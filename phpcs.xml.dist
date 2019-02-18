@@ -1,24 +1,25 @@
-<?xml version="1.0"?>
-<ruleset name="SS3">
-    <description>Coding standard for SilverStripe 4.x</description>
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="Catalyst SilverStripe">
+        <!-- Modified from the ruleset taken from silverstripe/framework @4.3.0 -->
+	<description>CodeSniffer ruleset for SilverStripe coding conventions.</description>
 
-    <!-- Don't sniff third party libraries -->
-    <exclude-pattern>*/vendor/*</exclude-pattern>
-    <exclude-pattern>*/thirdparty/*</exclude-pattern>
+	<!-- base rules are PSR-2 -->
+	<rule ref="PSR2" >
+		<!-- Current exclusions -->
+		<exclude name="PSR1.Methods.CamelCapsMethodName" />
+		<exclude name="PSR1.Files.SideEffects.FoundWithSymbols" />
+		<exclude name="PSR2.Classes.PropertyDeclaration" />
+		<exclude name="PSR2.ControlStructures.SwitchDeclaration.TerminatingComment" />
+		<exclude name="PSR2.Methods.MethodDeclaration.Underscore" />
+	</rule>
+        <rule ref="PEAR.Commenting.FunctionComment" />
+        <rule ref="Squiz.Commenting.FunctionCommentThrowTag.Missing" />
+        <rule ref="Squiz.Commenting.ClassComment" />
+        <rule ref="PEAR.Commenting.FileComment" />
+        <rule ref="Squiz.Commenting.VariableComment" />
 
-    <!-- Show progress and output sniff names on violation, and add colours -->
-    <arg value="sp"/>
-    <arg name="colors"/>
-
-    <!-- Use PSR-2 as a base standard -->
-    <rule ref="PSR2">
-        <!-- Allow classes to not declare a namespace -->
-        <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace"/>
-
-        <!-- Allow underscores in class names -->
-        <exclude name="Squiz.Classes.ValidClassName.NotCamelCaps"/>
-
-        <!-- Allow non camel cased method names -->
-        <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps"/>
-    </rule>
+	<!-- include php files only -->
+    	<arg name="extensions" value="php"/>
+    	<exclude-pattern>*/fixtures/*</exclude-pattern>
 </ruleset>
+

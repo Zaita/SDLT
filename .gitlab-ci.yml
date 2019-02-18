@@ -1,0 +1,28 @@
+variables:
+  GIT_STRATEGY: "clone"
+  VAGRANT_MACHINE: "silverstripe-project-machine"
+  VAGRANT_SNAPSHOT: "silverstripe-project-snapshot"
+  VAGRANT_CONTAINER: "silverstripe-project-container"
+  VAGRANT_DEFAULT_PROVIDER: "lxd"
+
+before_script:
+  - "pwd"
+  - "whoami"
+  - "vagrant-catalyst-2.0 --version"
+  - "cp Vagrantfile.ci Vagrantfile"
+  - "vagrant-catalyst-2.0 lxd attach -f ${VAGRANT_MACHINE} ${VAGRANT_CONTAINER} || true"
+  - "vagrant-catalyst-2.0 halt ${VAGRANT_MACHINE} || true"
+  - "vagrant-catalyst-2.0 up ${VAGRANT_MACHINE}"
+  - "vagrant-catalyst-2.0 snapshot restore ${VAGRANT_MACHINE} ${VAGRANT_SNAPSHOT} || true"
+  - "vagrant-catalyst-2.0 provision ${VAGRANT_MACHINE}"
+  - "vagrant-catalyst-2.0 snapshot save ${VAGRANT_MACHINE} ${VAGRANT_SNAPSHOT}"
+
+test:
+  only:
+    - 'master'
+    - 'team/meta'
+  script:
+    - vagrant-catalyst-2.0 ssh ${VAGRANT_MACHINE} -c "sudo -u silverstripe-site-niwa-proxy /vagrant/vendor/bin/phpunit /vagrant/mysite/test/TestTest.php"
+
+after_script:
+  - "vagrant-catalyst-2.0 lxd detach ${VAGRANT_MACHINE} || true"

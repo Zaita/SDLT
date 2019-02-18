@@ -1,0 +1,30 @@
+{
+    "common": [
+        "common",
+        "curl",
+        "dom",
+        "gd",
+        "iconv",
+        "imagic",
+        "mbstring",
+        "mysqli",
+        "pgsql",
+        "simplexml",
+        "tidy",
+        "xml"
+    ],
+    "7.0": [
+        "intl",
+        "mcrypt"
+    ],
+    "7.1": [
+        "intl",
+        "mcrypt"
+    ],
+    "7.2": [
+        "intl"
+    ],
+    "7.3": [
+        "intl"
+    ]
+}
