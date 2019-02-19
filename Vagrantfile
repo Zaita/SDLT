@@ -8,7 +8,7 @@
 # TODO: Enable mail.
 project_name="SDLT"
 remove_public=0
-wr="WR306952"
+wr="306952"
 rdbms="mysql"
 php_ver='7.2'
   
