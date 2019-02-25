@@ -1,0 +1,14 @@
+SilverStripe\Control\Director:
+  # Transparently deals with http vs https and assumes we're forcing HTTPS
+  alternate_base_url: '/'
+  rules:
+    graphql: '%$SilverStripe\GraphQL\Controller.default'
+
+SilverStripe\GraphQL\Manager:
+  schemas:
+    default:
+      scaffolding_providers:
+        - SDLT\Model\Questionnaire
+        - SDLT\Model\FormPage
+        - SDLT\Model\FormInput
+        - SDLT\Model\FormAction

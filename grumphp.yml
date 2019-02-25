@@ -49,6 +49,7 @@ parameters:
       metadata:
         priority: 90
         # Ensure commit messages are standard. Helps us when future debugging to see the story to which the commit relates
+      warning_severity: 0
     git_conflict: ~
     git_commit_message:
       matchers:
