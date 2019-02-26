@@ -53,6 +53,6 @@ parameters:
     git_conflict: ~
     git_commit_message:
       matchers:
-        - '/^(INIT|NEW|MINOR|FIX|API):\s(RM|WR)\#?[\d]+\s$/'
+        - '/^(INIT|NEW|MINOR|FIX|API):\s(RM|WR)\#?[\d]+\s.+$/'
       multiline: true
   extensions: []

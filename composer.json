@@ -6,7 +6,6 @@
         "php": ">=5.6.0",
         "silverstripe/recipe-plugin": "^1.2",
         "silverstripe/recipe-cms": "4.3.0@stable",
-        "silverstripe-themes/simple": "~3.2.0",
         "phptek/sentry": "^2.0.1",
         "silverstripe/postgresql": "^2.1.0",
         "unclecheese/display-logic": "^2.0"
@@ -34,6 +33,10 @@
             "install-frameworkmissing.html",
             "install.php",
             "web.config"
+        ],
+        "expose": [
+            "app/css",
+            "themes/sdlt/dist"
         ]
     },
     "config": {
@@ -42,6 +45,13 @@
     "prefer-stable": true,
     "minimum-stability": "dev",
     "scripts": {
-        "build": "sudo chown -R www-data ./public/assets && sudo -u www-data ./vendor/bin/sake /dev/build flush=all"
+        "post-update-cmd": [
+            "composer vendor-expose"
+        ],
+        "post-install-cmd": [
+            "composer vendor-expose"
+        ],
+        "build": "sudo chown -R www-data ./public/assets && sudo -u www-data ./vendor/bin/sake /dev/build flush=all",
+        "bundle": "cd /vagrant/themes/sdlt/ && yarn run build"
     }
 }
