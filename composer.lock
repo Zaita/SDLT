@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6adbffbabad140089ce4a7a20d392ae4",
+    "content-hash": "2cc8bbc22dd1730b46338e5287f9b5a4",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -184,16 +184,16 @@
         },
         {
             "name": "embed/embed",
-            "version": "v3.3.8",
+            "version": "v3.3.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/oscarotero/Embed.git",
-                "reference": "5a1677f19274b76ae93cfffa7626b935b7c37e51"
+                "reference": "4f0d7c0ba8dce13228fd35b7a73cd4ef5ab0f02c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/oscarotero/Embed/zipball/5a1677f19274b76ae93cfffa7626b935b7c37e51",
-                "reference": "5a1677f19274b76ae93cfffa7626b935b7c37e51",
+                "url": "https://api.github.com/repos/oscarotero/Embed/zipball/4f0d7c0ba8dce13228fd35b7a73cd4ef5ab0f02c",
+                "reference": "4f0d7c0ba8dce13228fd35b7a73cd4ef5ab0f02c",
                 "shasum": ""
             },
             "require": {
@@ -233,7 +233,7 @@
                 "opengraph",
                 "twitter cards"
             ],
-            "time": "2019-02-13T09:06:53+00:00"
+            "time": "2019-02-25T15:07:28+00:00"
         },
         {
             "name": "guzzlehttp/psr7",
@@ -1192,53 +1192,6 @@
                 "logging"
             ],
             "time": "2018-11-09T12:27:19+00:00"
-        },
-        {
-            "name": "silverstripe-themes/simple",
-            "version": "3.2.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/silverstripe-themes/silverstripe-simple.git",
-                "reference": "5a6b34cd00a71047e905a8cb5d4b73713ca510c3"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/silverstripe-themes/silverstripe-simple/zipball/5a6b34cd00a71047e905a8cb5d4b73713ca510c3",
-                "reference": "5a6b34cd00a71047e905a8cb5d4b73713ca510c3",
-                "shasum": ""
-            },
-            "require": {
-                "composer/installers": "*",
-                "silverstripe/framework": ">=3.5"
-            },
-            "type": "silverstripe-theme",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "3.2.x-dev"
-                },
-                "expose": [
-                    "css",
-                    "images",
-                    "javascript",
-                    "webfonts"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Sara Tušar (Innovaif)",
-                    "homepage": "http://www.saratusar.com"
-                }
-            ],
-            "description": "The SilverStripe simple theme (default SilverStripe 3 theme)",
-            "keywords": [
-                "silverstripe",
-                "theme"
-            ],
-            "time": "2018-06-25T20:55:43+00:00"
         },
         {
             "name": "silverstripe/admin",
