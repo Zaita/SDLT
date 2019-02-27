@@ -1,6 +1,6 @@
 SilverStripe\SiteConfig\SiteConfig:
   extensions:
-    - 'NZTA\SDLT\SDLTSiteConfigExtension'
+    - 'NZTA\SDLT\Extension\SDLTSiteConfigExtension'
 SilverStripe\Security\Member:
   extensions:
     - 'NZTA\SDLT\ShowLoginAttemptsExtension'

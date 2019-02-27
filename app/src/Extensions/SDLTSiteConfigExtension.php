@@ -10,18 +10,30 @@
  * @link https://www.catalyst.net.nz
  *
  * */
-namespace NZTA\SDLT;
+namespace NZTA\SDLT\Extension;
 
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\Assets\Image;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\AssetAdmin\Forms\UploadField;
+use SilverStripe\Forms\CheckboxField;
+use SilverStripe\Forms\HTMLEditor\HtmlEditorField;
+use SilverStripe\ORM\FieldType\DBHTMLText;
 
 /**
  * Site Config Extension for SDLT Tool
  **/
 class SDLTSiteConfigExtension extends DataExtension
 {
+    /**
+     * @var array
+     */
+    private static $db = [
+        'AlertEnabled' => 'Boolean',
+        'AlertMessage' => 'HTMLText',
+        'NoScriptAlertMessage' => 'HTMLText'
+    ];
+
     /**
      * Has One relationships
      *
@@ -57,6 +69,24 @@ class SDLTSiteConfigExtension extends DataExtension
                     ->setDescription('This is official NZTA logo that appears throughout the application. Should be an SVG'),
                 UploadField::create('LoginHeroImage', 'Login screen background image')
                     ->setDescription('This is the background image shown on the login screen.'),
+            ]
+        );
+
+        $fields->addFieldsToTab(
+            'Root.SiteAlertMessage',
+            [
+              CheckboxField::create(
+                  'AlertEnabled',
+                  'Alert Enabled'
+              ),
+              HtmlEditorField::create(
+                  'AlertMessage',
+                  'Alert Message'
+              ),
+              HtmlEditorField::create(
+                  'NoScriptAlertMessage',
+                  'Javascript disabled Alert Message'
+              )
             ]
         );
     }

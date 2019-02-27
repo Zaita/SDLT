@@ -1,0 +1,23 @@
+#site-alert,
+#noscript-alert {
+  @extend .bg-warning;
+  @extend .flex-row;
+  @extend .justify-content-between;
+  @extend .align-items-center;
+  @extend .px-2;
+  @extend .fixed-top;
+
+  .alert-text {
+    flex-grow: 1;
+    text-align: center;
+  }
+
+  p {
+    font-size: 16px;
+    margin-bottom: 0;
+  }
+}
+#site-alert {
+  display: none;
+  top: 0;
+}
