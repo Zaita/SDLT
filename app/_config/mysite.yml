@@ -1,5 +1,9 @@
----
-Name: myproject
----
 SilverStripe\Core\Manifest\ModuleManifest:
   project: app
+SilverStripe\Security\LoginAttempt:
+  summary_fields:
+    LastEdited: Login time
+    Status: Status
+    IP: IP Address
+    Hostname: Hostname
+  default_sort: Created DESC
