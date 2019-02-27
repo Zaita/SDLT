@@ -4,7 +4,7 @@
  * This file contains the "HomePageController" class.
  *
  * @category SilverStripe_Project
- * @package MoeCpt
+ * @package SDLT
  * @author  Catalyst I.T. SilverStripe Team 2018 <silverstripedev@catalyst.net.nz>
  * @copyright 2018 Catalyst.Net Ltd
  * @license https://www.catalyst.net.nz (Commercial)
@@ -22,6 +22,10 @@ use SilverStripe\View\Requirements;
  */
 class HomePageController extends PageController
 {
+    /**
+     * Pre-process
+     * @return void
+     */
     protected function init()
     {
         parent::init();

@@ -7,3 +7,6 @@ SilverStripe\Security\LoginAttempt:
     IP: IP Address
     Hostname: Hostname
   default_sort: Created DESC
+
+SilverStripe\CMS\Model\SiteTree:
+  create_default_pages: false
