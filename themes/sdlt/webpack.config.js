@@ -4,6 +4,7 @@ const webpack = require("webpack");
 module.exports = {
   entry: {
     index: "./src/js/index.js",
+    common: "./src/js/common.js"
   },
   mode: "production",
   module: {
