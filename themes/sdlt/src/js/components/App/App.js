@@ -2,20 +2,14 @@
 
 import React, {Component} from "react";
 import {Route, Switch} from "react-router-dom";
-import Questionnaire from "./components/Questionnaire/Questionnaire";
-import Home from "./components/Home/Home";
-import LogoImage from "../img/Logo.svg";
+import Questionnaire from "../Questionnaire/Questionnaire";
+import Home from "../Home/Home";
 
 class App extends Component {
 
   render() {
     return (
         <div>
-          <header>
-            <div className="container py-3">
-              <img className="logo" src={LogoImage}/>
-            </div>
-          </header>
           <main>
             <Switch>
               <Route exact path='/'>
@@ -30,8 +24,8 @@ class App extends Component {
               </Route>
             </Switch>
           </main>
-          <footer className="fixed-bottom">
-            <div className="container pt-1">
+          <footer>
+            <div>
               © 2019 | NZ Transport Agency
             </div>
           </footer>
