@@ -1,10 +1,24 @@
 <?php
+/**
+ * This file contains the "PageController" class.
+ *
+ * @category SilverStripe_Project
+ * @package SDLT
+ * @author  Catalyst I.T. SilverStripe Team 2018 <silverstripedev@catalyst.net.nz>
+ * @copyright 2018 Catalyst.Net Ltd
+ * @license https://www.catalyst.net.nz (Commercial)
+ * @link https://www.catalyst.net.nz
+ */
 
 namespace {
 
     use SilverStripe\CMS\Controllers\ContentController;
     use SilverStripe\View\Requirements;
 
+    /**
+     * Class PageController
+     *
+     */
     class PageController extends ContentController
     {
         /**
@@ -24,12 +38,17 @@ namespace {
          */
         private static $allowed_actions = [];
 
+        /**
+         * include css and js file
+         * @return void
+         */
         protected function init()
         {
             parent::init();
 
             Requirements::css('themes/sdlt/dist/css/index.css');
             Requirements::javascript('themes/sdlt/dist/js/vendors.bundle.js');
+            Requirements::javascript('themes/sdlt/dist/js/common.bundle.js');
         }
     }
 }
