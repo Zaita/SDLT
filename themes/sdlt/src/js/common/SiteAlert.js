@@ -14,8 +14,7 @@ class SiteAlert {
         bodyElement.style.paddingTop = siteAlertElement.offsetHeight+"px";
       }
 
-      //$("#site-alert .close-icon").on("click", () => {
-      document.querySelector("#site-alert .close-icon").on("click", () => {
+      document.querySelector("#site-alert .close-icon").addEventListener("click", () => {
         sessionStorage.setItem("SiteAlertClosed", "true");
         siteAlertElement.style.display = "none";
         bodyElement.style.paddingTop = 0;
