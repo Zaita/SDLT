@@ -46,7 +46,7 @@ namespace {
         {
             parent::init();
 
-            Requirements::css('themes/sdlt/dist/css/index.css');
+            Requirements::css('themes/sdlt/dist/css/main.css');
             Requirements::javascript('themes/sdlt/dist/js/vendors.bundle.js');
             Requirements::javascript('themes/sdlt/dist/js/common.bundle.js');
         }

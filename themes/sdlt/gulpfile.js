@@ -12,10 +12,18 @@ const cssnano = require("cssnano");
 const PATHS = {
   "src": {
     "css": "./src/scss/**/*.scss",
+    "font": "./src/font/**/*"
   },
   "dist": {
     "css": "./dist/css/",
+    "font": "./dist/font/"
   },
+};
+
+const copyFont = () => {
+  return gulp
+    .src(PATHS.src.font)
+    .pipe(gulp.dest(PATHS.dist.font));
 };
 
 const devScss = () => {
@@ -51,12 +59,14 @@ const prodScss = () => {
 };
 
 // Development
-gulp.task("dev", gulp.parallel(devScss));
+gulp.task("dev", gulp.parallel(devScss, copyFont));
 
 // Production
-gulp.task("build", gulp.parallel(prodScss));
+gulp.task("build", gulp.parallel(prodScss, copyFont));
 
 gulp.task("watch", () => {
-  gulp.watch(PATHS.src.css, gulp.parallel(devScss));
-  // Other watchers
+  gulp.watch(
+    PATHS.src.css,
+    {ignoreInitial: false},
+    gulp.parallel(devScss, copyFont))
 });

@@ -13,8 +13,12 @@
 
 namespace NZTA\SDLT\Page;
 
+use NZTA\SDLT\Model\Pillar;
 use Page;
 use NZTA\SDLT\Controller\HomePageController;
+use NZTA\SDLT\Model\FormTask;
+use SilverStripe\ORM\ValidationException;
+use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\ORM\DB;
@@ -24,9 +28,34 @@ use SilverStripe\Versioned\Versioned;
 /**
  * Class HomePage
  *
+ * @property string Subtitle
+ *
+ * @method Pillar Pillars()
+ * @method FormTask Tasks()
  */
 class HomePage extends Page
 {
+    /**
+     * @var array
+     */
+    private static $db = [
+        'Subtitle' => 'Varchar(255)'
+    ];
+
+    /**
+     * @var array
+     */
+    private static $has_many = [
+        'Pillars' => Pillar::class
+    ];
+
+    /**
+     * @var array
+     */
+    private static $many_many = [
+        'Tasks' => FormTask::class
+    ];
+
     /**
      * @return string
      */
@@ -57,6 +86,7 @@ class HomePage extends Page
      * parent::requireDefaultRecords().
      *
      * @return void
+     * @throws ValidationException
      */
     public function requireDefaultRecords()
     {
@@ -82,4 +112,6 @@ class HomePage extends Page
             }
         }
     }
+
+
 }
