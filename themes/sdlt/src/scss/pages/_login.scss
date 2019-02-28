@@ -1,0 +1,63 @@
+/**
+This is to create a full-page login screen background, with the login elements centred
+Note: this stylesheet is scoped to login page
+**/
+html.security {
+    height: 100%;
+
+    .container {
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .login {
+            background: white;
+            padding: 2rem;
+        }
+    }
+
+    .security {
+
+        /* Full height */
+        height: 100%;
+
+        /* Center and scale the image nicely */
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+
+        /**
+        Additionally, we style the buttons with btn-primary
+        **/
+        input.action {
+            @extend .btn;
+            @extend .btn-primary;
+            @extend .btn-block;
+        }
+
+        input[name=Email], input[name=Password] {
+            @extend .form-control;
+        }
+
+        .field {
+            @extend .form-group;
+            &.checkbox {
+                @extend .form-check;
+            }
+            input[name=Remember] {
+
+                @extend .form-check-input;
+
+                & + label.right {
+                    @extend .form-check-label;
+                }
+            }
+
+        }
+
+    }
+}
+
+/**
+END Login background image styling
+**/

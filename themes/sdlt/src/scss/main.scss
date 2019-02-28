@@ -1,0 +1,33 @@
+// Based on Bootstrap 4
+@import "bootstrap";
+
+// Import fonts
+@import "mixins/font";
+
+// Include all styles for the main app (based on React.js)
+#main-app {
+
+    header {
+        background-color: $blue;
+    }
+
+    footer {
+        @extend .fixed-bottom;
+        height: 72px;
+        background-color: $blue;
+        color: $white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    main {
+        @import "./components/Home";
+    }
+}
+
+// Include all styles for other layout (SilverStripe templates)
+@import "./layout/site-alert";
+
+// Include all styles for other pages (SilverStripe templates)
+@import "pages/login";

@@ -30,6 +30,6 @@ class HomePageController extends PageController
     {
         parent::init();
 
-        Requirements::javascript('themes/sdlt/dist/js/index.bundle.js');
+        Requirements::javascript('themes/sdlt/dist/js/main.bundle.js');
     }
 }
