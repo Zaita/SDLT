@@ -11,7 +11,7 @@
  * @link https://www.catalyst.net.nz
  */
 
-namespace SDLT\Controller;
+namespace NZTA\SDLT\Controller;
 
 use PageController;
 use SilverStripe\View\Requirements;

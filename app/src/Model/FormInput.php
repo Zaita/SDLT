@@ -11,7 +11,7 @@
  * @link https://www.catalyst.net.nz
  */
 
-namespace SDLT\Model;
+namespace NZTA\SDLT\Model;
 
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
