@@ -11,10 +11,10 @@
  * @link https://www.catalyst.net.nz
  */
 
-namespace SDLT\ModelAdmin;
+namespace NZTA\SDLT\ModelAdmin;
 
-use SDLT\Model\FormTask;
-use SDLT\Model\Questionnaire;
+use NZTA\SDLT\Model\FormTask;
+use NZTA\SDLT\Model\Questionnaire;
 use SilverStripe\Admin\ModelAdmin;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;

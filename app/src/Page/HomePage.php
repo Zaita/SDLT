@@ -11,10 +11,10 @@
  * @link https://www.catalyst.net.nz
  */
 
-namespace SDLT\Page;
+namespace NZTA\SDLT\Page;
 
 use Page;
-use SDLT\Controller\HomePageController;
+use NZTA\SDLT\Controller\HomePageController;
 use SilverStripe\Security\Permission;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\ORM\DB;

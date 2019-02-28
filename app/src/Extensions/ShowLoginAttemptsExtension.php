@@ -10,7 +10,7 @@
  * @link https://www.catalyst.net.nz
  *
  **/
-namespace NZTA\SDLT;
+namespace NZTA\SDLT\Extension;
 
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\Forms\FieldList;
