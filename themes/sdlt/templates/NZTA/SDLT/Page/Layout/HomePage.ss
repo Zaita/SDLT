@@ -1,1 +1,1 @@
-<div id="root"></div>
+<div id="main-app"></div>

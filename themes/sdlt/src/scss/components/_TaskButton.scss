@@ -1,0 +1,19 @@
+.TaskButton {
+    border: solid 2px #004071;
+    background-color: #ffffff;
+    padding: 15px 20px;
+    margin-bottom: 10px;
+
+    .title {
+        font-size: 18px;
+        font-weight: 600;
+        font-style: normal;
+        font-stretch: normal;
+        line-height: 1.78;
+        letter-spacing: normal;
+        text-align: center;
+        color: #004071;
+        overflow: visible;
+        white-space: nowrap;
+    }
+}

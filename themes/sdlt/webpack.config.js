@@ -3,8 +3,8 @@ const webpack = require("webpack");
 
 module.exports = {
   entry: {
-    index: "./src/js/index.js",
-    common: "./src/js/common.js"
+    common: "./src/js/common.js",
+    main: "./src/js/main.js",
   },
   mode: "production",
   module: {
