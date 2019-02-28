@@ -11,7 +11,7 @@
  * @link https://www.catalyst.net.nz
  */
 
-namespace SDLT\Model;
+namespace NZTA\SDLT\Model;
 
 use SilverStripe\ORM\DataObject;
 

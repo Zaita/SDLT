@@ -8,7 +8,7 @@ SilverStripe\GraphQL\Manager:
   schemas:
     default:
       scaffolding_providers:
-        - SDLT\Model\Questionnaire
-        - SDLT\Model\FormPage
-        - SDLT\Model\FormInput
-        - SDLT\Model\FormAction
+        - NZTA\SDLT\Model\Questionnaire
+        - NZTA\SDLT\Model\FormPage
+        - NZTA\SDLT\Model\FormInput
+        - NZTA\SDLT\Model\FormAction
