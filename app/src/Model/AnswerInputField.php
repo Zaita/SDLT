@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This file contains the "FormInput" class.
+ * This file contains the "AnswerInputField" class.
  *
  * @category SilverStripe_Project
  * @package SDLT
@@ -18,44 +18,65 @@ use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
 
 /**
- * Class FormInput
+ * Class AnswerInputField
  *
  * @property string Name
  * @property string Type
  *
- * @property FormPage Page
+ * @property Question Question
  */
-class FormInput extends DataObject implements ScaffoldingProvider
+class AnswerInputField extends DataObject implements ScaffoldingProvider
 {
     /**
      * @var string
      */
-    private static $table_name = 'FormInput';
+    private static $table_name = 'AnswerInputField';
 
     /**
      * @var array
      */
     private static $db = [
-        'Name' => 'Varchar(255)',
-        'Type' => 'Enum(array("text", "email", "textarea", "date"))',
+        'Label' => 'Varchar(255)',
+        'InputType' => 'Enum(array("text", "email", "textarea", "date"))',
         'Required' => 'Boolean',
-        'MinLength' => 'Int'
+        'MinLength' => 'Int',
+        'PlaceHolder' => 'Varchar(255)',
     ];
 
     /**
      * @var array
      */
     private static $has_one = [
-        'Page' => FormPage::class
+        'Question' => Question::class
     ];
 
     /**
      * @var array
      */
     private static $summary_fields = [
-        'Name',
-        'Type'
+        'Label',
+        'InputType'
     ];
+
+    /**
+     * @var array
+     */
+    private static $field_labels = [
+        'Label' => 'Field Label',
+        'InputType' => 'Field Type'
+    ];
+
+    /**
+     * @return FieldList
+     */
+    public function getCMSFields()
+    {
+        $fields = parent::getCMSFields();
+
+        $fields->removeByName('QuestionID');
+
+        return $fields;
+    }
 
     /**
      * @param SchemaScaffolder $scaffolder Scaffolder
@@ -65,11 +86,11 @@ class FormInput extends DataObject implements ScaffoldingProvider
     {
         // Provide entity type
         $typeScaffolder = $scaffolder
-            ->type(FormInput::class)
+            ->type(AnswerInputField::class)
             ->addFields([
                 'ID',
-                'Name',
-                'Type',
+                'Label',
+                'InputType',
                 'Required',
                 'MinLength'
             ]);

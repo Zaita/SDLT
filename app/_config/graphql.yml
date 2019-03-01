@@ -9,6 +9,6 @@ SilverStripe\GraphQL\Manager:
     default:
       scaffolding_providers:
         - NZTA\SDLT\Model\Questionnaire
-        - NZTA\SDLT\Model\FormPage
-        - NZTA\SDLT\Model\FormInput
-        - NZTA\SDLT\Model\FormAction
+        - NZTA\SDLT\Model\Question
+        - NZTA\SDLT\Model\AnswerInputField
+        - NZTA\SDLT\Model\AnswerActionField
