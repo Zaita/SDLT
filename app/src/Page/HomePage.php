@@ -16,7 +16,7 @@ namespace NZTA\SDLT\Page;
 use NZTA\SDLT\Model\Pillar;
 use Page;
 use NZTA\SDLT\Controller\HomePageController;
-use NZTA\SDLT\Model\FormTask;
+use NZTA\SDLT\Model\Task;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
@@ -31,10 +31,15 @@ use SilverStripe\Versioned\Versioned;
  * @property string Subtitle
  *
  * @method Pillar Pillars()
- * @method FormTask Tasks()
+ * @method Task Tasks()
  */
 class HomePage extends Page
 {
+    /**
+     * @var string
+     */
+    private static $table_name = 'HomePage';
+
     /**
      * @var array
      */
@@ -53,7 +58,7 @@ class HomePage extends Page
      * @var array
      */
     private static $many_many = [
-        'Tasks' => FormTask::class
+        'Tasks' => Task::class
     ];
 
     /**
@@ -112,6 +117,4 @@ class HomePage extends Page
             }
         }
     }
-
-
 }

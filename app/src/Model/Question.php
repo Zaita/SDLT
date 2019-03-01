@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This file contains the "FormPage" class.
+ * This file contains the "Question" class.
  *
  * @category SilverStripe_Project
  * @package SDLT
@@ -20,7 +20,7 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\HasManyList;
 
 /**
- * Class FormPage
+ * Class Question
  *
  * @property string Title
  * @property string Question
@@ -32,12 +32,12 @@ use SilverStripe\ORM\HasManyList;
  * @method HasManyList Inputs()
  * @method HasManyList Actions()
  */
-class FormPage extends DataObject implements ScaffoldingProvider
+class Question extends DataObject implements ScaffoldingProvider
 {
     /**
      * @var string
      */
-    private static $table_name = 'FormPage';
+    private static $table_name = 'Question';
 
     /**
      * @var array
@@ -46,18 +46,18 @@ class FormPage extends DataObject implements ScaffoldingProvider
         'Title' => 'Varchar(255)',
         'Question' => 'Text',
         'Description' => 'Text',
-        'Type' => 'Enum(array("Input", "Action"))',
+        'AnswerFieldType' => 'Enum(array("Input", "Action"))',
     ];
 
     /**
-     * A form page can have either inputs or actions, but not both
+     * A question's answer can have fields type either inputs or actions, but not both
      * This will be enforced by the `getCMSFields` and `beforeWrite`(//TODO)
      *
      * @var array
      */
     private static $has_many = [
-        'Inputs' => FormInput::class,
-        'Actions' => FormAction::class
+        'AnswerInputFields' => AnswerInputField::class,
+        'AnswerActionFields' => AnswerActionField::class
     ];
 
     /**
@@ -73,7 +73,16 @@ class FormPage extends DataObject implements ScaffoldingProvider
     private static $summary_fields = [
         'Title',
         'Question',
-        'Type'
+        'AnswerFieldType'
+    ];
+
+    /**
+     * @var array
+     */
+    private static $field_labels = [
+        'Title' => 'Question Title',
+        'Description' => 'Question Description',
+        'Question' => 'Question Heading'
     ];
 
     /**
@@ -83,11 +92,13 @@ class FormPage extends DataObject implements ScaffoldingProvider
     {
         $fields = parent::getCMSFields();
 
-        if ($this->Type === 'Input') {
-            $fields->removeByName('Actions');
+        $fields->removeByName('QuestionnaireID');
+
+        if ($this->AnswerFieldType === 'Input') {
+            $fields->removeByName('AnswerActionFields');
         }
-        if ($this->Type === 'Action') {
-            $fields->removeByName('Inputs');
+        if ($this->AnswerFieldType === 'Action') {
+            $fields->removeByName('AnswerInputFields');
         }
 
         return $fields;
@@ -101,22 +112,22 @@ class FormPage extends DataObject implements ScaffoldingProvider
     {
         // Provide entity type
         $typeScaffolder = $scaffolder
-            ->type(FormPage::class)
+            ->type(Question::class)
             ->addFields([
                 'ID',
                 'Title',
                 'Question',
                 'Description',
-                'Type'
+                'AnswerFieldType'
             ]);
 
         // Provide relations
         $typeScaffolder
-            ->nestedQuery('Inputs')
+            ->nestedQuery('AnswerInputFields')
             ->setUsePagination(false)
             ->end();
         $typeScaffolder
-            ->nestedQuery('Actions')
+            ->nestedQuery('AnswerActionFields')
             ->setUsePagination(false)
             ->end();
 

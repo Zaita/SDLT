@@ -24,7 +24,7 @@ use SilverStripe\ORM\HasManyList;
  * @property string Name
  * @property string KeyInformation
  *
- * @method HasManyList Pages
+ * @method HasManyList Questions
  */
 class Questionnaire extends DataObject implements ScaffoldingProvider
 {
@@ -45,7 +45,7 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
      * @var array
      */
     private static $has_many = [
-        'Pages' => FormPage::class
+        'Questions' => Question::class
     ];
 
     /**
@@ -65,7 +65,7 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
 
         // Provide relations
         $typeScaffolder
-            ->nestedQuery('Pages')
+            ->nestedQuery('Questions')
             ->setUsePagination(false)
             ->end();
 
@@ -81,7 +81,7 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
             ID
             Name
             KeyInformation
-            Pages {
+            Questions {
               ID
               Title
               Question

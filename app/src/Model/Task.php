@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This file contains the "FormTask" class.
+ * This file contains the "Task" class.
  *
  * @category SilverStripe_Project
  * @package SDLT
@@ -16,15 +16,15 @@ namespace NZTA\SDLT\Model;
 use SilverStripe\ORM\DataObject;
 
 /**
- * Class FormTask
+ * Class Task
  *
  */
-class FormTask extends DataObject
+class Task extends DataObject
 {
     /**
      * @var string
      */
-    private static $table_name = 'FormTask';
+    private static $table_name = 'Task';
 
     /**
      * @var array

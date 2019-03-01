@@ -13,7 +13,7 @@
 
 namespace NZTA\SDLT\ModelAdmin;
 
-use NZTA\SDLT\Model\FormTask;
+use NZTA\SDLT\Model\Task;
 use NZTA\SDLT\Model\Questionnaire;
 use SilverStripe\Admin\ModelAdmin;
 use SilverStripe\Forms\FieldList;
@@ -33,7 +33,7 @@ class QuestionnaireAdmin extends ModelAdmin
      */
     private static $managed_models = [
         Questionnaire::class,
-        FormTask::class
+        Task::class
     ];
 
     /**
