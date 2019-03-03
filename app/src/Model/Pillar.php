@@ -13,9 +13,9 @@
 
 namespace NZTA\SDLT\Model;
 
-use SDLT\Model\Questionnaire;
-use SDLT\Page\HomePage;
+use NZTA\SDLT\Page\HomePage;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\Forms\DropdownField;
 
 /**
  * Class Pillar
@@ -39,7 +39,8 @@ class Pillar extends DataObject
      */
     private static $db = [
         'Label' => 'Varchar(255)',
-        'Disabled' => 'Boolean'
+        'Disabled' => 'Boolean',
+        'Type' => 'Varchar(255)'
     ];
 
     /**
@@ -47,6 +48,48 @@ class Pillar extends DataObject
      */
     private static $has_one = [
         'HomePage' => HomePage::class,
+    ];
+
+    /**
+     * @var array
+     */
+    private static $has_many = [
         'Questionnaire' => Questionnaire::class,
     ];
+
+      /**
+     * @var array
+     */
+    private static $summary_fields = [
+        'Label'
+    ];
+
+    /**
+     * @var array
+     */
+    private static $pillar_type = [
+        'proof_of_concept' => 'PROOF OF CONCEPT OR SOFTWARE TRIAL',
+        'software_as_service' => 'SOFTWARE AS A SERVICE (SAAS)',
+        'product_project_or_solution' => 'PRODUCT, PROJECT OR SOLUTION',
+        'feature_or_bug_fix' => 'FEATURE OR BUG FIX'
+    ];
+
+    /**
+     * @return FieldList
+     */
+    public function getCMSFields()
+    {
+        $fields = parent::getCMSFields();
+
+        $fields->addFieldToTab(
+            'Root.Main',
+            DropdownField::create(
+                'Type',
+                'Pillar Type',
+                self::$pillar_type
+            )
+        );
+
+        return $fields;
+    }
 }

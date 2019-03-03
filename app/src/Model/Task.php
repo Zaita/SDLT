@@ -32,4 +32,11 @@ class Task extends DataObject
     private static $db = [
         'Name' => 'Varchar(255)',
     ];
+
+      /**
+     * @var array
+     */
+    private static $has_one = [
+        'Questionnaire' => Questionnaire::class,
+    ];
 }
