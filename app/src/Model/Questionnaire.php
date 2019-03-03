@@ -44,6 +44,13 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     /**
      * @var array
      */
+    private static $has_one = [
+        'Pillar' => Pillar::class
+    ];
+
+    /**
+     * @var array
+     */
     private static $has_many = [
         'Questions' => Question::class
     ];

@@ -24,6 +24,9 @@ use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\ORM\DB;
 use SilverStripe\CMS\Controllers\RootURLController;
 use SilverStripe\Versioned\Versioned;
+use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor;
 
 /**
  * Class HomePage
@@ -116,5 +119,35 @@ class HomePage extends Page
                 DB::alteration_message('Home page created', 'created');
             }
         }
+    }
+
+    /**
+     * CMS Fields
+     * @return FieldList
+     */
+    public function getCMSFields()
+    {
+        $fields = parent::getCMSFields();
+
+        $fields->addFieldToTab(
+            'Root.Main',
+            TextField::create(
+                'Subtitle',
+                'Subtitle'
+            ),
+            'URLSegment'
+        );
+
+        $fields->addFieldToTab(
+            'Root.Piller',
+            GridField::create(
+                'Pillar',
+                'Pillar',
+                $this->Pillars(),
+                GridFieldConfig_RecordEditor::create()
+            )
+        );
+
+        return $fields;
     }
 }
