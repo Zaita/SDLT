@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This file contains the "FormAction" class.
+ * This file contains the "AnswerActionField" class.
  *
  * @category SilverStripe_Project
  * @package SDLT
@@ -17,35 +17,36 @@ use SilverStripe\Forms\FieldList;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\Core\Convert;
 
 /**
- * Class FormAction
+ * Class AnswerActionField
  *
  * There are different types of action, and the CMS interface will be changed dynamically based on the type
  *
- * @property string Name
+ * @property string Label
  * @property string Title
  * @property string Type
  * @property string Message
  *
- * @property FormTask Task
- * @property FormPage Goto
- * @property FormPage Page
+ * @property Task Task
+ * @property Question Goto
+ * @property Question Question
  *
  */
-class FormAction extends DataObject implements ScaffoldingProvider
+class AnswerActionField extends DataObject implements ScaffoldingProvider
 {
     /**
      * @var string
      */
-    private static $table_name = 'FormAction';
+    private static $table_name = 'AnswerActionField';
 
     /**
      * @var array
      */
     private static $db = [
-        'Name' => 'Varchar(255)',
-        'Type' => 'Enum(array("create_task", "continue", "goto", "message", "finish"))',
+        'Label' => 'Varchar(255)',
+        'ActionType' => 'Enum(array("continue", "goto", "message", "finish"))',
         'Message' => 'HTMLText'
     ];
 
@@ -53,18 +54,25 @@ class FormAction extends DataObject implements ScaffoldingProvider
      * @var array
      */
     private static $has_one = [
-        'Task' => FormTask::class,
-        'Goto' => FormPage::class,
-        'Page' => FormPage::class
+        'Task' => Task::class,
+        'Goto' => Question::class,
+        'Question' => Question::class
     ];
 
     /**
      * @var array
      */
     private static $summary_fields = [
-        'Name',
-        'Type',
+        'Label',
+        'ActionType',
         'ActionDescription'
+    ];
+
+    /**
+     * @var array
+     */
+    private static $field_labels = [
+        'Label' => 'Action Label'
     ];
 
     /**
@@ -74,14 +82,14 @@ class FormAction extends DataObject implements ScaffoldingProvider
     {
         $fields = parent::getCMSFields();
 
+        $fields->removeByName('QuestionID');
+
         $mainTab = $fields->findOrMakeTab('Root.Main');
 
         /** @noinspection PhpUndefinedMethodInspection */
-        $mainTab->fieldByName('TaskID')->displayIf('Type')->isEqualTo('create_task');
+        $mainTab->fieldByName('GotoID')->displayIf('ActionType')->isEqualTo('goto');
         /** @noinspection PhpUndefinedMethodInspection */
-        $mainTab->fieldByName('GotoID')->displayIf('Type')->isEqualTo('goto');
-        /** @noinspection PhpUndefinedMethodInspection */
-        $mainTab->fieldByName('Message')->displayIf('Type')->isEqualTo('message');
+        $mainTab->fieldByName('Message')->displayIf('ActionType')->isEqualTo('message');
 
         return $fields;
     }
@@ -94,11 +102,11 @@ class FormAction extends DataObject implements ScaffoldingProvider
     {
         // Provide entity type
         $typeScaffolder = $scaffolder
-            ->type(FormAction::class)
+            ->type(AnswerActionField::class)
             ->addFields([
                 'ID',
-                'Name',
-                'Type',
+                'Label',
+                'ActionType',
                 'Message',
                 'Task',
                 'Goto',
@@ -112,15 +120,12 @@ class FormAction extends DataObject implements ScaffoldingProvider
      */
     public function getActionDescription()
     {
-        switch ($this->Type) {
+        switch ($this->ActionType) {
             case 'goto':
-                $page = $this->Goto->exists() ? $this->Goto->Title : "Null";
-                return "Goto: {$page}";
+                $question = $this->Goto->exists() ? $this->Goto->Title : "Null";
+                return "Goto: {$question}";
             case 'message':
-                return "Message: {$this->Message}";
-            case 'create_task':
-                $task = $this->Task->exists() ? $this->Task->Title : "Null";
-                return "Create Task: {$task}";
+                return "Message: " . Convert::xml2raw($this->Message);
             case 'continue':
                 return 'Continue';
             case 'finish':
