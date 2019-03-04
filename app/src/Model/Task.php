@@ -31,6 +31,7 @@ class Task extends DataObject
      */
     private static $db = [
         'Name' => 'Varchar(255)',
+        'DisplayOnHomePage'=> 'Boolean'
     ];
 
       /**
