@@ -40,6 +40,11 @@ use SilverStripe\ORM\DataObject;
 class HomePage extends Page
 {
     /**
+     * @var string
+     */
+    private static $table_name = 'HomePage';
+
+    /**
      * @return string
      */
     public function getControllerName()

@@ -7,6 +7,7 @@ const sourcemaps = require("gulp-sourcemaps");
 const autoprefixer = require("autoprefixer");
 const flexfixes = require("postcss-flexbugs-fixes");
 const cssnano = require("cssnano");
+const browserSync = require('browser-sync').create();
 
 // Source and Distributed Paths
 const PATHS = {
@@ -65,8 +66,22 @@ gulp.task("dev", gulp.parallel(devScss, copyFont));
 gulp.task("build", gulp.parallel(prodScss, copyFont));
 
 gulp.task("watch", () => {
+  // When scss files change, recompile them
   gulp.watch(
     PATHS.src.css,
     {ignoreInitial: false},
-    gulp.parallel(devScss, copyFont))
+    gulp.parallel(devScss, copyFont));
+
+  // When dist files change, refresh browser
+
+  // The way browserSync works is:
+  // Developer --> [External URL (https://10.221.213.41:3000/)] ---proxy--> [Nginx URL (https://sdlt)]
+  // We can use [UI URL (http://10.221.213.41:3001/)] to monitor the process
+  browserSync.init({
+    proxy: {
+      target: "https://sdlt"
+    },
+    open: false
+  });
+  gulp.watch("./dist/**/*").on("change", browserSync.reload);
 });

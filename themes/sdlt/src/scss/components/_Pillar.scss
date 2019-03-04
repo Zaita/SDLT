@@ -1,4 +1,6 @@
-.Pillar {
+@import "../variables";
+
+a.Pillar {
     width: 275px;
     height: 229px;
     display: flex;
@@ -30,5 +32,13 @@
         text-align: center;
         color: #333333;
         text-transform: uppercase;
+    }
+
+    &:hover {
+        text-decoration: none;
+
+        .icon {
+            background-color: $orange;
+        }
     }
 }
