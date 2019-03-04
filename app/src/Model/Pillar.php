@@ -13,21 +13,23 @@
 
 namespace NZTA\SDLT\Model;
 
-use NZTA\SDLT\Page\HomePage;
+use NZTA\SDLT\Model\Dashboard;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Forms\DropdownField;
+use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
+use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 
 /**
  * Class Pillar
  *
  * @property string Label
  *
- * @method HomePage HomePage()
+ * @method Dashboard Dashboard()
  * @method Questionnaire Questionnaire()
  *
  * // TODO: We need to allow Pillar to target at QuestionnaireGroup (e.g, Product, Project or Solution)
  */
-class Pillar extends DataObject
+class Pillar extends DataObject implements ScaffoldingProvider
 {
     /**
      * @var string
@@ -47,7 +49,7 @@ class Pillar extends DataObject
      * @var array
      */
     private static $has_one = [
-        'HomePage' => HomePage::class,
+        'Dashboard' => Dashboard::class,
     ];
 
     /**
@@ -92,5 +94,23 @@ class Pillar extends DataObject
         );
 
         return $fields;
+    }
+      /**
+     * @param SchemaScaffolder $scaffolder Scaffolder
+     * @return SchemaScaffolder
+     */
+    public function provideGraphQLScaffolding(SchemaScaffolder $scaffolder)
+    {
+        // Provide entity type
+        $typeScaffolder = $scaffolder
+            ->type(Pillar::class)
+            ->addFields([
+              'ID',
+              'Label',
+              'Disabled',
+              'Type'
+            ]);
+
+        return $scaffolder;
     }
 }
