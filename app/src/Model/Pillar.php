@@ -111,6 +111,12 @@ class Pillar extends DataObject implements ScaffoldingProvider
               'Type'
             ]);
 
+        // Provide relations
+        $typeScaffolder
+            ->nestedQuery('Questionnaire')
+            ->setUsePagination(false)
+            ->end();
+
         return $scaffolder;
     }
 }
