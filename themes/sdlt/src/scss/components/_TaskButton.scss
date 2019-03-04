@@ -1,5 +1,7 @@
-.TaskButton {
-    border: solid 2px #004071;
+@import "../variables";
+
+a.TaskButton {
+    border: solid 2px $blue;
     background-color: #ffffff;
     padding: 15px 20px;
     margin-bottom: 10px;
@@ -12,8 +14,17 @@
         line-height: 1.78;
         letter-spacing: normal;
         text-align: center;
-        color: #004071;
+        color: $blue;
         overflow: visible;
         white-space: nowrap;
+    }
+
+    &:hover {
+        text-decoration: none;
+        border: solid 2px $orange;
+
+        .title {
+            color: $orange;
+        }
     }
 }

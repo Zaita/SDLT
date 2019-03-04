@@ -1,31 +1,7 @@
 // @flow
 
 import axios from "axios";
-
-export type FormInput = {
-  name: string,
-  type: "text" | "email" | "textarea"
-};
-
-export type FormAction = {
-  text: string,
-  action: "create_task" | "continue" | "goto" | "message" | "finish",
-  target?: string,
-  message?: string,
-  result?: string
-};
-
-export type FormPage = {
-  id: string,
-  title: string,
-  question: string,
-  keyInformation?: Array<string>,
-  description: string,
-  inputs?: Array<FormInput>,
-  actions?: Array<FormAction>
-};
-
-export type FormSchema = Array<FormPage>;
+import type {FormSchema} from "../types/FormSchema";
 
 export default class DataProvider {
 

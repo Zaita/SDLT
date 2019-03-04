@@ -1,7 +1,7 @@
 // @flow
 
 import React, {Component} from "react";
-import type {FormPage} from "../../services/DataProvider";
+import type {FormPage} from "../../types/FormPage";
 
 type Props = {
   page: FormPage,
@@ -24,9 +24,9 @@ export default class LeftBarItem extends Component<Props> {
     }
 
     return (
-        <div className="LeftBarItem">
-          <button className="btn" onClick={this.props.onClick}>{text}</button>
-        </div>
+      <div className="LeftBarItem">
+        <button className="btn" onClick={this.props.onClick}>{text}</button>
+      </div>
     );
   }
 }
