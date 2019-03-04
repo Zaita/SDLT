@@ -12,3 +12,5 @@ SilverStripe\GraphQL\Manager:
         - NZTA\SDLT\Model\Question
         - NZTA\SDLT\Model\AnswerInputField
         - NZTA\SDLT\Model\AnswerActionField
+        - NZTA\SDLT\Model\Dashboard
+        - NZTA\SDLT\Model\Pillar
