@@ -1,7 +1,8 @@
 // @flow
 import React, {Component} from "react";
 import {ErrorMessage, Field, Form, Formik, FormikBag} from "formik";
-import type {FormAction, FormPage} from "../../services/DataProvider";
+import type {FormAction} from "../../types/FormAction";
+import type {FormPage} from "../../types/FormPage";
 
 type Props = {
   currentFormPage: FormPage,
@@ -24,69 +25,69 @@ export default class MainForm extends Component<Props> {
     });
 
     return <Formik
-        initialValues={initialValues}
-        validate={values => {
-          let errors = {};
-          inputs.forEach((input) => {
-            const name = input.name;
-            const type = input.type;
+      initialValues={initialValues}
+      validate={values => {
+        let errors = {};
+        inputs.forEach((input) => {
+          const name = input.name;
+          const type = input.type;
 
-            // TODO: need put more validation logic in the json
-            if (!(values[name])) {
-              errors[name] = "Required";
-              return;
-            }
+          // TODO: need put more validation logic in the json
+          if (!(values[name])) {
+            errors[name] = "Required";
+            return;
+          }
 
-            if (type === "email" &&
-                !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values[name])) {
-              errors[name] = "Invalid email address";
-              return;
-            }
-          });
+          if (type === "email" &&
+            !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values[name])) {
+            errors[name] = "Invalid email address";
+            return;
+          }
+        });
 
-          return errors;
-        }}
-        onSubmit={(values, formik) => {
-          this.props.handleFormSubmit(formik, values);
-        }}
+        return errors;
+      }}
+      onSubmit={(values, formik) => {
+        this.props.handleFormSubmit(formik, values);
+      }}
     >
       {({isSubmitting}) => (
-          <Form>
-            {inputs.map((input) => {
-              if (["text", "email"].includes(input.type)) {
-                return (
-                    <div className="form-group" key={input.name}>
-                      <label>{input.name.toUpperCase()}
-                        <br/>
-                        <Field type={input.type} name={input.name}/>
-                      </label>
-                      <ErrorMessage className="text-danger" name={input.name} component="div"/>
-                    </div>
-                );
-              }
+        <Form>
+          {inputs.map((input) => {
+            if (["text", "email"].includes(input.type)) {
+              return (
+                <div className="form-group" key={input.name}>
+                  <label>{input.name.toUpperCase()}
+                    <br/>
+                    <Field type={input.type} name={input.name}/>
+                  </label>
+                  <ErrorMessage className="text-danger" name={input.name} component="div"/>
+                </div>
+              );
+            }
 
-              if (input.type === "textarea") {
-                return (
-                    <div className="form-group" key={input.name}>
-                      <label>{input.name.toUpperCase()}
-                        <br/>
-                        <Field name={input.name}>
-                          {({field}) => {
-                            return <textarea {...field} />
-                          }}
-                        </Field>
-                      </label>
-                      <ErrorMessage className="text-danger" name={input.name} component="div"/>
-                    </div>
-                );
-              }
+            if (input.type === "textarea") {
+              return (
+                <div className="form-group" key={input.name}>
+                  <label>{input.name.toUpperCase()}
+                    <br/>
+                    <Field name={input.name}>
+                      {({field}) => {
+                        return <textarea {...field} />;
+                      }}
+                    </Field>
+                  </label>
+                  <ErrorMessage className="text-danger" name={input.name} component="div"/>
+                </div>
+              );
+            }
 
-              return null;
-            })}
-            <button className="btn btn-primary" type="submit" disabled={isSubmitting}>
-              Continue
-            </button>
-          </Form>
+            return null;
+          })}
+          <button className="btn btn-primary" type="submit" disabled={isSubmitting}>
+            Continue
+          </button>
+        </Form>
       )}
     </Formik>;
   }
@@ -104,42 +105,42 @@ export default class MainForm extends Component<Props> {
         case 1:
           return "btn btn-secondary";
         default:
-          return "btn btn-light"
+          return "btn btn-light";
       }
     };
 
     return (
-        <div className="row">
-          <div className="col d-flex justify-content-between">
+      <div className="row">
+        <div className="col d-flex justify-content-between">
           {actions.map((action, index) => {
             return (
-                <button key={action.text} type="button" className={`col-2 ${btnClassIndexes(index)}`} onClick={() => {
-                  switch (action.action) {
-                    case "continue":
-                      this.props.handleActionContinue(action);
-                      break;
-                    case "create_task":
-                      alert(`Create Task: ${action.target}`);
-                      break;
-                    case "goto":
-                      this.props.handleActionGoto(action);
-                      break;
-                    case "message":
-                      alert(action.message);
-                      break;
-                    case "finish":
-                      alert(action.result);
-                      break;
-                    default:
-                      break;
-                  }
-                }}>
-                  {action.text}
-                </button>
+              <button key={action.text} type="button" className={`col-2 ${btnClassIndexes(index)}`} onClick={() => {
+                switch (action.action) {
+                  case "continue":
+                    this.props.handleActionContinue(action);
+                    break;
+                  case "create_task":
+                    alert(`Create Task: ${action.target}`);
+                    break;
+                  case "goto":
+                    this.props.handleActionGoto(action);
+                    break;
+                  case "message":
+                    alert(action.message);
+                    break;
+                  case "finish":
+                    alert(action.result);
+                    break;
+                  default:
+                    break;
+                }
+              }}>
+                {action.text}
+              </button>
             );
           })}
-          </div>
         </div>
+      </div>
     );
   }
 
@@ -149,16 +150,16 @@ export default class MainForm extends Component<Props> {
     }
 
     return (
-        <div className="row">
-          <h2>Key Information</h2>
-          <ul>
+      <div className="row">
+        <h2>Key Information</h2>
+        <ul>
           {this.props.currentFormPage.keyInformation.map(info => {
             return (
-               <li>{info}</li>
+              <li>{info}</li>
             );
           })}
-          </ul>
-        </div>
+        </ul>
+      </div>
     );
   }
 
@@ -166,13 +167,13 @@ export default class MainForm extends Component<Props> {
     const currentFormPage = this.props.currentFormPage;
 
     return (
-        <div className="MainContent container">
-          {this.renderKeyInformation()}
-          <div className="row mb-3">{currentFormPage.question}</div>
-          <div className="row mb-3">{currentFormPage.description}</div>
-          {this.renderInputsForm(currentFormPage)}
-          {this.renderActions(currentFormPage)}
-        </div>
+      <div className="MainContent container">
+        {this.renderKeyInformation()}
+        <div className="row mb-3">{currentFormPage.question}</div>
+        <div className="row mb-3">{currentFormPage.description}</div>
+        {this.renderInputsForm(currentFormPage)}
+        {this.renderActions(currentFormPage)}
+      </div>
     );
   }
 }

@@ -11,7 +11,7 @@ class SiteAlert {
 
       if (siteAlertClosed !== "true") {
         siteAlertElement.style.display = "flex";
-        bodyElement.style.paddingTop = siteAlertElement.offsetHeight+"px";
+        bodyElement.style.paddingTop = siteAlertElement.offsetHeight + "px";
       }
 
       document.querySelector("#site-alert .close-icon").addEventListener("click", () => {

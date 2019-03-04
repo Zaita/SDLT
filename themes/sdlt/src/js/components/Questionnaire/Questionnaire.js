@@ -1,10 +1,12 @@
 import React, {Component} from "react";
-import type {FormAction, FormPage, FormSchema} from "../../services/DataProvider";
 import DataProvider from "../../services/DataProvider";
 import LeftBarItem from "./LeftBarItem";
 import MainForm from "./MainForm";
 import {FormikBag} from "formik";
 import {Link} from "react-router-dom";
+import type {FormAction} from "../../types/FormAction";
+import type {FormPage} from "../../types/FormPage";
+import type {FormSchema} from "../../types/FormSchema";
 
 export type FormState = {
   currentStep: number,
@@ -63,7 +65,7 @@ class Questionnaire extends Component<Props, FormState> {
 
       if (this.state.currentStep === this.state.maxStep) {
         alert(
-            JSON.stringify(this.state.data, null, 2),
+          JSON.stringify(this.state.data, null, 2),
         );
       }
     });
@@ -85,7 +87,7 @@ class Questionnaire extends Component<Props, FormState> {
     }, () => {
       if (this.state.currentStep === this.state.maxStep) {
         alert(
-            JSON.stringify(this.state.data, null, 2),
+          JSON.stringify(this.state.data, null, 2),
         );
       }
     });
@@ -110,7 +112,7 @@ class Questionnaire extends Component<Props, FormState> {
     }, () => {
       if (this.state.currentStep === this.state.maxStep) {
         alert(
-            JSON.stringify(this.state.data, null, 2),
+          JSON.stringify(this.state.data, null, 2),
         );
       }
     });
@@ -146,37 +148,37 @@ class Questionnaire extends Component<Props, FormState> {
     }
 
     return (
-        <div className="Questionnaire container">
-          <div className="row">
-            <div className="col-4">
-              <div className="LeftBar">
-                {this.state.schema.map((page) => {
-                  const pageIndex = this.state.schema.findIndex((item) => {
-                    return item.id === page.id;
-                  });
-                  const isCurrent = this.state.currentStep === pageIndex;
-                  const touched = (this.state.data[pageIndex] !== null);
+      <div className="Questionnaire container">
+        <div className="row">
+          <div className="col-4">
+            <div className="LeftBar">
+              {this.state.schema.map((page) => {
+                const pageIndex = this.state.schema.findIndex((item) => {
+                  return item.id === page.id;
+                });
+                const isCurrent = this.state.currentStep === pageIndex;
+                const touched = (this.state.data[pageIndex] !== null);
 
-                  return (
-                      <LeftBarItem key={page.id}
-                                   page={page}
-                                   isCurrentStep={isCurrent}
-                                   touched={touched}
-                                   onClick={() => {
-                                     this.handleClickLeftBarItem(page);
-                                   }}/>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="col-8">
-              <MainForm currentFormPage={this.state.schema[this.state.currentStep]}
-                        handleFormSubmit={this.handleFormSubmit.bind(this)}
-                        handleActionGoto={this.handleActionGoto.bind(this)}
-                        handleActionContinue={this.handleActionContinue.bind(this)}/>
+                return (
+                  <LeftBarItem key={page.id}
+                               page={page}
+                               isCurrentStep={isCurrent}
+                               touched={touched}
+                               onClick={() => {
+                                 this.handleClickLeftBarItem(page);
+                               }}/>
+                );
+              })}
             </div>
           </div>
+          <div className="col-8">
+            <MainForm currentFormPage={this.state.schema[this.state.currentStep]}
+                      handleFormSubmit={this.handleFormSubmit.bind(this)}
+                      handleActionGoto={this.handleActionGoto.bind(this)}
+                      handleActionContinue={this.handleActionContinue.bind(this)}/>
+          </div>
         </div>
+      </div>
     );
   }
 }
