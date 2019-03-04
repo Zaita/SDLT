@@ -87,7 +87,8 @@ class Pillar extends DataObject
                 'Type',
                 'Pillar Type',
                 self::$pillar_type
-            )
+            )->setDescription('The selected value will be used to dispaly icon
+                in the front-end for the Pillar.')
         );
 
         return $fields;

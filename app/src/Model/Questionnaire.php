@@ -56,6 +56,19 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     ];
 
     /**
+     * CMS Fields
+     * @return FieldList
+     */
+    public function getCMSFields()
+    {
+        $fields = parent::getCMSFields();
+
+        $fields->removeByName('PillarID');
+
+        return $fields;
+    }
+
+    /**
      * @param SchemaScaffolder $scaffolder Scaffolder
      * @return SchemaScaffolder
      */
