@@ -27,6 +27,7 @@ use SilverStripe\Versioned\Versioned;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor;
+use SilverStripe\ORM\DataObject;
 
 /**
  * Class HomePage
@@ -38,32 +39,6 @@ use SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor;
  */
 class HomePage extends Page
 {
-    /**
-     * @var string
-     */
-    private static $table_name = 'HomePage';
-
-    /**
-     * @var array
-     */
-    private static $db = [
-        'Subtitle' => 'Varchar(255)'
-    ];
-
-    /**
-     * @var array
-     */
-    private static $has_many = [
-        'Pillars' => Pillar::class
-    ];
-
-    /**
-     * @var array
-     */
-    private static $many_many = [
-        'Tasks' => Task::class
-    ];
-
     /**
      * @return string
      */
@@ -119,35 +94,5 @@ class HomePage extends Page
                 DB::alteration_message('Home page created', 'created');
             }
         }
-    }
-
-    /**
-     * CMS Fields
-     * @return FieldList
-     */
-    public function getCMSFields()
-    {
-        $fields = parent::getCMSFields();
-
-        $fields->addFieldToTab(
-            'Root.Main',
-            TextField::create(
-                'Subtitle',
-                'Subtitle'
-            ),
-            'URLSegment'
-        );
-
-        $fields->addFieldToTab(
-            'Root.Piller',
-            GridField::create(
-                'Pillar',
-                'Pillar',
-                $this->Pillars(),
-                GridFieldConfig_RecordEditor::create()
-            )
-        );
-
-        return $fields;
     }
 }
