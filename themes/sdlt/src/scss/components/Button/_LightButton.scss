@@ -1,0 +1,22 @@
+@import "../../variables";
+
+.LightButton {
+    border: solid 2px $blue;
+    background-color: $white;
+    padding: 10px 15px;
+
+    .title {
+        font-size: 14px;
+        font-weight: bold;
+        line-height: 1.57;
+        color: $blue;
+    }
+
+    &:hover {
+        border: solid 2px $orange;
+
+        .title {
+            color: $orange;
+        }
+    }
+}
