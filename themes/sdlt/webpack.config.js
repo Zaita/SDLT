@@ -23,6 +23,9 @@ module.exports = (env, argv) => {
               "@babel/preset-react",
               "@babel/preset-flow",
             ],
+            plugins: [
+              ["@babel/plugin-proposal-class-properties", {"loose": true}]
+            ]
           },
         },
         {

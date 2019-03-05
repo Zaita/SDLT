@@ -4,6 +4,7 @@ import React, {Component} from "react";
 import {Route, Switch} from "react-router-dom";
 import Questionnaire from "../Questionnaire/Questionnaire";
 import HomeContainer from "../Home/HomeContainer";
+import StartContainer from "../Questionnaire/StartContainer";
 
 class App extends Component<*> {
 
@@ -17,9 +18,9 @@ class App extends Component<*> {
                 return <HomeContainer/>;
               }}
             </Route>
-            <Route path='/questionnaire/:questionnaire'>
+            <Route path='/questionnaire/start/:id'>
               {({match}) => {
-                return <Questionnaire questionnaire={match.params.questionnaire}/>;
+                return <StartContainer questionnaireID={match.params.id}/>;
               }}
             </Route>
           </Switch>

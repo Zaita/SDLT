@@ -4,15 +4,31 @@
 // Import fonts
 @import "mixins/font";
 
+// Base
+body {
+    height: 100%;
+    background-color: $gray-200;
+}
+
 // Include all styles for the main app (based on React.js)
 #main-app {
 
     header {
         background-color: $blue;
+        height: 75px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+
+        .logo {
+            height: 41px;
+            width: auto;
+        }
     }
 
     footer {
-        @extend .fixed-bottom;
+        margin-top: 2rem;
         height: 72px;
         background-color: $blue;
         color: $white;
@@ -22,12 +38,15 @@
     }
 
     main {
-        @import "./components/Home";
+        @import "components/Home/Home";
+        @import "components/Quesionnaire/Start";
+        @import "components/Button/LightButton";
+        @import "components/Button/DarkButton";
     }
 }
 
 // Include all styles for other layout (SilverStripe templates)
-@import "./layout/site-alert";
+@import "layout/site-alert";
 
 // Include all styles for other pages (SilverStripe templates)
 @import "pages/login";
