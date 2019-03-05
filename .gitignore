@@ -30,6 +30,7 @@ nbproject
 .env
 _ss_environment.php
 silverstripe-cache
+assets
 vendor
 
 # Modules
