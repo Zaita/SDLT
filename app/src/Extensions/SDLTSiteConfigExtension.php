@@ -12,18 +12,21 @@
  * */
 namespace NZTA\SDLT\Extension;
 
+use GraphQL\Type\Definition\ResolveInfo;
+use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
+use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\Assets\Image;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\AssetAdmin\Forms\UploadField;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\HTMLEditor\HtmlEditorField;
-use SilverStripe\ORM\FieldType\DBHTMLText;
+use SilverStripe\SiteConfig\SiteConfig;
 
 /**
  * Site Config Extension for SDLT Tool
  **/
-class SDLTSiteConfigExtension extends DataExtension
+class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvider
 {
     /**
      * @var array
@@ -89,5 +92,28 @@ class SDLTSiteConfigExtension extends DataExtension
               )
             ]
         );
+    }
+
+    /**
+     * @param SchemaScaffolder $scaffolder
+     * @return SchemaScaffolder
+     */
+    public function provideGraphQLScaffolding(SchemaScaffolder $scaffolder)
+    {
+        $scaffolder
+            ->type(SiteConfig::class)
+            ->addFields([
+                'Title'
+            ])
+            ->operation(SchemaScaffolder::READ)
+            ->setName('readSiteConfig')
+            ->setUsePagination(false)
+            ->setResolver(function ($object, array $args, $context, ResolveInfo $info) {
+                $config = SiteConfig::current_site_config();
+                return [$config];
+            })
+            ->end();
+
+        return $scaffolder;
     }
 }

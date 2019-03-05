@@ -4,3 +4,4 @@ SilverStripe\SiteConfig\SiteConfig:
 SilverStripe\Security\Member:
   extensions:
     - 'NZTA\SDLT\Extension\ShowLoginAttemptsExtension'
+    - 'NZTA\SDLT\Extension\UserRoleExtension'
