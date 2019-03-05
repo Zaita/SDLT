@@ -30,7 +30,6 @@ nbproject
 .env
 _ss_environment.php
 silverstripe-cache
-assets
 vendor
 
 # Modules
@@ -102,4 +101,3 @@ versioned
 silverstripe-admin
 silverstripe-assets
 graphql
-
