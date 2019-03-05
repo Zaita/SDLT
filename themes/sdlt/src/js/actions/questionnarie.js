@@ -14,7 +14,7 @@ export function loadQuestionnaireStartState(questionnaireID: string): ThunkActio
       dispatch(loadQuestionnaireStartStateFinished(data));
     } catch (error) {
       // TODO: maybe dispatch a global error action
-      console.error(error);
+      alert(error);
     }
   };
 }

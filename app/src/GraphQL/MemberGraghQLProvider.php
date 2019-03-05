@@ -11,6 +11,7 @@
  */
 
 namespace NZTA\SDLT\GraphQL;
+use Exception;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -42,11 +43,10 @@ class MemberGraghQLProvider implements ScaffoldingProvider
 
                 // Check authentication
                 if (!$member) {
-                    return [];
+                    throw new Exception('Please log in first...');
                 }
 
-                $list = Member::get()->filter('ID', $member->ID);
-                return $list;
+                return Member::get()->filter('ID', $member->ID);
             })
             ->end();
 
