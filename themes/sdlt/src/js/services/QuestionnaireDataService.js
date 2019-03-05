@@ -27,9 +27,7 @@ query {
 }
 `;
 
-    const response = await GraphQLRequestHelper.prepareRequest(query).request();
-    const json = response.data;
-
+    const json = await GraphQLRequestHelper.request(query);
     const memberData = _.get(json, "data.readCurrentMember.0", null);
     const questionnaireData = _.get(json, "data.readQuestionnaire", null);
     const siteData = _.get(json, "data.readSiteConfig.0", null);
