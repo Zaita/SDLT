@@ -1,28 +1,12 @@
-variables:
-  GIT_STRATEGY: "clone"
-  VAGRANT_MACHINE: "silverstripe-project-machine"
-  VAGRANT_SNAPSHOT: "silverstripe-project-snapshot"
-  VAGRANT_CONTAINER: "silverstripe-project-container"
-  VAGRANT_DEFAULT_PROVIDER: "lxd"
+image: gitlab.catalyst.net.nz:4567/silverstripe/security-development-lifecycle-tool/devenv/silverstripe4:16.04
 
 before_script:
-  - "pwd"
-  - "whoami"
-  - "vagrant-catalyst-2.0 --version"
-  - "cp Vagrantfile.ci Vagrantfile"
-  - "vagrant-catalyst-2.0 lxd attach -f ${VAGRANT_MACHINE} ${VAGRANT_CONTAINER} || true"
-  - "vagrant-catalyst-2.0 halt ${VAGRANT_MACHINE} || true"
-  - "vagrant-catalyst-2.0 up ${VAGRANT_MACHINE}"
-  - "vagrant-catalyst-2.0 snapshot restore ${VAGRANT_MACHINE} ${VAGRANT_SNAPSHOT} || true"
-  - "vagrant-catalyst-2.0 provision ${VAGRANT_MACHINE}"
-  - "vagrant-catalyst-2.0 snapshot save ${VAGRANT_MACHINE} ${VAGRANT_SNAPSHOT}"
+  - puppet-devenv-apply
 
 test:
-  only:
-    - 'master'
-    - 'team/meta'
+  tags: [kubernetes]
+  only: [feature-gitlab-ci]
   script:
-    - vagrant-catalyst-2.0 ssh ${VAGRANT_MACHINE} -c "sudo -u silverstripe-site-niwa-proxy /vagrant/vendor/bin/phpunit /vagrant/mysite/test/TestTest.php"
-
-after_script:
-  - "vagrant-catalyst-2.0 lxd detach ${VAGRANT_MACHINE} || true"
+    - cd "${CI_PROJECT_DIR}"
+    - composer --no-interaction install --prefer-dist
+    - vendor/bin/phpunit
