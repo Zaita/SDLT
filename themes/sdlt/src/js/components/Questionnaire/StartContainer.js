@@ -7,6 +7,8 @@ import {Dispatch} from "redux";
 import Start from "./Start";
 import {loadQuestionnaireStartState} from "../../actions/questionnarie";
 import type {QuestionnaireStartState} from "../../store/QuestionnaireState";
+import Header from "../Header/Header";
+import Footer from "../Footer/Footer";
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -49,11 +51,15 @@ class StartContainer extends Component<Props> {
 
     return (
       <div className="StartContainer">
+        <Header title={title} subtitle={subtitle} />
+
         <Start title={title}
                subtitle={subtitle}
                keyInformation={keyInformation}
                user={user}
         />
+
+        <Footer/>
       </div>
     );
   }

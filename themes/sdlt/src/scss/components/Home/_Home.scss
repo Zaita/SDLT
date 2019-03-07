@@ -1,72 +1,66 @@
 @import "../../variables";
 
-.Home {
-    margin-bottom: 80px;
+.HomeContainer {
 
-    .background-image {
-        @extend .fixed-top;
-        width: 100vw;
-        height: 100vh;
-        z-index: -1;
-        background-size: cover;
+    .Home {
+
+        .logo {
+            width: 370px;
+            height: auto;
+            margin-bottom: 76px;
+        }
+
+        .layout {
+            @extend .d-flex;
+            @extend .flex-column;
+            @extend .justify-content-start;
+            @extend .align-items-center;
+            @extend .w-100;
+            @extend .h-100;
+            padding-top: 98px;
+        }
+
+        h1 {
+            font-size: 50px;
+            font-weight: 300;
+            font-style: normal;
+            font-stretch: normal;
+            line-height: 0.64;
+            letter-spacing: normal;
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 43px;
+        }
+
+        h2 {
+            font-size: 30px;
+            font-weight: normal;
+            font-style: normal;
+            font-stretch: normal;
+            line-height: 0.73;
+            letter-spacing: normal;
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 29px;
+        }
+
+        .pillars {
+            @extend .row;
+            margin-bottom: 40px;
+
+            @import "Pillar";
+        }
+
+        .tasks {
+            max-width: 1000px;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            margin-bottom: 150px;
+
+            @import "TaskButton";
+        }
     }
-
-    .logo {
-        width: 370px;
-        height: auto;
-        margin-bottom: 76px;
-    }
-
-    .layout {
-        @extend .d-flex;
-        @extend .flex-column;
-        @extend .justify-content-start;
-        @extend .align-items-center;
-        @extend .w-100;
-        @extend .h-100;
-        padding-top: 98px;
-    }
-
-    h1 {
-        font-size: 50px;
-        font-weight: 300;
-        font-style: normal;
-        font-stretch: normal;
-        line-height: 0.64;
-        letter-spacing: normal;
-        text-align: center;
-        color: #ffffff;
-        margin-bottom: 43px;
-    }
-
-    h2 {
-        font-size: 30px;
-        font-weight: normal;
-        font-style: normal;
-        font-stretch: normal;
-        line-height: 0.73;
-        letter-spacing: normal;
-        text-align: center;
-        color: #ffffff;
-        margin-bottom: 29px;
-    }
-
-    .pillars {
-        @extend .row;
-        margin-bottom: 40px;
-
-        @import "Pillar";
-    }
-
-    .tasks {
-        max-width: 1000px;
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: flex-start;
-        flex-wrap: wrap;
-
-        @import "TaskButton";
-    }
-
 }

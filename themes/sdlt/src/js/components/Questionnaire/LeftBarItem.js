@@ -1,32 +1,55 @@
 // @flow
 
 import React, {Component} from "react";
-import type {FormPage} from "../../types/FormPage";
+import type {Question} from "../../types/Questionnaire";
 
 type Props = {
-  page: FormPage,
-  isCurrentStep: boolean,
-  touched: boolean,
-  onClick: (page: FormPage) => void
+  question: Question,
+  onItemClick: (question: Question) => void
 };
 
 export default class LeftBarItem extends Component<Props> {
+
   render() {
-    let text = "";
-    text += this.props.page.title;
-
-    if (this.props.isCurrentStep) {
-      text += "[current]";
-    }
-
-    if (this.props.touched) {
-      text += "[touched]";
-    }
+    const {question, onItemClick} = {...this.props};
 
     return (
       <div className="LeftBarItem">
-        <button className="btn" onClick={this.props.onClick}>{text}</button>
+        {this.renderIcon(question)}
+        <button className="btn"
+                disabled={!question.isApplicable}
+                onClick={(event) => {
+                  onItemClick(question);
+                }}>
+          {question.title}
+        </button>
       </div>
+    );
+  }
+
+  renderIcon(question: Question) {
+    const {isCurrent, hasAnswer, isApplicable} = {...question};
+
+    if (isCurrent) {
+      return (
+        <i className="fas fa-edit current"/>
+      );
+    }
+
+    if (!isApplicable) {
+      return (
+        <i className="fas fa-question-circle not-applicable"/>
+      );
+    }
+
+    if (hasAnswer && isApplicable) {
+      return (
+        <i className="fas fa-check-circle success"/>
+      );
+    }
+
+    return (
+      <i className="fas fa-check-circle pending"/>
     );
   }
 }
