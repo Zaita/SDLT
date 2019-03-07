@@ -11,6 +11,7 @@
  */
 
 namespace NZTA\SDLT\GraphQL;
+
 use Exception;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
@@ -21,9 +22,12 @@ use SilverStripe\Security\Security;
 /**
  * Class MemberGraghQLProvider
  */
-
 class MemberGraghQLProvider implements ScaffoldingProvider
 {
+    /**
+     * @param SchemaScaffolder $scaffolder Scaffolder
+     * @return SchemaScaffolder
+     */
     public function provideGraphQLScaffolding(SchemaScaffolder $scaffolder)
     {
         $scaffolder

@@ -17,6 +17,7 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
+use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 
 /**
  * Class Dashboard
@@ -63,6 +64,24 @@ class Dashboard extends DataObject implements ScaffoldingProvider
         'Title',
         'Subtitle'
     ];
+
+
+    /**
+     * CMS Fields
+     * @return FieldList
+     */
+    public function getCMSFields()
+    {
+        $fields = parent::getCMSFields();
+
+        $config = $fields->dataFieldByName('Pillars')->getConfig();
+
+        $config->addComponent(
+            new GridFieldOrderableRows('SortOrder')
+        );
+
+        return $fields;
+    }
 
     /**
      * @param SchemaScaffolder $scaffolder Scaffolder

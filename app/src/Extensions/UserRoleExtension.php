@@ -20,8 +20,7 @@ use SilverStripe\ORM\DataExtension;
 /**
  * Class UserRoleExtension
  *
- * Add `UserRole` field
- */
+ * Add `UserRole` field */
 class UserRoleExtension extends DataExtension
 {
     /**
