@@ -1,11 +1,11 @@
-image: gitlab.catalyst.net.nz:4567/silverstripe/security-development-lifecycle-tool/devenv/silverstripe4:16.04
+image: gitlab.catalyst.net.nz:4567/silverstripe/security-development-lifecycle-tool/devenv/silverstripe4:18.04
 
 before_script:
   - puppet-devenv-apply
 
 test:
-  tags: [kubernetes]
-  only: [feature-gitlab-ci]
+  tags:
+    - kubernetes
   script:
     - cd "${CI_PROJECT_DIR}"
     - composer --no-interaction install --prefer-dist
