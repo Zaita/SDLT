@@ -7,39 +7,22 @@
 // Base
 body {
     height: 100%;
-    background-color: $gray-200;
+    background-color: $blue;
 }
 
 // Include all styles for the main app (based on React.js)
 #main-app {
 
-    header {
-        background-color: $blue;
-        height: 75px;
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-
-        .logo {
-            height: 41px;
-            width: auto;
-        }
-    }
-
-    footer {
-        margin-top: 2rem;
-        height: 72px;
-        background-color: $blue;
-        color: $white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
     main {
+        .gray-bg {
+            background-color: $gray-200;
+        }
+
+        @import "components/Header/Header";
+        @import "components/Footer/Footer";
         @import "components/Home/Home";
         @import "components/Quesionnaire/Start";
+        @import "components/Quesionnaire/Questionnaire";
         @import "components/Button/LightButton";
         @import "components/Button/DarkButton";
     }

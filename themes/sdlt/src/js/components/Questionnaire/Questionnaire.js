@@ -1,182 +1,115 @@
+// @flow
+
 import React, {Component} from "react";
-import DataProvider from "../../services/DataProvider";
-import LeftBarItem from "./LeftBarItem";
-import MainForm from "./MainForm";
 import {FormikBag} from "formik";
-import {Link} from "react-router-dom";
+import {Redirect} from "react-router-dom";
 import type {FormAction} from "../../types/FormAction";
 import type {FormPage} from "../../types/FormPage";
-import type {FormSchema} from "../../types/FormSchema";
-
-export type FormState = {
-  currentStep: number,
-  maxStep: number,
-  schema: FormSchema,
-  data: Array
-};
+import type {User} from "../../types/User";
+import type {AnswerAction, Question, Submission} from "../../types/Questionnaire";
+import LeftBar from "./LeftBar";
+import QuestionForm from "./QuestionForm";
+import _ from "lodash";
 
 type Props = {
-  questionnaire: string
+  user: User | null,
+  submission: Submission | null,
+  saveAnsweredQuestion: (question: Question) => void
 };
 
-class Questionnaire extends Component<Props, FormState> {
+class Questionnaire extends Component<Props> {
 
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      currentStep: 0,
-      maxStep: 0,
-      schema: [],
-      data: [],
-    };
-  }
-
-  async componentDidMount() {
-    await this.loadData();
-  }
-
-  async loadData() {
-    const schema = await DataProvider.provideData(this.props.questionnaire);
-    this.setState({
-      schema: schema,
-      maxStep: schema.length - 1,
-      data: Array(schema.length).fill(null),
-    });
-  }
-
-  handleFormSubmit(formik: FormikBag, values) {
+  handleFormSubmit(formik: FormikBag, values: Object) {
+    // Clear values
     formik.setValues({});
+    // TODO: use global loading indicator
+    formik.setSubmitting(false);
 
-    this.setState(prevState => {
-      const data = prevState.data.map((item, i) => {
-        if (i === prevState.currentStep) {
-          return values;
-        }
-        return item;
-      });
-      const currentStep = prevState.currentStep + 1;
-      return {
-        currentStep,
-        data,
-      };
-    }, () => {
-      formik.setSubmitting(false);
+    const {submission, saveAnsweredQuestion} = {...this.props};
+    if (!submission) {
+      return;
+    }
 
-      if (this.state.currentStep === this.state.maxStep) {
-        alert(
-          JSON.stringify(this.state.data, null, 2),
-        );
+    // Generate new question with data
+    const currentQuestion = submission.questions.find((question) => {
+      return question.isCurrent === true;
+    });
+    if (!currentQuestion) {
+      return;
+    }
+
+    const answeredQuestion = {...currentQuestion};
+    _.forIn(values, (value, key) => {
+      const index = answeredQuestion.inputs.findIndex((item) => item.id === key);
+      if(index >= 0) {
+        _.set(answeredQuestion, `inputs.${index}.data`, value)
       }
     });
+    answeredQuestion.hasAnswer = true;
+
+    saveAnsweredQuestion(answeredQuestion)
   }
 
-  handleActionContinue(action: FormAction) {
-    this.setState(prevState => {
-      const data = prevState.data.map((item, i) => {
-        if (i === prevState.currentStep) {
-          return action.text;
-        }
-        return item;
-      });
-      const currentStep = prevState.currentStep + 1;
-      return {
-        currentStep,
-        data,
-      };
-    }, () => {
-      if (this.state.currentStep === this.state.maxStep) {
-        alert(
-          JSON.stringify(this.state.data, null, 2),
-        );
+  handleActionClick(action: AnswerAction) {
+    const {submission, saveAnsweredQuestion} = {...this.props};
+    if (!submission) {
+      return;
+    }
+
+    // Generate new question with data
+    const currentQuestion = submission.questions.find((question) => {
+      return question.isCurrent === true;
+    });
+    if (!currentQuestion) {
+      return;
+    }
+
+    const answeredQuestion = {...currentQuestion};
+    answeredQuestion.actions = answeredQuestion.actions.map((item) => {
+      if (item.id === action.id) {
+        item.isChose = true;
+      } else {
+        item.isChose = false;
       }
+      return item;
     });
-  }
+    answeredQuestion.hasAnswer = true;
 
-  handleActionGoto(action: FormAction) {
-    const nextStep = this.state.schema.map((page) => {
-      return page.id;
-    }).indexOf(action.target);
-
-    this.setState(prevState => {
-      const data = prevState.data.map((item, i) => {
-        if (i === prevState.currentStep) {
-          return action.text;
-        }
-        return item;
-      });
-      return {
-        currentStep: nextStep,
-        data,
-      };
-    }, () => {
-      if (this.state.currentStep === this.state.maxStep) {
-        alert(
-          JSON.stringify(this.state.data, null, 2),
-        );
-      }
-    });
-  }
-
-  handleClickLeftBarItem(page: FormPage) {
-    // TODO: add limitation - only filled steps could be edited
-    const nextStep = this.state.schema.map((page) => {
-      return page.id;
-    }).indexOf(page.id);
-
-    this.setState(prevState => {
-      return {
-        currentStep: nextStep,
-      };
-    });
+    saveAnsweredQuestion(answeredQuestion)
   }
 
   render() {
-    if (this.state.schema.length === 0) {
+    const {user, submission} = {...this.props};
+
+    if (!user || !submission) {
+      return null;
+    }
+
+    if (submission.status !== "in_progress") {
       return (
-        <div className="container">
+        <div className="Questionnaire">
           <h1>
-            The questionnaire is not available...
+            The questionnaire is not in progress...
           </h1>
-          <Link to="/">
-            <button className="btn btn-primary">
-              Back
-            </button>
-          </Link>
+          <Redirect to="/"/>
         </div>
       );
     }
 
-    return (
-      <div className="Questionnaire container">
-        <div className="row">
-          <div className="col-4">
-            <div className="LeftBar">
-              {this.state.schema.map((page) => {
-                const pageIndex = this.state.schema.findIndex((item) => {
-                  return item.id === page.id;
-                });
-                const isCurrent = this.state.currentStep === pageIndex;
-                const touched = (this.state.data[pageIndex] !== null);
+    const currentQuestion = submission.questions.find((question) => {
+      return question.isCurrent === true;
+    });
 
-                return (
-                  <LeftBarItem key={page.id}
-                               page={page}
-                               isCurrentStep={isCurrent}
-                               touched={touched}
-                               onClick={() => {
-                                 this.handleClickLeftBarItem(page);
-                               }}/>
-                );
-              })}
-            </div>
-          </div>
-          <div className="col-8">
-            <MainForm currentFormPage={this.state.schema[this.state.currentStep]}
-                      handleFormSubmit={this.handleFormSubmit.bind(this)}
-                      handleActionGoto={this.handleActionGoto.bind(this)}
-                      handleActionContinue={this.handleActionContinue.bind(this)}/>
-          </div>
+    return (
+      <div className="Questionnaire">
+        <div className="major">
+          <LeftBar questions={submission.questions} onItemClick={(question) => {
+            console.log(`LeftBar::onItemClickL: ${question.title}`);
+          }}/>
+          {currentQuestion && <QuestionForm
+            question={currentQuestion}
+            handleFormSubmit={this.handleFormSubmit.bind(this)}
+           handleActionClick={this.handleActionClick.bind(this)}/>}
         </div>
       </div>
     );

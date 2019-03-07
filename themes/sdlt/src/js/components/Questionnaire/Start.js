@@ -17,12 +17,7 @@ class Start extends Component<Props> {
   render() {
     return (
       <div className="Start">
-        <header>
-          <img src={LogoImage} className="logo"/>
-        </header>
         <div className="start-form">
-          <h1>{this.props.title}</h1>
-          <h2>{this.props.subtitle}</h2>
           <div className="info-box">
             <div className="key-info-title">Key Information:</div>
             <div className="key-info"
@@ -45,7 +40,9 @@ class Start extends Component<Props> {
               </div>
             </div>
             <div className="actions">
-              <LightButton title="START" />
+              <LightButton title="START" onClick={() => {
+                window.location.href = "/#/questionnaire/submission/asdf";
+              }} />
             </div>
           </div>
         </div>
