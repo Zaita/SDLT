@@ -127,25 +127,26 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     throw new Exception('Sorry, no question available for selected Questionnaire.');
                 }
 
-                $this->SubmitterName = $member->FirstName;
-                $this->SubmitterRole = $member->UserRole;
-                $this->SubmitterEmail = $member->Email;
+                $model = self::create();
 
-                $this->QuestionnaireStatus = 'In-progress';
-                $this->CiscoApproval = 'Pending';
-                $this->BussionOwnerApproval = 'Pending';
-                $this->QuestionnaireID = $questionnaire->ID;
-                $this->UserID = $member->ID;
+                $model->SubmitterName = $member->FirstName;
+                $model->SubmitterRole = $member->UserRole;
+                $model->SubmitterEmail = $member->Email;
 
-                $this->UUID = uniqid();
+                $model->QuestionnaireStatus = 'In-progress';
+                $model->CiscoApproval = 'Pending';
+                $model->BussionOwnerApproval = 'Pending';
+                $model->QuestionnaireID = $questionnaire->ID;
+                $model->UserID = $member->ID;
 
-                $this->QuestionnaireData = $this->getQuestionsData($questionnaire);
+                $model->UUID = uniqid();
 
-                return $this;
+                $model->QuestionnaireData = $model->getQuestionsData($questionnaire);
+                $model->write();
+
+                return $model;
             })
             ->end();
-
-        $this->write();
     }
 
     /**
