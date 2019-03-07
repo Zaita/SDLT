@@ -2,9 +2,9 @@
 
 import React, {Component} from "react";
 import {Route, Switch} from "react-router-dom";
-import Questionnaire from "../Questionnaire/Questionnaire";
 import HomeContainer from "../Home/HomeContainer";
 import StartContainer from "../Questionnaire/StartContainer";
+import QuestionnaireContainer from "../Questionnaire/QuestionnaireContainer";
 
 class App extends Component<*> {
 
@@ -20,16 +20,24 @@ class App extends Component<*> {
             </Route>
             <Route path='/questionnaire/start/:id'>
               {({match}) => {
-                return <StartContainer questionnaireID={match.params.id}/>;
+                return (
+                  <div className="gray-bg">
+                    <StartContainer questionnaireID={match.params.id}/>
+                  </div>
+                );
+              }}
+            </Route>
+            <Route path='/questionnaire/submission/:hash'>
+              {({match}) => {
+                return (
+                  <div className="gray-bg">
+                    <QuestionnaireContainer submissionHash={match.params.hash}/>
+                  </div>
+                );
               }}
             </Route>
           </Switch>
         </main>
-        <footer>
-          <div>
-            © 2019 | NZ Transport Agency
-          </div>
-        </footer>
       </div>
 
     );

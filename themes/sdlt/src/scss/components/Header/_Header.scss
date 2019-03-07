@@ -1,0 +1,40 @@
+@import "../../variables";
+
+header.Header {
+
+    padding-bottom: 45px;
+
+    .top-banner {
+        background-color: $blue;
+        height: 75px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 50px;
+    }
+
+    .logo {
+        height: 41px;
+        width: auto;
+    }
+
+    h1, h2 {
+        font-weight: 300;
+        font-style: normal;
+        font-stretch: normal;
+        line-height: 1.22;
+        letter-spacing: normal;
+        text-align: center;
+        color: $blue;
+    }
+
+    h1 {
+        font-size: 36px;
+        margin-bottom: 0.5em;
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+}
