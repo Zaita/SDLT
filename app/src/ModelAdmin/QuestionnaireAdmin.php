@@ -33,9 +33,9 @@ class QuestionnaireAdmin extends ModelAdmin
      * @var string[]
      */
     private static $managed_models = [
+        Dashboard::class,
         Questionnaire::class,
-        Task::class,
-        Dashboard::class
+        Task::class
     ];
 
     /**
