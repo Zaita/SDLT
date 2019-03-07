@@ -42,7 +42,8 @@ class Pillar extends DataObject implements ScaffoldingProvider
     private static $db = [
         'Label' => 'Varchar(255)',
         'Disabled' => 'Boolean',
-        'Type' => 'Varchar(255)'
+        'Type' => 'Varchar(255)',
+        'SortOrder' => 'Int',
     ];
 
     /**
@@ -65,6 +66,11 @@ class Pillar extends DataObject implements ScaffoldingProvider
     private static $summary_fields = [
         'Label'
     ];
+
+    /**
+     * @var string
+     */
+    private static $default_sort = 'SortOrder';
 
     /**
      * @var array
@@ -102,7 +108,7 @@ class Pillar extends DataObject implements ScaffoldingProvider
     public function provideGraphQLScaffolding(SchemaScaffolder $scaffolder)
     {
         // Provide entity type
-        $typeScaffolder = $scaffolder
+        $pillarScaffolder = $scaffolder
             ->type(Pillar::class)
             ->addFields([
               'ID',
@@ -112,7 +118,7 @@ class Pillar extends DataObject implements ScaffoldingProvider
             ]);
 
         // Provide relations
-        $typeScaffolder
+        $pillarScaffolder
             ->nestedQuery('Questionnaire')
             ->setUsePagination(false)
             ->end();
