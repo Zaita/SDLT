@@ -1,7 +1,7 @@
 image: gitlab.catalyst.net.nz:4567/silverstripe/security-development-lifecycle-tool/devenv/silverstripe4:18.04
 
 before_script:
-  - puppet-devenv-apply
+  - puppet-devenv-apply --tools git
 
 test:
   tags:
