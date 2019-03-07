@@ -1,9 +1,10 @@
 // @flow
 
-import type {QuestionnaireStartState} from "../store/QuestionnaireState";
+import type {QuestionnaireStartState, QuestionnaireSubmissionState} from "../store/QuestionnaireState";
 import GraphQLRequestHelper from "../utils/GraphQLRequestHelper";
 import _ from "lodash";
 import {DEFAULT_NETWORK_ERROR} from "../constants/errors";
+import submissionFixture from "../../../__fixtures__/QuestionnaireSubmissionState";
 
 export default class QuestionnaireDataService {
 
@@ -47,5 +48,10 @@ query {
         email: _.get(memberData, "Email"),
       },
     };
+  }
+
+  static async fetchSubmissionData(submissionHash: string): Promise<QuestionnaireSubmissionState> {
+    // TODO: fetch real data
+    return submissionFixture;
   }
 }

@@ -7,6 +7,8 @@ import {loadHomeState} from "../../actions/home";
 import {Dispatch} from "redux";
 import Home from "./Home";
 import type {HomeState} from "../../store/HomeState";
+import Footer from "../Footer/Footer";
+import BackgroundImage from "../../../img/Home/background.jpg";
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -41,8 +43,12 @@ class HomeContainer extends Component<Props> {
     }
 
     return (
-      <div className="Home">
+      <div className="HomeContainer" style={{
+        backgroundImage: `url("${BackgroundImage}")`,
+        backgroundSize: "cover"
+      }}>
         <Home homeState={this.props.homeState}/>
+        <Footer/>
       </div>
     );
   }

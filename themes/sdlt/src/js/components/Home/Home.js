@@ -16,9 +16,6 @@ class Home extends Component<Props> {
   render() {
     return (
       <div className="Home">
-        <div className="background-image" style={{
-          backgroundImage: `url("${BackgroundImage}")`,
-        }}/>
         <div className="layout">
           <img src={LogoImage} className="logo"/>
           <h1>
