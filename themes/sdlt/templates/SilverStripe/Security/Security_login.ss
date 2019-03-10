@@ -20,6 +20,11 @@
             <img src="$SiteConfig.NZTALogo.URL" />
             <hr />
             $Form
+            <div class="pt-3">
+              <a class="btn btn-secondary w-100" href="/">
+                Continue as current user
+              </a>
+            </div>
             </div>
         </div>
     </div>
