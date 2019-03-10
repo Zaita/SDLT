@@ -109,7 +109,7 @@ class Questionnaire extends Component<Props> {
           {currentQuestion && <QuestionForm
             question={currentQuestion}
             handleFormSubmit={this.handleFormSubmit.bind(this)}
-           handleActionClick={this.handleActionClick.bind(this)}/>}
+            handleActionClick={this.handleActionClick.bind(this)}/>}
         </div>
       </div>
     );

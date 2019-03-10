@@ -8,6 +8,24 @@ import submissionFixture from "../../../__fixtures__/QuestionnaireSubmissionStat
 
 export default class QuestionnaireDataService {
 
+  static async createInProgressSubmission(argument: {questionnaireID: string, csrfToken: string}): Promise<string> {
+    const {questionnaireID, csrfToken} = {...argument};
+    const query = `
+mutation {
+ createQuestionnaireSubmission(QuestionnaireID: ${questionnaireID}){
+   UUID
+ }
+}`;
+
+    const json = await GraphQLRequestHelper.request({query, csrfToken});
+    const submissionHash = _.get(json, "data.createQuestionnaireSubmission.UUID", null);
+    if (!submissionHash) {
+      throw DEFAULT_NETWORK_ERROR;
+    }
+
+    return submissionHash;
+  }
+
   static async fetchStartData(questionnaireID: string): Promise<QuestionnaireStartState> {
     const query = `
 query {
@@ -28,7 +46,7 @@ query {
 }
 `;
 
-    const json = await GraphQLRequestHelper.request(query);
+    const json = await GraphQLRequestHelper.request({query});
     const memberData = _.get(json, "data.readCurrentMember.0", null);
     const questionnaireData = _.get(json, "data.readQuestionnaire", null);
     const siteData = _.get(json, "data.readSiteConfig.0", null);
