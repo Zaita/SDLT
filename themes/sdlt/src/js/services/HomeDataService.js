@@ -32,7 +32,7 @@ query {
 }`;
 
     // Send request
-    const json = await GraphQLRequestHelper.request(query);
+    const json = await GraphQLRequestHelper.request({query});
     const data = _.get(json, "data.readDashboard", []);
     if(!Array.isArray(data) || data.length === 0) {
       throw DEFAULT_NETWORK_ERROR;

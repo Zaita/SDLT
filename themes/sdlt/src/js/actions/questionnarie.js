@@ -7,6 +7,7 @@ import {ThunkAction} from "redux-thunk";
 import QuestionnaireDataService from "../services/QuestionnaireDataService";
 import type {Question} from "../types/Questionnaire";
 import type {RootState} from "../store/RootState";
+import CSRFTokenService from "../services/CSRFTokenService";
 
 // Start
 
@@ -31,6 +32,26 @@ export function loadQuestionnaireStartStateFinished(payload: QuestionnaireStartS
 }
 
 // Submission
+
+export function createInProgressSubmission(questionnaireID: string): ThunkAction {
+  return async (dispatch) => {
+    // TODO: maybe dispatch a global loading action
+    try {
+      // Get CSRF token
+      const csrfToken = await CSRFTokenService.getCSRFToken();
+
+      // Send request to create submission record
+      const submissionHash = await QuestionnaireDataService.createInProgressSubmission({questionnaireID, csrfToken});
+
+      // Redirect to questionnaire page
+      window.location.href = `/#/questionnaire/submission/${submissionHash}`;
+
+    } catch (error) {
+      // TODO: maybe dispatch a global error action
+      alert(error);
+    }
+  };
+}
 
 export function loadQuestionnaireSubmissionState(submissionHash: string): ThunkAction {
   return async (dispatch) => {

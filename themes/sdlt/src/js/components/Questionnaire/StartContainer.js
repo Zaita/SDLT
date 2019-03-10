@@ -5,7 +5,7 @@ import {connect} from "react-redux";
 import type {RootState} from "../../store/RootState";
 import {Dispatch} from "redux";
 import Start from "./Start";
-import {loadQuestionnaireStartState} from "../../actions/questionnarie";
+import {createInProgressSubmission, loadQuestionnaireStartState} from "../../actions/questionnarie";
 import type {QuestionnaireStartState} from "../../store/QuestionnaireState";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
@@ -21,6 +21,9 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
     dispatchLoadQuestionnaireAction(questionnaireID: string) {
       dispatch(loadQuestionnaireStartState(questionnaireID));
     },
+    dispatchCreateInProgressSubmissionAction(questionnaireID: string) {
+      dispatch(createInProgressSubmission(questionnaireID));
+    }
   };
 };
 
@@ -30,7 +33,8 @@ type ownProps = {
 
 type reduxProps = {
   startState: QuestionnaireStartState,
-  dispatchLoadQuestionnaireAction: (id: string) => void
+  dispatchLoadQuestionnaireAction: (id: string) => void,
+  dispatchCreateInProgressSubmissionAction: (questionnaireID: string) => void
 };
 
 type Props = ownProps & reduxProps;
@@ -44,6 +48,7 @@ class StartContainer extends Component<Props> {
 
   render() {
     const {title, subtitle, keyInformation, user} = {...this.props.startState};
+    const {questionnaireID, dispatchCreateInProgressSubmissionAction} = {...this.props};
 
     if(!user) {
       return null;
@@ -53,11 +58,11 @@ class StartContainer extends Component<Props> {
       <div className="StartContainer">
         <Header title={title} subtitle={subtitle} />
 
-        <Start title={title}
-               subtitle={subtitle}
-               keyInformation={keyInformation}
+        <Start keyInformation={keyInformation}
                user={user}
-        />
+               onStartButtonClick={() => {
+                 dispatchCreateInProgressSubmissionAction(questionnaireID);
+               }}/>
 
         <Footer/>
       </div>

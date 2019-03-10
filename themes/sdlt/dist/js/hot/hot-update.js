@@ -1,23 +1,23 @@
 webpackHotUpdate("main",{
 
-/***/ "./src/js/components/Button/LogoutButton.js":
-/*!**************************************************!*\
-  !*** ./src/js/components/Button/LogoutButton.js ***!
-  \**************************************************/
+/***/ "./src/js/services/QuestionnaireDataService.js":
+/*!*****************************************************!*\
+  !*** ./src/js/services/QuestionnaireDataService.js ***!
+  \*****************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _img_icons_user_svg__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../img/icons/user.svg */ "./src/img/icons/user.svg");
-/* harmony import */ var _img_icons_user_svg__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_img_icons_user_svg__WEBPACK_IMPORTED_MODULE_1__);
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return QuestionnaireDataService; });
+/* harmony import */ var _utils_GraphQLRequestHelper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/GraphQLRequestHelper */ "./src/js/utils/GraphQLRequestHelper.js");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _constants_errors__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../constants/errors */ "./src/js/constants/errors.js");
+/* harmony import */ var _fixtures_QuestionnaireSubmissionState__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../__fixtures__/QuestionnaireSubmissionState */ "./__fixtures__/QuestionnaireSubmissionState.js");
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -25,57 +25,153 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 
 
 
-var LogoutButton =
+
+var QuestionnaireDataService =
 /*#__PURE__*/
-function (_Component) {
-  _inherits(LogoutButton, _Component);
-
-  function LogoutButton() {
-    _classCallCheck(this, LogoutButton);
-
-    return _possibleConstructorReturn(this, _getPrototypeOf(LogoutButton).apply(this, arguments));
+function () {
+  function QuestionnaireDataService() {
+    _classCallCheck(this, QuestionnaireDataService);
   }
 
-  _createClass(LogoutButton, [{
-    key: "render",
-    value: function render() {
-      var _this$props = _objectSpread({}, this.props),
-          classes = _this$props.classes;
+  _createClass(QuestionnaireDataService, null, [{
+    key: "createInProgressSubmission",
+    value: function () {
+      var _createInProgressSubmission = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee(questionnaireID, csrfToken) {
+        var query, json, submissionHash;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                query = "\nmutation {\n createQuestionnaireSubmission(QuestionnaireID: ".concat(questionnaireID, "){\n   UUID\n }\n}");
+                _context.next = 3;
+                return _utils_GraphQLRequestHelper__WEBPACK_IMPORTED_MODULE_0__["default"].request({
+                  query: query,
+                  csrfToken: csrfToken
+                });
 
-      return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
-        className: "LogoutButton ".concat(classes.join(" ")),
-        onClick: this.onButtonClick.bind(this)
-      }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("img", {
-        src: _img_icons_user_svg__WEBPACK_IMPORTED_MODULE_1___default.a
-      }), "Log Out"));
-    }
+              case 3:
+                json = _context.sent;
+                submissionHash = lodash__WEBPACK_IMPORTED_MODULE_1___default.a.get(json, "data.createQuestionnaireSubmission.UUID", null);
+
+                if (submissionHash) {
+                  _context.next = 7;
+                  break;
+                }
+
+                throw _constants_errors__WEBPACK_IMPORTED_MODULE_2__["DEFAULT_NETWORK_ERROR"];
+
+              case 7:
+                return _context.abrupt("return", submissionHash);
+
+              case 8:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function createInProgressSubmission(_x, _x2) {
+        return _createInProgressSubmission.apply(this, arguments);
+      }
+
+      return createInProgressSubmission;
+    }()
   }, {
-    key: "onButtonClick",
-    value: function onButtonClick() {
-      window.location.href = "/Security/Logout";
-    }
+    key: "fetchStartData",
+    value: function () {
+      var _fetchStartData = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee2(questionnaireID) {
+        var query, json, memberData, questionnaireData, siteData;
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                query = "\nquery {\n  readCurrentMember {\n    Email\n    FirstName\n    Surname\n    UserRole\n  }\n  readQuestionnaire(ID: ".concat(questionnaireID, ") {\n    ID\n    Name\n    KeyInformation\n  }\n  readSiteConfig {\n    Title\n  }\n}\n");
+                _context2.next = 3;
+                return _utils_GraphQLRequestHelper__WEBPACK_IMPORTED_MODULE_0__["default"].request({
+                  query: query
+                });
+
+              case 3:
+                json = _context2.sent;
+                memberData = lodash__WEBPACK_IMPORTED_MODULE_1___default.a.get(json, "data.readCurrentMember.0", null);
+                questionnaireData = lodash__WEBPACK_IMPORTED_MODULE_1___default.a.get(json, "data.readQuestionnaire", null);
+                siteData = lodash__WEBPACK_IMPORTED_MODULE_1___default.a.get(json, "data.readSiteConfig.0", null);
+
+                if (!(!memberData || !questionnaireData || !siteData)) {
+                  _context2.next = 9;
+                  break;
+                }
+
+                throw _constants_errors__WEBPACK_IMPORTED_MODULE_2__["DEFAULT_NETWORK_ERROR"];
+
+              case 9:
+                return _context2.abrupt("return", {
+                  title: lodash__WEBPACK_IMPORTED_MODULE_1___default.a.get(questionnaireData, "Name", ""),
+                  subtitle: lodash__WEBPACK_IMPORTED_MODULE_1___default.a.get(siteData, "Title", ""),
+                  questionnaireID: lodash__WEBPACK_IMPORTED_MODULE_1___default.a.get(questionnaireData, "ID", ""),
+                  keyInformation: lodash__WEBPACK_IMPORTED_MODULE_1___default.a.get(questionnaireData, "KeyInformation", ""),
+                  user: {
+                    name: "".concat(lodash__WEBPACK_IMPORTED_MODULE_1___default.a.get(memberData, "FirstName"), " ").concat(lodash__WEBPACK_IMPORTED_MODULE_1___default.a.get(memberData, "Surname")),
+                    role: lodash__WEBPACK_IMPORTED_MODULE_1___default.a.get(memberData, "UserRole"),
+                    email: lodash__WEBPACK_IMPORTED_MODULE_1___default.a.get(memberData, "Email")
+                  }
+                });
+
+              case 10:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function fetchStartData(_x3) {
+        return _fetchStartData.apply(this, arguments);
+      }
+
+      return fetchStartData;
+    }()
+  }, {
+    key: "fetchSubmissionData",
+    value: function () {
+      var _fetchSubmissionData = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee3(submissionHash) {
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                return _context3.abrupt("return", _fixtures_QuestionnaireSubmissionState__WEBPACK_IMPORTED_MODULE_3__["default"]);
+
+              case 1:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this);
+      }));
+
+      function fetchSubmissionData(_x4) {
+        return _fetchSubmissionData.apply(this, arguments);
+      }
+
+      return fetchSubmissionData;
+    }()
   }]);
 
-  return LogoutButton;
-}(react__WEBPACK_IMPORTED_MODULE_0__["Component"]);
+  return QuestionnaireDataService;
+}();
 
-LogoutButton.defaultProps = {
-  classes: []
-};
-/* harmony default export */ __webpack_exports__["default"] = (LogoutButton);
+
 
 /***/ })
 
