@@ -1,0 +1,25 @@
+@import "../../variables";
+
+.LogoutButton {
+    height: 40px;
+    border-radius: 5px;
+    border: solid 2px $blue;
+    background-color: $gray-200;
+    font-size: 14px;
+    color: $blue;
+    padding-left: 18px;
+    padding-right: 18px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    img {
+        margin-right: 6px;
+    }
+
+    &:hover {
+        color: $orange;
+        border: solid 2px $orange;
+    }
+}

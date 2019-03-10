@@ -1,11 +1,11 @@
 // @flow
 
 import React, {Component} from "react";
-import BackgroundImage from "../../../img/Home/background.jpg";
 import LogoImage from "../../../img/Logo.svg";
 import Pillar from "./Pillar";
 import TaskButton from "./TaskButton";
 import type {HomeState} from "../../store/HomeState";
+import LogoutButton from "../Button/LogoutButton";
 
 type Props = {
   homeState: HomeState
@@ -16,6 +16,7 @@ class Home extends Component<Props> {
   render() {
     return (
       <div className="Home">
+        <LogoutButton classes={["clearfix","float-right", "mt-5", "mr-5"]}/>
         <div className="layout">
           <img src={LogoImage} className="logo"/>
           <h1>
