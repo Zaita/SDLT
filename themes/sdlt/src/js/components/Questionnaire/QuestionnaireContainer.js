@@ -6,7 +6,7 @@ import type {RootState} from "../../store/RootState";
 import {Dispatch} from "redux";
 import {
   loadQuestionnaireSubmissionState,
-  moveToAnotherQuestion,
+  moveAfterQuestionAnswered, moveToPreviousQuestion,
   putDataInQuestionnaireAnswer,
 } from "../../actions/questionnarie";
 import type {QuestionnaireSubmissionState} from "../../store/QuestionnaireState";
@@ -30,8 +30,11 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
       // Put data into state
       dispatch(putDataInQuestionnaireAnswer(answeredQuestion));
       // Move cursor to target question
-      dispatch(moveToAnotherQuestion(answeredQuestion))
+      dispatch(moveAfterQuestionAnswered(answeredQuestion))
       // TODO: Send network request to save state in database
+    },
+    dispatchMoveToPreviousQuestionAction(targetQuestion: Question) {
+      dispatch(moveToPreviousQuestion(targetQuestion));
     }
   };
 };
@@ -44,6 +47,7 @@ type reduxProps = {
   submissionState: QuestionnaireSubmissionState,
   dispatchLoadSubmissionAction: (submissionHash: string) => void,
   dispatchSaveAnsweredQuestionAction: (answeredQuestion: Question) => void,
+  dispatchMoveToPreviousQuestionAction: (targetQuestion: Question) => void,
 };
 
 type Props = ownProps & reduxProps;
@@ -56,7 +60,7 @@ class QuestionnaireContainer extends Component<Props> {
   }
 
   render() {
-    const {dispatchSaveAnsweredQuestionAction} = {...this.props};
+    const {dispatchSaveAnsweredQuestionAction, dispatchMoveToPreviousQuestionAction} = {...this.props};
     const {title, subtitle, user, submission} = {...this.props.submissionState};
 
     if (!user) {
@@ -72,6 +76,9 @@ class QuestionnaireContainer extends Component<Props> {
           submission={submission}
           saveAnsweredQuestion={(answeredQuestion) => {
             dispatchSaveAnsweredQuestionAction(answeredQuestion);
+          }}
+          onLeftBarItemClick={(targetQuestion) => {
+            dispatchMoveToPreviousQuestionAction(targetQuestion);
           }}
         />
 
