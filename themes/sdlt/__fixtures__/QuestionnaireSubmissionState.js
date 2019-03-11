@@ -91,14 +91,14 @@ const fixture: QuestionnaireSubmissionState = {
       {
         id: "third_question",
         title: "Third Question",
-        heading: "Choose yes to finish, choose no to goto the fifth question",
+        heading: "Choose yes to continue, choose no to goto the fifth question",
         description: "",
         type: "action",
         actions: [
           {
             id: "3",
             label: "YES",
-            type: "finish",
+            type: "continue",
             isChose: false
           },
           {
@@ -116,12 +116,21 @@ const fixture: QuestionnaireSubmissionState = {
       {
         id: "forth_question",
         title: "Forth Question",
-        heading: "Choose review to finish with task",
+        heading: "Choose next to continue, choose review to finish",
         description: "",
         type: "action",
         actions: [
           {
             id: "5",
+            label: "Next",
+            type: "continue",
+            isChose: false,
+            task: {
+              id: "dummy_task"
+            }
+          },
+          {
+            id: "6",
             label: "Review",
             type: "finish",
             isChose: false,
