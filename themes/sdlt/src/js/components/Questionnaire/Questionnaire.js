@@ -3,8 +3,6 @@
 import React, {Component} from "react";
 import {FormikBag} from "formik";
 import {Redirect} from "react-router-dom";
-import type {FormAction} from "../../types/FormAction";
-import type {FormPage} from "../../types/FormPage";
 import type {User} from "../../types/User";
 import type {AnswerAction, Question, Submission} from "../../types/Questionnaire";
 import LeftBar from "./LeftBar";
@@ -14,7 +12,8 @@ import _ from "lodash";
 type Props = {
   user: User | null,
   submission: Submission | null,
-  saveAnsweredQuestion: (question: Question) => void
+  saveAnsweredQuestion: (question: Question) => void,
+  onLeftBarItemClick: (question: Question) => void
 };
 
 class Questionnaire extends Component<Props> {
@@ -46,6 +45,7 @@ class Questionnaire extends Component<Props> {
       }
     });
     answeredQuestion.hasAnswer = true;
+    answeredQuestion.isApplicable = true;
 
     saveAnsweredQuestion(answeredQuestion)
   }
@@ -74,12 +74,13 @@ class Questionnaire extends Component<Props> {
       return item;
     });
     answeredQuestion.hasAnswer = true;
+    answeredQuestion.isApplicable = true;
 
     saveAnsweredQuestion(answeredQuestion)
   }
 
   render() {
-    const {user, submission} = {...this.props};
+    const {user, submission, onLeftBarItemClick} = {...this.props};
 
     if (!user || !submission) {
       return null;
@@ -103,13 +104,11 @@ class Questionnaire extends Component<Props> {
     return (
       <div className="Questionnaire">
         <div className="major">
-          <LeftBar questions={submission.questions} onItemClick={(question) => {
-            console.log(`LeftBar::onItemClickL: ${question.title}`);
-          }}/>
+          <LeftBar questions={submission.questions} onItemClick={onLeftBarItemClick}/>
           {currentQuestion && <QuestionForm
             question={currentQuestion}
             handleFormSubmit={this.handleFormSubmit.bind(this)}
-           handleActionClick={this.handleActionClick.bind(this)}/>}
+            handleActionClick={this.handleActionClick.bind(this)}/>}
         </div>
       </div>
     );

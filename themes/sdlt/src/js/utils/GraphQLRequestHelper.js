@@ -4,17 +4,21 @@ import compress from "graphql-query-compress";
 import axios from "axios";
 import _ from "lodash";
 
+export type GraphQLRequestArgument = {
+  query: string,
+  variables?: Object,
+  csrfToken?: string
+};
+
 export default class GraphQLRequestHelper {
 
-  static async request(query: string, variables?: Object): Promise<Object> {
+  static async request(argument: GraphQLRequestArgument): Promise<Object> {
+    const {query, variables, csrfToken} = {...argument};
     const headers = {};
 
-    /* Uncomment following lines to add custom headers for auth and/or statics
-    const user = StorageService.readUser();
-    if (user && user.Token) {
-      headers["Authorization"] = "Bearer " + user.Token;
+    if (csrfToken) {
+      headers["X-CSRF-TOKEN"] = csrfToken;
     }
-    */
 
     const data = {
       query: compress(query),

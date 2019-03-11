@@ -5,6 +5,7 @@ import _ from "lodash";
 import {Field, Form, Formik, FormikBag} from "formik";
 import LightButton from "../Button/LightButton";
 import DarkButton from "../Button/DarkButton";
+import moment from "moment";
 
 type Props = {
   question: Question,
@@ -110,7 +111,13 @@ class QuestionForm extends Component<Props> {
             return;
           }
 
-          // TODO: Date validation
+          // Date validation
+          if (type === "date") {
+            const date = moment(value, "YYYY-MM-DD");
+            if (!date.isValid()) {
+              errors[id] = "- Invalid date";
+            }
+          }
         });
 
         return errors;
@@ -119,72 +126,84 @@ class QuestionForm extends Component<Props> {
         this.props.handleFormSubmit(formik, values);
       }}
     >
-      {({isSubmitting, errors}) => (
-        <Form>
-          <table>
-            <tbody>
-            {inputs.map((input) => {
-              const {id, type, required, label} = {...input};
-              const hasError = Boolean(_.get(errors, id, null));
-              const classes = [];
-              if (hasError) {
-                classes.push("error");
-              }
+      {({isSubmitting, errors, touched}) => {
+        const filteredErrors = [];
+        _.keys(errors)
+          .filter(key => {
+            return Boolean(touched[key]);
+          })
+          .forEach(key => {
+            filteredErrors[key] = errors[key];
+          });
 
-              if (["text", "email", "date"].includes(type)) {
-                return (
-                  <tr key={id}>
-                    <td className="label"><label>{label}</label></td>
-                    <td>
-                      <Field type={type} name={id} className={classes.join(" ")}/>
-                      {hasError && <i className="fas fa-exclamation-circle text-danger ml-1"/>}
-                    </td>
-                  </tr>
-                );
-              }
+        return (
+          <Form>
+            <table>
+              <tbody>
+              {inputs.map((input) => {
+                const {id, type, label} = {...input};
+                const hasError = Boolean(_.get(filteredErrors, id, null));
+                const classes = [];
+                if (hasError) {
+                  classes.push("error");
+                }
 
-              if (type === "textarea") {
-                return (
-                  <tr key={id}>
-                    <td><label>{label}</label></td>
-                    <td>
-                      <Field name={id}>
-                        {({field}) => {
-                          return <textarea {...field} className={classes.join(" ")}/>;
-                        }}
-                      </Field>
-                      {hasError && <i className="fas fa-exclamation-circle text-danger ml-1"/>}
-                    </td>
-                  </tr>
-                );
-              }
-              return null;
-            })}
-            <tr>
-              <td/>
-              <td>
-                <DarkButton title="Continue" disabled={isSubmitting} />
-              </td>
-            </tr>
-            <tr>
-              <td/>
-              <td className="text-danger">
-                {errors && _.keys(errors).length > 0 && (
-                  <div>
-                    Whoops!
-                    {_.keys(errors).map((key) => {
-                      return (
-                        <div className="text-error" key={key}>{errors[key]}</div>
-                      );
-                    })}
-                  </div>
-                )}
-              </td>
-            </tr>
-            </tbody>
-          </table>
-        </Form>
-      )}
+                if (["text", "email", "date"].includes(type)) {
+                  return (
+                    <tr key={id}>
+                      <td className="label"><label>{label}</label></td>
+                      <td>
+                        <Field type={type} name={id} className={classes.join(" ")}/>
+                        {hasError && <i className="fas fa-exclamation-circle text-danger ml-1"/>}
+                      </td>
+                    </tr>
+                  );
+                }
+
+                if (type === "textarea") {
+                  return (
+                    <tr key={id}>
+                      <td><label>{label}</label></td>
+                      <td>
+                        <Field name={id}>
+                          {({field}) => {
+                            return <textarea {...field} className={classes.join(" ")}/>;
+                          }}
+                        </Field>
+                        {hasError && <i className="fas fa-exclamation-circle text-danger ml-1"/>}
+                      </td>
+                    </tr>
+                  );
+                }
+                return null;
+              })}
+              <tr>
+                <td/>
+                <td>
+                  <DarkButton title="Continue" disabled={isSubmitting} />
+                </td>
+              </tr>
+              <tr>
+                <td/>
+                <td className="text-danger">
+                  {filteredErrors && _.keys(filteredErrors).length > 0 && (
+                    <div>
+                      Whoops!
+                      {_.keys(filteredErrors)
+                        .map((key) => {
+                          return (
+                            <div className="text-error" key={key}>{filteredErrors[key]}</div>
+                          );
+                        })}
+                    </div>
+                  )}
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </Form>
+        );
+      }}
     </Formik>;
   }
 }

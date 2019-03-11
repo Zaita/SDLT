@@ -2,6 +2,7 @@
 
 import React, {Component} from "react";
 import LogoImage from "../../../img/Logo.svg";
+import LogoutButton from "../Button/LogoutButton";
 
 type Props = {
   title: string,
@@ -17,6 +18,9 @@ class Header extends Component<Props> {
       <header className="Header">
         <div className="top-banner">
           <img src={LogoImage} className="logo"/>
+        </div>
+        <div className="logout-wrapper">
+          <LogoutButton/>
         </div>
         <h1>{title}</h1>
         <h2>{subtitle}</h2>
