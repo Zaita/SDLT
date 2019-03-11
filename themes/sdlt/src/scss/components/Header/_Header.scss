@@ -11,7 +11,18 @@ header.Header {
         flex-direction: row;
         justify-content: center;
         align-items: center;
+    }
+
+    .logout-wrapper {
+        max-width: 1136px;
+        margin-left: auto;
+        margin-right: auto;
         margin-bottom: 50px;
+
+        .LogoutButton {
+            float: right;
+            margin-top: -2px;
+        }
     }
 
     .logo {
