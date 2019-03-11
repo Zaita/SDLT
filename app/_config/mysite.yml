@@ -10,3 +10,6 @@ SilverStripe\Security\LoginAttempt:
 
 SilverStripe\CMS\Model\SiteTree:
   create_default_pages: false
+
+SilverStripe\Core\Injector\Injector:
+  Swift_Transport: Swift_SendmailTransport

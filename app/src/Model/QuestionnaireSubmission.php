@@ -23,6 +23,11 @@ use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use SilverStripe\Security\SecurityToken;
 use SilverStripe\ORM\HasManyList;
+use SilverStripe\Control\Email\Email;
+use Symbiote\QueuedJobs\Services\QueuedJobService;
+use NZTA\SDLT\Job\SendSubmitterLinkEmailJob;
+use Silverstripe\Control\Director;
+use SilverStripe\Core\Convert;
 use Exception;
 
 /**
@@ -46,10 +51,12 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SubmitterRole' => 'Varchar(255)',
         'SubmitterEmail'=> 'Varchar(255)',
         'QuestionnaireData' => 'Text',
+        'AnswerData' => 'Text',
         'QuestionnaireStatus' => 'Enum(array("In-progress", "Pending", "Approved", "Denied"))',
         'CiscoApproval' => 'Enum(array("Pending", "Approved", "Denied"))',
         'BussionOwnerApproval' => 'Enum(array("Pending", "Approved", "Denied"))',
         'UUID' => 'Varchar(255)',
+        'StartEmailSendStatus' => 'Boolean',
     ];
 
     /**
@@ -80,7 +87,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
               'QuestionnaireStatus',
               'CiscoApproval',
               'BussionOwnerApproval',
-              'QuestionnaireData'
+              'QuestionnaireData',
+              'AnswerData'
             ]);
 
         // Provide relations
@@ -91,6 +99,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ->end();
 
         $this->createQuestionnaireSubmission($scaffolder);
+        $this->updateQuestionnaireSubmission($scaffolder);
 
         return $scaffolder;
     }
@@ -142,11 +151,34 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 $model->UUID = uniqid();
 
                 $model->QuestionnaireData = $model->getQuestionsData($questionnaire);
+
                 $model->write();
 
                 return $model;
             })
             ->end();
+    }
+
+    /**
+     * Event handler called after writing to the database.
+     *
+     * @return void
+     */
+    public function onAfterWrite()
+    {
+        parent::onAfterWrite();
+
+        if (!$this->startEmailSendStatus) {
+            singleton(QueuedJobService::class)
+                ->queueJob(
+                    new SendSubmitterLinkEmailJob($this),
+                    date('Y-m-d H:i:s', time() + 90)
+                );
+
+            $this->startEmailSendStatus = 1;
+
+            $this->write();
+        }
     }
 
     /**
@@ -214,5 +246,60 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         }
 
         return $finalActionFields;
+    }
+
+    /**
+     * @return string $link link
+     */
+    public function getSubmitterLink()
+    {
+        $link = Convert::html2raw(Director::absoluteBaseURL(). '#/' . $this->UUID);
+        return $link;
+    }
+
+    /**
+     * @param SchemaScaffolder $scaffolder SchemaScaffolder
+     *
+     * @return void
+     */
+    public function updateQuestionnaireSubmission(SchemaScaffolder $scaffolder)
+    {
+        $scaffolder
+            ->mutation('updateQuestionnaireSubmission', QuestionnaireSubmission::class)
+            ->addArgs([
+                'ID' => 'ID!',
+                'QuestionID' => 'ID!',
+                'AnswerData' => 'String'
+            ])
+            ->setResolver(function ($object, array $args, $context, ResolveInfo $info) {
+                $member = Security::getCurrentUser();
+
+                // Check authentication
+                if (!$member) {
+                    throw new Exception('Please log in first...');
+                }
+
+                $questionnaireSubmission = QuestionnaireSubmission::get()
+                    ->byID($args['ID']);
+
+                $answerDataArr = [];
+
+                $jsonDecodeAnswerData = json_decode($args['AnswerData'], true);
+
+                if (!empty($questionnaireSubmission->AnswerData)) {
+                    $answerDataArr = json_decode($questionnaireSubmission->AnswerData, true);
+                }
+
+                $answerDataArr[$args['QuestionID']] = $args['AnswerData'];
+
+                $data = json_encode($answerDataArr);
+
+                $questionnaireSubmission->AnswerData = $data;
+
+                $questionnaireSubmission->write();
+
+                return $questionnaireSubmission;
+            })
+            ->end();
     }
 }
