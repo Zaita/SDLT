@@ -9,4 +9,5 @@ test:
   script:
     - cd "${CI_PROJECT_DIR}"
     - composer --no-interaction install --prefer-dist
+    - vendor/bin/sake dev/build flush=all
     - vendor/bin/phpunit
