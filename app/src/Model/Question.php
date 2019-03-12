@@ -97,7 +97,7 @@ class Question extends DataObject implements ScaffoldingProvider
         if ($this->AnswerFieldType === 'input') {
             $fields->removeByName('AnswerActionFields');
         }
-        if ($this->AnswerFieldType === 'cction') {
+        if ($this->AnswerFieldType === 'action') {
             $fields->removeByName('AnswerInputFields');
         }
 
