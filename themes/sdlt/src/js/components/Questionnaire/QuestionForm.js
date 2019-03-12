@@ -35,6 +35,10 @@ class QuestionForm extends Component<Props> {
 
   renderActions(question: Question) {
     const {handleActionClick} = {...this.props};
+    if (question.type !== 'action') {
+      return;
+    }
+
     const actions: Array<AnswerAction> = _.get(question, "actions", null);
     if (!actions) {
       return null;
@@ -74,6 +78,11 @@ class QuestionForm extends Component<Props> {
   }
 
   renderInputsForm(question: Question) {
+    const {handleFormSubmit} = {...this.props};
+    if (question.type !== "input") {
+      return;
+    }
+
     const inputs: Array<AnswerInput> = _.get(question, "inputs", null);
     if (!inputs) {
       return null;
@@ -123,7 +132,7 @@ class QuestionForm extends Component<Props> {
         return errors;
       }}
       onSubmit={(values, formik) => {
-        this.props.handleFormSubmit(formik, values);
+        handleFormSubmit(formik, values);
       }}
     >
       {({isSubmitting, errors, touched}) => {

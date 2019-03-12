@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6c69466951adbdd432db0e7a9929ea23",
+    "content-hash": "50bf693c19bd61187a30f2ad6a186db3",
     "packages": [
         {
             "name": "asyncphp/doorman",
@@ -3928,16 +3928,16 @@
         },
         {
             "name": "lekoala/silverstripe-debugbar",
-            "version": "2.0.1",
+            "version": "2.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/lekoala/silverstripe-debugbar.git",
-                "reference": "7058480c77b4265d832ff1a4b430ad606192129a"
+                "reference": "fbbd059357db6fe7bbcce875e576a307c702d9a9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lekoala/silverstripe-debugbar/zipball/7058480c77b4265d832ff1a4b430ad606192129a",
-                "reference": "7058480c77b4265d832ff1a4b430ad606192129a",
+                "url": "https://api.github.com/repos/lekoala/silverstripe-debugbar/zipball/fbbd059357db6fe7bbcce875e576a307c702d9a9",
+                "reference": "fbbd059357db6fe7bbcce875e576a307c702d9a9",
                 "shasum": ""
             },
             "require": {
@@ -3983,7 +3983,7 @@
                 "module",
                 "silverstripe"
             ],
-            "time": "2018-11-16T12:38:35+00:00"
+            "time": "2019-03-08T00:14:38+00:00"
         },
         {
             "name": "maximebf/debugbar",
@@ -6349,7 +6349,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.6.0"
+        "php": ">=7.2"
     },
     "platform-dev": []
 }
