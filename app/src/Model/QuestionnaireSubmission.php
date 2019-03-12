@@ -142,9 +142,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 $model->SubmitterRole = $member->UserRole;
                 $model->SubmitterEmail = $member->Email;
 
-                $model->QuestionnaireStatus = 'In-progress';
-                $model->CiscoApproval = 'Pending';
-                $model->BussionOwnerApproval = 'Pending';
+                $model->QuestionnaireStatus = 'in_progress';
+                $model->CiscoApproval = 'pending';
+                $model->BussionOwnerApproval = 'pending';
                 $model->QuestionnaireID = $questionnaire->ID;
                 $model->UserID = $member->ID;
 

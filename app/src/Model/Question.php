@@ -46,7 +46,7 @@ class Question extends DataObject implements ScaffoldingProvider
         'Title' => 'Varchar(255)',
         'Question' => 'Text',
         'Description' => 'Text',
-        'AnswerFieldType' => 'Enum(array("Input", "Action"))',
+        'AnswerFieldType' => 'Enum(array("input", "action"))',
     ];
 
     /**
@@ -94,10 +94,10 @@ class Question extends DataObject implements ScaffoldingProvider
 
         $fields->removeByName('QuestionnaireID');
 
-        if ($this->AnswerFieldType === 'Input') {
+        if ($this->AnswerFieldType === 'input') {
             $fields->removeByName('AnswerActionFields');
         }
-        if ($this->AnswerFieldType === 'Action') {
+        if ($this->AnswerFieldType === 'cction') {
             $fields->removeByName('AnswerInputFields');
         }
 
