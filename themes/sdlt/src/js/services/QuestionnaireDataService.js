@@ -4,7 +4,7 @@ import type {QuestionnaireStartState, QuestionnaireSubmissionState} from "../sto
 import GraphQLRequestHelper from "../utils/GraphQLRequestHelper";
 import _ from "lodash";
 import {DEFAULT_NETWORK_ERROR} from "../constants/errors";
-import type {AnswerAction, AnswerInput, Question, Task} from "../types/Questionnaire";
+import type {AnswerAction, AnswerInput, Question, SubmissionQuestionData, Task} from "../types/Questionnaire";
 import StringUtil from "../utils/StringUtil";
 
 export default class QuestionnaireDataService {
@@ -200,7 +200,71 @@ query {
       }
     };
 
-    console.log(data);
     return data;
+  }
+
+  static async updateSubmissionData(argument: {
+    submissionID: string,
+    questionID: string,
+    answerData: SubmissionQuestionData,
+    csrfToken: string
+  }): Promise<void> {
+    const {submissionID, questionID, answerData, csrfToken} = {...argument};
+    const answerDataStr = JSON.stringify(answerData).replace(/"/g,"\\\"");
+
+    const query = `
+mutation {
+  updateQuestionnaireSubmission(ID: "${submissionID}", QuestionID: "${questionID}", AnswerData: "${answerDataStr}") {
+    ID
+    AnswerData
+  }
+}`;
+
+    const json = await GraphQLRequestHelper.request({query, csrfToken});
+    const updatedData = _.get(json, "data.updateQuestionnaireSubmission.AnswerData", null);
+    if (!updatedData) {
+      throw DEFAULT_NETWORK_ERROR;
+    }
+    console.log(`updatedData: ${updatedData}`);
+  }
+
+  static async batchUpdateSubmissionData(argument: {
+    submissionID: string,
+    questionIDList: Array<string>,
+    answerDataList: Array<SubmissionQuestionData>,
+    csrfToken: string
+  }): Promise<void> {
+    const {submissionID, questionIDList, answerDataList, csrfToken} = {...argument};
+
+    if (questionIDList.length !== answerDataList.length) {
+      throw DEFAULT_NETWORK_ERROR;
+    }
+
+
+    let mutations = [];
+    for (let index = 0; index < questionIDList.length; index++) {
+      const questionID = questionIDList[index];
+      const answerData = answerDataList[index];
+      const answerDataStr = JSON.stringify(answerData).replace(/"/g,"\\\"");
+      const singleQuery = `
+updateQuestion${questionID}: updateQuestionnaireSubmission(ID: "${submissionID}", QuestionID: "${questionID}", AnswerData: "${answerDataStr}") {
+  ID
+  AnswerData
+}`;
+      mutations.push(singleQuery);
+    }
+
+    let query = `
+mutation {
+  ${mutations.join("\n")}
+}
+`;
+
+    const json = await GraphQLRequestHelper.request({query, csrfToken});
+    const updatedData = _.get(json, "data", null);
+    if (!updatedData) {
+      throw DEFAULT_NETWORK_ERROR;
+    }
+    console.log(`batchUpdatedData: ${updatedData}`);
   }
 }

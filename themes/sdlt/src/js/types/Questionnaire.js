@@ -1,5 +1,7 @@
 // @flow
 
+// Questionnaire Schema
+
 export type Task = {
   id: string
 };
@@ -42,4 +44,25 @@ export type Submission = {
   submissionID: string,
   questions: Array<Question>,
   status: string, //"in_progress" | "waiting_for_approval" | "approved" | "rejected" | "expired"
+};
+
+// Submission Data
+
+export type SubmissionInputData = {
+  id: string,
+  data: string | null
+}
+
+export type SubmissionActionData = {
+  id: string,
+  isChose: boolean
+};
+
+export type SubmissionQuestionData = {
+  isCurrent: boolean,
+  hasAnswer: boolean,
+  isApplicable: boolean,
+  answerType: "input" | "action",
+  inputs?: Array<SubmissionInputData>,
+  actions?: Array<SubmissionActionData>
 };
