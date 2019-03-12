@@ -17,6 +17,10 @@ use SilverStripe\Security\SecurityToken;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Security\Security;
+use SilverStripe\Control\Email\Email;
+use Symbiote\QueuedJobs\Services\QueuedJobService;
+use NZTA\SDLT\Job\SendSubmitterLinkEmail;
+use Silverstripe\Control\Director;
 
 /**
  * Class GraphQLTokenController
