@@ -52,9 +52,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SubmitterEmail'=> 'Varchar(255)',
         'QuestionnaireData' => 'Text',
         'AnswerData' => 'Text',
-        'QuestionnaireStatus' => 'Enum(array("In-progress", "Pending", "Approved", "Denied"))',
-        'CiscoApproval' => 'Enum(array("Pending", "Approved", "Denied"))',
-        'BussionOwnerApproval' => 'Enum(array("Pending", "Approved", "Denied"))',
+        'QuestionnaireStatus' => 'Enum(array("in_progress", "pending", "approved", "denied"))',
+        'CiscoApproval' => 'Enum(array("pending", "approved", "denied"))',
+        'BussionOwnerApproval' => 'Enum(array("pending", "approved", "denied"))',
         'UUID' => 'Varchar(255)',
         'StartEmailSendStatus' => 'Boolean',
     ];
