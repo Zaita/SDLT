@@ -13,11 +13,11 @@
 
 namespace NZTA\SDLT\Model;
 
+use Exception;
+use GraphQL\Type\Definition\ResolveInfo;
+use SilverStripe\GraphQL\Scaffolding\Interfaces\ResolverInterface;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
-use GraphQL\Type\Definition\ResolveInfo;
-use SilverStripe\GraphQL\MutationCreator;
-use SilverStripe\GraphQL\OperationResolver;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
@@ -28,7 +28,6 @@ use Symbiote\QueuedJobs\Services\QueuedJobService;
 use NZTA\SDLT\Job\SendSubmitterLinkEmailJob;
 use Silverstripe\Control\Director;
 use SilverStripe\Core\Convert;
-use Exception;
 
 /**
  * Class Questionnaire
@@ -74,28 +73,65 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     public function provideGraphQLScaffolding(SchemaScaffolder $scaffolder)
     {
         // Provide entity type
-        $sumissionScaffolder = $scaffolder
+        $submissionScaffolder = $scaffolder
             ->type(QuestionnaireSubmission::class)
             ->addFields([
-              'ID',
-              'UUID',
-              'QuestionnaireID',
-              'UserID',
-              'SubmitterName',
-              'SubmitterRole',
-              'SubmitterEmail',
-              'QuestionnaireStatus',
-              'CiscoApproval',
-              'BussionOwnerApproval',
-              'QuestionnaireData',
-              'AnswerData'
+                'ID',
+                'UUID',
+                'SubmitterName',
+                'SubmitterRole',
+                'SubmitterEmail',
+                'QuestionnaireStatus',
+                'CiscoApproval',
+                'BussionOwnerApproval',
+                'QuestionnaireData',
+                'AnswerData',
+                'Questionnaire',
+                'User',
             ]);
 
-        // Provide relations
-        $sumissionScaffolder
+        $submissionScaffolder
             ->operation(SchemaScaffolder::READ)
             ->setName('readQuestionnaireSubmission')
+            ->addArg('UUID', 'String!')
             ->setUsePagination(false)
+            ->setResolver(new class implements ResolverInterface {
+
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed $object
+                 * @param array $args
+                 * @param mixed $context
+                 * @param ResolveInfo $info
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    $member = Security::getCurrentUser();
+                    $uuid = htmlentities(trim($args['UUID']));
+
+                    // Check authentication
+                    if (!$member) {
+                        throw new Exception('Please log in first...');
+                    }
+
+                    // Check argument
+                    if (!$uuid) {
+                        throw new Exception('Wrong argument');
+                    }
+
+                    // Filter data
+                    // TODO: filter by status (only pending or in_progress)
+                    $data = QuestionnaireSubmission::get()->where([
+                        'UUID' => $uuid,
+                        'UserID' => $member->ID
+                    ]);
+
+                    return $data;
+                }
+            })
             ->end();
 
         $this->createQuestionnaireSubmission($scaffolder);
@@ -192,6 +228,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $finalData = [];
 
         foreach ($questions as $question) {
+            $data['ID'] = $question->ID;
             $data['Title'] = $question->Title;
             $data['Question'] = $question->Question;
             $data['Description'] = $question->Description;
@@ -214,11 +251,12 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $finalInputFields = [];
 
         foreach ($question->AnswerInputFields() as $answerInputField) {
-            $inputFields['ID'] = $answerInputField->Label;
+            $inputFields['ID'] = $answerInputField->ID;
             $inputFields['Label'] = $answerInputField->Label;
             $inputFields['InputType'] = $answerInputField->InputType;
             $inputFields['Required'] = $answerInputField->Required;
             $inputFields['MinLength'] = $answerInputField->MinLength;
+            $inputFields['PlaceHolder'] = $answerInputField->PlaceHolder;
             $finalInputFields[] = $inputFields;
         }
 
@@ -235,10 +273,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $finalActionFields = [];
 
         foreach ($question->AnswerActionFields() as $answerActionField) {
-            $actionFields['ID'] = $answerActionField->Label;
+            $actionFields['ID'] = $answerActionField->ID;
             $actionFields['Label'] = $answerActionField->Label;
             $actionFields['ActionType'] = $answerActionField->ActionType;
-            $actionFields['Message'] = $answerActionField->Required;
+            $actionFields['Message'] = $answerActionField->Message;
             $actionFields['GotoID'] = $answerActionField->GotoID;
             $actionFields['QuestionID'] = $answerActionField->QuestionID;
             $actionFields['TaskID'] = $answerActionField->TaskID;

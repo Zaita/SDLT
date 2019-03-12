@@ -3,7 +3,7 @@
     "type": "silverstripe-recipe",
     "description": "The SilverStripe Framework Installer",
     "require": {
-        "php": ">=5.6.0",
+        "php": ">=7.2",
         "silverstripe/recipe-plugin": "^1.2",
         "silverstripe/recipe-cms": "4.3.0@stable",
         "phptek/sentry": "^2.0.1",

@@ -7,7 +7,7 @@ export type Task = {
 export type AnswerInput = {
   id: string,
   label: string,
-  type: "text" | "email" | "textarea" | "date",
+  type: string, //"text" | "email" | "textarea" | "date",
   required: boolean,
   minLength: number,
   placeholder: string,
@@ -17,7 +17,7 @@ export type AnswerInput = {
 export type AnswerAction = {
   id: string,
   label: string,
-  type: "continue" | "goto" | "message" | "finish",
+  type: string, //"continue" | "goto" | "message" | "finish",
   isChose: boolean,
   message?: string,
   task?: Task,
@@ -41,5 +41,5 @@ export type Submission = {
   questionnaireID: string,
   submissionID: string,
   questions: Array<Question>,
-  status: "in_progress" | "waiting_for_approval" | "approved" | "rejected" | "expired"
+  status: string, //"in_progress" | "waiting_for_approval" | "approved" | "rejected" | "expired"
 };
