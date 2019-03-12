@@ -150,7 +150,7 @@ class QuestionForm extends Component<Props> {
             <table>
               <tbody>
               {inputs.map((input) => {
-                const {id, type, label} = {...input};
+                const {id, type, label, placeholder} = {...input};
                 const hasError = Boolean(_.get(filteredErrors, id, null));
                 const classes = [];
                 if (hasError) {
@@ -162,7 +162,7 @@ class QuestionForm extends Component<Props> {
                     <tr key={id}>
                       <td className="label"><label>{label}</label></td>
                       <td>
-                        <Field type={type} name={id} className={classes.join(" ")}/>
+                        <Field type={type} name={id} className={classes.join(" ")} placeholder={placeholder}/>
                         {hasError && <i className="fas fa-exclamation-circle text-danger ml-1"/>}
                       </td>
                     </tr>
@@ -176,7 +176,7 @@ class QuestionForm extends Component<Props> {
                       <td>
                         <Field name={id}>
                           {({field}) => {
-                            return <textarea {...field} className={classes.join(" ")}/>;
+                            return <textarea {...field} className={classes.join(" ")} placeholder={placeholder}/>;
                           }}
                         </Field>
                         {hasError && <i className="fas fa-exclamation-circle text-danger ml-1"/>}
