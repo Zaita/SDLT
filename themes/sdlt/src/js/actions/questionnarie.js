@@ -154,6 +154,7 @@ export function moveAfterQuestionAnswered(answeredQuestion: Question): ThunkActi
       // "continue" | "goto" | "message" | "finish"
       if (choseAction.type === "finish") {
         // TODO: if it is already the last question, move to review page
+        // TODO: [NEED CONFIRM] if the user trigger the "finish" action, should we mark all questions later to be non-applicable?
         alert("This action trigger finish early");
         return;
       }
@@ -229,6 +230,11 @@ export function moveToPreviousQuestion(targetQuestion: Question): ThunkAction {
       return;
     }
 
+    const currentIndex = submission.questions.findIndex((question) => question.isCurrent);
+    if (!currentIndex) {
+      throw new Error("Wrong state, please reload the questionnaire");
+    }
+
     // Don't move if the target question is not applicable or doesn't have answer
     if (!targetQuestion.isApplicable || !targetQuestion.hasAnswer) {
       return;
@@ -244,6 +250,25 @@ export function moveToPreviousQuestion(targetQuestion: Question): ThunkAction {
       targetIndex,
     });
 
-    // TODO: Network request
+    // Batch update states for all related questions to cloud ("current" cursor changes)
+    const newRootState: RootState = getState();
+    const newSubmission = newRootState.questionnaireState.submissionState.submission;
+    if (!newSubmission) {
+      return;
+    }
+
+    const csrfToken = await CSRFTokenService.getCSRFToken();
+    const indexesToUpdate = [currentIndex, targetIndex];
+    try {
+      await QuestionnaireDataService.batchUpdateSubmissionData({
+        submissionID: newSubmission.submissionID,
+        questionIDList: indexesToUpdate.map((index) => newSubmission.questions[index].id),
+        answerDataList: indexesToUpdate.map((index) => SubmissionDataUtil.transformFromFullQuestionToData(newSubmission.questions[index])),
+        csrfToken,
+      });
+    } catch (error) {
+      // TODO: error handling
+      alert(error.message);
+    }
   };
 }

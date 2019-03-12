@@ -70,8 +70,6 @@ query {
   }
 
   static async fetchSubmissionData(submissionHash: string): Promise<QuestionnaireSubmissionState> {
-    // TODO: need to fetch saved data at the same time
-
     const query = `
 query {
   readCurrentMember {
@@ -89,6 +87,7 @@ query {
       Name
     }
     QuestionnaireData
+    AnswerData
   }
   readSiteConfig {
     Title
@@ -108,6 +107,25 @@ query {
       throw DEFAULT_NETWORK_ERROR;
     }
 
+    // Construct answers object for data parse (need key to be string)
+    const answersJSON = _.get(submissionJSON, "AnswerData", "");
+    const answersRaw = answersJSON ? JSON.parse(answersJSON) : {};
+    const answers = {};
+    if (answersRaw) {
+      _.keys(answersRaw).forEach((key) => {
+        answers[StringUtil.toString(key)] = answersRaw[key];
+      });
+    }
+
+    // Find the current question
+    let currentQuestionID;
+    _.keys(answers).forEach((questionID) => {
+      const answer = answers[questionID];
+      if (!currentQuestionID && Boolean(_.get(answer, `isCurrent`, false))) {
+        currentQuestionID = questionID;
+      }
+    });
+
     let status = StringUtil.toString(_.get(submissionJSON, "QuestionnaireStatus", "")).toLowerCase().replace("-","_");
 
     const data: QuestionnaireSubmissionState = {
@@ -123,22 +141,39 @@ query {
         submissionID: StringUtil.toString(_.get(submissionJSON, "ID", "")),
         status: status,
         questions: schema.map((questionSchema, schemaIndex) => {
+          const questionID = StringUtil.toString(_.get(questionSchema, "ID", ""));
+          const hasAnswer = Boolean(_.get(answers, `${questionID}.hasAnswer`, false));
+          const isApplicable = Boolean(_.get(answers, `${questionID}.isApplicable`, true));
+
+          let isCurrent = false;
+          if (currentQuestionID) {
+            isCurrent = (currentQuestionID === questionID);
+          } else {
+            // The first question will be the current one by default
+            isCurrent = (schemaIndex === 0);
+          }
+
           let inputs = null;
           let actions = null;
+
+          const inputAnswers = hasAnswer ? _.get(answers, `${questionID}.inputs`, []) : [];
+          const actionAnswers = hasAnswer ? _.get(answers, `${questionID}.actions`, []) : [];
 
           const inputSchemas = _.get(questionSchema, "AnswerInputFields", []);
           const actionSchemas = _.get(questionSchema, "AnswerActionFields", []);
 
           if (inputSchemas && Array.isArray(inputSchemas) && inputSchemas.length > 0) {
             inputs = inputSchemas.map((inputSchema) => {
+              // Schema of input
               let type = StringUtil.toString(_.get(inputSchema, "InputType", "")).toLowerCase();
               const validTypes = ["text", "email", "textarea", "date"];
               if (!validTypes.includes(type)) {
                 type = "text";
               }
 
+              const inputID = StringUtil.toString(_.get(inputSchema, "ID", ""));
               const input: AnswerInput = {
-                id: StringUtil.toString(_.get(inputSchema, "ID", "")),
+                id: inputID,
                 label: StringUtil.toString(_.get(inputSchema, "Label", "")),
                 type: type,
                 required: Boolean(_.get(inputSchema, "Required", false)),
@@ -146,20 +181,34 @@ query {
                 placeholder: StringUtil.toString(_.get(inputSchema, "PlaceHolder", "")),
                 data: null
               };
+
+              // Data of input
+              if (inputAnswers && Array.isArray(inputAnswers) && inputAnswers.length > 0) {
+                const answer = _.head(inputAnswers.filter((answer) => answer.id === inputID));
+                if (answer) {
+                  const inputData = StringUtil.toString(_.get(answer, "data", null));
+                  if (inputData) {
+                    input.data = inputData;
+                  }
+                }
+              }
+
               return input;
             });
           }
 
           if (actionSchemas && Array.isArray(actionSchemas) && actionSchemas.length > 0) {
             actions = actionSchemas.map((actionSchema) => {
+              // Schema of action
               let type = StringUtil.toString(_.get(actionSchema, "ActionType", "")).toLowerCase();
               const validTypes = ["continue", "goto", "message", "finish"];
               if (!validTypes.includes(type)) {
                 type = "continue";
               }
 
+              const actionID = StringUtil.toString(_.get(actionSchema, "ID", ""));
               const action: AnswerAction = {
-                id: StringUtil.toString(_.get(actionSchema, "ID", "")),
+                id: actionID,
                 label: StringUtil.toString(_.get(actionSchema, "Label", "")),
                 type: type,
                 isChose: false,
@@ -173,19 +222,28 @@ query {
                 action.goto = StringUtil.toString(_.get(actionSchema, "GotoID", ""));
               }
 
+              // Data of action
+              if (actionAnswers && Array.isArray(actionAnswers) && actionAnswers.length > 0) {
+                const answer = _.head(actionAnswers.filter((answer) => answer.id === actionID));
+                if (answer) {
+                  const isChose = Boolean(_.get(answer, "isChose", false));
+                  action.isChose = isChose;
+                }
+              }
+
               return action;
             });
           }
 
           const question: Question = {
-            id: StringUtil.toString(_.get(questionSchema, "ID", "")),
+            id: questionID,
             title: StringUtil.toString(_.get(questionSchema, "Title", "")),
             heading: StringUtil.toString(_.get(questionSchema, "Question", "")),
             description: StringUtil.toString(_.get(questionSchema, "Description", "")),
             type: StringUtil.toString(_.get(questionSchema, "AnswerFieldType", "")).toLowerCase() === "input" ? "input" : "action",
-            isCurrent: schemaIndex === 0,
-            hasAnswer: false,
-            isApplicable: true
+            isCurrent: isCurrent,
+            hasAnswer: hasAnswer,
+            isApplicable: isApplicable
           };
 
           if (inputs) {
@@ -225,7 +283,6 @@ mutation {
     if (!updatedData) {
       throw DEFAULT_NETWORK_ERROR;
     }
-    console.log(`updatedData: ${updatedData}`);
   }
 
   static async batchUpdateSubmissionData(argument: {
@@ -265,6 +322,5 @@ mutation {
     if (!updatedData) {
       throw DEFAULT_NETWORK_ERROR;
     }
-    console.log(`batchUpdatedData: ${updatedData}`);
   }
 }
