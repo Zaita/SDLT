@@ -27,11 +27,7 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
       dispatch(loadQuestionnaireSubmissionState(submissionHash));
     },
     dispatchSaveAnsweredQuestionAction(answeredQuestion: Question) {
-      // Put data into state
       dispatch(putDataInQuestionnaireAnswer(answeredQuestion));
-      // Move cursor to target question
-      dispatch(moveAfterQuestionAnswered(answeredQuestion))
-      // TODO: Send network request to save state in database
     },
     dispatchMoveToPreviousQuestionAction(targetQuestion: Question) {
       dispatch(moveToPreviousQuestion(targetQuestion));
