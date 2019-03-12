@@ -70,7 +70,7 @@ class SendSubmitterLinkEmailJob extends AbstractQueuedJob implements QueuedJob
                 'Link'=> $this->questionnaireSubmission->getSubmitterLink(),
                 'QuestionnaireName' => $this->questionnaireSubmission->Questionnaire()->Name
             ])
-            ->setFrom('scott@zaita.com')
+            ->setFrom($from)
             ->setTo($to)
             ->setSubject($sub);
 
