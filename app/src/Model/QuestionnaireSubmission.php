@@ -328,7 +328,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $answerDataArr = json_decode($questionnaireSubmission->AnswerData, true);
                 }
 
-                $answerDataArr[$args['QuestionID']] = $args['AnswerData'];
+                $answerDataArr[$args['QuestionID']] = $jsonDecodeAnswerData;
 
                 $data = json_encode($answerDataArr);
 
