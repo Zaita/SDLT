@@ -5,9 +5,11 @@ import ActionType from "./ActionType";
 import type {LoadQuestionnaireStartAction, LoadQuestionnaireSubmissionAction} from "./ActionType";
 import {ThunkAction} from "redux-thunk";
 import QuestionnaireDataService from "../services/QuestionnaireDataService";
-import type {Question} from "../types/Questionnaire";
+import type {Question, SubmissionActionData, SubmissionInputData, SubmissionQuestionData} from "../types/Questionnaire";
 import type {RootState} from "../store/RootState";
 import CSRFTokenService from "../services/CSRFTokenService";
+import _ from "lodash";
+import SubmissionDataUtil from "../utils/SubmissionDataUtil";
 
 // Start
 
@@ -73,10 +75,42 @@ export function loadQuestionnaireSubmissionStateFinished(payload: QuestionnaireS
   }
 }
 
-export function putDataInQuestionnaireAnswer(payload: Question) {
-  return {
-    type: ActionType.QUESTIONNAIRE.PUT_DATA_IN_QUESTIONNAIRE_ANSWER,
-    payload
+// TODO: split big functions
+
+export function putDataInQuestionnaireAnswer(payload: Question): ThunkAction {
+  return async (dispatch, getState) => {
+
+    // Save local state
+    dispatch({
+      type: ActionType.QUESTIONNAIRE.PUT_DATA_IN_QUESTIONNAIRE_ANSWER,
+      payload
+    });
+
+    const rootState: RootState = getState();
+    const submissionID = _.get(rootState, "questionnaireState.submissionState.submission.submissionID", null);
+    if (!submissionID) {
+      throw new Error("Something is wrong, please reload the page");
+    }
+
+    const csrfToken = await CSRFTokenService.getCSRFToken();
+    const questionID = payload.id;
+    const answerData: SubmissionQuestionData = SubmissionDataUtil.transformFromFullQuestionToData(payload);
+
+    // Update state of current answered question in cloud
+    try {
+      await QuestionnaireDataService.updateSubmissionData({
+        submissionID,
+        questionID,
+        csrfToken,
+        answerData
+      });
+    } catch (error) {
+      // TODO: error handling
+      alert(error.message);
+    }
+
+    // Move cursor
+    dispatch(moveAfterQuestionAnswered(payload));
   };
 }
 
@@ -104,7 +138,7 @@ export function moveAfterQuestionAnswered(answeredQuestion: Question): ThunkActi
       targetIndex = currentIndex + 1;
     }
 
-    // TODO: If answered question is action type, move to the defined target
+    // If answered question is action type, move to the defined target
     if (answeredQuestion.type === "action") {
       if (!answeredQuestion.actions) {
         return;
@@ -164,7 +198,26 @@ export function moveAfterQuestionAnswered(answeredQuestion: Question): ThunkActi
       nonApplicableIndexes
     });
 
-    // TODO: Network request
+    // Batch update states for all related questions to cloud
+    const newRootState: RootState = getState();
+    const newSubmission = newRootState.questionnaireState.submissionState.submission;
+    if (!newSubmission) {
+      return;
+    }
+
+    const csrfToken = await CSRFTokenService.getCSRFToken();
+    const indexesToUpdate = [currentIndex,...nonApplicableIndexes, targetIndex];
+    try {
+      await QuestionnaireDataService.batchUpdateSubmissionData({
+        submissionID: newSubmission.submissionID,
+        questionIDList: indexesToUpdate.map((index) => newSubmission.questions[index].id),
+        answerDataList: indexesToUpdate.map((index) => SubmissionDataUtil.transformFromFullQuestionToData(newSubmission.questions[index])),
+        csrfToken,
+      });
+    } catch (error) {
+      // TODO: error handling
+      alert(error.message);
+    }
   };
 }
 
