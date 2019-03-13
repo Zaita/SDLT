@@ -2,6 +2,7 @@
 
 import React, {Component} from "react";
 import Icon from "../../../img/icons/user.svg";
+import URLUtil from "../../utils/URLUtil";
 
 type Props = {
   classes: Array<string>
@@ -29,7 +30,7 @@ class LogoutButton extends Component<Props> {
   }
 
   onButtonClick() {
-    window.location.href = "/Security/Logout";
+    URLUtil.redirectToLogout();
   }
 }
 
