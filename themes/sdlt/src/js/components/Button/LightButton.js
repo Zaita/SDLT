@@ -7,6 +7,7 @@ type Props = {
   disabled: boolean,
   classes: Array<string>,
   onClick: (event: Event) => void,
+  iconImage?: string
 };
 
 class LightButton extends Component<Props> {
@@ -19,19 +20,25 @@ class LightButton extends Component<Props> {
   };
 
   render() {
-    const {title, classes, disabled, onClick} = {...this.props};
+    const {title, classes, disabled, onClick, iconImage} = {...this.props};
+
+    let icon = null;
+    if (iconImage) {
+      icon = <img src={iconImage}/>;
+    }
 
     return (
       <button className={`LightButton ${classes.join(" ")}`}
-            onClick={(event) => {
-              if(disabled) {
-                event.preventDefault();
-                return;
-              }
-              onClick(event);
-            }}
+              onClick={(event) => {
+                if (disabled) {
+                  event.preventDefault();
+                  return;
+                }
+                onClick(event);
+              }}
       >
-        <div className="title">{title}</div>
+          {icon}
+          {title}
       </button>
     );
   }
