@@ -63,7 +63,7 @@ export function submissionState(state: QuestionnaireSubmissionState = defaultSub
       return state;
     }
 
-    const {targetIndex, nonApplicableIndexes} = {...action};
+    const {targetIndex} = {...action};
     const currentIndex = submission.questions.findIndex((question) => {
       return question.isCurrent;
     });
@@ -78,7 +78,21 @@ export function submissionState(state: QuestionnaireSubmissionState = defaultSub
     // Mark current question is not current anymore
     _.set(newState, `submission.questions.${currentIndex}.isCurrent`, false);
 
+    // Mark target question to be current
+    _.set(newState, `submission.questions.${targetIndex}.isCurrent`, true);
+
+    return newState;
+  }
+
+  if (action.type === ActionType.QUESTIONNAIRE.MARK_QUESTIONNAIRE_QUESTION_NOT_APPLICABLE) {
+    const submission = state.submission;
+    if (!submission) {
+      return state;
+    }
+    const newState = {...state};
+
     // Mark questions between target and current to be "not applicable"
+    const nonApplicableIndexes = action.nonApplicableIndexes;
     if (nonApplicableIndexes && nonApplicableIndexes.length > 0) {
       nonApplicableIndexes.forEach(index => {
         const nonApplicableQuestion = submission.questions[index];
@@ -86,9 +100,6 @@ export function submissionState(state: QuestionnaireSubmissionState = defaultSub
         _.set(newState, `submission.questions.${index}`, nonApplicableQuestion);
       });
     }
-
-    // Mark target question to be current
-    _.set(newState, `submission.questions.${targetIndex}.isCurrent`, true);
 
     return newState;
   }
