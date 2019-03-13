@@ -67,6 +67,36 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     ];
 
     /**
+     * @var array
+     */
+    private static $summary_fields = [
+        'getQuestionnaireName' => 'Questionnaire Name',
+        'SubmitterName',
+        'SubmitterRole',
+        'SubmitterEmail',
+        'QuestionnaireStatus',
+        'CiscoApproval',
+        'BussionOwnerApproval',
+        'UUID',
+        'StartEmailSendStatus',
+        'Created' => 'Created date'
+    ];
+
+    /**
+     * Default sort ordering
+     * @var array
+     */
+    private static $default_sort = ['ID' => 'DESC'];
+
+    /**
+    * @return string
+    */
+    public function getQuestionnaireName()
+    {
+        return $this->Questionnaire()->Name;
+    }
+
+    /**
      * @param SchemaScaffolder $scaffolder Scaffolder
      * @return SchemaScaffolder
      */
@@ -201,6 +231,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $model->BussionOwnerApproval = 'pending';
                     $model->QuestionnaireID = $questionnaire->ID;
                     $model->UserID = $member->ID;
+                    $model->StartEmailSendStatus = 0;
 
                     $model->UUID = uniqid();
 
@@ -223,14 +254,14 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     {
         // parent::onAfterWrite();
         //
-        // if (!$this->startEmailSendStatus) {
+        // if (!$this->StartEmailSendStatus) {
         //     singleton(QueuedJobService::class)
         //         ->queueJob(
         //             new SendSubmitterLinkEmailJob($this),
         //             date('Y-m-d H:i:s', time() + 90)
         //         );
         //
-        //     $this->startEmailSendStatus = 1;
+        //     $this->StartEmailSendStatus = 1;
         //
         //     $this->write();
         // }
@@ -574,7 +605,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * Allow logged-in user to access the model
      *
-     * @param Member|null $member
+     * @param Member|null $member member
      * @return bool
      */
     public function canView($member = null)
