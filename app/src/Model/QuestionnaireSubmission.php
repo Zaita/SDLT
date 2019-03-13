@@ -381,15 +381,27 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         throw new Exception('Sorry Questionnaire Submission does not belong to login user.');
                     }
 
+                    // Validate answer data
+                    do {
+                        // If there is no answer or not applicable, don't validate it
+                        // Scenario: only use this API to save "current" and "applicable" flag
+                        if((bool)($jsonDecodeAnswerData->hasAnswer) === false) {
+                            break;
+                        }
+                        if((bool)($jsonDecodeAnswerData->isApplicable) === false) {
+                            break;
+                        }
+
+                        if ($jsonDecodeAnswerData->answerType == "input") {
+                            QuestionnaireSubmission::validate_answer_input_data($jsonDecodeAnswerData->inputs);
+                        }
+
+                        if ($jsonDecodeAnswerData->answerType == "action") {
+                            QuestionnaireSubmission::validate_answer_action_data($jsonDecodeAnswerData->actions);
+                        }
+                    } while(false);
+
                     $answerDataArr = [];
-
-                    if ($jsonDecodeAnswerData->answerType == "input") {
-                        QuestionnaireSubmission::validate_answer_input_data($jsonDecodeAnswerData->inputs);
-                    }
-
-                    if ($jsonDecodeAnswerData->answerType == "action") {
-                        QuestionnaireSubmission::validate_answer_action_data($jsonDecodeAnswerData->actions);
-                    }
 
                     if (!empty($questionnaireSubmission->AnswerData)) {
                         $answerDataArr = json_decode($questionnaireSubmission->AnswerData, true);
