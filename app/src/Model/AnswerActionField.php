@@ -18,6 +18,8 @@ use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Core\Convert;
+use SilverStripe\Security\Member;
+use SilverStripe\Security\Security;
 
 /**
  * Class AnswerActionField
@@ -133,5 +135,16 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
             default:
                 return "Unknown";
         }
+    }
+
+    /**
+     * Allow logged-in user to access the model
+     *
+     * @param Member|null $member
+     * @return bool
+     */
+    public function canView($member = null)
+    {
+        return (Security::getCurrentUser() !== null);
     }
 }

@@ -558,4 +558,15 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             throw new Exception('Please enter a valid year like 2019.');
         }
     }
+
+    /**
+     * Allow logged-in user to access the model
+     *
+     * @param Member|null $member
+     * @return bool
+     */
+    public function canView($member = null)
+    {
+        return (Security::getCurrentUser() !== null);
+    }
 }

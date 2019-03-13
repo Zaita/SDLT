@@ -18,6 +18,8 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
+use SilverStripe\Security\Member;
+use SilverStripe\Security\Security;
 
 /**
  * Class Pillar
@@ -124,5 +126,16 @@ class Pillar extends DataObject implements ScaffoldingProvider
             ->end();
 
         return $scaffolder;
+    }
+
+    /**
+     * Allow logged-in user to access the model
+     *
+     * @param Member|null $member
+     * @return bool
+     */
+    public function canView($member = null)
+    {
+        return (Security::getCurrentUser() !== null);
     }
 }

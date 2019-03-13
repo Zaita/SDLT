@@ -14,6 +14,8 @@
 namespace NZTA\SDLT\Model;
 
 use SilverStripe\ORM\DataObject;
+use SilverStripe\Security\Member;
+use SilverStripe\Security\Security;
 
 /**
  * Class Task
@@ -40,4 +42,15 @@ class Task extends DataObject
     private static $has_one = [
         'Questionnaire' => Questionnaire::class,
     ];
+
+    /**
+     * Allow logged-in user to access the model
+     *
+     * @param Member|null $member
+     * @return bool
+     */
+    public function canView($member = null)
+    {
+        return (Security::getCurrentUser() !== null);
+    }
 }
