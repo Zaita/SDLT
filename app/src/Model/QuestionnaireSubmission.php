@@ -377,6 +377,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         throw new Exception('No data available for Questionnaire Submission. Please start again');
                     }
 
+                    if ($member->ID !== $questionnaireSubmission->UserID) {
+                        throw new Exception('Sorry Questionnaire Submission does not belong to login user.');
+                    }
+
                     $answerDataArr = [];
 
                     if ($jsonDecodeAnswerData->answerType == "input") {
@@ -407,8 +411,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
     /**
     * @param array $actionFields actionFields
-    *
-    * @return Exception|Void
+    * @throws Exception
+    * @return void
     */
     public static function validate_answer_action_data($actionFields)
     {
@@ -439,8 +443,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
     /**
      * @param array $inputfields inputfields
-     *
-     * @return Exception|Void
+     * @throws Exception
+     * @return void
      */
     public static function validate_answer_input_data($inputfields)
     {
@@ -473,8 +477,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @param string     $data              answer data
      * @param DataObject $inputfieldDetails inputfieldsDetails
-     *
-     * @return Exception|Void
+     * @throws Exception
+     * @return void
      */
     public static function validate_input_field($data, $inputfieldDetails)
     {
@@ -504,8 +508,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @param string     $email             email
      * @param DataObject $inputfieldDetails inputfieldsDetails
-     *
-     * @return Exception|Void
+     * @throws Exception
+     * @return void
      */
     public static function validate_email_field($email, $inputfieldDetails)
     {
@@ -522,8 +526,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @param string     $date              date
      * @param DataObject $inputfieldDetails inputfieldsDetails
-     *
-     * @return Exception|Void
+     * @throws Exception
+     * @return void
      */
     public static function validate_date_field($date, $inputfieldDetails)
     {
