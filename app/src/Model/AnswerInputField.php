@@ -16,6 +16,8 @@ namespace NZTA\SDLT\Model;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\Security\Member;
+use SilverStripe\Security\Security;
 
 /**
  * Class AnswerInputField
@@ -96,5 +98,16 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
             ]);
 
         return $scaffolder;
+    }
+
+    /**
+     * Allow logged-in user to access the model
+     *
+     * @param Member|null $member
+     * @return bool
+     */
+    public function canView($member = null)
+    {
+        return (Security::getCurrentUser() !== null);
     }
 }
