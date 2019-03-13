@@ -202,19 +202,19 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      */
     public function onAfterWrite()
     {
-        parent::onAfterWrite();
-
-        if (!$this->startEmailSendStatus) {
-            singleton(QueuedJobService::class)
-                ->queueJob(
-                    new SendSubmitterLinkEmailJob($this),
-                    date('Y-m-d H:i:s', time() + 90)
-                );
-
-            $this->startEmailSendStatus = 1;
-
-            $this->write();
-        }
+        // parent::onAfterWrite();
+        //
+        // if (!$this->startEmailSendStatus) {
+        //     singleton(QueuedJobService::class)
+        //         ->queueJob(
+        //             new SendSubmitterLinkEmailJob($this),
+        //             date('Y-m-d H:i:s', time() + 90)
+        //         );
+        //
+        //     $this->startEmailSendStatus = 1;
+        //
+        //     $this->write();
+        // }
     }
 
     /**
