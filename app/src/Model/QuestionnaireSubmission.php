@@ -377,7 +377,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         throw new Exception('No data available for Questionnaire Submission. Please start again');
                     }
 
-                    if ($member->ID !== $questionnaireSubmission->UserID) {
+                    if ((int)($member->ID) !== (int)($questionnaireSubmission->UserID)) {
                         throw new Exception('Sorry Questionnaire Submission does not belong to login user.');
                     }
 
