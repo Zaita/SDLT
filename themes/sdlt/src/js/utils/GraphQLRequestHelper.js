@@ -3,6 +3,7 @@
 import compress from "graphql-query-compress";
 import axios from "axios";
 import _ from "lodash";
+import URLUtil from "./URLUtil";
 
 export type GraphQLRequestArgument = {
   query: string,
@@ -40,7 +41,7 @@ export default class GraphQLRequestHelper {
     if (errorMessage) {
       // Check auth error
       if (errorMessage === "Please log in first...") {
-        window.location.href = "/Security/login?BackURL=%2F";
+        URLUtil.redirectToLogin();
       }
 
       throw new Error(errorMessage);

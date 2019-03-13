@@ -4,19 +4,17 @@
     border: solid 2px $blue;
     background-color: $white;
     padding: 10px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1.57;
+    color: $blue;
 
-    .title {
-        font-size: 14px;
-        font-weight: bold;
-        line-height: 1.57;
-        color: $blue;
+    img {
+        margin-right: 10px;
     }
 
     &:hover {
+        color: $orange;
         border: solid 2px $orange;
-
-        .title {
-            color: $orange;
-        }
     }
 }

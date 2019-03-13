@@ -5,6 +5,7 @@ import {Route, Switch} from "react-router-dom";
 import HomeContainer from "../Home/HomeContainer";
 import StartContainer from "../Questionnaire/StartContainer";
 import QuestionnaireContainer from "../Questionnaire/QuestionnaireContainer";
+import ReviewContainer from "../Questionnaire/ReviewContainer";
 
 class App extends Component<*> {
 
@@ -32,6 +33,15 @@ class App extends Component<*> {
                 return (
                   <div className="gray-bg">
                     <QuestionnaireContainer submissionHash={match.params.hash}/>
+                  </div>
+                );
+              }}
+            </Route>
+            <Route path='/questionnaire/review/:hash'>
+              {({match}) => {
+                return (
+                  <div className="gray-bg">
+                    <ReviewContainer submissionHash={match.params.hash}/>
                   </div>
                 );
               }}

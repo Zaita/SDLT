@@ -139,6 +139,7 @@ query {
       submission: {
         questionnaireID: StringUtil.toString(_.get(submissionJSON, "Questionnaire.ID", "")),
         submissionID: StringUtil.toString(_.get(submissionJSON, "ID", "")),
+        submissionUUID: StringUtil.toString(_.get(submissionJSON, "UUID", "")),
         status: status,
         questions: schema.map((questionSchema, schemaIndex) => {
           const questionID = StringUtil.toString(_.get(questionSchema, "ID", ""));

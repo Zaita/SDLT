@@ -5,11 +5,18 @@ import ActionType from "./ActionType";
 import type {LoadQuestionnaireStartAction, LoadQuestionnaireSubmissionAction} from "./ActionType";
 import {ThunkAction} from "redux-thunk";
 import QuestionnaireDataService from "../services/QuestionnaireDataService";
-import type {Question, SubmissionActionData, SubmissionInputData, SubmissionQuestionData} from "../types/Questionnaire";
+import type {
+  Question,
+  Submission,
+  SubmissionActionData,
+  SubmissionInputData,
+  SubmissionQuestionData,
+} from "../types/Questionnaire";
 import type {RootState} from "../store/RootState";
 import CSRFTokenService from "../services/CSRFTokenService";
 import _ from "lodash";
 import SubmissionDataUtil from "../utils/SubmissionDataUtil";
+import URLUtil from "../utils/URLUtil";
 
 // Start
 
@@ -43,10 +50,10 @@ export function createInProgressSubmission(questionnaireID: string): ThunkAction
       const csrfToken = await CSRFTokenService.getCSRFToken();
 
       // Send request to create submission record
-      const submissionHash = await QuestionnaireDataService.createInProgressSubmission({questionnaireID, csrfToken});
+      const uuid = await QuestionnaireDataService.createInProgressSubmission({questionnaireID, csrfToken});
 
       // Redirect to questionnaire page
-      window.location.href = `/#/questionnaire/submission/${submissionHash}`;
+      URLUtil.redirectToQuestionnaireEditing(uuid);
 
     } catch (error) {
       // TODO: maybe dispatch a global error action
@@ -127,9 +134,9 @@ export function moveAfterQuestionAnswered(answeredQuestion: Question): ThunkActi
 
     const currentIndex = submission.questions.findIndex((question) => question.id === answeredQuestion.id);
 
-    // TODO: if it is already the last question, move to review page
+    // If it is already the last question, move to review page
     if (currentIndex === submission.questions.length - 1) {
-      alert("This is the last question");
+      URLUtil.redirectToQuestionnaireReview(submission.submissionUUID);
       return;
     }
 
@@ -153,9 +160,20 @@ export function moveAfterQuestionAnswered(answeredQuestion: Question): ThunkActi
 
       // "continue" | "goto" | "message" | "finish"
       if (choseAction.type === "finish") {
-        // TODO: if it is already the last question, move to review page
-        // TODO: [NEED CONFIRM] if the user trigger the "finish" action, should we mark all questions later to be non-applicable?
-        alert("This action trigger finish early");
+        // Mark all questions later to be non-applicable
+        for (let i = currentIndex + 1; i < submission.questions.length; i++) {
+          nonApplicableIndexes.push(i);
+        }
+
+        dispatch({
+          type: ActionType.QUESTIONNAIRE.MARK_QUESTIONNAIRE_QUESTION_NOT_APPLICABLE,
+          nonApplicableIndexes
+        });
+
+        await batchUpdateSubmissionData(getState(), nonApplicableIndexes);
+
+        // Move to review page
+        URLUtil.redirectToQuestionnaireReview(submission.submissionUUID);
         return;
       }
       if (choseAction.type === "message") {
@@ -185,40 +203,27 @@ export function moveAfterQuestionAnswered(answeredQuestion: Question): ThunkActi
             cursor++;
           }
         }
+
+        if (nonApplicableIndexes.length > 0) {
+          dispatch({
+            type: ActionType.QUESTIONNAIRE.MARK_QUESTIONNAIRE_QUESTION_NOT_APPLICABLE,
+            nonApplicableIndexes
+          });
+        }
       }
     }
 
     if (!targetIndex) {
-      alert("Can't find a target question");
-      return;
+      throw new Error("Can't find a target question");
     }
 
     dispatch({
       type: ActionType.QUESTIONNAIRE.MOVE_TO_ANOTHER_QUESTIONNAIRE_QUESTION,
-      targetIndex,
-      nonApplicableIndexes
+      targetIndex
     });
 
     // Batch update states for all related questions to cloud
-    const newRootState: RootState = getState();
-    const newSubmission = newRootState.questionnaireState.submissionState.submission;
-    if (!newSubmission) {
-      return;
-    }
-
-    const csrfToken = await CSRFTokenService.getCSRFToken();
-    const indexesToUpdate = [currentIndex,...nonApplicableIndexes, targetIndex];
-    try {
-      await QuestionnaireDataService.batchUpdateSubmissionData({
-        submissionID: newSubmission.submissionID,
-        questionIDList: indexesToUpdate.map((index) => newSubmission.questions[index].id),
-        answerDataList: indexesToUpdate.map((index) => SubmissionDataUtil.transformFromFullQuestionToData(newSubmission.questions[index])),
-        csrfToken,
-      });
-    } catch (error) {
-      // TODO: error handling
-      alert(error.message);
-    }
+    await batchUpdateSubmissionData(getState(), [currentIndex, ...nonApplicableIndexes, targetIndex]);
   };
 }
 
@@ -251,24 +256,28 @@ export function moveToPreviousQuestion(targetQuestion: Question): ThunkAction {
     });
 
     // Batch update states for all related questions to cloud ("current" cursor changes)
-    const newRootState: RootState = getState();
-    const newSubmission = newRootState.questionnaireState.submissionState.submission;
-    if (!newSubmission) {
-      return;
-    }
-
-    const csrfToken = await CSRFTokenService.getCSRFToken();
-    const indexesToUpdate = [currentIndex, targetIndex];
-    try {
-      await QuestionnaireDataService.batchUpdateSubmissionData({
-        submissionID: newSubmission.submissionID,
-        questionIDList: indexesToUpdate.map((index) => newSubmission.questions[index].id),
-        answerDataList: indexesToUpdate.map((index) => SubmissionDataUtil.transformFromFullQuestionToData(newSubmission.questions[index])),
-        csrfToken,
-      });
-    } catch (error) {
-      // TODO: error handling
-      alert(error.message);
-    }
+    await batchUpdateSubmissionData(getState(), [currentIndex, targetIndex]);
   };
+}
+
+// Commons
+
+async function batchUpdateSubmissionData(rootState: RootState, indexesToUpdate: Array<number>) {
+  const submission = rootState.questionnaireState.submissionState.submission;
+  if (!submission) {
+    return;
+  }
+
+  const csrfToken = await CSRFTokenService.getCSRFToken();
+  try {
+    await QuestionnaireDataService.batchUpdateSubmissionData({
+      submissionID: submission.submissionID,
+      questionIDList: indexesToUpdate.map((index) => submission.questions[index].id),
+      answerDataList: indexesToUpdate.map((index) => SubmissionDataUtil.transformFromFullQuestionToData(submission.questions[index])),
+      csrfToken,
+    });
+  } catch (error) {
+    // TODO: error handling
+    alert(error.message);
+  }
 }

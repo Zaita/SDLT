@@ -42,6 +42,7 @@ export type Question = {
 export type Submission = {
   questionnaireID: string,
   submissionID: string,
+  submissionUUID: string,
   questions: Array<Question>,
   status: string, //"in_progress" | "waiting_for_approval" | "approved" | "rejected" | "expired"
 };
