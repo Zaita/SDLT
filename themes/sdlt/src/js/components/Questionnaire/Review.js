@@ -7,7 +7,7 @@ import _ from "lodash";
 import LightButton from "../Button/LightButton";
 import DarkButton from "../Button/DarkButton";
 import editIcon from "../../../img/icons/edit.svg";
-import pdfIcon from "../../../img/icons/edit.svg";
+import pdfIcon from "../../../img/icons/pdf.svg";
 import URLUtil from "../../utils/URLUtil";
 
 type Props = {
