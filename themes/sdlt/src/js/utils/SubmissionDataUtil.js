@@ -1,6 +1,7 @@
 // @flow
 
 import type {Question, SubmissionQuestionData} from "../types/Questionnaire";
+import _ from "lodash";
 
 export default class SubmissionDataUtil {
 
@@ -14,9 +15,14 @@ export default class SubmissionDataUtil {
 
     if (fullQuestion.type === "input" && Array.isArray(fullQuestion.inputs)) {
       answerData.inputs = fullQuestion.inputs.map((input) => {
+        let data = input.data;
+        if (data && _.isString(data)) {
+          data = data.trim().replace(/\n/g,"\\n");
+        }
+
         return {
           id: input.id,
-          data: input.data
+          data: data
         };
       });
     }

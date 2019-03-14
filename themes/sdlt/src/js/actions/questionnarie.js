@@ -236,7 +236,7 @@ export function moveToPreviousQuestion(targetQuestion: Question): ThunkAction {
     }
 
     const currentIndex = submission.questions.findIndex((question) => question.isCurrent);
-    if (!currentIndex) {
+    if (currentIndex < 0) {
       throw new Error("Wrong state, please reload the questionnaire");
     }
 
