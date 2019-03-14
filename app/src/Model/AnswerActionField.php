@@ -20,6 +20,7 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\Core\Convert;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
+use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 
 /**
  * Class AnswerActionField
@@ -49,7 +50,8 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
     private static $db = [
         'Label' => 'Varchar(255)',
         'ActionType' => 'Enum(array("continue", "goto", "message", "finish"))',
-        'Message' => 'HTMLText'
+        'Message' => 'HTMLText',
+        'SortOrder' => 'Int',
     ];
 
     /**
@@ -76,6 +78,11 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
     private static $field_labels = [
         'Label' => 'Action Label'
     ];
+
+    /**
+     * @var string
+     */
+    private static $default_sort = 'SortOrder';
 
     /**
      * @return FieldList

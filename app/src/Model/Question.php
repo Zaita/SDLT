@@ -20,6 +20,7 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\HasManyList;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
+use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 
 /**
  * Class Question
@@ -49,6 +50,7 @@ class Question extends DataObject implements ScaffoldingProvider
         'Question' => 'Text',
         'Description' => 'Text',
         'AnswerFieldType' => 'Enum(array("input", "action"))',
+        'SortOrder' => 'Int',
     ];
 
     /**
@@ -88,6 +90,11 @@ class Question extends DataObject implements ScaffoldingProvider
     ];
 
     /**
+     * @var string
+     */
+    private static $default_sort = 'SortOrder';
+
+    /**
      * @return FieldList
      */
     public function getCMSFields()
@@ -95,6 +102,18 @@ class Question extends DataObject implements ScaffoldingProvider
         $fields = parent::getCMSFields();
 
         $fields->removeByName('QuestionnaireID');
+
+        $inputGridconfig = $fields->dataFieldByName('AnswerInputFields')->getConfig();
+
+        $inputGridconfig->addComponent(
+            new GridFieldOrderableRows('SortOrder')
+        );
+
+        $actionGridconfig = $fields->dataFieldByName('AnswerActionFields')->getConfig();
+
+        $actionGridconfig->addComponent(
+            new GridFieldOrderableRows('SortOrder')
+        );
 
         if ($this->AnswerFieldType === 'input') {
             $fields->removeByName('AnswerActionFields');
@@ -139,7 +158,7 @@ class Question extends DataObject implements ScaffoldingProvider
     /**
      * Allow logged-in user to access the model
      *
-     * @param Member|null $member
+     * @param Member|null $member member
      * @return bool
      */
     public function canView($member = null)
