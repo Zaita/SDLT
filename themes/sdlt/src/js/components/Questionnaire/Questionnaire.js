@@ -19,11 +19,6 @@ type Props = {
 class Questionnaire extends Component<Props> {
 
   handleFormSubmit(formik: FormikBag, values: Object) {
-    // Clear values
-    formik.setValues({});
-    // TODO: use global loading indicator
-    formik.setSubmitting(false);
-
     const {submission, saveAnsweredQuestion} = {...this.props};
     if (!submission) {
       return;
@@ -106,6 +101,7 @@ class Questionnaire extends Component<Props> {
         <div className="major">
           <LeftBar questions={submission.questions} onItemClick={onLeftBarItemClick}/>
           {currentQuestion && <QuestionForm
+            key={currentQuestion.id}
             question={currentQuestion}
             handleFormSubmit={this.handleFormSubmit.bind(this)}
             handleActionClick={this.handleActionClick.bind(this)}/>}
