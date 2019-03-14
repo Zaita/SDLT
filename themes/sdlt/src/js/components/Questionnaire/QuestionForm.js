@@ -172,7 +172,7 @@ class QuestionForm extends Component<Props> {
                 if (type === "textarea") {
                   return (
                     <tr key={id}>
-                      <td><label>{label}</label></td>
+                      <td className="label"><label>{label}</label></td>
                       <td>
                         <Field name={id}>
                           {({field}) => {
