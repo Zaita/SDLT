@@ -86,6 +86,13 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
 
         $fields->removeByName('QuestionID');
 
+        // get questionnaire Id
+        $questionnaireID = $this->Question()->Questionnaire()->ID;
+
+        $questionList = Question::get()->filter('QuestionnaireID', $questionnaireID);
+
+        $fields->dataFieldByName('GotoID')->setSource($questionList);
+
         $mainTab = $fields->findOrMakeTab('Root.Main');
 
         /** @noinspection PhpUndefinedMethodInspection */
@@ -140,7 +147,7 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
     /**
      * Allow logged-in user to access the model
      *
-     * @param Member|null $member
+     * @param Member|null $member member
      * @return bool
      */
     public function canView($member = null)
