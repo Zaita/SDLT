@@ -62,7 +62,7 @@ class Pillar extends DataObject implements ScaffoldingProvider
         'Questionnaire' => Questionnaire::class,
     ];
 
-      /**
+    /**
      * @var array
      */
     private static $summary_fields = [
@@ -131,7 +131,7 @@ class Pillar extends DataObject implements ScaffoldingProvider
     /**
      * Allow logged-in user to access the model
      *
-     * @param Member|null $member
+     * @param Member|null $member member
      * @return bool
      */
     public function canView($member = null)
