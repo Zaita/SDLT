@@ -2,6 +2,7 @@
 
 import React, {Component} from "react";
 import type {Question} from "../../types/Questionnaire";
+import QuesiontEditingIcon from "../../../img/icons/question-editing.svg";
 
 type Props = {
   question: Question,
@@ -32,7 +33,7 @@ export default class LeftBarItem extends Component<Props> {
 
     if (isCurrent) {
       return (
-        <i className="fas fa-edit current"/>
+        <img src={QuesiontEditingIcon} />
       );
     }
 
