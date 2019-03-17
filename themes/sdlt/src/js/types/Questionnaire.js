@@ -2,6 +2,8 @@
 
 // Questionnaire Schema
 
+import type {User} from "./User";
+
 export type Task = {
   id: string
 };
@@ -41,8 +43,10 @@ export type Question = {
 
 export type Submission = {
   questionnaireID: string,
+  questionnaireTitle: string,
   submissionID: string,
   submissionUUID: string,
+  submitter: User,
   questions: Array<Question>,
   status: string, //"in_progress" | "waiting_for_approval" | "approved" | "rejected" | "expired"
 };

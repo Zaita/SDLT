@@ -9,8 +9,10 @@ import DarkButton from "../Button/DarkButton";
 import editIcon from "../../../img/icons/edit.svg";
 import pdfIcon from "../../../img/icons/pdf.svg";
 import URLUtil from "../../utils/URLUtil";
+import PDFUtil from "../../utils/PDFUtil";
 
 type Props = {
+  siteTitle: string,
   submission: Submission | null,
 };
 
@@ -116,7 +118,17 @@ class Review extends Component<Props> {
   }
 
   handlePDFDownloadButtonClick() {
-    alert("Coming soon...");
+    const {submission, siteTitle} = {...this.props};
+    if (!submission) {
+      return;
+    }
+
+    PDFUtil.generatePDF({
+      questions: submission.questions,
+      submitter: submission.submitter,
+      questionnaireTitle: submission.questionnaireTitle,
+      siteTitle
+    });
   }
 
   handleSubmitButtonClick() {

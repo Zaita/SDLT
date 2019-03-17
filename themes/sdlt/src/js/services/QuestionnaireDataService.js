@@ -81,6 +81,9 @@ query {
   readQuestionnaireSubmission(UUID: "${submissionHash}") {
     ID
     UUID
+    SubmitterName,
+    SubmitterRole,
+    SubmitterEmail,
     QuestionnaireStatus
     Questionnaire {
       ID
@@ -130,7 +133,7 @@ query {
 
     const data: QuestionnaireSubmissionState = {
       title: StringUtil.toString(_.get(submissionJSON, "Questionnaire.Name", "")),
-      subtitle: StringUtil.toString(_.get(json, "data.readSiteConfig.0.Title", "")),
+      siteTitle: StringUtil.toString(_.get(json, "data.readSiteConfig.0.Title", "")),
       user: {
         name: `${_.get(memberData, "FirstName")} ${_.get(memberData, "Surname")}`,
         role: _.get(memberData, "UserRole"),
@@ -138,8 +141,14 @@ query {
       },
       submission: {
         questionnaireID: StringUtil.toString(_.get(submissionJSON, "Questionnaire.ID", "")),
+        questionnaireTitle: StringUtil.toString(_.get(submissionJSON, "Questionnaire.Name", "")),
         submissionID: StringUtil.toString(_.get(submissionJSON, "ID", "")),
         submissionUUID: StringUtil.toString(_.get(submissionJSON, "UUID", "")),
+        submitter: {
+          name: StringUtil.toString(_.get(submissionJSON, "SubmitterName", "")),
+          role: StringUtil.toString(_.get(submissionJSON, "SubmitterRole", "")),
+          email: StringUtil.toString(_.get(submissionJSON, "SubmitterEmail", "")),
+        },
         status: status,
         questions: schema.map((questionSchema, schemaIndex) => {
           const questionID = StringUtil.toString(_.get(questionSchema, "ID", ""));

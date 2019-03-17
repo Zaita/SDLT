@@ -43,7 +43,7 @@ class ReviewContainer extends Component<Props> {
   }
 
   render() {
-    const {title, subtitle, user, submission} = {...this.props.submissionState};
+    const {title, siteTitle, user, submission} = {...this.props.submissionState};
 
     if (!user) {
       return null;
@@ -52,7 +52,7 @@ class ReviewContainer extends Component<Props> {
     return (
       <div className="ReviewContainer">
         <Header title={title} subtitle="Review Responses" />
-        <Review submission={submission}/>
+        <Review siteTitle={siteTitle} submission={submission}/>
         <Footer/>
       </div>
     );
