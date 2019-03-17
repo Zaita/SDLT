@@ -18,6 +18,7 @@ use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
+use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 
 /**
  * Class AnswerInputField
@@ -43,7 +44,13 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         'Required' => 'Boolean',
         'MinLength' => 'Int',
         'PlaceHolder' => 'Varchar(255)',
+        'SortOrder' => 'Int',
     ];
+
+    /**
+     * @var string
+     */
+    private static $default_sort = 'SortOrder';
 
     /**
      * @var array
@@ -103,7 +110,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
     /**
      * Allow logged-in user to access the model
      *
-     * @param Member|null $member
+     * @param Member|null $member member
      * @return bool
      */
     public function canView($member = null)
