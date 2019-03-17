@@ -4,7 +4,7 @@ import type {QuestionnaireSubmissionState} from "../src/js/store/QuestionnaireSt
 
 const fixture: QuestionnaireSubmissionState = {
   title: "Proof of Concept or Software Trial Request Form",
-  subtitle: "Security Development Lifecycle Tool",
+  siteTitle: "Security Development Lifecycle Tool",
   user: {
     name: "Thor Chen",
     role: "Developer",
@@ -12,7 +12,14 @@ const fixture: QuestionnaireSubmissionState = {
   },
   submission: {
     questionnaireID: "1",
+    questionnaireTitle: "Proof of Concept or Software Trial Request Form",
     submissionID: "1",
+    submissionUUID: "uuid",
+    submitter: {
+      name: "Thor Chen",
+      role: "Developer",
+      email: "thor.chen@catalyst.net.nz"
+    },
     questions: [
       {
         id: "first_question",

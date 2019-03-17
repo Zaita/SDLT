@@ -14,7 +14,7 @@ export type QuestionnaireStartState = {
 
 export type QuestionnaireSubmissionState = {
   title: string,
-  subtitle: string,
+  siteTitle: string,
   user: User | null,
   submission: Submission | null
 };
