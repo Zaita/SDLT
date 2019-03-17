@@ -152,7 +152,7 @@ class QuestionForm extends Component<Props> {
               {inputs.map((input) => {
                 const {id, type, label, placeholder} = {...input};
                 const hasError = Boolean(_.get(filteredErrors, id, null));
-                const classes = [];
+                const classes = ["form-control"];
                 if (hasError) {
                   classes.push("error");
                 }
