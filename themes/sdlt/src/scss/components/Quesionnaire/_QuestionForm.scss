@@ -3,9 +3,7 @@
 .QuestionForm {
     background-color: $white;
     width: 840px;
-    padding-top: 45px;
-    padding-bottom: 45px;
-    padding-left: 45px;
+    padding: 45px;
     font-size: 14px;
     color: $black;
 
@@ -31,7 +29,8 @@
         white-space: nowrap;
     }
 
-    input, textarea {
+    input.form-control, textarea {
+        @extend .rounded-0;
         border: solid 1px #959595;
         width: 355px;
     }

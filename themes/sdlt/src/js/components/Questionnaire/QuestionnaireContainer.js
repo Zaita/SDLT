@@ -57,7 +57,7 @@ class QuestionnaireContainer extends Component<Props> {
 
   render() {
     const {dispatchSaveAnsweredQuestionAction, dispatchMoveToPreviousQuestionAction} = {...this.props};
-    const {title, subtitle, user, submission} = {...this.props.submissionState};
+    const {title, siteTitle, user, submission} = {...this.props.submissionState};
 
     if (!user) {
       return null;
@@ -65,7 +65,7 @@ class QuestionnaireContainer extends Component<Props> {
 
     return (
       <div className="QuestionnaireContainer">
-        <Header title={title} subtitle={subtitle} />
+        <Header title={title} subtitle={siteTitle} />
 
         <Questionnaire
           user={user}

@@ -97,7 +97,7 @@ class Questionnaire extends Component<Props> {
     });
 
     return (
-      <div className="Questionnaire">
+      <div className="Questionnaire mx-1">
         <div className="major">
           <LeftBar questions={submission.questions} onItemClick={onLeftBarItemClick}/>
           {currentQuestion && <QuestionForm
