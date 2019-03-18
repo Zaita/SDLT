@@ -1,12 +1,14 @@
 // @flow
 
 import React, {Component} from "react";
+import BaseButton from "./BaseButton";
 
 type Props = {
   title: string,
   disabled: boolean,
   classes: Array<string>,
-  onClick: (event: Event) => void
+  onClick: (event: Event) => void,
+  iconImage?: string
 };
 
 class DarkButton extends Component<Props> {
@@ -19,21 +21,7 @@ class DarkButton extends Component<Props> {
   };
 
   render() {
-    const {title, classes, disabled, onClick} = {...this.props};
-
-    return (
-      <button className={`DarkButton ${classes.join(" ")}`}
-            onClick={(event) => {
-              if(disabled) {
-                event.preventDefault();
-                return;
-              }
-              onClick(event);
-            }}
-      >
-        <div className="title">{title}</div>
-      </button>
-    );
+    return <BaseButton {...this.props} classes={["DarkButton", ...this.props.classes]} />;
   }
 }
 

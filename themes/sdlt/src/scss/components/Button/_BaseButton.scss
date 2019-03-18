@@ -1,0 +1,24 @@
+@import "../../variables";
+
+.BaseButton {
+    padding: 10px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1.57;
+
+    img {
+        margin-right: 10px;
+    }
+}
+
+.BaseButton.disabled {
+    background-color: $gray-600;
+    color: $gray-200;
+    border: none;
+
+    &:hover {
+        background-color: $gray-600;
+        color: $gray-200;
+        border: none;
+    }
+}

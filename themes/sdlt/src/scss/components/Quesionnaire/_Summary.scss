@@ -1,0 +1,20 @@
+.SummaryContainer {
+
+    .Summary {
+        max-width: 1136px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 80px;
+
+        .buttons {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: stretch;
+
+            .BaseButton {
+                margin-right: 16px;
+            }
+        }
+    }
+}

@@ -10,6 +10,10 @@ export default class URLUtil {
     window.location.href = `/#/questionnaire/review/${uuid}`;
   }
 
+  static redirectToQuestionnaireSummary(uuid: string) {
+    window.location.href = `/#/questionnaire/summary/${uuid}`;
+  }
+
   static redirectToLogout() {
     window.location.href = "/Security/Logout";
   }

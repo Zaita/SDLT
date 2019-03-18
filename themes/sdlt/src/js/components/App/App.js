@@ -6,6 +6,7 @@ import HomeContainer from "../Home/HomeContainer";
 import StartContainer from "../Questionnaire/StartContainer";
 import QuestionnaireContainer from "../Questionnaire/QuestionnaireContainer";
 import ReviewContainer from "../Questionnaire/ReviewContainer";
+import SummaryContainer from "../Questionnaire/SummaryContainer";
 
 class App extends Component<*> {
 
@@ -42,6 +43,15 @@ class App extends Component<*> {
                 return (
                   <div className="gray-bg">
                     <ReviewContainer submissionHash={match.params.hash}/>
+                  </div>
+                );
+              }}
+            </Route>
+            <Route path='/questionnaire/summary/:hash'>
+              {({match}) => {
+                return (
+                  <div className="gray-bg">
+                    <SummaryContainer submissionHash={match.params.hash}/>
                   </div>
                 );
               }}
