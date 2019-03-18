@@ -76,11 +76,14 @@ class Dashboard extends DataObject implements ScaffoldingProvider
     {
         $fields = parent::getCMSFields();
 
-        $config = $fields->dataFieldByName('Pillars')->getConfig();
+        $pillars = $fields->dataFieldByName('Pillars');
+        if ($pillars) {
+            $config = $pillars->getConfig();
 
-        $config->addComponent(
-            new GridFieldOrderableRows('SortOrder')
-        );
+            $config->addComponent(
+                new GridFieldOrderableRows('SortOrder')
+            );
+        }
 
         return $fields;
     }
@@ -118,7 +121,7 @@ class Dashboard extends DataObject implements ScaffoldingProvider
     /**
      * Allow logged-in user to access the model
      *
-     * @param Member|null $member
+     * @param Member|null $member passed in by framework
      * @return bool
      */
     public function canView($member = null)
