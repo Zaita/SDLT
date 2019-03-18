@@ -68,11 +68,15 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
 
         $fields->removeByName('PillarID');
 
-        $config = $fields->dataFieldByName('Questions')->getConfig();
+        $questions = $fields->dataFieldByName('Questions');
 
-        $config->addComponent(
-            new GridFieldOrderableRows('SortOrder')
-        );
+        if ($questions) {
+            $config = $questions->getConfig();
+
+            $config->addComponent(
+                new GridFieldOrderableRows('SortOrder')
+            );
+        }
 
         return $fields;
     }

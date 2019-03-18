@@ -103,17 +103,25 @@ class Question extends DataObject implements ScaffoldingProvider
 
         $fields->removeByName('QuestionnaireID');
 
-        $inputGridconfig = $fields->dataFieldByName('AnswerInputFields')->getConfig();
+        $answerInputFields = $fields->dataFieldByName('AnswerInputFields');
 
-        $inputGridconfig->addComponent(
-            new GridFieldOrderableRows('SortOrder')
-        );
+        if ($answerInputFields) {
+            $inputGridconfig = $answerInputFields->getConfig();
 
-        $actionGridconfig = $fields->dataFieldByName('AnswerActionFields')->getConfig();
+            $inputGridconfig->addComponent(
+                new GridFieldOrderableRows('SortOrder')
+            );
+        }
 
-        $actionGridconfig->addComponent(
-            new GridFieldOrderableRows('SortOrder')
-        );
+        $answerActionFields = $fields->dataFieldByName('AnswerActionFields');
+
+        if ($answerActionFields) {
+            $actionGridconfig = $answerActionFields->getConfig();
+
+            $actionGridconfig->addComponent(
+                new GridFieldOrderableRows('SortOrder')
+            );
+        }
 
         if ($this->AnswerFieldType === 'input') {
             $fields->removeByName('AnswerActionFields');
