@@ -191,7 +191,12 @@ export default class PDFUtil {
       margin: [0, 0, 0, defaultFontSize]
     });
 
-    pdfMake.createPdf({info, content, styles, defaultStyle}).open();
+    try {
+      await pdfMake.createPdf({info, content, styles, defaultStyle}).download(info.title);
+    } catch {
+      alert("Can't download PDF, please disable AdBlock!");
+    }
+
   }
 
   static async blobToDataURL(blob: Blob): Promise<string> {
