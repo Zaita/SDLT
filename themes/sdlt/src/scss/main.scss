@@ -24,6 +24,9 @@ body {
         @import "components/Quesionnaire/Start";
         @import "components/Quesionnaire/Questionnaire";
         @import "components/Quesionnaire/Review";
+        @import "components/Quesionnaire/Summary";
+        @import "components/Quesionnaire/AnswerPreview";
+        @import "components/Button/BaseButton";
         @import "components/Button/LightButton";
         @import "components/Button/DarkButton";
         @import "components/Button/LogoutButton";
