@@ -6,6 +6,8 @@ import {Field, Form, Formik, FormikBag} from "formik";
 import LightButton from "../Button/LightButton";
 import DarkButton from "../Button/DarkButton";
 import moment from "moment";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 type Props = {
   question: Question,
@@ -35,7 +37,7 @@ class QuestionForm extends Component<Props> {
 
   renderActions(question: Question) {
     const {handleActionClick} = {...this.props};
-    if (question.type !== 'action') {
+    if (question.type !== "action") {
       return;
     }
 
@@ -135,7 +137,7 @@ class QuestionForm extends Component<Props> {
         handleFormSubmit(formik, values);
       }}
     >
-      {({isSubmitting, errors, touched}) => {
+      {({isSubmitting, errors, touched, setFieldValue}) => {
         const filteredErrors = [];
         _.keys(errors)
           .filter(key => {
@@ -152,17 +154,53 @@ class QuestionForm extends Component<Props> {
               {inputs.map((input) => {
                 const {id, type, label, placeholder} = {...input};
                 const hasError = Boolean(_.get(filteredErrors, id, null));
-                const classes = ["form-control"];
+                const classes = [];
                 if (hasError) {
                   classes.push("error");
                 }
 
-                if (["text", "email", "date"].includes(type)) {
+                if (["text", "email"].includes(type)) {
                   return (
                     <tr key={id}>
                       <td className="label"><label>{label}</label></td>
                       <td>
                         <Field type={type} name={id} className={classes.join(" ")} placeholder={placeholder}/>
+                        {hasError && <i className="fas fa-exclamation-circle text-danger ml-1"/>}
+                      </td>
+                    </tr>
+                  );
+                }
+
+                if (type === "date") {
+                  return (
+                    <tr key={id}>
+                      <td className="label"><label>{label}</label></td>
+                      <td>
+                        <Field name={id} render={({field}) => {
+                          let date = null;
+                          const dateValue = field.value || null;
+                          if (dateValue && dateValue.trim().length > 0) {
+                            date = moment(dateValue).toDate();
+                          }
+
+                          return (
+                            <DatePicker
+                                        dateFormat="yyyy-MM-dd"
+                                        className={classes.join(" ")}
+                                        selected={date}
+                                        onChange={(value) => {
+                                          if (!value) {
+                                            setFieldValue(id, null);
+                                            return;
+                                          }
+                                          const date = moment(value).format("YYYY-MM-DD");
+                                          setFieldValue(id, date);
+                                        }}
+                                        placeholderText={placeholder}
+                                        dropdownMode="scroll"
+                                        withPortal/>
+                          );
+                        }}/>
                         {hasError && <i className="fas fa-exclamation-circle text-danger ml-1"/>}
                       </td>
                     </tr>
@@ -189,7 +227,7 @@ class QuestionForm extends Component<Props> {
               <tr>
                 <td/>
                 <td>
-                  <DarkButton title="Continue" disabled={isSubmitting} />
+                  <DarkButton title="Continue" disabled={isSubmitting}/>
                 </td>
               </tr>
               <tr>
