@@ -10,7 +10,6 @@ import pdfIcon from "../../../img/icons/pdf.svg";
 import URLUtil from "../../utils/URLUtil";
 import PDFUtil from "../../utils/PDFUtil";
 import AnswersPreview from "./AnswersPreview";
-import moment from "moment";
 
 type Props = {
   siteTitle: string,

@@ -3,6 +3,7 @@
 import React, {Component} from "react";
 import type {AnswerAction, Question, Submission} from "../../types/Questionnaire";
 import _ from "lodash";
+import moment from "moment";
 
 type Props = {
   submission: Submission | null,
@@ -61,11 +62,15 @@ class AnswersPreview extends Component<Props> {
       return (
         <div>
           {question.inputs.map((input => {
+            let data = input.data;
+            if (input.type === "date") {
+              data = moment(data).format("DD-MM-YYYY");
+            }
             return (
               <div key={input.id}>
                 <b>{input.label}</b>&nbsp;
                 <span>-</span>&nbsp;
-                <span>{input.data}</span>
+                <span>{data}</span>
               </div>
             );
           }))}
