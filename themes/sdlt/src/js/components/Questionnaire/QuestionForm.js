@@ -185,7 +185,7 @@ class QuestionForm extends Component<Props> {
 
                           return (
                             <DatePicker
-                                        dateFormat="yyyy-MM-dd"
+                                        dateFormat="dd-MM-yyyy"
                                         className={classes.join(" ")}
                                         selected={date}
                                         onChange={(value) => {
