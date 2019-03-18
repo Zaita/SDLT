@@ -10,6 +10,7 @@ import editIcon from "../../../img/icons/edit.svg";
 import pdfIcon from "../../../img/icons/pdf.svg";
 import URLUtil from "../../utils/URLUtil";
 import PDFUtil from "../../utils/PDFUtil";
+import moment from "moment";
 
 type Props = {
   siteTitle: string,
@@ -85,11 +86,16 @@ class Review extends Component<Props> {
       return (
         <div>
           {question.inputs.map((input => {
+            let data = input.data;
+            if (input.type === "date") {
+              data = moment(data).format("DD-MM-YYYY");
+            }
+
             return (
               <div key={input.id}>
                 <b>{input.label}</b>&nbsp;
                 <span>-</span>&nbsp;
-                <span>{input.data}</span>
+                <span>{data}</span>
               </div>
             );
           }))}
