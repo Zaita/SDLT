@@ -29,7 +29,7 @@
         white-space: nowrap;
     }
 
-    input.form-control, textarea {
+    input, textarea {
         @extend .rounded-0;
         border: solid 1px #959595;
         width: 355px;
@@ -51,7 +51,7 @@
         font-size: 16px;
     }
 
-    button {
+    .DarkButton, .LightButton {
         min-width: 84px;
     }
 }
