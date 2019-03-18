@@ -9,6 +9,7 @@ import _ from "lodash";
 import headingImage from "../../img/PDF/heading.jpg";
 import footerImage from "../../img/PDF/footer.jpg";
 import type {User} from "../types/User";
+import moment from "moment";
 
 type GeneratePDFArgument = {
   questions: Array<Question>,
@@ -158,9 +159,13 @@ export default class PDFUtil {
       if (question.type === "input" && question.inputs && Array.isArray(question.inputs)) {
         question.inputs.forEach((input, index, arr) => {
           const isLast = (index === arr.length - 1);
+          let data = input.data;
+          if (input.type === "date") {
+            data = moment(data).format("DD-MM-YYYY");
+          }
 
           content.push({
-            text: `${input.label} - ${StringUtil.toString(input.data)}`,
+            text: `${input.label}: ${StringUtil.toString(data)}`,
             margin: [0, 0, 0, isLast ? defaultFontSize : parseInt(`${defaultFontSize / 3}`)],
           });
         });
