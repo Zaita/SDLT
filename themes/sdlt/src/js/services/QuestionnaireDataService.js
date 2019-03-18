@@ -278,7 +278,7 @@ query {
     csrfToken: string
   }): Promise<void> {
     const {submissionID, questionID, answerData, csrfToken} = {...argument};
-    const answerDataStr = JSON.stringify(answerData).replace(/"/g,"\\\"");
+    const answerDataStr = window.btoa(JSON.stringify(answerData));
 
     const query = `
 mutation {
@@ -312,7 +312,7 @@ mutation {
     for (let index = 0; index < questionIDList.length; index++) {
       const questionID = questionIDList[index];
       const answerData = answerDataList[index];
-      const answerDataStr = JSON.stringify(answerData).replace(/"/g,"\\\"");
+      const answerDataStr = window.btoa(JSON.stringify(answerData));
       const singleQuery = `
 updateQuestion${questionID}: updateQuestionnaireSubmission(ID: "${submissionID}", QuestionID: "${questionID}", AnswerData: "${answerDataStr}") {
   ID

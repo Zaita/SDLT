@@ -17,7 +17,7 @@ export default class SubmissionDataUtil {
       answerData.inputs = fullQuestion.inputs.map((input) => {
         let data = input.data;
         if (data && _.isString(data)) {
-          data = data.trim().replace(/\n/g,"\\n");
+          data = data.trim();
         }
 
         return {
