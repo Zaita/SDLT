@@ -159,9 +159,14 @@ export default class PDFUtil {
       if (question.type === "input" && question.inputs && Array.isArray(question.inputs)) {
         question.inputs.forEach((input, index, arr) => {
           const isLast = (index === arr.length - 1);
-          let data = input.data;
+          let data: string = input.data || "";
+          // Format data
           if (input.type === "date") {
             data = moment(data).format("DD-MM-YYYY");
+          }
+          // Format textarea
+          if (input.type === "textarea") {
+            data = "\n" + data;
           }
 
           content.push({

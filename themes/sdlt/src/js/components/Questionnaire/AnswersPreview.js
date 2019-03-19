@@ -62,9 +62,14 @@ class AnswersPreview extends Component<Props> {
       return (
         <div>
           {question.inputs.map((input => {
-            let data = input.data;
+            let data: string = input.data || "";
+            // Format data
             if (input.type === "date") {
               data = moment(data).format("DD-MM-YYYY");
+            }
+            // Format textarea
+            if (input.type === "textarea") {
+              data = "\n" + data;
             }
             return (
               <div key={input.id}>
