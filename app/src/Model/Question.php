@@ -68,7 +68,8 @@ class Question extends DataObject implements ScaffoldingProvider
      * @var array
      */
     private static $has_one = [
-        'Questionnaire' => Questionnaire::class
+        'Questionnaire' => Questionnaire::class,
+        'Task' => Task::class
     ];
 
     /**
