@@ -41,7 +41,11 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
      */
     private static $db = [
         'Name' => 'Varchar(255)',
-        'KeyInformation' => 'HTMLText'
+        'KeyInformation' => 'HTMLText',
+        'IsCisoApprovalRequired' => 'Boolean',
+        'IsSecurityArchitectApprovalRequired' => 'Boolean',
+        'IsBusinessOwnerApprovalRequired' => 'Boolean',
+        'SendApprovedNotificatonToSecurityArchitect' => 'Boolean',
     ];
 
     /**
@@ -55,7 +59,8 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
      * @var array
      */
     private static $has_many = [
-        'Questions' => Question::class
+        'Questions' => Question::class,
+        'SubmissionNotificationEmails' => SubmissionNotificationEmail::class
     ];
 
     /**
@@ -77,6 +82,14 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
                 new GridFieldOrderableRows('SortOrder')
             );
         }
+
+        $fields->dataFieldByName('IsBusinessOwnerApprovalRequired')
+            ->setDescription('If business owner approval is required, then please
+            make sure you create a question for product owner email address and
+            that should be mandatory.');
+
+        $fields->dataFieldByName('IsCisoApprovalRequired')
+            ->setTitle('Is CISO Approval Required');
 
         return $fields;
     }
@@ -107,36 +120,6 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
             ->operation(SchemaScaffolder::READ_ONE)
             ->setName('readQuestionnaire')
             ->end();
-
-        /* Example query:
-        query{
-          readQuestionnaire(ID:1) {
-            ID
-            Name
-            KeyInformation
-            Questions {
-              ID
-              Title
-              Question
-              Description
-              Type
-              Inputs {
-                ID
-                Name
-                Type
-                Required
-                MinLength
-              }
-              Actions {
-                ID
-                Name
-                Type
-                Message
-              }
-            }
-          }
-        }
-        */
 
         return $scaffolder;
     }
