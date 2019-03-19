@@ -13,13 +13,23 @@
 
 namespace NZTA\SDLT\Model;
 
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\HasManyList;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
+use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 
 /**
  * Class Task
  *
+ * @property string Name
+ * @property boolean DisplayOnHomePage
+ * @property string KeyInformation
+ * @property string TaskType
+ *
+ * @method HasManyList Questions()
  */
 class Task extends DataObject
 {
@@ -33,15 +43,42 @@ class Task extends DataObject
      */
     private static $db = [
         'Name' => 'Varchar(255)',
-        'DisplayOnHomePage'=> 'Boolean'
+        'DisplayOnHomePage'=> 'Boolean',
+        'KeyInformation' => 'HTMLText',
+        'TaskType' => 'Enum(array("questionnaire", "selection"))'
     ];
 
-      /**
+    /**
      * @var array
      */
-    private static $has_one = [
-        'Questionnaire' => Questionnaire::class,
+    private static $has_many = [
+        'Questions' => Question::class
     ];
+
+    /**
+     * CMS Fields
+     * @return FieldList
+     */
+    public function getCMSFields()
+    {
+        $fields = parent::getCMSFields();
+
+        /* @var GridField $questions */
+        $questions = $fields->dataFieldByName('Questions');
+
+        if ($questions) {
+            $config = $questions->getConfig();
+            $config->addComponent(
+                new GridFieldOrderableRows('SortOrder')
+            );
+        }
+
+        if ($this->TaskType === 'selection') {
+            $fields->removeByName('Questions');
+        }
+
+        return $fields;
+    }
 
     /**
      * Allow logged-in user to access the model
