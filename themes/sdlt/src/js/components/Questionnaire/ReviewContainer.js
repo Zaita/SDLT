@@ -7,8 +7,12 @@ import {Dispatch} from "redux";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import type {QuestionnaireSubmissionState} from "../../store/QuestionnaireState";
-import {loadQuestionnaireSubmissionState} from "../../actions/questionnarie";
+import {loadQuestionnaireSubmissionState, submitQuestionnaire} from "../../actions/questionnarie";
 import Review from "./Review";
+import SubmissionDataUtil from "../../utils/SubmissionDataUtil";
+import PDFUtil from "../../utils/PDFUtil";
+import _ from "lodash";
+import URLUtil from "../../utils/URLUtil";
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -21,6 +25,9 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
     dispatchLoadSubmissionAction(submissionHash: string) {
       dispatch(loadQuestionnaireSubmissionState(submissionHash));
     },
+    dispatchSubmitQuestionnaire(submissionID: string) {
+      dispatch(submitQuestionnaire(submissionID));
+    },
   };
 };
 
@@ -31,6 +38,7 @@ type ownProps = {
 type reduxProps = {
   submissionState: QuestionnaireSubmissionState,
   dispatchLoadSubmissionAction: (submissionHash: string) => void,
+  dispatchSubmitQuestionnaire: (submissionID: string) => void,
 };
 
 type Props = ownProps & reduxProps;
@@ -51,11 +59,53 @@ class ReviewContainer extends Component<Props> {
 
     return (
       <div className="ReviewContainer">
-        <Header title={title} subtitle="Review Responses" />
-        <Review siteTitle={siteTitle} submission={submission}/>
-        <Footer/>
+        <Header title={title} subtitle="Review Responses"/>
+        <Review siteTitle={siteTitle}
+                submission={submission}
+                handleSubmitButtonClick={this.handleSubmitButtonClick.bind(this)}
+                handlePDFDownloadButtonClick={this.handlePDFDownloadButtonClick.bind(this)}
+                handleEditAnswerButtonClick={this.handleEditAnswerButtonClick.bind(this)}/>
+        <Footer/>;
       </div>
-    );
+    )
+      ;
+  }
+
+  handleSubmitButtonClick() {
+    const submission = this.props.submissionState.submission;
+    if (!submission) {
+      return;
+    }
+
+    // Check if the questionnaire is answered properly (only have answered and non-applicable questions)
+    if (SubmissionDataUtil.existsUnansweredQuestion(submission.questions)) {
+      alert("There are questions not answered properly, please check your answers");
+      return;
+    }
+
+    this.props.dispatchSubmitQuestionnaire(submission.submissionID);
+  }
+
+  handlePDFDownloadButtonClick() {
+    const {submission, siteTitle} = {...this.props.submissionState};
+    if (!submission) {
+      return;
+    }
+
+    PDFUtil.generatePDF({
+      questions: submission.questions,
+      submitter: submission.submitter,
+      questionnaireTitle: submission.questionnaireTitle,
+      siteTitle,
+    });
+  }
+
+  handleEditAnswerButtonClick() {
+    const uuid = _.get(this.props.submissionState, "submission.submissionUUID", "");
+    if (!uuid) {
+      return;
+    }
+    URLUtil.redirectToQuestionnaireEditing(uuid);
   }
 }
 

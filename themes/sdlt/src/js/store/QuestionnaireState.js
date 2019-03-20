@@ -1,7 +1,6 @@
 // @flow
 
 import type {User} from "../types/User";
-import type {FormSchema} from "../types/FormSchema";
 import type {Submission} from "../types/Questionnaire";
 
 export type QuestionnaireStartState = {

@@ -38,4 +38,16 @@ export default class SubmissionDataUtil {
 
     return answerData;
   }
+
+  static existsUnansweredQuestion(questions: Array<Question>): boolean {
+    let hasUnansweredQuestion = false;
+    questions.forEach((question) => {
+      const {hasAnswer, isApplicable} = {...question};
+      // Invalid question state: does not have answer and still available
+      if (!hasAnswer && isApplicable) {
+        hasUnansweredQuestion = true;
+      }
+    });
+    return hasUnansweredQuestion;
+  }
 }

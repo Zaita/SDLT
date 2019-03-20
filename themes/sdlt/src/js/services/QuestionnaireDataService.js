@@ -31,6 +31,7 @@ mutation {
     const query = `
 query {
   readCurrentMember {
+    ID
     Email
     FirstName
     Surname
@@ -62,6 +63,7 @@ query {
       questionnaireID: _.get(questionnaireData, "ID", ""),
       keyInformation: _.get(questionnaireData, "KeyInformation", ""),
       user: {
+        id: _.get(memberData, "ID"),
         name: `${_.get(memberData, "FirstName")} ${_.get(memberData, "Surname")}`,
         role: _.get(memberData, "UserRole"),
         email: _.get(memberData, "Email"),
@@ -73,6 +75,7 @@ query {
     const query = `
 query {
   readCurrentMember {
+    ID
     Email
     FirstName
     Surname
@@ -81,6 +84,9 @@ query {
   readQuestionnaireSubmission(UUID: "${submissionHash}") {
     ID
     UUID
+    User {
+      ID
+    }
     SubmitterName,
     SubmitterRole,
     SubmitterEmail,
@@ -91,6 +97,9 @@ query {
     }
     QuestionnaireData
     AnswerData
+    CisoApprovalStatus
+    BusinessOwnerApprovalStatus
+    SecurityArchitectApprovalStatus
   }
   readSiteConfig {
     Title
@@ -135,6 +144,7 @@ query {
       title: StringUtil.toString(_.get(submissionJSON, "Questionnaire.Name", "")),
       siteTitle: StringUtil.toString(_.get(json, "data.readSiteConfig.0.Title", "")),
       user: {
+        id: StringUtil.toString(_.get(memberData, "ID")),
         name: `${_.get(memberData, "FirstName")} ${_.get(memberData, "Surname")}`,
         role: _.get(memberData, "UserRole"),
         email: _.get(memberData, "Email"),
@@ -145,11 +155,17 @@ query {
         submissionID: StringUtil.toString(_.get(submissionJSON, "ID", "")),
         submissionUUID: StringUtil.toString(_.get(submissionJSON, "UUID", "")),
         submitter: {
+          id: StringUtil.toString(_.get(submissionJSON, "User.ID")),
           name: StringUtil.toString(_.get(submissionJSON, "SubmitterName", "")),
           role: StringUtil.toString(_.get(submissionJSON, "SubmitterRole", "")),
           email: StringUtil.toString(_.get(submissionJSON, "SubmitterEmail", "")),
         },
         status: status,
+        approvalStatus: {
+          chiefInformationSecurityOfficer: StringUtil.toString(_.get(submissionJSON, "CisoApprovalStatus", "")),
+          businessOwner: StringUtil.toString(_.get(submissionJSON, "BusinessOwnerApprovalStatus", "")),
+          securityArchitect: StringUtil.toString(_.get(submissionJSON, "SecurityArchitectApprovalStatus", ""))
+        },
         questions: schema.map((questionSchema, schemaIndex) => {
           const questionID = StringUtil.toString(_.get(questionSchema, "ID", ""));
           const hasAnswer = Boolean(_.get(answers, `${questionID}.hasAnswer`, false));
@@ -332,5 +348,49 @@ mutation {
     if (!updatedData) {
       throw DEFAULT_NETWORK_ERROR;
     }
+  }
+
+  static async submitQuestionnaire(argument: {submissionID: string, csrfToken: string}): Promise<{uuid: string}> {
+    const {submissionID, csrfToken} = {...argument};
+    const query = `
+mutation {
+ updateQuestionnaireStatusToSubmitted(ID: "${submissionID}") {
+   QuestionnaireStatus
+   UUID
+ }
+}`;
+    const json = await GraphQLRequestHelper.request({query, csrfToken});
+    const status = StringUtil.toString(_.get(json, "data.updateQuestionnaireStatusToSubmitted.QuestionnaireStatus", null));
+    const uuid = StringUtil.toString(_.get(json, "data.updateQuestionnaireStatusToSubmitted.UUID", null));
+    if (!status || !uuid) {
+      throw DEFAULT_NETWORK_ERROR;
+    }
+    if (status !== "submitted") {
+      throw new Error(`Submit questionnaire failed, the status is ${status}`);
+    }
+
+    return {uuid};
+  }
+
+  static async submitQuestionnaireForApproval(argument: {submissionID: string, csrfToken: string}): Promise<{uuid: string}> {
+    const {submissionID, csrfToken} = {...argument};
+    const query = `
+mutation {
+ updateQuestionnaireStatusToWaitingForApproval(ID: "${submissionID}") {
+   QuestionnaireStatus
+   UUID
+ }
+}`;
+    const json = await GraphQLRequestHelper.request({query, csrfToken});
+    const status = StringUtil.toString(_.get(json, "data.updateQuestionnaireStatusToWaitingForApproval.QuestionnaireStatus", null));
+    const uuid = StringUtil.toString(_.get(json, "data.updateQuestionnaireStatusToWaitingForApproval.UUID", null));
+    if (!status || !uuid) {
+      throw DEFAULT_NETWORK_ERROR;
+    }
+    if (status !== "waiting_for_appraval") {
+      throw new Error(`Submit questionnaire for approval failed, the status is ${status}`);
+    }
+
+    return {uuid};
   }
 }

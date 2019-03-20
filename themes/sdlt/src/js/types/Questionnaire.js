@@ -49,6 +49,11 @@ export type Submission = {
   submitter: User,
   questions: Array<Question>,
   status: string, //"in_progress" | "waiting_for_approval" | "approved" | "rejected" | "expired"
+  approvalStatus: {
+    chiefInformationSecurityOfficer: string,
+    businessOwner: string,
+    securityArchitect: string
+  }
 };
 
 // Submission Data

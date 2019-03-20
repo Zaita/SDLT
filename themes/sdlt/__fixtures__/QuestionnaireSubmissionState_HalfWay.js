@@ -1,5 +1,3 @@
-// @flow
-
 import type {QuestionnaireSubmissionState} from "../src/js/store/QuestionnaireState";
 import original from "./QuestionnaireSubmissionState";
 

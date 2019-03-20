@@ -2,17 +2,28 @@
 
 import React, {Component} from "react";
 import type {Submission} from "../../types/Questionnaire";
-import _ from "lodash";
 import LightButton from "../Button/LightButton";
 import DarkButton from "../Button/DarkButton";
 import pdfIcon from "../../../img/icons/pdf.svg";
-import URLUtil from "../../utils/URLUtil";
-import PDFUtil from "../../utils/PDFUtil";
 import AnswersPreview from "./AnswersPreview";
+import {Link} from "react-router-dom";
+import editIcon from "../../../img/icons/edit.svg";
+import _ from "lodash";
 
 type Props = {
-  siteTitle: string,
   submission: Submission | null,
+  handlePDFDownloadButtonClick: () => void,
+  handleSubmitButtonClick: () => void,
+  viewAs: "submitter" | "approver" | "others"
+};
+
+const prettifyStatus = (status: string) => {
+  return status
+    .split("_")
+    .map((str) => {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    })
+    .join(" ");
 };
 
 class Summary extends Component<Props> {
@@ -24,63 +35,146 @@ class Summary extends Component<Props> {
       return null;
     }
 
-    // TODO: Check questionnaire status
-    /*
     if (submission.status === "in_progress") {
       return (
         <div className="Summary">
           <h3>
-            Submission has not been complete
+            Submission has not been complete...
           </h3>
         </div>
       );
     }
-    */
-
-    // TODO: Check if all tasks are finished
-    const disabledSendForApprovalButton = true;
 
     return (
       <div className="Summary">
+        {this.renderSubmitterInfo(submission)}
+        <div className="answers">
+          <h3>Answers</h3>
+        </div>
         <AnswersPreview submission={submission}/>
-        <div className="buttons">
+        {this.renderApprovals(submission)}
+        {this.renderButtons(submission)}
+      </div>
+    );
+  }
+
+  renderSubmitterInfo(submission: Submission) {
+    const submitter = submission.submitter;
+
+    return (
+      <div className="request-info">
+        <h3>Request Information</h3>
+        <div><b>Submitted by:</b> {submitter.name}</div>
+        <div><b>Role:</b> {submitter.role}</div>
+        <div><b>Email:</b> {submitter.email}</div>
+        <div><b>Status:</b> {prettifyStatus(submission.status)}</div>
+      </div>
+    );
+  }
+
+  renderTasks(tasks: Array<{ name: string, url: string, status: string }>) {
+    // TODO: Render tasks with links to complete them
+    return (
+      <div className="tasks">
+        <h3>Tasks</h3>
+        {tasks.map((task) => {
+          return (
+            <div key={task.name}><Link to={task.url}>{task.name} ({task.status})</Link></div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  renderButtons(submission: Submission) {
+    const {viewAs, handleSubmitButtonClick, handlePDFDownloadButtonClick} = {...this.props};
+
+    // Display buttons for submitter when status is "submitted"
+    let editAnswersButton = null;
+    let sendForApprovalButton = null;
+    if (viewAs === "submitter") {
+      editAnswersButton = (
+        <LightButton title="EDIT ANSWERS"
+                     iconImage={editIcon}
+                     classes={["button"]}
+                     disabled={true}
+        />
+      );
+
+      if (submission.status === "submitted") {
+        sendForApprovalButton = (
+          <DarkButton title="SEND FOR APPROVAL"
+                      classes={["button"]}
+                      onClick={handleSubmitButtonClick}
+          />
+        );
+      }
+    }
+
+    // Display "APPROVE" and "DENY" for approvers when status is "waiting for approval"
+    let approveButton = null;
+    let denyButton = null;
+    if (viewAs === "approver") {
+      approveButton = (
+        <DarkButton title="APPROVE"
+                    classes={["button"]}
+                    onClick={() => {}}
+        />
+      );
+      denyButton = (
+        <LightButton title="DENY"
+                     classes={["button"]}
+                     onClick={() => {}}
+        />
+      );
+    }
+
+    return (
+      <div className="buttons">
+        <div>
+          {editAnswersButton}
           <LightButton title="DOWNLOAD PDF"
                        iconImage={pdfIcon}
                        classes={["button"]}
-                       onClick={this.handlePDFDownloadButtonClick.bind(this)}/>
-          <DarkButton title="SEND FOR APPROVAL"
-                      classes={["button"]}
-                      onClick={this.handleSubmitButtonClick.bind(this)}
-                      disabled={disabledSendForApprovalButton}/>
+                       onClick={handlePDFDownloadButtonClick}/>
+          {sendForApprovalButton}
+        </div>
+        <div>
+          {approveButton}
+          {denyButton}
         </div>
       </div>
     );
   }
 
-  handleEditAnswerButtonClick() {
-    const uuid = _.get(this.props, "submission.submissionUUID", "");
-    if (!uuid) {
-      return;
-    }
-    URLUtil.redirectToQuestionnaireEditing(uuid);
-  }
-
-  handlePDFDownloadButtonClick() {
-    const {submission, siteTitle} = {...this.props};
-    if (!submission) {
-      return;
+  renderApprovals(submission: Submission) {
+    // TODO: Refactor - consider using constants instead of string literal
+    if (submission.status === "in_progress" || submission.status === "submitted") {
+      return null;
     }
 
-    PDFUtil.generatePDF({
-      questions: submission.questions,
-      submitter: submission.submitter,
-      questionnaireTitle: submission.questionnaireTitle,
-      siteTitle,
-    });
-  }
+    const approvalStatus = submission.approvalStatus;
 
-  handleSubmitButtonClick() {
-    alert("Coming soon...");
+    return (
+      <div className="approvals">
+        <h3>Approvals</h3>
+        <div>
+          <b>Chief Information Security Officer</b>
+          &nbsp;-&nbsp;
+          {prettifyStatus(approvalStatus.chiefInformationSecurityOfficer)}
+        </div>
+        <div>
+          <b>Business Owner</b>
+          &nbsp;-&nbsp;
+          {prettifyStatus(approvalStatus.businessOwner)}
+        </div>
+        <div>
+          <b>Security Architect</b>
+          &nbsp;-&nbsp;
+          {prettifyStatus(approvalStatus.securityArchitect)}
+        </div>
+      </div>
+    );
   }
 }
 

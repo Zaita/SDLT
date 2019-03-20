@@ -188,11 +188,11 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         throw new Exception('Wrong argument');
                     }
 
-                    // Filter data
-                    // TODO: filter by status (only pending or in_progress)
+                    // Filter data by UUID
+                    // The questionnaire can be read by other users
+                    // TODO: we may limit the access to "submitter", "business owner" and "chief security officer"
                     $data = QuestionnaireSubmission::get()->where([
-                        'UUID' => $uuid,
-                        'UserID' => $member->ID
+                        'UUID' => $uuid
                     ]);
 
                     return $data;

@@ -2,24 +2,30 @@
 
 import React, {Component} from "react";
 import type {Submission} from "../../types/Questionnaire";
-import _ from "lodash";
 import LightButton from "../Button/LightButton";
 import DarkButton from "../Button/DarkButton";
 import editIcon from "../../../img/icons/edit.svg";
 import pdfIcon from "../../../img/icons/pdf.svg";
-import URLUtil from "../../utils/URLUtil";
-import PDFUtil from "../../utils/PDFUtil";
 import AnswersPreview from "./AnswersPreview";
+import SubmissionDataUtil from "../../utils/SubmissionDataUtil";
 
 type Props = {
   siteTitle: string,
   submission: Submission | null,
+  handleSubmitButtonClick: () => void,
+  handlePDFDownloadButtonClick: () => void,
+  handleEditAnswerButtonClick: () => void,
 };
 
 class Review extends Component<Props> {
 
   render() {
-    const {submission} = {...this.props};
+    const {
+      submission,
+      handleSubmitButtonClick,
+      handlePDFDownloadButtonClick,
+      handleEditAnswerButtonClick,
+    } = {...this.props};
 
     if (!submission) {
       return null;
@@ -42,52 +48,18 @@ class Review extends Component<Props> {
           <LightButton title="EDIT ANSWERS"
                        iconImage={editIcon}
                        classes={["button"]}
-                       onClick={this.handleEditAnswerButtonClick.bind(this)}/>
+                       onClick={handleEditAnswerButtonClick}/>
           <LightButton title="DOWNLOAD PDF"
                        iconImage={pdfIcon}
                        classes={["button"]}
-                       onClick={this.handlePDFDownloadButtonClick.bind(this)}/>
+                       onClick={handlePDFDownloadButtonClick}/>
           <DarkButton title="SUBMIT QUESTIONNAIRE"
                       classes={["button"]}
-                      onClick={this.handleSubmitButtonClick.bind(this)}/>
+                      disabled={SubmissionDataUtil.existsUnansweredQuestion(submission.questions)}
+                      onClick={handleSubmitButtonClick}/>
         </div>
       </div>
     );
-  }
-
-  handleEditAnswerButtonClick() {
-    const uuid = _.get(this.props, "submission.submissionUUID", "");
-    if (!uuid) {
-      return;
-    }
-    URLUtil.redirectToQuestionnaireEditing(uuid);
-  }
-
-  handlePDFDownloadButtonClick() {
-    const {submission, siteTitle} = {...this.props};
-    if (!submission) {
-      return;
-    }
-
-    PDFUtil.generatePDF({
-      questions: submission.questions,
-      submitter: submission.submitter,
-      questionnaireTitle: submission.questionnaireTitle,
-      siteTitle,
-    });
-  }
-
-  handleSubmitButtonClick() {
-    const uuid = _.get(this.props, "submission.submissionUUID", "");
-    if (!uuid) {
-      return;
-    }
-
-    // TODO: Check if the questionnaire is answered properly (only have answered and non-applicable questions)
-
-    // TODO: Network request
-
-    URLUtil.redirectToQuestionnaireSummary(uuid);
   }
 }
 
