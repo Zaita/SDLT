@@ -21,6 +21,7 @@ use SilverStripe\ORM\HasManyList;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
+use SilverStripe\Forms\GridField\GridFieldPaginator;
 
 /**
  * Class Question
@@ -112,6 +113,9 @@ class Question extends DataObject implements ScaffoldingProvider
             $inputGridconfig->addComponent(
                 new GridFieldOrderableRows('SortOrder')
             );
+
+            $pageConfig = $inputGridconfig->getComponentByType(GridFieldPaginator::class);
+            $pageConfig->setItemsPerPage(250);
         }
 
         $answerActionFields = $fields->dataFieldByName('AnswerActionFields');
@@ -122,6 +126,9 @@ class Question extends DataObject implements ScaffoldingProvider
             $actionGridconfig->addComponent(
                 new GridFieldOrderableRows('SortOrder')
             );
+
+            $pageConfig = $actionGridconfig->getComponentByType(GridFieldPaginator::class);
+            $pageConfig->setItemsPerPage(250);
         }
 
         if ($this->AnswerFieldType === 'input') {
