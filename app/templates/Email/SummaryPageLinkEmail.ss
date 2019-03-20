@@ -9,8 +9,8 @@
   </p>
 
   <p>
-    You have just submitted to work through the NZTA SDLT - $QuestionnaireName
-    Form. As part of this process you will be able to go back to modify your
+    You have just submitted to work through the NZTA SDLT - $QuestionnaireName.
+    As part of this process you will be able to go back to modify your
     answers if required and after completing the generated task you can submit
     this for approval. To do that please use <a href="$Link">this link</a>.
   </p>
