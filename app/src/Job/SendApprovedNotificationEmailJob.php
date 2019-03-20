@@ -62,14 +62,19 @@ class SendApprovedNotificationEmailJob extends AbstractQueuedJob implements Queu
 
         //@todo :get list of SecurityArchitect to send approved notification;
         if ($isSendNotificaton) {
-          // get member socket_create_listen
-
-          // send email notificaton
+            // get member
+            $group = Group::get()->filter('code', 'security-architect')->first();
+            if ($group) {
+                $members = $group->Members();
+                foreach ($members as $member) {
+                    $this->sendEmail($member);
+                }
+            }
         }
 
         // send email to the user
         if ($member = $this->questionnaireSubmission->User()) {
-            $this->sendEmail($member, $approver);
+            $this->sendEmail($member);
         }
 
 
@@ -83,7 +88,7 @@ class SendApprovedNotificationEmailJob extends AbstractQueuedJob implements Queu
       */
     public function sendEmail($member)
     {
-        $sub = $this->questionnaireSubmission->Questionnaire()->Name . '- is approved.';
+        $sub = $this->questionnaireSubmission->Questionnaire()->Name . ' is approved.';
         $from = 'no-reply@nzta.govt.nz';
 
         $email = Email::create()
