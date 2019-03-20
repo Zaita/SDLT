@@ -20,6 +20,7 @@ use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
+use SilverStripe\Forms\GridField\GridFieldPaginator;
 
 /**
  * Class Dashboard
@@ -83,6 +84,9 @@ class Dashboard extends DataObject implements ScaffoldingProvider
             $config->addComponent(
                 new GridFieldOrderableRows('SortOrder')
             );
+
+            $pageConfig = $config->getComponentByType(GridFieldPaginator::class);
+            $pageConfig->setItemsPerPage(250);
         }
 
         return $fields;
