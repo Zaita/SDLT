@@ -6,6 +6,7 @@ const fixture: QuestionnaireSubmissionState = {
   title: "Proof of Concept or Software Trial Request Form",
   siteTitle: "Security Development Lifecycle Tool",
   user: {
+    id: "1",
     name: "Thor Chen",
     role: "Developer",
     email: "thor.chen@catalyst.net.nz"
@@ -16,9 +17,15 @@ const fixture: QuestionnaireSubmissionState = {
     submissionID: "1",
     submissionUUID: "uuid",
     submitter: {
+      id: "1",
       name: "Thor Chen",
       role: "Developer",
       email: "thor.chen@catalyst.net.nz"
+    },
+    approvalStatus: {
+      chiefInformationSecurityOfficer: "not_applicable",
+      businessOwner: "not_applicable",
+      securityArchitect: "not_applicable"
     },
     questions: [
       {

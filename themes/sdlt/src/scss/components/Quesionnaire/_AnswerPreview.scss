@@ -9,10 +9,10 @@
             margin-bottom: 6px;
             padding: 20px;
             word-break: break-word;
-        }
 
-        .row:last-child {
-            margin-bottom: 40px;
+            .col:first-child {
+                padding-left: 0;
+            }
         }
 
         .vertical-divider {

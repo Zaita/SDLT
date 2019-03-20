@@ -260,6 +260,32 @@ export function moveToPreviousQuestion(targetQuestion: Question): ThunkAction {
   };
 }
 
+export function submitQuestionnaire(submissionID: string): ThunkAction {
+  return async (dispatch, getState) => {
+    try {
+      const csrfToken = await CSRFTokenService.getCSRFToken();
+      const {uuid} = await QuestionnaireDataService.submitQuestionnaire({submissionID, csrfToken});
+      URLUtil.redirectToQuestionnaireSummary(uuid);
+    } catch(error) {
+      // TODO: errors
+      alert(error);
+    }
+  };
+}
+
+export function submitQuestionnaireForApproval(submissionID: string): ThunkAction {
+  return async (dispatch, getState) => {
+    try {
+      const csrfToken = await CSRFTokenService.getCSRFToken();
+      const {uuid} = await QuestionnaireDataService.submitQuestionnaireForApproval({submissionID, csrfToken});
+      dispatch(loadQuestionnaireSubmissionState(uuid));
+    } catch(error) {
+      // TODO: errors
+      alert(error);
+    }
+  };
+}
+
 // Commons
 
 async function batchUpdateSubmissionData(rootState: RootState, indexesToUpdate: Array<number>) {

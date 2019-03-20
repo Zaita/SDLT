@@ -21,7 +21,7 @@ const defaultStartState: QuestionnaireStartState = {
 
 const defaultSubmissionState: QuestionnaireSubmissionState = {
   title: "",
-  subtitle: "",
+  siteTitle: "",
   user: null,
   submission: null
 };
