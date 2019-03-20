@@ -10,7 +10,8 @@
         "silverstripe/postgresql": "^2.1.0",
         "unclecheese/display-logic": "^2.0",
         "symbiote/silverstripe-gridfieldextensions": "^3.2",
-        "symbiote/silverstripe-queuedjobs": "^4.3"
+        "symbiote/silverstripe-queuedjobs": "^4.3",
+        "ramsey/uuid": "^3.8"
     },
     "require-dev": {
         "phpunit/phpunit": "^5.7",

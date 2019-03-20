@@ -32,6 +32,7 @@ use NZTA\SDLT\Job\SendSummaryPageLinkEmailJob;
 use NZTA\SDLT\Job\SendApprovalLinkEmailJob;
 use Silverstripe\Control\Director;
 use SilverStripe\Core\Convert;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Class Questionnaire
@@ -56,7 +57,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'QuestionnaireData' => 'Text',
         'AnswerData' => 'Text',
         'QuestionnaireStatus' => 'Enum(array("in_progress", "submitted", "waiting_for_appraval", "approved", "denied"))',
-        'UUID' => 'Varchar(255)',
+        'UUID' => 'Varchar(36)',
         'StartEmailSendStatus' => 'Boolean',
         'CisoApprovalStatus' => 'Enum(array("not_applicable", "pending", "approved", "denied"))',
         'CisoApproverIPAddress' => 'Varchar(255)',
@@ -292,7 +293,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $model->StartEmailSendStatus = 0;
                     $model->SendApprovedNotificatonToSecurityArchitect = $questionnaire->SendApprovedNotificatonToSecurityArchitect;
 
-                    $model->UUID = uniqid();
+                    $uuid = Uuid::uuid4();
+                    $model->UUID = (string) $uuid;
+
 
                     $model->QuestionnaireData = $model->getQuestionsData($questionnaire);
 
