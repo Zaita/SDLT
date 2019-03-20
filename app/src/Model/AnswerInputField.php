@@ -45,6 +45,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         'MinLength' => 'Int',
         'PlaceHolder' => 'Varchar(255)',
         'SortOrder' => 'Int',
+        'IsProductOwner' => 'Boolean'
     ];
 
     /**
@@ -83,6 +84,9 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         $fields = parent::getCMSFields();
 
         $fields->removeByName('QuestionID');
+
+        /** @noinspection PhpUndefinedMethodInspection */
+        $fields->dataFieldByName('IsProductOwner')->displayIf('InputType')->isEqualTo('email');
 
         return $fields;
     }
