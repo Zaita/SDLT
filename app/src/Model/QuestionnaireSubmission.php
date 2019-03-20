@@ -15,6 +15,7 @@ namespace NZTA\SDLT\Model;
 
 use Exception;
 use GraphQL\Type\Definition\ResolveInfo;
+use NZTA\SDLT\Job\SendApprovedNotificationEmailJob;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ResolverInterface;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
@@ -316,13 +317,12 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      */
     public function onAfterWrite()
     {
-<<<<<<< 53e04ed572ff1d7d29a9c607049f4d95b70c441d
         parent::onAfterWrite();
 
         if (!$this->StartEmailSendStatus) {
             singleton(QueuedJobService::class)
                 ->queueJob(
-                    new SendSubmitterLinkEmailJob($this),
+                    new SendStartLinkEmailJob($this),
                     date('Y-m-d H:i:s', time() + 30)
                 );
 
@@ -330,21 +330,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
             $this->write();
         }
-=======
-        // parent::onAfterWrite();
-        //
-        // if (!$this->StartEmailSendStatus) {
-        //     singleton(QueuedJobService::class)
-        //         ->queueJob(
-        //             new SendStartLinkEmailJob($this),
-        //             date('Y-m-d H:i:s', time() + 90)
-        //         );
-        //
-        //     $this->StartEmailSendStatus = 1;
-        //
-        //     $this->write();
-        // }
->>>>>>> NEW: RM#62624 add approve and dent logic
     }
 
     /**
@@ -465,6 +450,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 public function resolve($object, array $args, $context, ResolveInfo $info)
                 {
                     $member = Security::getCurrentUser();
+                    $businessOwnerID = 0;
 
                     // Check authentication
                     if (!$member) {
@@ -518,21 +504,19 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                         if ($jsonDecodeAnswerData->answerType == "input") {
                             QuestionnaireSubmission::validate_answer_input_data($jsonDecodeAnswerData->inputs);
+
+                            // validate businessOwnerID, if field type is input
+                            $businessOwnerID = QuestionnaireSubmission::validate_business_owner_email(
+                                $jsonDecodeAnswerData->inputs,
+                                $questionnaireSubmission->QuestionnaireData,
+                                $args['QuestionID']
+                            );
                         }
 
                         if ($jsonDecodeAnswerData->answerType == "action") {
                             QuestionnaireSubmission::validate_answer_action_data($jsonDecodeAnswerData->actions);
                         }
                     } while (false);
-
-                    // validate businessOwnerID, if field type is input
-                    if ($jsonDecodeAnswerData->answerType == "input") {
-                        $businessOwnerID = QuestionnaireSubmission::validate_business_owner_email(
-                            $jsonDecodeAnswerData->inputs,
-                            $questionnaireSubmission->QuestionnaireData,
-                            $args['QuestionID']
-                        );
-                    }
 
                     $answerDataArr = [];
 
@@ -556,11 +540,11 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * @param array $inputAnswers      input field answer
-     * @param array $questionnaireData questionnaire
-     * @param array $QuestionId        Question Id
+     * @param array  $inputAnswers      input field answer
+     * @param string $questionnaireData questionnaire
+     * @param array  $QuestionId        Question Id
      * @throws Exception
-     * @return void
+     * @return int
      */
     public static function validate_business_owner_email($inputAnswers, $questionnaireData, $QuestionId)
     {
@@ -584,28 +568,29 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             return 0;
         }
 
-        if ($emailField) {
-            foreach ($inputAnswers as $inputAnswer) {
-                if ($emailField->ID == $inputAnswer->id) {
-                    if (empty($inputAnswer->data)) {
-                        return 0;
-                    }
-
-                    $member = Member::get()->filter('Email', $inputAnswer->data)->first();
-
-                    if (!$member) {
-                        throw new Exception(
-                            sprintf(
-                                'Sorry, we don\'t have any user with given email address:- %s.',
-                                $inputAnswer->data
-                            )
-                        );
-                    }
-
-                    return $member->ID;
+        foreach ($inputAnswers as $inputAnswer) {
+            if ($emailField->ID == $inputAnswer->id) {
+                if (empty($inputAnswer->data)) {
+                    return 0;
                 }
+
+                $member = Member::get()->filter('Email', $inputAnswer->data)->first();
+
+                if (!$member) {
+                    throw new Exception(
+                        sprintf(
+                            'Sorry, we don\'t have any user with given email address:- %s.',
+                            $inputAnswer->data
+                        )
+                    );
+                }
+
+                return $member->ID;
             }
         }
+
+
+        return 0;
     }
 
     /**
