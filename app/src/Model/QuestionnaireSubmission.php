@@ -22,6 +22,7 @@ use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
+use SilverStripe\Security\Group;
 use SilverStripe\Security\SecurityToken;
 use SilverStripe\ORM\HasManyList;
 use SilverStripe\Control\Email\Email;
@@ -200,8 +201,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
         $this->createQuestionnaireSubmission($scaffolder);
         $this->updateQuestionnaireSubmission($scaffolder);
-        $this->updateQuestionnaireStatusForApproval($scaffolder);
-        $this->updateQuestionnaireStatusToSubmit($scaffolder);
+        $this->updateQuestionnaireStatusToWaitingForApproval($scaffolder);
+        $this->updateQuestionnaireStatusToSubmitted($scaffolder);
         $this->updateQuestionnaireStatusToApproved($scaffolder);
 
         return $scaffolder;
@@ -265,17 +266,12 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $model->QuestionnaireStatus = 'in_progress';
 
                     // Is CisoApprovalRequired for the questionnaire
+                    $model->CisoApprovalStatus = 'pending';
+
                     if (!$questionnaire->IsCisoApprovalRequired) {
                         $model->CisoApprovalStatus = 'not_applicable';
                     }
 
-                    $model->CisoApprovalStatus = 'pending';
-
-                    // Is BusinessOwnerApprovalRequired for the questionnaire
-                    if (!$questionnaire->IsBusinessOwnerApprovalRequired) {
-                        $model->BusinessOwnerApprovalStatus = 'not_applicable';
-                    }
-
                     $model->BusinessOwnerApprovalStatus = 'pending';
 
                     // Is BusinessOwnerApprovalRequired for the questionnaire
@@ -283,14 +279,12 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         $model->BusinessOwnerApprovalStatus = 'not_applicable';
                     }
 
-                    $model->BusinessOwnerApprovalStatus = 'pending';
+                    $model->SecurityArchitectApprovalStatus = 'pending';
 
                     // Is SecurityArchitectApprovalRequired
                     if (!$questionnaire->IsSecurityArchitectApprovalRequired) {
                         $model->SecurityArchitectApprovalStatus = 'not_applicable';
                     }
-
-                    $model->SecurityArchitectApprovalStatus = 'pending';
 
                     $model->QuestionnaireID = $questionnaire->ID;
 
@@ -598,10 +592,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      *
      * @return void
      */
-    public function updateQuestionnaireStatusToSubmit(SchemaScaffolder $scaffolder)
+    public function updateQuestionnaireStatusToSubmitted(SchemaScaffolder $scaffolder)
     {
         $scaffolder
-            ->mutation('updateQuestionnaireStatusToSubmit', QuestionnaireSubmission::class)
+            ->mutation('updateQuestionnaireStatusToSubmitted', QuestionnaireSubmission::class)
             ->addArgs([
                 'ID' => 'ID!',
             ])
@@ -663,10 +657,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      *
      * @return void
      */
-    public function updateQuestionnaireStatusForApproval(SchemaScaffolder $scaffolder)
+    public function updateQuestionnaireStatusToWaitingForApproval(SchemaScaffolder $scaffolder)
     {
         $scaffolder
-            ->mutation('updateQuestionnaireStatusForApproval', QuestionnaireSubmission::class)
+            ->mutation('updateQuestionnaireStatusToWaitingForApproval', QuestionnaireSubmission::class)
             ->addArgs([
                 'ID' => 'ID!',
             ])
@@ -769,13 +763,17 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         throw new Exception('No data available for Questionnaire Submission. Please start again');
                     }
 
+                    if ($questionnaireSubmission->QuestionnaireStatus !== 'waiting_for_appraval') {
+                        throw new Exception('Sorry, Questionnaire Submission is not ready for approval');
+                    }
+
                     $accessDetail = QuestionnaireSubmission::is_current_user_has_access_to_approve_deny($questionnaireSubmission);
 
                     $accessDetailObj = json_decode($accessDetail);
 
                     if ($accessDetailObj->hasAccess) {
                         $group = $accessDetailObj->group;
-                        if ($group == 'security_architect') {
+                        if ($group == 'security-architect') {
                             $questionnaireSubmission->updateSecurityArchitectDetail(
                                 $questionnaireSubmission,
                                 $member,
@@ -791,7 +789,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                             );
                         }
 
-                        if ($group == 'business_owner') {
+                        if ($group == 'business-owner') {
                             $questionnaireSubmission->updateBusinessOwnerDetail(
                                 $questionnaireSubmission,
                                 $member,
@@ -929,44 +927,58 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      */
     public static function is_current_user_has_access_to_approve_deny($questionnaireSubmission)
     {
+        $approvalGroup = ['business-owner', 'ciso', 'security-architect'];
+
         $member = Security::getCurrentUser();
 
-        $memberList = $questionnaireSubmission->Questionnaire()->SubmissionNotificationEmails();
+        // is user exist in approval member list
+        $memberList = $questionnaireSubmission->getApprovalMemerIDList();
 
-        $isMemberExist = $memberList->Filter('MemberID', $member->ID)->first();
-
-        $memberFromApprovalGroup = Member::get()->byID($isMemberExist->MemberID);
-
-        $hasAccess = $questionnaireSubmission->isCurrentUserReviewSummaryPage();
-
-        if (!$hasAccess) {
-            throw new Exception('Sorry current user don\'t has access to review the summary page.');
+        if (!in_array($member->ID, $memberList)) {
+            throw new Exception('Sorry current user don\'t has access to apparove/deny.');
         }
 
+        // get current member group
         $logInMemberApprovalGroup = null;
 
+        //check if current user is business owner
+        // else calculate user group
         if ($questionnaireSubmission->isBusinessOwner()) {
-            $logInMemberApprovalGroup = 'business_owner';
-        } else if ($memberFromApprovalGroup) {
-            $logInMemberApprovalGroup = $isMemberExist->ApprovalGroup;
+            $logInMemberApprovalGroup = 'business-owner';
+        } else if ($member->Groups()->count() == 1) {
+            $logInMemberApprovalGroup = $member->Groups()->first()->Code;
+        } else {
+            $groups = $member->Groups();
+            foreach ($groups as $group) {
+                if ($group->Code == 'ciso' &&
+                    $questionnaireSubmission->CisoApprovalStatus !== 'not_applicable') {
+                      $logInMemberApprovalGroup = $group->Code;
+                }
+
+                if ($group->Code == 'security-architect' &&
+                    $questionnaireSubmission->CisoApprovalStatus !== 'not_applicable') {
+                      $logInMemberApprovalGroup = $group->Code;
+                }
+            }
         }
 
-        // Current user approval group
-        if (!$logInMemberApprovalGroup) {
-            throw new Exception('Sorry log in user is not belonges to approval group');
+        // check if Current user approval group
+        if (!$logInMemberApprovalGroup || !in_array($logInMemberApprovalGroup, $approvalGroup)) {
+            throw new Exception('Sorry, log in user does not belong to approval group');
         }
 
         // check current user group has permission to approve/deny or
         // if QuestionnaireSubmission is already approved/denied by other Member
         // then return exception
         switch ($logInMemberApprovalGroup) {
-            case 'business_owner':
+            case 'business-owner':
                 if ($questionnaireSubmission->BusinessOwnerApprovalStatus == 'not_applicable') {
                     throw new Exception('Sorry business owner approval is not required.');
                 }
                 if ($questionnaireSubmission->BusinessOwnerApprovalStatus == 'approved'
                     || $questionnaireSubmission->BusinessOwnerApprovalStatus == 'denied') {
-                    throw new Exception('Sorry, this is already approved or denied by business owner.');
+                    throw new Exception('Sorry, this is already approved or denied by business owner.
+                        Please check summary page for detail.');
                 }
                 if ($questionnaireSubmission->BusinessOwnerApprovalStatus == 'pending') {
                     return json_encode(["hasAccess" => true, "group" => $logInMemberApprovalGroup]);
@@ -974,23 +986,25 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 break;
             case 'ciso':
                 if ($questionnaireSubmission->CisoApprovalStatus == 'not_applicable') {
-                    throw new Exception('Sorry business owner approval is not required.');
+                    throw new Exception('Sorry ciso group approval is not required.');
                 }
                 if ($questionnaireSubmission->CisoApprovalStatus == 'approved'
                     || $questionnaireSubmission->CisoApprovalStatus == 'denied') {
-                    throw new Exception('Sorry, this is already approved or denied by other group member.');
+                    throw new Exception('Sorry, this is already approved or denied by other group member.
+                        Please check summary page for detail.');
                 }
                 if ($questionnaireSubmission->CisoApprovalStatus == 'pending') {
                     return json_encode(["hasAccess" => true, "group" => $logInMemberApprovalGroup]);
                 }
                 break;
-            case 'security_architect':
+            case 'security-architect':
                 if ($questionnaireSubmission->SecurityArchitectApprovalStatus == 'not_applicable') {
-                    throw new Exception('Sorry business owner approval is not required.');
+                    throw new Exception('Sorry security architect approval is not required.');
                 }
                 if ($questionnaireSubmission->SecurityArchitectApprovalStatus == 'approved'
                     || $questionnaireSubmission->CisoApprovalStatus == 'denied') {
-                    throw new Exception('Sorry, this is already approved or denied by other group member.');
+                    throw new Exception('Sorry, this is already approved or denied by other group member.
+                        Please check summary page for detail.');
                 }
                 if ($questionnaireSubmission->SecurityArchitectApprovalStatus == 'pending') {
                     return json_encode(["hasAccess" => true, "group" => $logInMemberApprovalGroup]);
@@ -1165,19 +1179,31 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      */
     public function getApprovalMemerIDList()
     {
-        $toEmailAddressList = $this->Questionnaire()->SubmissionNotificationEmails();
-
         $memberList = [];
 
-        // get stack holder (CISO and Security Architect group) ID
-        foreach ($toEmailAddressList as $toEmailAddress) {
-            $member = Member::get()->byID($toEmailAddress->MemberID);
-            if ($member) {
-                $memberList[] =  $member->ID;
+        // get CISO group's member
+        if ($this->CisoApprovalStatus !== 'not_applicable') {
+            $group = Group::get()->filter('code', 'ciso')->first();
+            if ($group) {
+                $members = $group->Members();
+                foreach ($members as $member) {
+                    $memberList[] = $member->ID;
+                }
             }
         }
 
-        // send email to businessOwner
+        // get Security Architect group's member
+        if ($this->SecurityArchitectApprovalStatus !== 'not_applicable') {
+            $group = Group::get()->filter('code', 'security-architect')->first();
+            if ($group) {
+                $members = $group->Members();
+                foreach ($members as $member) {
+                    $memberList[] = $member->ID;
+                }
+            }
+        }
+
+        // businessOwner
         if ($this->BusinessOwnerID) {
             $member = Member::get()->byID($this->BusinessOwnerID);
             if ($member) {
@@ -1185,23 +1211,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             }
         }
 
-        return $memberList;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isCurrentUserReviewSummaryPage()
-    {
-        $member = Security::getCurrentUser();
-
-        $memberList = $this->getApprovalMemerIDList($this);
-
-        if (in_array($member->ID, $memberList)) {
-            return true;
-        }
-
-        return false;
+        return array_unique($memberList);
     }
 
     /**
@@ -1233,11 +1243,11 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             return $this->CisoApprover();
         }
 
-        if ($this->$group == 'security_architect') {
+        if ($this->$group == 'security-architect') {
             return $this->SecurityArchitectApprover();
         }
 
-        if ($this->$group == 'business_owner') {
+        if ($this->$group == 'business-owner') {
             return $this->BusinessOwner();
         }
     }

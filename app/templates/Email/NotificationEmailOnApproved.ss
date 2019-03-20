@@ -2,7 +2,7 @@
   <p>Hello $Name,</p>
 
   <p>
-    $QuestionnaireName Form has been Approved.
+    $QuestionnaireName has been Approved.
   </p>
 
   <p>
