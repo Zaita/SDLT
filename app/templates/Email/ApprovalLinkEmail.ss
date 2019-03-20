@@ -2,7 +2,7 @@
   <p>Hello $ReviewerName,</p>
 
   <p>
-    Please review and approve the following $QuestionnaireName Form that has been submitted by:
+    Please review and approve the following $QuestionnaireName has been submitted by:
     <p>Name: $SubmitterName</p>
     <p> Email: $SubmitterEmail</p>
   </p>
