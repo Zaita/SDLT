@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This file contains the "SendSubmitterLinkEmailJob" class.
+ * This file contains the "SendStartLinkEmailJob" class.
  *
  * @category SilverStripe_Project
  * @package SDLT
@@ -21,7 +21,7 @@ use Symbiote\QueuedJobs\Services\QueuedJob;
 /**
  * A QueuedJob is specifically designed to be invoked from an onAfterWrite() process
  */
-class SendSubmitterLinkEmailJob extends AbstractQueuedJob implements QueuedJob
+class SendStartLinkEmailJob extends AbstractQueuedJob implements QueuedJob
 {
     /**
      * @param QuestionnaireSubmission $questionnaireSubmission $questionnaireSubmission
@@ -61,10 +61,10 @@ class SendSubmitterLinkEmailJob extends AbstractQueuedJob implements QueuedJob
     {
         $sub = 'NZTA SDLT - ' . $this->questionnaireSubmission->Questionnaire()->Name . '- Link';
         $from = 'no-reply@nzta.govt.nz';
-        $to = 'roopamjain@catalyst.net.nz';
+        $to = $this->questionnaireSubmission->SubmitterEmail;
 
         $email = Email::create()
-            ->setHTMLTemplate('Email\\SendSubmitterLinkEmail')
+            ->setHTMLTemplate('Email\\StartLinkEmail')
             ->setData([
                 'SubmitterName' => $this->questionnaireSubmission->SubmitterName,
                 'Link'=> $this->questionnaireSubmission->getSubmitterLink(),
