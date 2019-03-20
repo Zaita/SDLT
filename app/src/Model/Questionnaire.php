@@ -20,6 +20,7 @@ use SilverStripe\ORM\HasManyList;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
+use SilverStripe\Forms\GridField\GridFieldPaginator;
 
 /**
  * Class Questionnaire
@@ -80,6 +81,9 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
             $config->addComponent(
                 new GridFieldOrderableRows('SortOrder')
             );
+
+            $pageConfig = $config->getComponentByType(GridFieldPaginator::class);
+            $pageConfig->setItemsPerPage(250);
         }
 
         $fields->dataFieldByName('IsBusinessOwnerApprovalRequired')
