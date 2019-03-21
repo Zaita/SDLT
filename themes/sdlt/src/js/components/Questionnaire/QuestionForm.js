@@ -227,7 +227,7 @@ class QuestionForm extends Component<Props> {
               <tr>
                 <td/>
                 <td>
-                  <DarkButton title="Continue" disabled={isSubmitting}/>
+                  <DarkButton title="Continue"/>
                 </td>
               </tr>
               <tr>

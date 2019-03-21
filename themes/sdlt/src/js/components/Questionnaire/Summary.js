@@ -14,6 +14,8 @@ type Props = {
   submission: Submission | null,
   handlePDFDownloadButtonClick: () => void,
   handleSubmitButtonClick: () => void,
+  handleApproveButtonClick: () => void,
+  handleDenyButtonClick: () => void,
   viewAs: "submitter" | "approver" | "others"
 };
 
@@ -87,7 +89,13 @@ class Summary extends Component<Props> {
   }
 
   renderButtons(submission: Submission) {
-    const {viewAs, handleSubmitButtonClick, handlePDFDownloadButtonClick} = {...this.props};
+    const {
+      viewAs,
+      handleSubmitButtonClick,
+      handlePDFDownloadButtonClick,
+      handleApproveButtonClick,
+      handleDenyButtonClick
+    } = {...this.props};
 
     // Display buttons for submitter when status is "submitted"
     let editAnswersButton = null;
@@ -118,13 +126,13 @@ class Summary extends Component<Props> {
       approveButton = (
         <DarkButton title="APPROVE"
                     classes={["button"]}
-                    onClick={() => {}}
+                    onClick={handleApproveButtonClick}
         />
       );
       denyButton = (
         <LightButton title="DENY"
                      classes={["button"]}
-                     onClick={() => {}}
+                     onClick={handleDenyButtonClick}
         />
       );
     }

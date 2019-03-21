@@ -7,7 +7,11 @@ import {Dispatch} from "redux";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import type {QuestionnaireSubmissionState} from "../../store/QuestionnaireState";
-import {loadQuestionnaireSubmissionState, submitQuestionnaireForApproval} from "../../actions/questionnarie";
+import {
+  approveQuestionnaireSubmission, denyQuestionnaireSubmission,
+  loadQuestionnaireSubmissionState,
+  submitQuestionnaireForApproval,
+} from "../../actions/questionnarie";
 import Summary from "./Summary";
 import PDFUtil from "../../utils/PDFUtil";
 
@@ -22,9 +26,15 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
     dispatchLoadSubmissionAction(submissionHash: string) {
       dispatch(loadQuestionnaireSubmissionState(submissionHash));
     },
-    dispatchSubmitForApproval(submissionID: string) {
+    dispatchSubmitForApprovalAction(submissionID: string) {
       dispatch(submitQuestionnaireForApproval(submissionID));
-    }
+    },
+    dispatchApproveSubmissionAction(submissionID: string) {
+      dispatch(approveQuestionnaireSubmission(submissionID));
+    },
+    dispatchDenySubmissionAction(submissionID: string) {
+      dispatch(denyQuestionnaireSubmission(submissionID));
+    },
   };
 };
 
@@ -35,7 +45,9 @@ type ownProps = {
 type reduxProps = {
   submissionState: QuestionnaireSubmissionState,
   dispatchLoadSubmissionAction: (submissionHash: string) => void,
-  dispatchSubmitForApproval: (submissionID: string) => void,
+  dispatchSubmitForApprovalAction: (submissionID: string) => void,
+  dispatchApproveSubmissionAction: (submissionID: string) => void,
+  dispatchDenySubmissionAction: (submissionID: string) => void,
 };
 
 type Props = ownProps & reduxProps;
@@ -48,7 +60,7 @@ class SummaryContainer extends Component<Props> {
   }
 
   render() {
-    const {title, user, submission} = {...this.props.submissionState};
+    const {title, user, submission, isCurrentUserApprover} = {...this.props.submissionState};
 
     if (!user || !submission) {
       return null;
@@ -56,14 +68,20 @@ class SummaryContainer extends Component<Props> {
 
     // Decide what the permission of the current user
     let viewAs = "others";
-    // Check if the current user is the submitter
-    if (user.id === submission.submitter.id) {
-      viewAs = "submitter";
-    }
-    // Check if the current user is an approver
-    if (user.role === "Approver") {
-      viewAs = "approver";
-    }
+
+    do {
+      // Check if the current user is the submitter
+      if (user.id === submission.submitter.id) {
+        viewAs = "submitter";
+        break;
+      }
+
+      // Check if the current user is an approver
+      if (isCurrentUserApprover) {
+        viewAs = "approver";
+        break;
+      }
+    } while (false);
 
     return (
       <div className="SummaryContainer">
@@ -71,6 +89,8 @@ class SummaryContainer extends Component<Props> {
         <Summary submission={submission}
                  handlePDFDownloadButtonClick={this.handlePDFDownloadButtonClick.bind(this)}
                  handleSubmitButtonClick={this.handleSubmitButtonClick.bind(this)}
+                 handleApproveButtonClick={this.handleApproveButtonClick.bind(this)}
+                 handleDenyButtonClick={this.handleDenyButtonClick.bind(this)}
                  viewAs={viewAs}
         />
         <Footer/>
@@ -99,7 +119,27 @@ class SummaryContainer extends Component<Props> {
       return;
     }
 
-    this.props.dispatchSubmitForApproval(submission.submissionID);
+    this.props.dispatchSubmitForApprovalAction(submission.submissionID);
+  }
+
+  handleApproveButtonClick() {
+    const {user, submission} = {...this.props.submissionState};
+
+    if (!user || !submission) {
+      return;
+    }
+
+    this.props.dispatchApproveSubmissionAction(submission.submissionID);
+  }
+
+  handleDenyButtonClick() {
+    const {user, submission} = {...this.props.submissionState};
+
+    if (!user || !submission) {
+      return;
+    }
+
+    this.props.dispatchDenySubmissionAction(submission.submissionID);
   }
 }
 

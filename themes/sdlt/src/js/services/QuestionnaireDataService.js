@@ -100,6 +100,7 @@ query {
     CisoApprovalStatus
     BusinessOwnerApprovalStatus
     SecurityArchitectApprovalStatus
+    IsCurrentUserAnApprover
   }
   readSiteConfig {
     Title
@@ -149,6 +150,7 @@ query {
         role: _.get(memberData, "UserRole"),
         email: _.get(memberData, "Email"),
       },
+      isCurrentUserApprover: Boolean(_.get(submissionJSON, "IsCurrentUserAnApprover", "")),
       submission: {
         questionnaireID: StringUtil.toString(_.get(submissionJSON, "Questionnaire.ID", "")),
         questionnaireTitle: StringUtil.toString(_.get(submissionJSON, "Questionnaire.Name", "")),
@@ -387,10 +389,46 @@ mutation {
     if (!status || !uuid) {
       throw DEFAULT_NETWORK_ERROR;
     }
-    if (status !== "waiting_for_appraval") {
+    if (status !== "waiting_for_approval") {
       throw new Error(`Submit questionnaire for approval failed, the status is ${status}`);
     }
 
+    return {uuid};
+  }
+
+  static async approveQuestionnaireSubmission(argument: {submissionID: string, csrfToken: string}): Promise<{uuid: string}>  {
+    const {submissionID, csrfToken} = {...argument};
+    const query = `
+mutation {
+ updateQuestionnaireStatusToApproved(ID: "${submissionID}") {
+   QuestionnaireStatus
+   UUID
+ }
+}`;
+    const json = await GraphQLRequestHelper.request({query, csrfToken});
+    const status = StringUtil.toString(_.get(json, "data.updateQuestionnaireStatusToApproved.QuestionnaireStatus", null));
+    const uuid = StringUtil.toString(_.get(json, "data.updateQuestionnaireStatusToApproved.UUID", null));
+    if (!status || !uuid) {
+      throw DEFAULT_NETWORK_ERROR;
+    }
+    return {uuid};
+  }
+
+  static async denyQuestionnaireSubmission(argument: {submissionID: string, csrfToken: string}): Promise<{uuid: string}>  {
+    const {submissionID, csrfToken} = {...argument};
+    const query = `
+mutation {
+ updateQuestionnaireStatusToDenied(ID: "${submissionID}") {
+   QuestionnaireStatus
+   UUID
+ }
+}`;
+    const json = await GraphQLRequestHelper.request({query, csrfToken});
+    const status = StringUtil.toString(_.get(json, "data.updateQuestionnaireStatusToDenied.QuestionnaireStatus", null));
+    const uuid = StringUtil.toString(_.get(json, "data.updateQuestionnaireStatusToDenied.UUID", null));
+    if (!status || !uuid) {
+      throw DEFAULT_NETWORK_ERROR;
+    }
     return {uuid};
   }
 }

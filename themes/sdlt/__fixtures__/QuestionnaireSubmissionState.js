@@ -11,6 +11,7 @@ const fixture: QuestionnaireSubmissionState = {
     role: "Developer",
     email: "thor.chen@catalyst.net.nz"
   },
+  isCurrentUserApprover: false,
   submission: {
     questionnaireID: "1",
     questionnaireTitle: "Proof of Concept or Software Trial Request Form",

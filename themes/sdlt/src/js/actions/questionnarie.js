@@ -111,13 +111,13 @@ export function putDataInQuestionnaireAnswer(payload: Question): ThunkAction {
         csrfToken,
         answerData
       });
+
+      // Move cursor
+      dispatch(moveAfterQuestionAnswered(payload));
     } catch (error) {
       // TODO: error handling
       alert(error.message);
     }
-
-    // Move cursor
-    dispatch(moveAfterQuestionAnswered(payload));
   };
 }
 
@@ -284,6 +284,32 @@ export function submitQuestionnaireForApproval(submissionID: string): ThunkActio
       alert(error);
     }
   };
+}
+
+export function approveQuestionnaireSubmission(submissionID: string): ThunkAction {
+  return async (dispatch, getState) => {
+    try {
+      const csrfToken = await CSRFTokenService.getCSRFToken();
+      const {uuid} = await QuestionnaireDataService.approveQuestionnaireSubmission({submissionID, csrfToken});
+      dispatch(loadQuestionnaireSubmissionState(uuid));
+    } catch(error) {
+      // TODO: errors
+      alert(error);
+    }
+  }
+}
+
+export function denyQuestionnaireSubmission(submissionID: string): ThunkAction {
+  return async (dispatch, getState) => {
+    try {
+      const csrfToken = await CSRFTokenService.getCSRFToken();
+      const {uuid} = await QuestionnaireDataService.denyQuestionnaireSubmission({submissionID, csrfToken});
+      dispatch(loadQuestionnaireSubmissionState(uuid));
+    } catch(error) {
+      // TODO: errors
+      alert(error);
+    }
+  }
 }
 
 // Commons

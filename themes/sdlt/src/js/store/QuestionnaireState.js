@@ -15,7 +15,8 @@ export type QuestionnaireSubmissionState = {
   title: string,
   siteTitle: string,
   user: User | null,
-  submission: Submission | null
+  submission: Submission | null,
+  isCurrentUserApprover: boolean
 };
 
 export type QuestionnaireState = {

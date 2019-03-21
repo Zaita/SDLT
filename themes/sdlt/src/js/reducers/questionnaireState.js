@@ -23,7 +23,8 @@ const defaultSubmissionState: QuestionnaireSubmissionState = {
   title: "",
   siteTitle: "",
   user: null,
-  submission: null
+  submission: null,
+  isCurrentUserApprover: false,
 };
 
 export function startState(state: QuestionnaireStartState = defaultStartState, action: LoadQuestionnaireStartAction) {
