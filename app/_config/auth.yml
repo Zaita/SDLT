@@ -1,0 +1,45 @@
+---
+Name: azure_auth
+---
+SilverStripe\Core\Injector\Injector:
+  Bigfork\SilverStripeOAuth\Client\Factory\ProviderFactory:
+    properties:
+      providers:
+        'ActiveDirectory': '%$AzureProvider'
+  AzureProvider:
+    class: 'TheNetworg\OAuth2\Client\Provider\Azure'
+    constructor:
+      Options:
+        # Taken from the "Application ID" ; Azure AD => App Registrations => {App}
+        clientId: '`AZURE_CLIENT_ID`'
+        # Create from Azure AD => App registrations => {App} => Settings => Keys
+        clientSecret: '`AZURE_CLIENT_SECRET`'
+        # From Azure AD => Properties => Directory ID
+        tenant: '`AZURE_TENANT_ID`'
+        # Add in Azure AD => App registrations => {App} => Reply URLs
+        redirectUri: https://sdlt-uat.catalystdemo.net.nz/oauth/callback/
+Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator:
+  providers:
+    'ActiveDirectory':
+      name: 'NZTA'
+      scopes: ['email profile']
+
+---
+Name: app-auth-reset
+After:
+  - '#oauthauthenticator'
+---
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Security\Security:
+    properties:
+      Authenticators: null
+---
+Name: app-auth
+After:
+  - '#app-auth-reset'
+---
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Security\Security:
+    properties:
+      Authenticators:
+        oauth: '%$Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator'
