@@ -57,7 +57,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SubmitterEmail'=> 'Varchar(255)',
         'QuestionnaireData' => 'Text',
         'AnswerData' => 'Text',
-        'QuestionnaireStatus' => 'Enum(array("in_progress", "submitted", "waiting_for_appraval", "approved", "denied"))',
+        'QuestionnaireStatus' => 'Enum(array("in_progress", "submitted", "waiting_for_approval", "approved", "denied"))',
         'UUID' => 'Varchar(36)',
         'StartEmailSendStatus' => 'Boolean',
         'CisoApprovalStatus' => 'Enum(array("not_applicable", "pending", "approved", "denied"))',
@@ -706,7 +706,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         throw new Exception('Sorry Questionnaire Submission does not belong to login user.');
                     }
 
-                    $questionnaireSubmission->QuestionnaireStatus = 'waiting_for_appraval';
+                    $questionnaireSubmission->QuestionnaireStatus = 'waiting_for_approval';
 
                     $questionnaireSubmission->write();
 
