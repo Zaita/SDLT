@@ -245,3 +245,25 @@ There are some known issues with devtools and Bionic. See the following pages th
 * [Thor's LXD problem]([https://github.com/silverstripe/vendor-plugin)
 * [Devtools: LXC + Bionic](http://devtools-docs.wgtn.cat-it.co.nz/catalyst-vagrant.html?highlight=bionic#troubleshooting)
 
+### Azure Active Directory
+This website uses Azure Active Directory to authenticate. Azure supports OAuth, 
+so we use the oauth-login module to authenticate.
+
+You need to add some values to your .env (or SetEnv) for this to work. Follow 
+these instructions to obtain these values from Azure active directory:
+https://www.symbiote.com.au/blog/azure-active-directory-and-silverstripe/
+
+```
+# Taken from the "Application ID" ; Azure AD => App Registrations => {App}
+AZURE_CLIENT_ID="..."
+
+# Create from Azure AD => App registrations => {App} => Settings => Keys
+AZURE_CLIENT_SECRET="..."
+
+# From Azure AD => Properties => Directory ID
+AZURE_TENANT_ID="..."
+```
+
+The default authenticator with email and password is removed for standard users.
+For non-NZTA CMS to authenticate, you will need to append showloginform=1 to the
+/admin URL
