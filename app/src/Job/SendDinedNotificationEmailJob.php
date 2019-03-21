@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This file contains the "SendApprovalLinkEmailJob" class.
+ * This file contains the "SendDeniedNotificationEmailJob" class.
  *
  * @category SilverStripe_Project
  * @package SDLT
@@ -22,7 +22,7 @@ use SilverStripe\Security\Member;
 /**
  * A QueuedJob is specifically designed to be invoked from an onAfterWrite() process
  */
-class SendApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJob
+class SendDeniedNotificationEmailJob extends AbstractQueuedJob implements QueuedJob
 {
     /**
      * @param QuestionnaireSubmission $questionnaireSubmission $questionnaireSubmission
@@ -38,7 +38,7 @@ class SendApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJob
     public function getTitle()
     {
         return sprintf(
-            'Initialising approval page link email for - %s (%d)',
+            'Initialising denied email notification - %s (%d)',
             $this->questionnaireSubmission->Questionnaire()->Name,
             $this->questionnaireSubmission->ID
         );
@@ -58,14 +58,9 @@ class SendApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJob
       */
     public function process()
     {
-        $toEmailAddressList = $this->questionnaireSubmission->getApprovalMemerIDList();
-
-        // send email to stack holder (CISO and Security Architect group)
-        foreach ($toEmailAddressList as $toEmailAddress) {
-            $member = Member::get()->byID($toEmailAddress);
-            if ($member) {
-                $this->sendEmail($member);
-            }
+        // send email to the user
+        if ($member = $this->questionnaireSubmission->User()) {
+            $this->sendEmail($member);
         }
 
         $this->isComplete = true;
@@ -78,15 +73,13 @@ class SendApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJob
       */
     public function sendEmail($member)
     {
-        $sub = 'Please Approve - ' . $this->questionnaireSubmission->Questionnaire()->Name;
+        $sub = $this->questionnaireSubmission->Questionnaire()->Name . ' is denied.';
         $from = 'no-reply@nzta.govt.nz';
 
         $email = Email::create()
-            ->setHTMLTemplate('Email\\ApprovalLinkEmail')
+            ->setHTMLTemplate('Email\\NotificationEmailOnApproved')
             ->setData([
-                'SubmitterName' => $this->questionnaireSubmission->SubmitterName,
-                'SubmitterEmail' => $this->questionnaireSubmission->SubmitterEmail,
-                'ReviewerName' => $member->FirstName,
+                'Name' => $member->FirstName,
                 'Link'=> $this->questionnaireSubmission->getSummaryPageLink(),
                 'QuestionnaireName' => $this->questionnaireSubmission->Questionnaire()->Name
             ])
