@@ -30,6 +30,7 @@ use Symbiote\QueuedJobs\Services\QueuedJobService;
 use NZTA\SDLT\Job\SendStartLinkEmailJob;
 use NZTA\SDLT\Job\SendSummaryPageLinkEmailJob;
 use NZTA\SDLT\Job\SendApprovalLinkEmailJob;
+use NZTA\SDLT\Job\SendDeniedNotificationEmailJob;
 use Silverstripe\Control\Director;
 use SilverStripe\Core\Convert;
 use Ramsey\Uuid\Uuid;
@@ -56,7 +57,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SubmitterEmail'=> 'Varchar(255)',
         'QuestionnaireData' => 'Text',
         'AnswerData' => 'Text',
-        'QuestionnaireStatus' => 'Enum(array("in_progress", "submitted", "waiting_for_appraval", "approved", "denied"))',
+        'QuestionnaireStatus' => 'Enum(array("in_progress", "submitted", "waiting_for_approval", "approved", "denied"))',
         'UUID' => 'Varchar(36)',
         'StartEmailSendStatus' => 'Boolean',
         'CisoApprovalStatus' => 'Enum(array("not_applicable", "pending", "approved", "denied"))',
@@ -205,6 +206,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $this->updateQuestionnaireStatusToWaitingForApproval($scaffolder);
         $this->updateQuestionnaireStatusToSubmitted($scaffolder);
         $this->updateQuestionnaireStatusToApproved($scaffolder);
+        $this->updateQuestionnaireStatusToDenied($scaffolder);
+        $this->getUserPermissionToApproveDeny($scaffolder);
 
         return $scaffolder;
     }
@@ -295,7 +298,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     $uuid = Uuid::uuid4();
                     $model->UUID = (string) $uuid;
-
 
                     $model->QuestionnaireData = $model->getQuestionsData($questionnaire);
 
@@ -704,7 +706,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         throw new Exception('Sorry Questionnaire Submission does not belong to login user.');
                     }
 
-                    $questionnaireSubmission->QuestionnaireStatus = 'waiting_for_appraval';
+                    $questionnaireSubmission->QuestionnaireStatus = 'waiting_for_approval';
 
                     $questionnaireSubmission->write();
 
@@ -756,7 +758,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     // Check submission ID
                     if (empty($args['ID']) || !is_numeric($args['ID'])) {
-                        throw new Exception('Please enter a valid ID.');
+                        throw new Exception('Please enter a valid Questionnaire Submission ID.');
                     }
 
                     // get QuestionnaireSubmission
@@ -766,83 +768,151 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         throw new Exception('No data available for Questionnaire Submission. Please start again');
                     }
 
-                    if ($questionnaireSubmission->QuestionnaireStatus !== 'waiting_for_appraval') {
-                        throw new Exception('Sorry, Questionnaire Submission is not ready for approval');
+                    $questionnaireSubmission->updateQuestionnaireApproveDenyUserDetails($member, 'approved');
+
+                    $isApproved = $questionnaireSubmission->isQuestionnaireApproved();
+
+                    if ($isApproved) {
+                        $questionnaireSubmission->QuestionnaireStatus = 'approved';
+                        $questionnaireSubmission->write();
+                        $qs = QueuedJobService::create();
+                        $qs->queueJob(
+                            new SendApprovedNotificationEmailJob($questionnaireSubmission),
+                            date('Y-m-d H:i:s', time() + 90)
+                        );
                     }
 
-                    $accessDetail = QuestionnaireSubmission::is_current_user_has_access_to_approve_deny($questionnaireSubmission);
-
-                    $accessDetailObj = json_decode($accessDetail);
-
-                    if ($accessDetailObj->hasAccess) {
-                        $group = $accessDetailObj->group;
-                        if ($group == 'security-architect') {
-                            $questionnaireSubmission->updateSecurityArchitectDetail(
-                                $questionnaireSubmission,
-                                $member,
-                                'approved'
-                            );
-                        }
-
-                        if ($group == 'ciso') {
-                            $questionnaireSubmission->updaterCisoDetail(
-                                $questionnaireSubmission,
-                                $member,
-                                'approved'
-                            );
-                        }
-
-                        if ($group == 'business-owner') {
-                            $questionnaireSubmission->updateBusinessOwnerDetail(
-                                $questionnaireSubmission,
-                                $member,
-                                'approved'
-                            );
-                        }
-
-                        $isApproved = QuestionnaireSubmission::is_questionnaire_submission_approved($questionnaireSubmission);
-
-                        if ($isApproved) {
-                            $questionnaireSubmission->QuestionnaireStatus = 'approved';
-                            $qs = QueuedJobService::create();
-                            $qs->queueJob(
-                                new SendApprovedNotificationEmailJob($questionnaireSubmission),
-                                date('Y-m-d H:i:s', time() + 90)
-                            );
-                        }
-
-                        return $questionnaireSubmission;
-                    }
+                    return $questionnaireSubmission;
                 }
             })
             ->end();
     }
 
     /**
-     * @param dataObject $questionnaireSubmission questionnaireSubmission
+     * @param SchemaScaffolder $scaffolder SchemaScaffolder
+     *
+     * @return void
+     */
+    public function updateQuestionnaireStatusToDenied(SchemaScaffolder $scaffolder)
+    {
+        $scaffolder
+            ->mutation('updateQuestionnaireStatusToDenied', QuestionnaireSubmission::class)
+            ->addArgs([
+                'ID' => 'ID!',
+            ])
+            ->setResolver(new class implements ResolverInterface {
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
+                 * @throws Exception
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    $member = Security::getCurrentUser();
+
+                    // Check authentication
+                    if (!$member) {
+                        throw new Exception('Please log in first.');
+                    }
+
+                    // Check submission ID
+                    if (empty($args['ID']) || !is_numeric($args['ID'])) {
+                        throw new Exception('Please enter a valid Questionnaire Submission ID.');
+                    }
+
+                    // get QuestionnaireSubmission
+                    $questionnaireSubmission = QuestionnaireSubmission::get()->byID($args['ID']);
+
+                    if (!$questionnaireSubmission) {
+                        throw new Exception('No data available for Questionnaire Submission. Please start again');
+                    }
+
+                    $questionnaireSubmission->updateQuestionnaireApproveDenyUserDetails($member, 'denied');
+
+                    $questionnaireSubmission->QuestionnaireStatus = 'denied';
+                    $questionnaireSubmission->write();
+
+                    // send email to the user (submitter)
+                    $queuedJobService = QueuedJobService::create();
+                    $queuedJobService->queueJob(
+                        new SendDeniedNotificationEmailJob($questionnaireSubmission),
+                        date('Y-m-d H:i:s', time() + 90)
+                    );
+
+                    return $questionnaireSubmission;
+                }
+            })
+            ->end();
+    }
+
+    /**
+     * update quesionnaire approver details based on group and permission
+     *
+     * @param DataObject $member member
+     * @param string     $status status approved/denied
+     * @throws Exception
+     * @return Void
+     */
+    public function updateQuestionnaireApproveDenyUserDetails($member, $status)
+    {
+        $accessDetail = $this->isCurrentUserHasAccessToApproveDeny();
+
+        $accessDetailObj = json_decode($accessDetail);
+
+        if (!$accessDetailObj->hasAccess) {
+            throw new Exception($accessDetailObj->message);
+        }
+
+        if ($accessDetailObj->hasAccess) {
+            $group = $accessDetailObj->group;
+
+            if ($group == 'security-architect') {
+                $this->updateSecurityArchitectDetail($member, $status);
+            }
+
+            if ($group == 'ciso') {
+                $this->updateCisoDetail($member, $status);
+            }
+
+            if ($group == 'business-owner') {
+                $this->updateBusinessOwnerDetail($member, $status);
+            }
+        }
+    }
+
+    /**
+     * for quesionnaire submission, it required to be approved by every group,
+     * if their approval is required(CISO Group, Security Architect Group, Business owner),
+     * then only we can change questionnaire submission status
      *
      * @return boolean
      */
-    public static function is_questionnaire_submission_approved($questionnaireSubmission)
+    public function isQuestionnaireApproved()
     {
         // approve status of ciso
         $cisoApproveStatus = 0;
-        if ($questionnaireSubmission->CisoApprovalStatus == 'not_applicable'
-            || $questionnaireSubmission->CisoApprovalStatus == "approved") {
+        if ($this->CisoApprovalStatus == 'not_applicable'
+            || $this->CisoApprovalStatus == "approved") {
             $cisoApproveStatus = 1;
         }
 
         // approve status of ciso
         $securityArchitectApproveStatus = 0;
-        if ($questionnaireSubmission->SecurityArchitectApprovalStatus == 'not_applicable'
-            || $questionnaireSubmission->SecurityArchitectApprovalStatus == "approved") {
+        if ($this->SecurityArchitectApprovalStatus == 'not_applicable'
+            || $this->SecurityArchitectApprovalStatus == "approved") {
             $securityArchitectApproveStatus = 1;
         }
 
         // approve status of ciso
         $businessOwnerApproveStatus = 0;
-        if ($questionnaireSubmission->BusinessOwnerApprovalStatus == 'not_applicable'
-            || $questionnaireSubmission->BusinessOwnerApprovalStatus == "approved") {
+        if ($this->BusinessOwnerApprovalStatus == 'not_applicable'
+            || $this->BusinessOwnerApprovalStatus == "approved") {
             $businessOwnerApproveStatus = 1;
         }
 
@@ -855,165 +925,287 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
-    * @param DataObject $questionnaireSubmission questionnaireSubmission
-    * @param DataObject $member                  member
-    * @param string     $status                  status
+    * update approver details for group security-architect
+    *
+    * @param DataObject $member member
+    * @param string     $status status
     * @return void
     */
-    public function updateSecurityArchitectDetail($questionnaireSubmission, $member, $status)
+    public function updateSecurityArchitectDetail($member = null, $status = null)
     {
-        $questionnaireSubmission->SecurityArchitectApproverID = $member->ID;
-        $questionnaireSubmission->SecurityArchitectApprovalStatus = $status;
-        $questionnaireSubmission->SecurityArchitectStatusUpdateDate = date('Y-m-d H:i:s');
+        $this->SecurityArchitectApproverID = $member->ID;
+        $this->SecurityArchitectApprovalStatus = $status;
+        $this->SecurityArchitectStatusUpdateDate = date('Y-m-d H:i:s');
 
         if ($_SERVER['REMOTE_ADDR']) {
-            $questionnaireSubmission->SecurityArchitectApproverIPAddress = Convert::raw2sql($_SERVER['REMOTE_ADDR']);
+            $this->SecurityArchitectApproverIPAddress = Convert::raw2sql($_SERVER['REMOTE_ADDR']);
         }
 
         if (gethostname()) {
-            $questionnaireSubmission->SecurityArchitectApproverMachineName = Convert::raw2sql(gethostname());
+            $this->SecurityArchitectApproverMachineName = Convert::raw2sql(gethostname());
         }
 
-        $questionnaireSubmission->write();
+        $this->write();
     }
 
     /**
-    * @param DataObject $questionnaireSubmission questionnaireSubmission
-    * @param DataObject $member                  member
-    * @param string     $status                  status
+    * update approver details for a business-owner
+    *
+    * @param DataObject $member member
+    * @param string     $status status
     * @return void
     */
-    public function updateBusinessOwnerDetail($questionnaireSubmission = null, $member = null, $status = null)
+    public function updateBusinessOwnerDetail($member = null, $status = null)
     {
-        $questionnaireSubmission->BusinessOwnerApprovalStatus = $status;
-        $questionnaireSubmission->BusinessOwnerStatusUpdateDate = date('Y-m-d H:i:s');
+        $this->BusinessOwnerApprovalStatus = $status;
+        $this->BusinessOwnerStatusUpdateDate = date('Y-m-d H:i:s');
 
         if ($_SERVER['REMOTE_ADDR']) {
-            $questionnaireSubmission->BusinessOwnerIPAddress = Convert::raw2sql($_SERVER['REMOTE_ADDR']);
+            $this->BusinessOwnerIPAddress = Convert::raw2sql($_SERVER['REMOTE_ADDR']);
         }
         if (gethostname()) {
-            $questionnaireSubmission->BusinessOwnerMachineName = Convert::raw2sql(gethostname());
+            $this->BusinessOwnerMachineName = Convert::raw2sql(gethostname());
         }
 
-        $questionnaireSubmission->write();
+        $this->write();
     }
 
     /**
-    * @param DataObject $questionnaireSubmission questionnaireSubmission
-    * @param DataObject $member                  member
-    * @param string     $status                  status
+    * update approver details for group ciso
+    *
+    * @param DataObject $member member
+    * @param string     $status status
     * @return void
     */
-    public function updaterCisoDetail($questionnaireSubmission = null, $member = null, $status = null)
+    public function updateCisoDetail($member = null, $status = null)
     {
-        $questionnaireSubmission->CisoApprover = $member->ID;
-        $questionnaireSubmission->CisoApprovalStatus = $status;
-        $questionnaireSubmission->CisoApprovalStatusUpdateDate = date('Y-m-d H:i:s');
+        $this->CisoApprover = $member->ID;
+        $this->CisoApprovalStatus = $status;
+        $this->CisoApprovalStatusUpdateDate = date('Y-m-d H:i:s');
 
         if ($_SERVER['REMOTE_ADDR']) {
-            $questionnaireSubmission->CisoApproverIPAddress = Convert::raw2sql($_SERVER['REMOTE_ADDR']);
+            $this->CisoApproverIPAddress = Convert::raw2sql($_SERVER['REMOTE_ADDR']);
         }
 
         if (gethostname()) {
-            $questionnaireSubmission->CisoApproverMachineName = Convert::raw2sql(gethostname());
+            $this->CisoApproverMachineName = Convert::raw2sql(gethostname());
         }
 
-        $questionnaireSubmission->write();
+        $this->write();
     }
 
     /**
-     * @param DataObject $questionnaireSubmission Questionnaire Submission
+     * check if current user has access to approve or deny the Questionnaire
      *
      * @throws Exception
-
-     * @return Boolean
+     * @return object
      */
-    public static function is_current_user_has_access_to_approve_deny($questionnaireSubmission)
+    public function isCurrentUserHasAccessToApproveDeny()
     {
         $approvalGroup = ['business-owner', 'ciso', 'security-architect'];
 
         $member = Security::getCurrentUser();
 
         // is user exist in approval member list
-        $memberList = $questionnaireSubmission->getApprovalMemerIDList();
+        $memberList = $this->getApprovalMemerIDList();
+
+        $logInUserApprovalGroup = $this->getCurrentLoginUserGroup($member);
+
+        // check Current user in the approval group
+        if (!$logInUserApprovalGroup || !in_array($logInUserApprovalGroup, $approvalGroup)) {
+            return json_encode([
+                "hasAccess" => false,
+                "group" => $logInUserApprovalGroup,
+                "message" => 'Sorry, log in user does not belong to approval group.'
+            ]);
+        }
 
         if (!in_array($member->ID, $memberList)) {
-            throw new Exception('Sorry current user don\'t has access to apparove/deny.');
-        }
-
-        // get current member group
-        $logInMemberApprovalGroup = null;
-
-        //check if current user is business owner
-        // else calculate user group
-        if ($questionnaireSubmission->isBusinessOwner()) {
-            $logInMemberApprovalGroup = 'business-owner';
-        } else if ($member->Groups()->count() == 1) {
-            $logInMemberApprovalGroup = $member->Groups()->first()->Code;
-        } else {
-            $groups = $member->Groups();
-            foreach ($groups as $group) {
-                if ($group->Code == 'ciso' &&
-                    $questionnaireSubmission->CisoApprovalStatus !== 'not_applicable') {
-                      $logInMemberApprovalGroup = $group->Code;
-                }
-
-                if ($group->Code == 'security-architect' &&
-                    $questionnaireSubmission->CisoApprovalStatus !== 'not_applicable') {
-                      $logInMemberApprovalGroup = $group->Code;
-                }
-            }
-        }
-
-        // check if Current user approval group
-        if (!$logInMemberApprovalGroup || !in_array($logInMemberApprovalGroup, $approvalGroup)) {
-            throw new Exception('Sorry, log in user does not belong to approval group');
+            return json_encode([
+                "hasAccess" => false,
+                "group" => $logInUserApprovalGroup,
+                "message" => 'Sorry current user don\'t has access to apparove/deny.'
+            ]);
         }
 
         // check current user group has permission to approve/deny or
         // if QuestionnaireSubmission is already approved/denied by other Member
-        // then return exception
-        switch ($logInMemberApprovalGroup) {
+        // of the group
+        switch ($logInUserApprovalGroup) {
             case 'business-owner':
-                if ($questionnaireSubmission->BusinessOwnerApprovalStatus == 'not_applicable') {
-                    throw new Exception('Sorry business owner approval is not required.');
+                if ($this->BusinessOwnerApprovalStatus == 'not_applicable') {
+                    return json_encode([
+                        "hasAccess" => false,
+                        "group" => $logInUserApprovalGroup,
+                        "message" => 'Sorry business owner approval is not required,'
+                    ]);
                 }
-                if ($questionnaireSubmission->BusinessOwnerApprovalStatus == 'approved'
-                    || $questionnaireSubmission->BusinessOwnerApprovalStatus == 'denied') {
-                    throw new Exception('Sorry, this is already approved or denied by business owner.
-                        Please check summary page for detail.');
+                if ($this->BusinessOwnerApprovalStatus == 'approved'
+                    || $this->BusinessOwnerApprovalStatus == 'denied') {
+                    return json_encode([
+                        "hasAccess" => false,
+                        "group" => $logInUserApprovalGroup,
+                        "message" => 'Sorry, this is already approved or denied by business owner.'
+                    ]);
                 }
-                if ($questionnaireSubmission->BusinessOwnerApprovalStatus == 'pending') {
-                    return json_encode(["hasAccess" => true, "group" => $logInMemberApprovalGroup]);
+                if ($this->BusinessOwnerApprovalStatus == 'pending') {
+                    return json_encode([
+                        "hasAccess" => true,
+                        "group" => $logInUserApprovalGroup,
+                        "message" => 'Approval pending from Business Owner'
+                    ]);
                 }
                 break;
             case 'ciso':
-                if ($questionnaireSubmission->CisoApprovalStatus == 'not_applicable') {
-                    throw new Exception('Sorry ciso group approval is not required.');
+                if ($this->CisoApprovalStatus == 'not_applicable') {
+                    return json_encode([
+                        "hasAccess" => false,
+                        "group" => $logInUserApprovalGroup,
+                        "message" => 'Sorry ciso group approval is not required.'
+                    ]);
                 }
-                if ($questionnaireSubmission->CisoApprovalStatus == 'approved'
-                    || $questionnaireSubmission->CisoApprovalStatus == 'denied') {
-                    throw new Exception('Sorry, this is already approved or denied by other group member.
-                        Please check summary page for detail.');
+                if ($this->CisoApprovalStatus == 'approved'
+                    || $this->CisoApprovalStatus == 'denied') {
+                    return json_encode([
+                        "hasAccess" => false,
+                        "group" => $logInUserApprovalGroup,
+                        "message" => 'Sorry, this is already approved or denied by other group member.'
+                    ]);
                 }
-                if ($questionnaireSubmission->CisoApprovalStatus == 'pending') {
-                    return json_encode(["hasAccess" => true, "group" => $logInMemberApprovalGroup]);
+                if ($this->CisoApprovalStatus == 'pending') {
+                    return json_encode([
+                        "hasAccess" => true,
+                        "group" => $logInUserApprovalGroup,
+                        "message" => 'CISO approval is pending.'
+                    ]);
                 }
                 break;
             case 'security-architect':
-                if ($questionnaireSubmission->SecurityArchitectApprovalStatus == 'not_applicable') {
-                    throw new Exception('Sorry security architect approval is not required.');
+                if ($this->SecurityArchitectApprovalStatus == 'not_applicable') {
+                    return json_encode([
+                        "hasAccess" => false,
+                        "group" => $logInUserApprovalGroup,
+                        "message" => 'Sorry security architect approval is not required.'
+                    ]);
                 }
-                if ($questionnaireSubmission->SecurityArchitectApprovalStatus == 'approved'
-                    || $questionnaireSubmission->CisoApprovalStatus == 'denied') {
-                    throw new Exception('Sorry, this is already approved or denied by other group member.
-                        Please check summary page for detail.');
+                if ($this->SecurityArchitectApprovalStatus == 'approved'
+                    || $this->CisoApprovalStatus == 'denied') {
+                    return json_encode([
+                        "hasAccess" => false,
+                        "group" => $logInUserApprovalGroup,
+                        "message" => 'Sorry, this is already approved or denied by other group member.'
+                    ]);
                 }
-                if ($questionnaireSubmission->SecurityArchitectApprovalStatus == 'pending') {
-                    return json_encode(["hasAccess" => true, "group" => $logInMemberApprovalGroup]);
+                if ($this->SecurityArchitectApprovalStatus == 'pending') {
+                      return json_encode([
+                          "hasAccess" => true,
+                          "group" => $logInUserApprovalGroup,
+                          "message" => 'CISO approval is pending.'
+                      ]);
                 }
                 break;
+            default:
+                return json_encode([
+                    "hasAccess" => false,
+                    "group" => $logInUserApprovalGroup,
+                    "message" => 'sorry, log in user does not belongs to approval group.'
+                ]);
         }
+    }
+
+    /**
+     * get Current login user groups
+     *
+     * @param DataObject $member member
+     *
+     * @return string
+     */
+    public function getCurrentLoginUserGroup($member)
+    {
+        // get current member group
+        $logInUserApprovalGroup = '';
+
+        // check if current user is business owner or
+        // else calculate user group
+        if ($this->isBusinessOwner()) {
+            $logInUserApprovalGroup = 'business-owner';
+        } else if ($member->Groups()->count() == 1) {
+            $logInUserApprovalGroup = $member->Groups()->first()->Code;
+        } else if ($member->Groups()->count() > 1) {
+            $groups = $member->Groups();
+
+            foreach ($groups as $group) {
+                if ($group->Code == 'ciso' &&
+                    $this->CisoApprovalStatus !== 'not_applicable') {
+                      $logInUserApprovalGroup = $group->Code;
+                }
+
+                if ($group->Code == 'security-architect' &&
+                    $this->SecurityArchitectApprovalStatus !== 'not_applicable') {
+                      $logInUserApprovalGroup = $group->Code;
+                }
+            }
+
+            if (empty($logInUserApprovalGroup)) {
+                $logInUserApprovalGroup = $member->Groups()->first()->Code;
+            }
+        }
+
+        return $logInUserApprovalGroup;
+    }
+
+
+    /**
+     * @param SchemaScaffolder $scaffolder SchemaScaffolder
+     *
+     * @return void
+     */
+    public function getUserPermissionToApproveDeny(SchemaScaffolder $scaffolder)
+    {
+        $scaffolder
+            ->mutation('getUserPermissionToApproveDeny', QuestionnaireSubmission::class)
+            ->addArgs([
+                'ID' => 'ID!',
+            ])
+            ->setResolver(new class implements ResolverInterface {
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
+                 * @throws Exception
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    $member = Security::getCurrentUser();
+
+                    // Check authentication
+                    if (!$member) {
+                        throw new Exception('Please log in first.');
+                    }
+
+                    // Check submission ID
+                    if (empty($args['ID']) || !is_numeric($args['ID'])) {
+                        throw new Exception('Please enter a valid Questionnaire Submission ID.');
+                    }
+
+                    // get QuestionnaireSubmission
+                    $questionnaireSubmission = QuestionnaireSubmission::get()->byID($args['ID']);
+
+                    if (!$questionnaireSubmission) {
+                        throw new Exception('No data available for Questionnaire Submission. Please start again');
+                    }
+
+                    $accessDetailsObj = $questionnaireSubmission->isCurrentUserHasAccessToApproveDeny();
+
+                    return $accessDetailsObj;
+                }
+            })
+            ->end();
     }
 
     /**
