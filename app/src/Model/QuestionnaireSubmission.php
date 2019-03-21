@@ -774,6 +774,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     if ($isApproved) {
                         $questionnaireSubmission->QuestionnaireStatus = 'approved';
+                        $questionnaireSubmission->write();
                         $qs = QueuedJobService::create();
                         $qs->queueJob(
                             new SendApprovedNotificationEmailJob($questionnaireSubmission),
