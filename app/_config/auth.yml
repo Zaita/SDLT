@@ -22,7 +22,7 @@ Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator:
   providers:
     'ActiveDirectory':
       name: 'NZTA'
-      scopes: ['email profile']
+      scopes: ['offline_access User.Read']
 
 ---
 Name: app-auth-reset
