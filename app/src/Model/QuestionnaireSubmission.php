@@ -153,7 +153,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'SecurityArchitectApproverIPAddress',
                 'SecurityArchitectApproverMachineName',
                 'SecurityArchitectStatusUpdateDate',
-                'SendApprovedNotificatonToSecurityArchitect'
+                'SendApprovedNotificatonToSecurityArchitect',
+                'IsCurrentUserAnApprover',
             ]);
 
         $submissionScaffolder
@@ -207,10 +208,34 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $this->updateQuestionnaireStatusToSubmitted($scaffolder);
         $this->updateQuestionnaireStatusToApproved($scaffolder);
         $this->updateQuestionnaireStatusToDenied($scaffolder);
-        $this->getUserPermissionToApproveDeny($scaffolder);
 
         return $scaffolder;
     }
+
+    /**
+     * get is current user has access for approval or not
+     *
+     * @return boolean
+     */
+    public function getIsCurrentUserAnApprover()
+    {
+        $member = Security::getCurrentUser();
+
+        if (!$member) {
+            return false;
+        }
+
+        $accessDetail = $this->isCurrentUserHasAccessToApproveDeny($member);
+
+        if (!empty($accessDetail)) {
+            $accessDetailObj = json_decode($accessDetail);
+            return $accessDetailObj->hasAccess;
+        }
+
+        return false;
+    }
+
+
 
     /**
      * @param SchemaScaffolder $scaffolder SchemaScaffolder
@@ -861,7 +886,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      */
     public function updateQuestionnaireApproveDenyUserDetails($member, $status)
     {
-        $accessDetail = $this->isCurrentUserHasAccessToApproveDeny();
+        $accessDetail = $this->isCurrentUserHasAccessToApproveDeny($member);
 
         $accessDetailObj = json_decode($accessDetail);
 
@@ -996,15 +1021,13 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
     /**
      * check if current user has access to approve or deny the Questionnaire
-     *
+     * @param Dataobject $member member
      * @throws Exception
      * @return object
      */
-    public function isCurrentUserHasAccessToApproveDeny()
+    public function isCurrentUserHasAccessToApproveDeny($member)
     {
         $approvalGroup = ['business-owner', 'ciso', 'security-architect'];
-
-        $member = Security::getCurrentUser();
 
         // is user exist in approval member list
         $memberList = $this->getApprovalMemerIDList();
@@ -1152,60 +1175,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         }
 
         return $logInUserApprovalGroup;
-    }
-
-
-    /**
-     * @param SchemaScaffolder $scaffolder SchemaScaffolder
-     *
-     * @return void
-     */
-    public function getUserPermissionToApproveDeny(SchemaScaffolder $scaffolder)
-    {
-        $scaffolder
-            ->mutation('getUserPermissionToApproveDeny', QuestionnaireSubmission::class)
-            ->addArgs([
-                'ID' => 'ID!',
-            ])
-            ->setResolver(new class implements ResolverInterface {
-                /**
-                 * Invoked by the Executor class to resolve this mutation / query
-                 * @see Executor
-                 *
-                 * @param mixed       $object  object
-                 * @param array       $args    args
-                 * @param mixed       $context context
-                 * @param ResolveInfo $info    info
-                 * @throws Exception
-                 * @return mixed
-                 */
-                public function resolve($object, array $args, $context, ResolveInfo $info)
-                {
-                    $member = Security::getCurrentUser();
-
-                    // Check authentication
-                    if (!$member) {
-                        throw new Exception('Please log in first.');
-                    }
-
-                    // Check submission ID
-                    if (empty($args['ID']) || !is_numeric($args['ID'])) {
-                        throw new Exception('Please enter a valid Questionnaire Submission ID.');
-                    }
-
-                    // get QuestionnaireSubmission
-                    $questionnaireSubmission = QuestionnaireSubmission::get()->byID($args['ID']);
-
-                    if (!$questionnaireSubmission) {
-                        throw new Exception('No data available for Questionnaire Submission. Please start again');
-                    }
-
-                    $accessDetailsObj = $questionnaireSubmission->isCurrentUserHasAccessToApproveDeny();
-
-                    return $accessDetailsObj;
-                }
-            })
-            ->end();
     }
 
     /**
