@@ -11,7 +11,9 @@
         "unclecheese/display-logic": "^2.0",
         "symbiote/silverstripe-gridfieldextensions": "^3.2",
         "symbiote/silverstripe-queuedjobs": "^4.3",
-        "ramsey/uuid": "^3.8"
+        "ramsey/uuid": "^3.8",
+        "bigfork/silverstripe-oauth-login": "^2",
+        "thenetworg/oauth2-azure": "^1.4.2"
     },
     "require-dev": {
         "phpunit/phpunit": "^5.7",
