@@ -367,10 +367,6 @@ mutation {
     if (!status || !uuid) {
       throw DEFAULT_NETWORK_ERROR;
     }
-    if (status !== "submitted") {
-      throw new Error(`Submit questionnaire failed, the status is ${status}`);
-    }
-
     return {uuid};
   }
 
@@ -389,10 +385,6 @@ mutation {
     if (!status || !uuid) {
       throw DEFAULT_NETWORK_ERROR;
     }
-    if (status !== "waiting_for_approval") {
-      throw new Error(`Submit questionnaire for approval failed, the status is ${status}`);
-    }
-
     return {uuid};
   }
 

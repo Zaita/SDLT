@@ -2,7 +2,7 @@
 
 import pdfMake from "pdfmake/build/pdfmake";
 import vfsFonts from "pdfmake/build/vfs_fonts";
-import type {AnswerAction, Question} from "../types/Questionnaire";
+import type {AnswerAction, AnswerInput, Question} from "../types/Questionnaire";
 import React from "react";
 import StringUtil from "./StringUtil";
 import _ from "lodash";
@@ -156,9 +156,8 @@ export default class PDFUtil {
       }
 
       // Input-type questions
-      if (question.type === "input" && question.inputs && Array.isArray(question.inputs)) {
-        question.inputs.forEach((input, index, arr) => {
-          const isLast = (index === arr.length - 1);
+      if (question.type === "input" && question.inputs && Array.isArray(question.inputs) && question.inputs.length > 0) {
+        const renderInputData = (input: AnswerInput) => {
           let data: string = input.data || "";
           // Format data
           if (input.type === "date") {
@@ -168,11 +167,25 @@ export default class PDFUtil {
           if (input.type === "textarea") {
             data = "\n" + data;
           }
+          return data;
+        };
 
-          content.push({
-            text: `${input.label}: ${StringUtil.toString(data)}`,
-            margin: [0, 0, 0, isLast ? defaultFontSize : parseInt(`${defaultFontSize / 3}`)],
+        // For multiple-inputs question, display their labels
+        if (question.inputs.length > 1) {
+          question.inputs.forEach((input, index, arr) => {
+            const isLast = (index === arr.length - 1);
+            content.push({
+              text: `${input.label}: ${StringUtil.toString(renderInputData(input))}`,
+              margin: [0, 0, 0, isLast ? defaultFontSize : parseInt(`${defaultFontSize / 3}`)],
+            });
           });
+          return;
+        }
+
+        // For single-input question, display its answer directly
+        content.push({
+          text: renderInputData(question.inputs[0]).trim(),
+          margin: [0, 0, 0, defaultFontSize],
         });
         return;
       }

@@ -5,7 +5,6 @@ import type {Submission} from "../../types/Questionnaire";
 import LightButton from "../Button/LightButton";
 import DarkButton from "../Button/DarkButton";
 import pdfIcon from "../../../img/icons/pdf.svg";
-import AnswersPreview from "./AnswersPreview";
 import {Link} from "react-router-dom";
 import editIcon from "../../../img/icons/edit.svg";
 import _ from "lodash";
@@ -50,10 +49,6 @@ class Summary extends Component<Props> {
     return (
       <div className="Summary">
         {this.renderSubmitterInfo(submission)}
-        <div className="answers">
-          <h3>Answers</h3>
-        </div>
-        <AnswersPreview submission={submission}/>
         {this.renderApprovals(submission)}
         {this.renderButtons(submission)}
       </div>
@@ -97,9 +92,34 @@ class Summary extends Component<Props> {
       handleDenyButtonClick
     } = {...this.props};
 
-    // Display buttons for submitter when status is "submitted"
     let editAnswersButton = null;
     let sendForApprovalButton = null;
+    const downloadPDFButton = (
+      <LightButton title="DOWNLOAD PDF OF ANSWERS"
+                   iconImage={pdfIcon}
+                   classes={["button"]}
+                   onClick={handlePDFDownloadButtonClick}/>
+    );
+    let approveButton = null;
+    let denyButton = null;
+
+    if (submission.status === "approved" || submission.status === "denied") {
+      return (
+        <div className="buttons">
+          <div>
+            {editAnswersButton}
+            {downloadPDFButton}
+            {sendForApprovalButton}
+          </div>
+          <div>
+            {approveButton}
+            {denyButton}
+          </div>
+        </div>
+      );
+    }
+
+    // Display buttons for submitter when status is "submitted"
     if (viewAs === "submitter") {
       editAnswersButton = (
         <LightButton title="EDIT ANSWERS"
@@ -120,8 +140,6 @@ class Summary extends Component<Props> {
     }
 
     // Display "APPROVE" and "DENY" for approvers when status is "waiting for approval"
-    let approveButton = null;
-    let denyButton = null;
     if (viewAs === "approver") {
       approveButton = (
         <DarkButton title="APPROVE"
@@ -141,10 +159,7 @@ class Summary extends Component<Props> {
       <div className="buttons">
         <div>
           {editAnswersButton}
-          <LightButton title="DOWNLOAD PDF"
-                       iconImage={pdfIcon}
-                       classes={["button"]}
-                       onClick={handlePDFDownloadButtonClick}/>
+          {downloadPDFButton}
           {sendForApprovalButton}
         </div>
         <div>
@@ -167,6 +182,11 @@ class Summary extends Component<Props> {
       <div className="approvals">
         <h3>Approvals</h3>
         <div>
+          <b>Security Architect</b>
+          &nbsp;-&nbsp;
+          {prettifyStatus(approvalStatus.securityArchitect)}
+        </div>
+        <div>
           <b>Chief Information Security Officer</b>
           &nbsp;-&nbsp;
           {prettifyStatus(approvalStatus.chiefInformationSecurityOfficer)}
@@ -175,11 +195,6 @@ class Summary extends Component<Props> {
           <b>Business Owner</b>
           &nbsp;-&nbsp;
           {prettifyStatus(approvalStatus.businessOwner)}
-        </div>
-        <div>
-          <b>Security Architect</b>
-          &nbsp;-&nbsp;
-          {prettifyStatus(approvalStatus.securityArchitect)}
         </div>
       </div>
     );
