@@ -235,8 +235,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         return false;
     }
 
-
-
     /**
      * @param SchemaScaffolder $scaffolder SchemaScaffolder
      *
@@ -444,7 +442,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         return $link;
     }
 
-
     /**
      * @param SchemaScaffolder $scaffolder SchemaScaffolder
      *
@@ -474,7 +471,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 public function resolve($object, array $args, $context, ResolveInfo $info)
                 {
                     $member = Security::getCurrentUser();
-                    $businessOwnerID = 0;
 
                     // Check authentication
                     if (!$member) {
@@ -529,12 +525,24 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         if ($jsonDecodeAnswerData->answerType == "input") {
                             QuestionnaireSubmission::validate_answer_input_data($jsonDecodeAnswerData->inputs);
 
-                            // validate businessOwnerID, if field type is input
-                            $businessOwnerID = QuestionnaireSubmission::validate_business_owner_email(
-                                $jsonDecodeAnswerData->inputs,
+                            // check if input field is email field and
+                            // it is product owner email field
+                            $productOwnerEmailField = QuestionnaireSubmission::is_email_field_prouct_owner_email_field(
                                 $questionnaireSubmission->QuestionnaireData,
                                 $args['QuestionID']
                             );
+
+                            // if it is product owner email field, then add product owner member id
+                            if (!empty($productOwnerEmailField)) {
+                                // validate businessOwnerID, if field type is input
+                                $businessOwnerID = QuestionnaireSubmission::validate_business_owner_email(
+                                    $jsonDecodeAnswerData->inputs,
+                                    $productOwnerEmailField,
+                                    $questionnaireSubmission->User()->ID
+                                );
+
+                                $questionnaireSubmission->BusinessOwnerID = $businessOwnerID;
+                            }
                         }
 
                         if ($jsonDecodeAnswerData->answerType == "action") {
@@ -553,7 +561,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $data = json_encode($answerDataArr);
 
                     $questionnaireSubmission->AnswerData = $data;
-                    $questionnaireSubmission->BusinessOwnerID = $businessOwnerID;
 
                     $questionnaireSubmission->write();
 
@@ -564,19 +571,17 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * @param array  $inputAnswers      input field answer
      * @param string $questionnaireData questionnaire
-     * @param array  $QuestionId        Question Id
-     * @throws Exception
-     * @return int
+     * @param int    $QuestionId        Question Id
+     * @return mixed
      */
-    public static function validate_business_owner_email($inputAnswers, $questionnaireData, $QuestionId)
+    public static function is_email_field_prouct_owner_email_field($questionnaireData, $QuestionId)
     {
-        $questionnaireData = json_decode($questionnaireData);
+        $questions = json_decode($questionnaireData);
 
         $emailField = null;
 
-        foreach ($questionnaireData as $question) {
+        foreach ($questions as $question) {
             if ($question->ID == $QuestionId) {
                 foreach ($question->AnswerInputFields as $inputFields) {
                     if ($inputFields->InputType == 'email' &&
@@ -588,19 +593,28 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             }
         }
 
-        if (!$emailField) {
-            return 0;
-        }
+        return $emailField;
+    }
 
+    /**
+     * @param array  $inputAnswers input field answer
+     * @param object $emailField   email field
+     * @param int    $submitterID  Submitter Id
+     *
+     * @throws Exception
+     * @return int
+     */
+    public static function validate_business_owner_email($inputAnswers, $emailField, $submitterID)
+    {
         foreach ($inputAnswers as $inputAnswer) {
             if ($emailField->ID == $inputAnswer->id) {
                 if (empty($inputAnswer->data)) {
                     return 0;
                 }
 
-                $member = Member::get()->filter('Email', $inputAnswer->data)->first();
+                $businessOwner = Member::get()->filter('Email', $inputAnswer->data)->first();
 
-                if (!$member) {
+                if (!$businessOwner) {
                     throw new Exception(
                         sprintf(
                             'Sorry, we don\'t have any user with given email address:- %s.',
@@ -609,10 +623,15 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     );
                 }
 
-                return $member->ID;
+                if ((int)$businessOwner->ID === (int)$submitterID) {
+                    throw new Exception(
+                        'Sorry, this is a submitter email address, please enter the business owner email address.'
+                    );
+                }
+
+                return $businessOwner->ID;
             }
         }
-
 
         return 0;
     }
