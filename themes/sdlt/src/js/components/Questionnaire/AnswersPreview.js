@@ -1,7 +1,7 @@
 // @flow
 
 import React, {Component} from "react";
-import type {AnswerAction, Question, Submission} from "../../types/Questionnaire";
+import type {AnswerAction, AnswerInput, Question, Submission} from "../../types/Questionnaire";
 import _ from "lodash";
 import moment from "moment";
 
@@ -58,27 +58,42 @@ class AnswersPreview extends Component<Props> {
     }
 
     // Render data for input
-    if (question.type === "input" && question.inputs && Array.isArray(question.inputs)) {
+    if (question.type === "input" && question.inputs && Array.isArray(question.inputs) && question.inputs.length > 0) {
+      const renderInputData = (input: AnswerInput) => {
+        let data: string = input.data || "";
+        // Format data
+        if (input.type === "date") {
+          data = moment(data).format("DD-MM-YYYY");
+        }
+        // Format textarea
+        if (input.type === "textarea") {
+          data = "\n" + data;
+        }
+        return data;
+      };
+
+      // For multiple-inputs question, display their labels
+      if (question.inputs.length > 1) {
+        return (
+          <div>
+            {question.inputs.map((input => {
+              const data = renderInputData(input);
+              return (
+                <div key={input.id}>
+                  <b>{input.label}</b>&nbsp;
+                  <span>-</span>&nbsp;
+                  <span>{data}</span>
+                </div>
+              );
+            }))}
+          </div>
+        );
+      }
+
+      // For single-input question, display its answer directly
       return (
         <div>
-          {question.inputs.map((input => {
-            let data: string = input.data || "";
-            // Format data
-            if (input.type === "date") {
-              data = moment(data).format("DD-MM-YYYY");
-            }
-            // Format textarea
-            if (input.type === "textarea") {
-              data = "\n" + data;
-            }
-            return (
-              <div key={input.id}>
-                <b>{input.label}</b>&nbsp;
-                <span>-</span>&nbsp;
-                <span>{data}</span>
-              </div>
-            );
-          }))}
+          {renderInputData(question.inputs[0]).trim()}
         </div>
       );
     }

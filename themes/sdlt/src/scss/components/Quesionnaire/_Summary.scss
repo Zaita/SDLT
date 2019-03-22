@@ -32,11 +32,6 @@
             @extend .base-section;
         }
 
-        .answers {
-            @extend .base-section;
-            margin-bottom: 6px;
-        }
-
         .buttons {
             display: flex;
             flex-direction: row;
