@@ -42,7 +42,7 @@ use SilverStripe\Security\Security;
 class TaskSubmission extends DataObject implements ScaffoldingProvider
 {
     const STATUS_IN_PROGRESS = 'in_progress';
-    CONST STATUS_COMPLETE = 'complete';
+    const STATUS_COMPLETE = 'complete';
 
     /**
      * @var string
@@ -111,42 +111,9 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * When the user submit a questionnaire, the system will generate task submissions by calling this method
-     *
-     * @param string|int $taskID The task ID
-     * @param string|int $questionnaireSubmissionID The questionnaire submission ID
-     * @param int $submitterID The submitter ID
-     * @return TaskSubmission
-     * @throws Exception
-     */
-    public static function create_task_submission($taskID, $questionnaireSubmissionID, $submitterID)
-    {
-        $taskSubmission = TaskSubmission::create();
-
-        // Relations
-        $taskSubmission->TaskID = $taskID;
-        $taskSubmission->QuestionnaireSubmissionID = $questionnaireSubmissionID;
-        $taskSubmission->SubmitterID = $submitterID;
-
-        // Structure of task questionnaire
-        $task = Task::get_by_id($taskID);
-        if (!$task->exists()) {
-            throw new Exception('Task does not exist');
-        }
-        $questionnaireData = $task->getQuestionsData();
-        $taskSubmission->QuestionnaireData = json_encode($questionnaireData);
-
-        // Initial statue of the submission
-        $taskSubmission->Status = TaskSubmission::STATUS_IN_PROGRESS;
-        $taskSubmission->UUID = (string) Uuid::uuid4();
-
-        $taskSubmission->write();
-
-        return $taskSubmission;
-    }
-
-    /**
      * @param SchemaScaffolder $scaffolder The scaffolder of the schema
+     *
+     * @return void
      */
     public function provideGraphQLScaffolding(SchemaScaffolder $scaffolder)
     {
@@ -170,7 +137,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'taskID' => 'String!',
                 'questionnaireSubmissionID' => 'String!'
             ])
-            ->setResolver(new class implements ResolverInterface {
+            ->setResolver(new class implements ResolverInterface
+            {
                 /**
                  * Invoked by the Executor class to resolve this mutation / query
                  * @see Executor
@@ -208,10 +176,49 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                         throw new Exception('Questionnaire submission does not belong to you');
                     }
 
-                    $taskSubmission = TaskSubmission::create_task_submission($taskID, $questionnaireSubmissionID, $submitterID);
+                    $taskSubmission = TaskSubmission::create_task_submission(
+                        $taskID,
+                        $questionnaireSubmissionID,
+                        $submitterID
+                    );
                     return $taskSubmission;
                 }
             })
             ->end();
+    }
+
+    /**
+     * When the user submit a questionnaire, the system will generate task submissions by calling this method
+     *
+     * @param string|int $taskID                    The task ID
+     * @param string|int $questionnaireSubmissionID The questionnaire submission ID
+     * @param int        $submitterID               The submitter ID
+     * @return TaskSubmission
+     * @throws Exception
+     */
+    public static function create_task_submission($taskID, $questionnaireSubmissionID, $submitterID)
+    {
+        $taskSubmission = TaskSubmission::create();
+
+        // Relations
+        $taskSubmission->TaskID = $taskID;
+        $taskSubmission->QuestionnaireSubmissionID = $questionnaireSubmissionID;
+        $taskSubmission->SubmitterID = $submitterID;
+
+        // Structure of task questionnaire
+        $task = Task::get_by_id($taskID);
+        if (!$task->exists()) {
+            throw new Exception('Task does not exist');
+        }
+        $questionnaireData = $task->getQuestionsData();
+        $taskSubmission->QuestionnaireData = json_encode($questionnaireData);
+
+        // Initial statue of the submission
+        $taskSubmission->Status = TaskSubmission::STATUS_IN_PROGRESS;
+        $taskSubmission->UUID = (string)Uuid::uuid4();
+
+        $taskSubmission->write();
+
+        return $taskSubmission;
     }
 }
