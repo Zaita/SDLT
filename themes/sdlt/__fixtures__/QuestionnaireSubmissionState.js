@@ -180,7 +180,8 @@ const fixture: QuestionnaireSubmissionState = {
         isApplicable: true
       }
     ],
-    status: "in_progress"
+    status: "in_progress",
+    taskSubmissions: []
   }
 };
 

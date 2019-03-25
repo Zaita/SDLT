@@ -2,6 +2,10 @@
 
 export default class URLUtil {
 
+  static getTaskSubmissionURL(uuid: string) {
+    return `/tasks/submission/${uuid}`;
+  }
+
   static redirectToQuestionnaireEditing(uuid: string) {
     window.location.href = `/#/questionnaire/submission/${uuid}`;
   }

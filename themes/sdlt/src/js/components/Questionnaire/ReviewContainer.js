@@ -9,7 +9,6 @@ import Footer from "../Footer/Footer";
 import type {QuestionnaireSubmissionState} from "../../store/QuestionnaireState";
 import {loadQuestionnaireSubmissionState, submitQuestionnaire} from "../../actions/questionnarie";
 import Review from "./Review";
-import SubmissionDataUtil from "../../utils/SubmissionDataUtil";
 import PDFUtil from "../../utils/PDFUtil";
 import _ from "lodash";
 import URLUtil from "../../utils/URLUtil";
@@ -25,8 +24,8 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
     dispatchLoadSubmissionAction(submissionHash: string) {
       dispatch(loadQuestionnaireSubmissionState(submissionHash));
     },
-    dispatchSubmitQuestionnaire(submissionID: string) {
-      dispatch(submitQuestionnaire(submissionID));
+    dispatchSubmitQuestionnaire() {
+      dispatch(submitQuestionnaire());
     },
   };
 };
@@ -38,7 +37,7 @@ type ownProps = {
 type reduxProps = {
   submissionState: QuestionnaireSubmissionState,
   dispatchLoadSubmissionAction: (submissionHash: string) => void,
-  dispatchSubmitQuestionnaire: (submissionID: string) => void,
+  dispatchSubmitQuestionnaire: () => void,
 };
 
 type Props = ownProps & reduxProps;
@@ -72,18 +71,7 @@ class ReviewContainer extends Component<Props> {
   }
 
   handleSubmitButtonClick() {
-    const submission = this.props.submissionState.submission;
-    if (!submission) {
-      return;
-    }
-
-    // Check if the questionnaire is answered properly (only have answered and non-applicable questions)
-    if (SubmissionDataUtil.existsUnansweredQuestion(submission.questions)) {
-      alert("There are questions not answered properly, please check your answers");
-      return;
-    }
-
-    this.props.dispatchSubmitQuestionnaire(submission.submissionID);
+    this.props.dispatchSubmitQuestionnaire();
   }
 
   handlePDFDownloadButtonClick() {
