@@ -57,9 +57,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SubmitterEmail'=> 'Varchar(255)',
         'QuestionnaireData' => 'Text',
         'AnswerData' => 'Text',
-        'QuestionnaireStatus' => 'Enum(array("in_progress", "submitted", "waiting_for_approval", "approved", "denied"))',
+        'QuestionnaireStatus' => 'Enum(array("in_progress", "submitted", "waiting_for_security_architect_approval","waiting_for_approval" "approved", "denied"))',
         'UUID' => 'Varchar(36)',
         'StartEmailSendStatus' => 'Boolean',
+        'SendEmailToSecurityArchitect' => 'Boolean',
         'CisoApprovalStatus' => 'Enum(array("not_applicable", "pending", "approved", "denied"))',
         'CisoApproverIPAddress' => 'Varchar(255)',
         'CisoApproverMachineName' => 'Varchar(255)',
@@ -73,6 +74,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SecurityArchitectApproverMachineName' => 'Varchar(255)',
         'SecurityArchitectStatusUpdateDate' => 'Varchar(255)',
         'SendApprovedNotificatonToSecurityArchitect' => 'Boolean',
+        'IsApprovalEmailSentToSA' => 'Boolean',
     ];
 
     /**
@@ -105,6 +107,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
     /**
      * Default sort ordering
+     *
      * @var array
      */
     private static $default_sort = ['ID' => 'DESC'];
@@ -115,6 +118,28 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     public function getQuestionnaireName()
     {
         return $this->Questionnaire()->Name;
+    }
+
+    /**
+     * get is current user has access for approval or not
+     *
+     * @return boolean
+     */
+    public function getIsCurrentUserAnApprover()
+    {
+        $member = Security::getCurrentUser();
+
+        if (!$member) {
+            return false;
+        }
+
+        $accessDetail = $this->doesCurrentUserHasAccessToApproveDeny($member);
+
+        if (!empty($accessDetail)) {
+            return $accessDetail['hasAccess'];
+        }
+
+        return false;
     }
 
     /**
@@ -155,6 +180,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'SecurityArchitectStatusUpdateDate',
                 'SendApprovedNotificatonToSecurityArchitect',
                 'IsCurrentUserAnApprover',
+                'SendEmailToSecurityArchitect'
             ]);
 
         $submissionScaffolder
@@ -187,7 +213,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     // Check argument
                     if (!$uuid) {
-                        throw new Exception('Wrong argument');
+                        throw new Exception('Sorry, wrong UUID.');
                     }
 
                     // Filter data by UUID
@@ -204,35 +230,13 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
         $this->createQuestionnaireSubmission($scaffolder);
         $this->updateQuestionnaireSubmission($scaffolder);
-        $this->updateQuestionnaireStatusToWaitingForApproval($scaffolder);
         $this->updateQuestionnaireStatusToSubmitted($scaffolder);
+        $this->updateQuestionnaireAfterSubmit($scaffolder);
+        $this->updateStatusToWaitingForSecurityArchitectApproval($scaffolder);
         $this->updateQuestionnaireStatusToApproved($scaffolder);
         $this->updateQuestionnaireStatusToDenied($scaffolder);
 
         return $scaffolder;
-    }
-
-    /**
-     * get is current user has access for approval or not
-     *
-     * @return boolean
-     */
-    public function getIsCurrentUserAnApprover()
-    {
-        $member = Security::getCurrentUser();
-
-        if (!$member) {
-            return false;
-        }
-
-        $accessDetail = $this->isCurrentUserHasAccessToApproveDeny($member);
-
-        if (!empty($accessDetail)) {
-            $accessDetailObj = json_decode($accessDetail);
-            return $accessDetailObj->hasAccess;
-        }
-
-        return false;
     }
 
     /**
@@ -292,31 +296,18 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $model->SubmitterEmail = $member->Email;
                     $model->QuestionnaireStatus = 'in_progress';
 
-                    // Is CisoApprovalRequired for the questionnaire
+                    // set approval status of BO, SA and CISO
                     $model->CisoApprovalStatus = 'pending';
-
-                    if (!$questionnaire->IsCisoApprovalRequired) {
-                        $model->CisoApprovalStatus = 'not_applicable';
-                    }
 
                     $model->BusinessOwnerApprovalStatus = 'pending';
 
-                    // Is BusinessOwnerApprovalRequired for the questionnaire
-                    if (!$questionnaire->IsBusinessOwnerApprovalRequired) {
-                        $model->BusinessOwnerApprovalStatus = 'not_applicable';
-                    }
-
                     $model->SecurityArchitectApprovalStatus = 'pending';
-
-                    // Is SecurityArchitectApprovalRequired
-                    if (!$questionnaire->IsSecurityArchitectApprovalRequired) {
-                        $model->SecurityArchitectApprovalStatus = 'not_applicable';
-                    }
 
                     $model->QuestionnaireID = $questionnaire->ID;
 
                     $model->UserID = $member->ID;
                     $model->StartEmailSendStatus = 0;
+                    $model->SendEmailToSecurityArchitect = 0;
                     $model->SendApprovedNotificatonToSecurityArchitect = $questionnaire->SendApprovedNotificatonToSecurityArchitect;
 
                     $uuid = Uuid::uuid4();
@@ -327,6 +318,342 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $model->write();
 
                     return $model;
+                }
+            })
+            ->end();
+    }
+
+    /**
+     * @param SchemaScaffolder $scaffolder SchemaScaffolder
+     *
+     * @return void
+     */
+    public function updateQuestionnaireSubmission(SchemaScaffolder $scaffolder)
+    {
+        $scaffolder
+            ->mutation('updateQuestionnaireSubmission', QuestionnaireSubmission::class)
+            ->addArgs([
+                'ID' => 'ID!',
+                'QuestionID' => 'ID!',
+                'AnswerData' => 'String'
+            ])
+            ->setResolver(new class implements ResolverInterface {
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
+                 * @throws Exception
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
+
+                    $doesUserHasAcess = $questionnaireSubmission->doesQuestionnairBelongToCurrentUser();
+
+                    if ($doesUserHasAcess) {
+                        // Check question ID
+                        if (empty($args['QuestionID']) || !is_numeric($args['QuestionID'])) {
+                            throw new Exception('Please enter a valid QuestionID.');
+                        }
+
+                        // Check answer data
+                        if (empty($args['AnswerData']) || !is_string($args['AnswerData'])) {
+                            throw new Exception('Please enter a valid AnswerData.');
+                        }
+
+                        // AnswerData is generated by `window.btoa(JSON.stringify(answerData))` in JavaScript
+                        // This is to avoid parsing issue caused by `quote`, `\n` and other special characters
+                        $jsonDecodeAnswerData = json_decode(base64_decode($args['AnswerData']));
+
+                        if (is_null($jsonDecodeAnswerData)) {
+                            throw new Exception('data is not a vaild json object.');
+                        }
+
+                        // Validate answer data
+                        do {
+                            // If there is no answer or not applicable, don't validate it
+                            // Scenario: only use this API to save "current" and "applicable" flag
+                            if ((bool)($jsonDecodeAnswerData->hasAnswer) === false) {
+                                break;
+                            }
+                            if ((bool)($jsonDecodeAnswerData->isApplicable) === false) {
+                                break;
+                            }
+
+                            if ($jsonDecodeAnswerData->answerType == "input") {
+                                QuestionnaireSubmission::validate_answer_input_data($jsonDecodeAnswerData->inputs);
+
+                                // check if input field is email field and
+                                // it is product owner email field
+                                $productOwnerEmailField = QuestionnaireSubmission::is_email_field_prouct_owner_email_field(
+                                    $questionnaireSubmission->QuestionnaireData,
+                                    $args['QuestionID']
+                                );
+
+                                // if it is product owner email field, then add product owner member id
+                                if (!empty($productOwnerEmailField)) {
+                                    // validate businessOwnerID, if field type is input
+                                    $businessOwnerID = QuestionnaireSubmission::validate_business_owner_email(
+                                        $jsonDecodeAnswerData->inputs,
+                                        $productOwnerEmailField,
+                                        $questionnaireSubmission->User()->ID
+                                    );
+
+                                    $questionnaireSubmission->BusinessOwnerID = $businessOwnerID;
+                                }
+                            }
+
+                            if ($jsonDecodeAnswerData->answerType == "action") {
+                                QuestionnaireSubmission::validate_answer_action_data($jsonDecodeAnswerData->actions);
+                            }
+                        } while (false);
+
+                        $answerDataArr = [];
+
+                        if (!empty($questionnaireSubmission->AnswerData)) {
+                            $answerDataArr = json_decode($questionnaireSubmission->AnswerData, true);
+                        }
+
+                        $answerDataArr[$args['QuestionID']] = $jsonDecodeAnswerData;
+
+                        $data = json_encode($answerDataArr);
+
+                        $questionnaireSubmission->AnswerData = $data;
+
+                        $questionnaireSubmission->write();
+                    }
+                    return $questionnaireSubmission;
+                }
+            })
+            ->end();
+    }
+
+    /**
+     * @param SchemaScaffolder $scaffolder SchemaScaffolder
+     *
+     * @return void
+     */
+    public function updateQuestionnaireStatusToSubmitted(SchemaScaffolder $scaffolder)
+    {
+        $scaffolder
+            ->mutation('updateQuestionnaireStatusToSubmitted', QuestionnaireSubmission::class)
+            ->addArgs([
+                'ID' => 'ID!',
+            ])
+            ->setResolver(new class implements ResolverInterface {
+
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
+                 * @throws Exception
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
+
+                    $doesUserHasAcess = $questionnaireSubmission->doesQuestionnairBelongToCurrentUser();
+
+                    if ($doesUserHasAcess) {
+                        $questionnaireSubmission->QuestionnaireStatus = 'submitted';
+
+                        $questionnaireSubmission->write();
+
+                        // after submit the questionnaire, please send a summary page link
+                        // to the submitter
+                        $queuedJobService = QueuedJobService::create();
+
+                        $queuedJobService->queueJob(
+                            new SendSummaryPageLinkEmailJob($questionnaireSubmission),
+                            date('Y-m-d H:i:s', time() + 30)
+                        );
+                    }
+
+                    return $questionnaireSubmission;
+                }
+            })
+            ->end();
+    }
+
+    /**
+     * @param SchemaScaffolder $scaffolder SchemaScaffolder
+     *
+     * @return void
+     */
+    public function updateQuestionnaireAfterSubmit(SchemaScaffolder $scaffolder)
+    {
+        $scaffolder
+            ->mutation('updateQuestionnaireAfterSubmit', QuestionnaireSubmission::class)
+            ->addArgs([
+                'ID' => 'ID!',
+            ])
+            ->setResolver(new class implements ResolverInterface {
+
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
+                 * @throws Exception
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
+
+                    $doesUserHasAcess = $questionnaireSubmission->doesQuestionnairBelongToCurrentUser();
+
+                    if ($doesUserHasAcess) {
+                        $questionnaireSubmission->QuestionnaireStatus = 'in_progress';
+
+                        $questionnaireSubmission->write();
+                    }
+
+                    return $questionnaireSubmission;
+                }
+            })
+            ->end();
+    }
+
+    /**
+     * @param SchemaScaffolder $scaffolder SchemaScaffolder
+     *
+     * @return void
+     */
+    public function updateStatusToWaitingForSecurityArchitectApproval(SchemaScaffolder $scaffolder)
+    {
+        $scaffolder
+            ->mutation('updateStatusToWaitingForSecurityArchitectApproval', QuestionnaireSubmission::class)
+            ->addArgs([
+                'ID' => 'ID!',
+            ])
+            ->setResolver(new class implements ResolverInterface {
+
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
+                 * @throws Exception
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
+
+                    $doesUserHasAcess = $questionnaireSubmission->doesQuestionnairBelongToCurrentUser();
+
+                    $questionnaireSubmission->QuestionnaireStatus = 'waiting_for_security_architect_approval';
+
+                    if (!$questionnaireSubmission->SendEmailToSecurityArchitect) {
+                        $members = $questionnaireSubmission->getApprovalMembersListByGroup('security-architect');
+
+                        if (!$members) {
+                            throw new Exception('Please add member in Security architect group.');
+                        }
+
+                        $questionnaireSubmission->SendEmailToSecurityArchitect = 1;
+
+                        // Send Email to Security Architect group for Approval
+                        $qs = QueuedJobService::create();
+
+                        $qs->queueJob(
+                            new SendApprovalLinkEmailJob($questionnaireSubmission, $members),
+                            date('Y-m-d H:i:s', time() + 90)
+                        );
+                    }
+
+                    $questionnaireSubmission->write();
+
+                    return $questionnaireSubmission;
+                }
+            })
+            ->end();
+    }
+
+    /**
+     * @param SchemaScaffolder $scaffolder SchemaScaffolder
+     *
+     * @return void
+     */
+    public function updateQuestionnaireStatusToApproved(SchemaScaffolder $scaffolder)
+    {
+        $scaffolder
+            ->mutation('updateQuestionnaireStatusToApproved', QuestionnaireSubmission::class)
+            ->addArgs([
+                'ID' => 'ID!',
+            ])
+            ->setResolver(new class implements ResolverInterface {
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
+                 * @throws Exception
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
+
+                    $questionnaireSubmission->updateQuestionnaireOnApproveAndDeny('approved');
+
+                    return $questionnaireSubmission;
+                }
+            })
+            ->end();
+    }
+
+    /**
+     * @param SchemaScaffolder $scaffolder SchemaScaffolder
+     *
+     * @return void
+     */
+    public function updateQuestionnaireStatusToDenied(SchemaScaffolder $scaffolder)
+    {
+        $scaffolder
+            ->mutation('updateQuestionnaireStatusToDenied', QuestionnaireSubmission::class)
+            ->addArgs([
+                'ID' => 'ID!',
+            ])
+            ->setResolver(new class implements ResolverInterface {
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
+                 * @throws Exception
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
+
+                    $questionnaireSubmission->updateQuestionnaireOnApproveAndDeny('denied');
+
+                    return $questionnaireSubmission;
                 }
             })
             ->end();
@@ -443,134 +770,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * @param SchemaScaffolder $scaffolder SchemaScaffolder
-     *
-     * @return void
-     */
-    public function updateQuestionnaireSubmission(SchemaScaffolder $scaffolder)
-    {
-        $scaffolder
-            ->mutation('updateQuestionnaireSubmission', QuestionnaireSubmission::class)
-            ->addArgs([
-                'ID' => 'ID!',
-                'QuestionID' => 'ID!',
-                'AnswerData' => 'String'
-            ])
-            ->setResolver(new class implements ResolverInterface {
-                /**
-                 * Invoked by the Executor class to resolve this mutation / query
-                 * @see Executor
-                 *
-                 * @param mixed       $object  object
-                 * @param array       $args    args
-                 * @param mixed       $context context
-                 * @param ResolveInfo $info    info
-                 * @throws Exception
-                 * @return mixed
-                 */
-                public function resolve($object, array $args, $context, ResolveInfo $info)
-                {
-                    $member = Security::getCurrentUser();
-
-                    // Check authentication
-                    if (!$member) {
-                        throw new Exception('Please log in first.');
-                    }
-
-                    // Check submission ID
-                    if (empty($args['ID']) || !is_numeric($args['ID'])) {
-                        throw new Exception('Please enter a valid ID.');
-                    }
-
-                    // Check question ID
-                    if (empty($args['QuestionID']) || !is_numeric($args['QuestionID'])) {
-                        throw new Exception('Please enter a valid QuestionID.');
-                    }
-
-                    // Check answer data
-                    if (empty($args['AnswerData']) || !is_string($args['AnswerData'])) {
-                        throw new Exception('Please enter a valid AnswerData.');
-                    }
-
-                    // AnswerData is generated by `window.btoa(JSON.stringify(answerData))` in JavaScript
-                    // This is to avoid parsing issue caused by `quote`, `\n` and other special characters
-                    $jsonDecodeAnswerData = json_decode(base64_decode($args['AnswerData']));
-
-                    if (is_null($jsonDecodeAnswerData)) {
-                        throw new Exception('data is not a vaild json object.');
-                    }
-
-                    // get QuestionnaireSubmission
-                    $questionnaireSubmission = QuestionnaireSubmission::get()->byID($args['ID']);
-
-                    if (!$questionnaireSubmission) {
-                        throw new Exception('No data available for Questionnaire Submission. Please start again');
-                    }
-
-                    if ((int)($member->ID) !== (int)($questionnaireSubmission->UserID)) {
-                        throw new Exception('Sorry Questionnaire Submission does not belong to login user.');
-                    }
-
-                    // Validate answer data
-                    do {
-                        // If there is no answer or not applicable, don't validate it
-                        // Scenario: only use this API to save "current" and "applicable" flag
-                        if ((bool)($jsonDecodeAnswerData->hasAnswer) === false) {
-                            break;
-                        }
-                        if ((bool)($jsonDecodeAnswerData->isApplicable) === false) {
-                            break;
-                        }
-
-                        if ($jsonDecodeAnswerData->answerType == "input") {
-                            QuestionnaireSubmission::validate_answer_input_data($jsonDecodeAnswerData->inputs);
-
-                            // check if input field is email field and
-                            // it is product owner email field
-                            $productOwnerEmailField = QuestionnaireSubmission::is_email_field_prouct_owner_email_field(
-                                $questionnaireSubmission->QuestionnaireData,
-                                $args['QuestionID']
-                            );
-
-                            // if it is product owner email field, then add product owner member id
-                            if (!empty($productOwnerEmailField)) {
-                                // validate businessOwnerID, if field type is input
-                                $businessOwnerID = QuestionnaireSubmission::validate_business_owner_email(
-                                    $jsonDecodeAnswerData->inputs,
-                                    $productOwnerEmailField,
-                                    $questionnaireSubmission->User()->ID
-                                );
-
-                                $questionnaireSubmission->BusinessOwnerID = $businessOwnerID;
-                            }
-                        }
-
-                        if ($jsonDecodeAnswerData->answerType == "action") {
-                            QuestionnaireSubmission::validate_answer_action_data($jsonDecodeAnswerData->actions);
-                        }
-                    } while (false);
-
-                    $answerDataArr = [];
-
-                    if (!empty($questionnaireSubmission->AnswerData)) {
-                        $answerDataArr = json_decode($questionnaireSubmission->AnswerData, true);
-                    }
-
-                    $answerDataArr[$args['QuestionID']] = $jsonDecodeAnswerData;
-
-                    $data = json_encode($answerDataArr);
-
-                    $questionnaireSubmission->AnswerData = $data;
-
-                    $questionnaireSubmission->write();
-
-                    return $questionnaireSubmission;
-                }
-            })
-            ->end();
-    }
-
-    /**
      * @param string $questionnaireData questionnaire
      * @param int    $QuestionId        Question Id
      * @return mixed
@@ -594,6 +793,51 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         }
 
         return $emailField;
+    }
+
+    /**
+     * @param int $submissionID Questionnaire Submission ID
+     *
+     * @throws Exception
+     * @return Dataobject
+     */
+    public static function validate_before_updating_questionnaire_submission($submissionID)
+    {
+        $member = Security::getCurrentUser();
+
+        // Check authentication
+        if (!$member) {
+            throw new Exception('Please log in first.');
+        }
+
+        // Check submission ID
+        if (empty($submissionID) || !is_numeric($submissionID)) {
+            throw new Exception('Please enter a valid ID.');
+        }
+
+        // get QuestionnaireSubmission
+        $questionnaireSubmission = QuestionnaireSubmission::get()->byID($submissionID);
+
+        if (!$questionnaireSubmission) {
+            throw new Exception('No data available for Questionnaire Submission. Please start again');
+        }
+
+        return $questionnaireSubmission;
+    }
+
+    /**
+     * @throws Exception
+     * @return boolean
+     */
+    public function doesQuestionnairBelongToCurrentUser()
+    {
+        $member = Security::getCurrentUser();
+
+        if ((int)($member->ID) !== (int)($this->UserID)) {
+            throw new Exception('Sorry Questionnaire Submission does not belong to login user.');
+        }
+
+        return true;
     }
 
     /**
@@ -637,339 +881,88 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * @param SchemaScaffolder $scaffolder SchemaScaffolder
-     *
-     * @return void
-     */
-    public function updateQuestionnaireStatusToSubmitted(SchemaScaffolder $scaffolder)
-    {
-        $scaffolder
-            ->mutation('updateQuestionnaireStatusToSubmitted', QuestionnaireSubmission::class)
-            ->addArgs([
-                'ID' => 'ID!',
-            ])
-            ->setResolver(new class implements ResolverInterface {
-
-                /**
-                 * Invoked by the Executor class to resolve this mutation / query
-                 * @see Executor
-                 *
-                 * @param mixed       $object  object
-                 * @param array       $args    args
-                 * @param mixed       $context context
-                 * @param ResolveInfo $info    info
-                 * @throws Exception
-                 * @return mixed
-                 */
-                public function resolve($object, array $args, $context, ResolveInfo $info)
-                {
-                    $member = Security::getCurrentUser();
-
-                    // Check authentication
-                    if (!$member) {
-                        throw new Exception('Please log in first.');
-                    }
-
-                    // Check submission ID
-                    if (empty($args['ID']) || !is_numeric($args['ID'])) {
-                        throw new Exception('Please enter a valid ID.');
-                    }
-
-                    // get QuestionnaireSubmission
-                    $questionnaireSubmission = QuestionnaireSubmission::get()->byID($args['ID']);
-
-                    if (!$questionnaireSubmission) {
-                        throw new Exception('No data available for Questionnaire Submission. Please start again');
-                    }
-
-                    $questionnaireSubmission->QuestionnaireStatus = 'submitted';
-
-                    $questionnaireSubmission->write();
-
-                    // after submit the questionnaire, please send a summary page link
-                    // to the submitter
-                    $queuedJobService = QueuedJobService::create();
-
-                    $queuedJobService->queueJob(
-                        new SendSummaryPageLinkEmailJob($questionnaireSubmission),
-                        date('Y-m-d H:i:s', time() + 30)
-                    );
-
-                    return $questionnaireSubmission;
-                }
-            })
-            ->end();
-    }
-
-    /**
-     * @param SchemaScaffolder $scaffolder SchemaScaffolder
-     *
-     * @return void
-     */
-    public function updateQuestionnaireStatusToWaitingForApproval(SchemaScaffolder $scaffolder)
-    {
-        $scaffolder
-            ->mutation('updateQuestionnaireStatusToWaitingForApproval', QuestionnaireSubmission::class)
-            ->addArgs([
-                'ID' => 'ID!',
-            ])
-            ->setResolver(new class implements ResolverInterface {
-
-                /**
-                 * Invoked by the Executor class to resolve this mutation / query
-                 * @see Executor
-                 *
-                 * @param mixed       $object  object
-                 * @param array       $args    args
-                 * @param mixed       $context context
-                 * @param ResolveInfo $info    info
-                 * @throws Exception
-                 * @return mixed
-                 */
-                public function resolve($object, array $args, $context, ResolveInfo $info)
-                {
-                    $member = Security::getCurrentUser();
-
-                    // Check authentication
-                    if (!$member) {
-                        throw new Exception('Please log in first.');
-                    }
-
-                    // Check submission ID
-                    if (empty($args['ID']) || !is_numeric($args['ID'])) {
-                        throw new Exception('Please enter a valid ID.');
-                    }
-                    // get QuestionnaireSubmission
-                    $questionnaireSubmission = QuestionnaireSubmission::get()->byID($args['ID']);
-
-                    if (!$questionnaireSubmission) {
-                        throw new Exception('No data available for Questionnaire Submission. Please start again');
-                    }
-
-                    if ((int)($member->ID) !== (int)($questionnaireSubmission->UserID)) {
-                        throw new Exception('Sorry Questionnaire Submission does not belong to login user.');
-                    }
-
-                    $questionnaireSubmission->QuestionnaireStatus = 'waiting_for_approval';
-
-                    $questionnaireSubmission->write();
-
-                    // Send Email for Approval
-                    $qs = QueuedJobService::create();
-                    $qs->queueJob(
-                        new SendApprovalLinkEmailJob($questionnaireSubmission),
-                        date('Y-m-d H:i:s', time() + 90)
-                    );
-
-                    return $questionnaireSubmission;
-                }
-            })
-            ->end();
-    }
-
-    /**
-     * @param SchemaScaffolder $scaffolder SchemaScaffolder
-     *
-     * @return void
-     */
-    public function updateQuestionnaireStatusToApproved(SchemaScaffolder $scaffolder)
-    {
-        $scaffolder
-            ->mutation('updateQuestionnaireStatusToApproved', QuestionnaireSubmission::class)
-            ->addArgs([
-                'ID' => 'ID!',
-            ])
-            ->setResolver(new class implements ResolverInterface {
-                /**
-                 * Invoked by the Executor class to resolve this mutation / query
-                 * @see Executor
-                 *
-                 * @param mixed       $object  object
-                 * @param array       $args    args
-                 * @param mixed       $context context
-                 * @param ResolveInfo $info    info
-                 * @throws Exception
-                 * @return mixed
-                 */
-                public function resolve($object, array $args, $context, ResolveInfo $info)
-                {
-                    $member = Security::getCurrentUser();
-
-                    // Check authentication
-                    if (!$member) {
-                        throw new Exception('Please log in first.');
-                    }
-
-                    // Check submission ID
-                    if (empty($args['ID']) || !is_numeric($args['ID'])) {
-                        throw new Exception('Please enter a valid Questionnaire Submission ID.');
-                    }
-
-                    // get QuestionnaireSubmission
-                    $questionnaireSubmission = QuestionnaireSubmission::get()->byID($args['ID']);
-
-                    if (!$questionnaireSubmission) {
-                        throw new Exception('No data available for Questionnaire Submission. Please start again');
-                    }
-
-                    $questionnaireSubmission->updateQuestionnaireApproveDenyUserDetails($member, 'approved');
-
-                    $isApproved = $questionnaireSubmission->isQuestionnaireApproved();
-
-                    if ($isApproved) {
-                        $questionnaireSubmission->QuestionnaireStatus = 'approved';
-                        $questionnaireSubmission->write();
-                        $qs = QueuedJobService::create();
-                        $qs->queueJob(
-                            new SendApprovedNotificationEmailJob($questionnaireSubmission),
-                            date('Y-m-d H:i:s', time() + 90)
-                        );
-                    }
-
-                    return $questionnaireSubmission;
-                }
-            })
-            ->end();
-    }
-
-    /**
-     * @param SchemaScaffolder $scaffolder SchemaScaffolder
-     *
-     * @return void
-     */
-    public function updateQuestionnaireStatusToDenied(SchemaScaffolder $scaffolder)
-    {
-        $scaffolder
-            ->mutation('updateQuestionnaireStatusToDenied', QuestionnaireSubmission::class)
-            ->addArgs([
-                'ID' => 'ID!',
-            ])
-            ->setResolver(new class implements ResolverInterface {
-                /**
-                 * Invoked by the Executor class to resolve this mutation / query
-                 * @see Executor
-                 *
-                 * @param mixed       $object  object
-                 * @param array       $args    args
-                 * @param mixed       $context context
-                 * @param ResolveInfo $info    info
-                 * @throws Exception
-                 * @return mixed
-                 */
-                public function resolve($object, array $args, $context, ResolveInfo $info)
-                {
-                    $member = Security::getCurrentUser();
-
-                    // Check authentication
-                    if (!$member) {
-                        throw new Exception('Please log in first.');
-                    }
-
-                    // Check submission ID
-                    if (empty($args['ID']) || !is_numeric($args['ID'])) {
-                        throw new Exception('Please enter a valid Questionnaire Submission ID.');
-                    }
-
-                    // get QuestionnaireSubmission
-                    $questionnaireSubmission = QuestionnaireSubmission::get()->byID($args['ID']);
-
-                    if (!$questionnaireSubmission) {
-                        throw new Exception('No data available for Questionnaire Submission. Please start again');
-                    }
-
-                    $questionnaireSubmission->updateQuestionnaireApproveDenyUserDetails($member, 'denied');
-
-                    $questionnaireSubmission->QuestionnaireStatus = 'denied';
-                    $questionnaireSubmission->write();
-
-                    // send email to the user (submitter)
-                    $queuedJobService = QueuedJobService::create();
-                    $queuedJobService->queueJob(
-                        new SendDeniedNotificationEmailJob($questionnaireSubmission),
-                        date('Y-m-d H:i:s', time() + 90)
-                    );
-
-                    return $questionnaireSubmission;
-                }
-            })
-            ->end();
-    }
-
-    /**
      * update quesionnaire approver details based on group and permission
      *
-     * @param DataObject $member member
-     * @param string     $status status approved/denied
+     * @param string $status status approved/denied
      * @throws Exception
      * @return Void
      */
-    public function updateQuestionnaireApproveDenyUserDetails($member, $status)
+    public function updateQuestionnaireOnApproveAndDeny($status)
     {
-        $accessDetail = $this->isCurrentUserHasAccessToApproveDeny($member);
+        $member = Security::getCurrentUser();
 
-        $accessDetailObj = json_decode($accessDetail);
+        $accessDetail = $this->doesCurrentUserHasAccessToApproveDeny($member);
 
-        if (!$accessDetailObj->hasAccess) {
-            throw new Exception($accessDetailObj->message);
+        if (!$accessDetail['hasAccess'] || !$accessDetail['group']) {
+            throw new Exception($accessDetail['message']);
         }
 
-        if ($accessDetailObj->hasAccess) {
-            $group = $accessDetailObj->group;
+        if ($accessDetail['group'] == 'security-architect') {
+            $this->updateSecurityArchitectDetail($member, $status);
 
-            if ($group == 'security-architect') {
-                $this->updateSecurityArchitectDetail($member, $status);
+            if ($status == 'approved') {
+                $this->QuestionnaireStatus = 'waiting_for_approval';
+
+                // get CISO group and Business owner member list
+                $members = $this->getApprovalMembersListByGroup('ciso');
+
+                if (!$members) {
+                    throw new Exception('Please add member in Security architect group.');
+                }
+
+                if (!$this->BusinessOwnerID) {
+                    throw new Exception('Please add business owner.');
+                }
+
+                $members[] = $this->BusinessOwnerID;
+
+                // send email to CISO group and Business owner
+                $qs = QueuedJobService::create();
+
+                $qs->queueJob(
+                    new SendApprovalLinkEmailJob($this, $members),
+                    date('Y-m-d H:i:s', time() + 90)
+                );
+            } else {
+                // no email, internal communication between Submitter and security-architect
+                $this->QuestionnaireStatus = 'in_progress';
             }
 
-            if ($group == 'ciso') {
-                $this->updateCisoDetail($member, $status);
-            }
+            $this->write();
+        }
 
-            if ($group == 'business-owner') {
-                $this->updateBusinessOwnerDetail($member, $status);
+        if ($accessDetail['group'] == 'ciso') {
+            $this->updateCisoDetail($member, $status);
+            $this->write();
+        }
+
+        if ($accessDetail['group'] == 'business-owner') {
+            $this->updateBusinessOwnerDetail($member, $status);
+            if ($status == 'approved') {
+                $this->QuestionnaireStatus = $status;
+
+                // send denied email to the user (submitter)
+                $queuedJobService = QueuedJobService::create();
+                $queuedJobService->queueJob(
+                    new SendApprovedNotificationEmailJob($this),
+                    date('Y-m-d H:i:s', time() + 90)
+                );
+            } else {
+                $this->QuestionnaireStatus = $status;
+
+                // send denied email to the user (submitter)
+                $queuedJobService = QueuedJobService::create();
+                $queuedJobService->queueJob(
+                    new SendDeniedNotificationEmailJob($this),
+                    date('Y-m-d H:i:s', time() + 90)
+                );
             }
+            $this->write();
         }
     }
 
     /**
-     * for quesionnaire submission, it required to be approved by every group,
-     * if their approval is required(CISO Group, Security Architect Group, Business owner),
-     * then only we can change questionnaire submission status
-     *
-     * @return boolean
-     */
-    public function isQuestionnaireApproved()
-    {
-        // approve status of ciso
-        $cisoApproveStatus = 0;
-        if ($this->CisoApprovalStatus == 'not_applicable'
-            || $this->CisoApprovalStatus == "approved") {
-            $cisoApproveStatus = 1;
-        }
-
-        // approve status of ciso
-        $securityArchitectApproveStatus = 0;
-        if ($this->SecurityArchitectApprovalStatus == 'not_applicable'
-            || $this->SecurityArchitectApprovalStatus == "approved") {
-            $securityArchitectApproveStatus = 1;
-        }
-
-        // approve status of ciso
-        $businessOwnerApproveStatus = 0;
-        if ($this->BusinessOwnerApprovalStatus == 'not_applicable'
-            || $this->BusinessOwnerApprovalStatus == "approved") {
-            $businessOwnerApproveStatus = 1;
-        }
-
-        if ($cisoApproveStatus && $securityArchitectApproveStatus
-            && $businessOwnerApproveStatus) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-    * update approver details for group security-architect
+    * update approver(Security Architect) details
     *
     * @param DataObject $member member
     * @param string     $status status
@@ -988,12 +981,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         if (gethostname()) {
             $this->SecurityArchitectApproverMachineName = Convert::raw2sql(gethostname());
         }
-
-        $this->write();
     }
 
     /**
-    * update approver details for a business-owner
+    * update approver (business-owner) details
     *
     * @param DataObject $member member
     * @param string     $status status
@@ -1010,8 +1001,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         if (gethostname()) {
             $this->BusinessOwnerMachineName = Convert::raw2sql(gethostname());
         }
-
-        $this->write();
     }
 
     /**
@@ -1034,166 +1023,164 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         if (gethostname()) {
             $this->CisoApproverMachineName = Convert::raw2sql(gethostname());
         }
-
-        $this->write();
     }
 
     /**
-     * check if current user has access to approve or deny the Questionnaire
-     * @param Dataobject $member member
-     * @throws Exception
-     * @return object
-     */
-    public function isCurrentUserHasAccessToApproveDeny($member)
+    * get access details for Security Architect
+    *
+    * @param DataObject $member member
+    * @return array
+    */
+    public function getSecurityArchitectAccessDetail($member)
     {
-        $approvalGroup = ['business-owner', 'ciso', 'security-architect'];
+        $group = 'security-architect';
 
-        // is user exist in approval member list
-        $memberList = $this->getApprovalMemerIDList();
+        // check member groups
+        $ismemberInGroup = $member->Groups()->filter('Code', $group)->first();
 
-        $logInUserApprovalGroup = $this->getCurrentLoginUserGroup($member);
-
-        // check Current user in the approval group
-        if (!$logInUserApprovalGroup || !in_array($logInUserApprovalGroup, $approvalGroup)) {
-            return json_encode([
+        if (!$ismemberInGroup) {
+            return [
                 "hasAccess" => false,
-                "group" => $logInUserApprovalGroup,
-                "message" => 'Sorry, log in user does not belong to approval group.'
-            ]);
+                "message" => 'Sorry, user is not belongs to Security Architect group.',
+                'group' => $group
+            ];
         }
 
-        if (!in_array($member->ID, $memberList)) {
-            return json_encode([
-                "hasAccess" => false,
-                "group" => $logInUserApprovalGroup,
-                "message" => 'Sorry current user don\'t has access to apparove/deny.'
-            ]);
+        if ($this->SecurityArchitectApprovalStatus == 'pending') {
+            return [
+                "hasAccess" => true,
+                "message" => 'Yes, current user has access to approve and denied.',
+                'group' => $group
+            ];
         }
 
-        // check current user group has permission to approve/deny or
-        // if QuestionnaireSubmission is already approved/denied by other Member
-        // of the group
-        switch ($logInUserApprovalGroup) {
-            case 'business-owner':
-                if ($this->BusinessOwnerApprovalStatus == 'not_applicable') {
-                    return json_encode([
-                        "hasAccess" => false,
-                        "group" => $logInUserApprovalGroup,
-                        "message" => 'Sorry business owner approval is not required,'
-                    ]);
-                }
-                if ($this->BusinessOwnerApprovalStatus == 'approved'
-                    || $this->BusinessOwnerApprovalStatus == 'denied') {
-                    return json_encode([
-                        "hasAccess" => false,
-                        "group" => $logInUserApprovalGroup,
-                        "message" => 'Sorry, this is already approved or denied by business owner.'
-                    ]);
-                }
-                if ($this->BusinessOwnerApprovalStatus == 'pending') {
-                    return json_encode([
-                        "hasAccess" => true,
-                        "group" => $logInUserApprovalGroup,
-                        "message" => 'Approval pending from Business Owner'
-                    ]);
-                }
-                break;
-            case 'ciso':
-                if ($this->CisoApprovalStatus == 'not_applicable') {
-                    return json_encode([
-                        "hasAccess" => false,
-                        "group" => $logInUserApprovalGroup,
-                        "message" => 'Sorry ciso group approval is not required.'
-                    ]);
-                }
-                if ($this->CisoApprovalStatus == 'approved'
-                    || $this->CisoApprovalStatus == 'denied') {
-                    return json_encode([
-                        "hasAccess" => false,
-                        "group" => $logInUserApprovalGroup,
-                        "message" => 'Sorry, this is already approved or denied by other group member.'
-                    ]);
-                }
-                if ($this->CisoApprovalStatus == 'pending') {
-                    return json_encode([
-                        "hasAccess" => true,
-                        "group" => $logInUserApprovalGroup,
-                        "message" => 'CISO approval is pending.'
-                    ]);
-                }
-                break;
-            case 'security-architect':
-                if ($this->SecurityArchitectApprovalStatus == 'not_applicable') {
-                    return json_encode([
-                        "hasAccess" => false,
-                        "group" => $logInUserApprovalGroup,
-                        "message" => 'Sorry security architect approval is not required.'
-                    ]);
-                }
-                if ($this->SecurityArchitectApprovalStatus == 'approved'
-                    || $this->CisoApprovalStatus == 'denied') {
-                    return json_encode([
-                        "hasAccess" => false,
-                        "group" => $logInUserApprovalGroup,
-                        "message" => 'Sorry, this is already approved or denied by other group member.'
-                    ]);
-                }
-                if ($this->SecurityArchitectApprovalStatus == 'pending') {
-                      return json_encode([
-                          "hasAccess" => true,
-                          "group" => $logInUserApprovalGroup,
-                          "message" => 'CISO approval is pending.'
-                      ]);
-                }
-                break;
-            default:
-                return json_encode([
+        if ($this->SecurityArchitectApprovalStatus == 'Approved') {
+            return [
+                "hasAccess" => false,
+                "message" => 'Sorry, questionnaire already approved by Security Architect group member.',
+                'group' => $group
+            ];
+        }
+
+        if ($this->SecurityArchitectApprovalStatus == 'denied') {
+            if ((int)$member->ID === (int)$this->SecurityArchitectApproverID) {
+                return [
+                    "hasAccess" => true,
+                    "message" => 'Yes, log in member can approve and denied the questionnaire.',
+                    'group' => $group
+                ];
+            } else {
+                return [
                     "hasAccess" => false,
-                    "group" => $logInUserApprovalGroup,
-                    "message" => 'sorry, log in user does not belongs to approval group.'
-                ]);
+                    "message" => 'Sorry, questionnaire already assigned to other member of Security Architect group.',
+                    'group' => $group
+                ];
+            }
         }
+
+        return [
+            "hasAccess" => false,
+            "message" => 'Sorry, there is some problem for Security Architect approval.',
+            'group' => $group
+        ];
     }
 
     /**
-     * get Current login user groups
-     *
-     * @param DataObject $member member
-     *
-     * @return string
-     */
-    public function getCurrentLoginUserGroup($member)
+    * get access details for CISO member
+    *
+    * @param DataObject $member member
+    * @return array
+    */
+    public function getCISOAccessDetail($member)
     {
-        // get current member group
-        $logInUserApprovalGroup = '';
+        $group = 'ciso';
 
-        // check if current user is business owner or
-        // else calculate user group
-        if ($this->isBusinessOwner()) {
-            $logInUserApprovalGroup = 'business-owner';
-        } else if ($member->Groups()->count() == 1) {
-            $logInUserApprovalGroup = $member->Groups()->first()->Code;
-        } else if ($member->Groups()->count() > 1) {
-            $groups = $member->Groups();
+        // check member groups
+        $ismemberInGroup = $member->Groups()->filter('Code', $group)->first();
 
-            foreach ($groups as $group) {
-                if ($group->Code == 'ciso' &&
-                    $this->CisoApprovalStatus !== 'not_applicable') {
-                      $logInUserApprovalGroup = $group->Code;
-                }
+        if (!$ismemberInGroup) {
+            return [
+              "hasAccess" => false,
+              "message" => 'Sorry, user is not belongs to CISO group.',
+              'group' => $group
+            ];
+        }
 
-                if ($group->Code == 'security-architect' &&
-                    $this->SecurityArchitectApprovalStatus !== 'not_applicable') {
-                      $logInUserApprovalGroup = $group->Code;
-                }
-            }
+        if ($this->CisoApprovalStatus == 'pending') {
+            return [
+                "hasAccess" => true,
+                "message" => 'Yes, current user has access to approve and deny.',
+                'group' => $group
+            ];
+        }
 
-            if (empty($logInUserApprovalGroup)) {
-                $logInUserApprovalGroup = $member->Groups()->first()->Code;
+        if ($this->CisoApprovalStatus == 'approved' || $this->CisoApprovalStatus == 'denied') {
+            return [
+                "hasAccess" => false,
+                "message" => 'Sorry, questionnaire is already approved and denied by CISO group member.',
+                'group' => $group
+            ];
+        }
+
+        return [
+            "hasAccess" => false,
+            "message" => 'Sorry, there is some problem for CISO Group Approval.',
+            'group' => $group
+        ];
+    }
+
+    /**
+    * Check if current user has access for approval or deny
+    *
+    * @param DataObject $member member
+    * @return array
+    */
+    public function doesCurrentUserHasAccessToApproveDeny($member)
+    {
+        // check QuestionnaireStatus
+        if (in_array($this->QuestionnaireStatus, ['in_progress', 'submitted'])) {
+            return [
+                "hasAccess" => false,
+                "message" => 'Sorry, this is not ready for review. Please contact with the submitter.',
+                "group" => ''
+            ];
+        }
+
+        // check for security architect
+        if ($this->QuestionnaireStatus == 'waiting_for_security_architect_approval') {
+            $accessdetails = $this->getSecurityArchitectAccessDetail($member);
+            return $accessdetails;
+        }
+
+        // check for Business owner
+        if ($this->QuestionnaireStatus == 'waiting_for_approval'
+          && (int)$member->ID === (int)$this->BusinessOwnerID) {
+            if ($this->BusinessOwnerApprovalStatus != "pending") {
+                return [
+                    "hasAccess" => false,
+                    "message" => 'Sorry, this is already approved and denied by the Business Owner.',
+                    "group" => 'business-owner'
+                ];
+            } else {
+                return [
+                    "hasAccess" => true,
+                    "message" => 'Yes, current user has access to approve and deny.',
+                    "group" => 'business-owner'
+                ];
             }
         }
 
-        return $logInUserApprovalGroup;
+        // check for CISO
+        if (in_array($this->QuestionnaireStatus, ['waiting_for_approval', 'pending', 'approved'])) {
+            return $this->getCISOAccessDetail($member);
+        }
+
+        return [
+            "hasAccess" => false,
+            "message" => 'Sorry, user is not belong to approval group or user
+                don\'t have access to approve and deny.',
+            'group' => ''
+        ];
     }
 
     /**
@@ -1358,80 +1345,36 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * @return array
+     * @param string $group group code
+     * @throws Exception
+     * @return DataObject
      */
-    public function getApprovalMemerIDList()
+    public function getApprovalMembersListByGroup($group)
     {
-        $memberList = [];
-
         // get CISO group's member
-        if ($this->CisoApprovalStatus !== 'not_applicable') {
-            $group = Group::get()->filter('code', 'ciso')->first();
+        if ($group == 'ciso') {
+            $group = Group::get()->filter('code', $group)->first();
             if ($group) {
                 $members = $group->Members();
-                foreach ($members as $member) {
-                    $memberList[] = $member->ID;
-                }
             }
         }
 
         // get Security Architect group's member
-        if ($this->SecurityArchitectApprovalStatus !== 'not_applicable') {
-            $group = Group::get()->filter('code', 'security-architect')->first();
+        if ($group == 'security-architect') {
+            $group = Group::get()->filter('code', $group)->first();
             if ($group) {
                 $members = $group->Members();
-                foreach ($members as $member) {
-                    $memberList[] = $member->ID;
-                }
             }
         }
 
-        // businessOwner
-        if ($this->BusinessOwnerID) {
-            $member = Member::get()->byID($this->BusinessOwnerID);
-            if ($member) {
-                $memberList[] =  $member->ID;
-            }
+        if (!$members) {
+            throw new Exception('Please add member for the CISO and Security Architect group.');
         }
 
-        return array_unique($memberList);
-    }
+        $membersArray = $members->toArray();
 
-    /**
-     * @return boolean
-     */
-    public function isBusinessOwner()
-    {
-        $member = Security::getCurrentUser();
+        $membersIdList = array_column($membersArray, 'ID');
 
-        if ($this->BusinessOwnerID && (int)$member->ID === (int)$this->BusinessOwnerID) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * @param string $group group
-     * @throws Exception
-     * @return DataObject
-     */
-    public function getApproverDetails($group = null)
-    {
-        if (empty($group)) {
-            throw new Exception('Please enter a valid user group and role.');
-        }
-
-        if ($this->$group == 'ciso') {
-            return $this->CisoApprover();
-        }
-
-        if ($this->$group == 'security-architect') {
-            return $this->SecurityArchitectApprover();
-        }
-
-        if ($this->$group == 'business-owner') {
-            return $this->BusinessOwner();
-        }
+        return $membersIdList;
     }
 }

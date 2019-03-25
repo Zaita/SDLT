@@ -43,10 +43,6 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     private static $db = [
         'Name' => 'Varchar(255)',
         'KeyInformation' => 'HTMLText',
-        'IsCisoApprovalRequired' => 'Boolean',
-        'IsSecurityArchitectApprovalRequired' => 'Boolean',
-        'IsBusinessOwnerApprovalRequired' => 'Boolean',
-        'SendApprovedNotificatonToSecurityArchitect' => 'Boolean',
     ];
 
     /**
@@ -85,14 +81,6 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
             $pageConfig = $config->getComponentByType(GridFieldPaginator::class);
             $pageConfig->setItemsPerPage(250);
         }
-
-        $fields->dataFieldByName('IsBusinessOwnerApprovalRequired')
-            ->setDescription('If business owner approval is required, then please
-            make sure you create a question for product owner email address and
-            that should be mandatory.');
-
-        $fields->dataFieldByName('IsCisoApprovalRequired')
-            ->setTitle('Is CISO Approval Required');
 
         return $fields;
     }
