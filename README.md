@@ -264,6 +264,9 @@ AZURE_CLIENT_SECRET="..."
 AZURE_TENANT_ID="..."
 ```
 
-The default authenticator with email and password is removed for standard users.
-For non-NZTA CMS to authenticate, you will need to append showloginform=1 to the
-/admin URL
+SDLT does not take the traditional SAML + LDAP approach that older Active Directory integrations used. As of 2016, Microsoft's Azure cloud provider allows for managed Active Directory instances and connecting via OAuth2. This enables SilverStripe to authenticate users in the same way that Google, Facebook, and thousands of other identity providers handle online authentications against their service. 
+
+NZTA have requested that the primary means of connecting to SDLT is through Active Directory, which means the default authenticator has been disabled by default. In case of a lockout, or when Catalyst needs to access the CMS for support reasons, the default authenticator can be accessed by appending ?showloginform=1 to the /admin URL. You can use this mechanism to login win a Default Admin password enabled through the codebase.
+
+#### Adding new administrators setup
+All users that are intended to use this system must first log into SilverStripe via AD so that SilverStripe can automatically create an account for them. On their first successful login, a Member account containing their first name, surname, email address, and unique Member Identifier will be created in the Security section of the CMS. This account *will not*, and *must not*, have any privileges until an existing Administrator adds them to the appropriate group. Attempts to create the accounts beforehand will result in an error. Once a group is assigned, these users will be able to log in with their NZTA Active Directory accounts.
