@@ -137,4 +137,27 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     {
         return (Security::getCurrentUser() !== null);
     }
+
+    /**
+     * @return array
+     */
+    public function getQuestionsData()
+    {
+        $questions = $this->Questions();
+        $questionsData = [];
+
+        foreach ($questions as $question) {
+            /* @var $question Question */
+            $questionData['ID'] = $question->ID;
+            $questionData['Title'] = $question->Title;
+            $questionData['Question'] = $question->Question;
+            $questionData['Description'] = $question->Description;
+            $questionData['AnswerFieldType'] = $question->AnswerFieldType;
+            $questionData['AnswerInputFields'] = $question->getAnswerInputFieldsData();
+            $questionData['AnswerActionFields'] = $question->getAnswerActionFieldsData();
+            $questionsData[] = $questionData;
+        }
+
+        return $questionsData;
+    }
 }
