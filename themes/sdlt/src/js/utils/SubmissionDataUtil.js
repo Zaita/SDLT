@@ -2,6 +2,7 @@
 
 import type {Question, SubmissionQuestionData} from "../types/Questionnaire";
 import _ from "lodash";
+import type {TaskSubmissionDisplay} from "../types/Task";
 
 export default class SubmissionDataUtil {
 
@@ -49,5 +50,15 @@ export default class SubmissionDataUtil {
       }
     });
     return hasUnansweredQuestion;
+  }
+
+  static existsIncompleteTaskSubmission(taskSubmissions: Array<TaskSubmissionDisplay>): boolean {
+    let exists = false;
+    taskSubmissions.forEach((taskSubmission) => {
+      if (taskSubmission.status === "in_progress") {
+        exists = true;
+      }
+    });
+    return exists;
   }
 }

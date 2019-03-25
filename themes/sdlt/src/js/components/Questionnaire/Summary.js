@@ -9,6 +9,7 @@ import {Link} from "react-router-dom";
 import editIcon from "../../../img/icons/edit.svg";
 import _ from "lodash";
 import URLUtil from "../../utils/URLUtil";
+import SubmissionDataUtil from "../../utils/SubmissionDataUtil";
 
 type Props = {
   submission: Submission | null,
@@ -143,6 +144,7 @@ class Summary extends Component<Props> {
         sendForApprovalButton = (
           <DarkButton title="SEND FOR APPROVAL"
                       classes={["button"]}
+                      disabled={SubmissionDataUtil.existsIncompleteTaskSubmission(submission.taskSubmissions)}
                       onClick={handleSubmitButtonClick}
           />
         );
