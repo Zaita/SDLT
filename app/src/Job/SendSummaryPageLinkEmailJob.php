@@ -17,6 +17,7 @@ use SilverStripe\Control\Email\Email;
 use Symbiote\QueuedJobs\Services\AbstractQueuedJob;
 use Symbiote\QueuedJobs\Services\QueuedJobService;
 use Symbiote\QueuedJobs\Services\QueuedJob;
+use NZTA\SDLT\Model\QuestionnaireEmail;
 
 /**
  * A QueuedJob is specifically designed to be invoked from an onAfterWrite() process
@@ -32,43 +33,45 @@ class SendSummaryPageLinkEmailJob extends AbstractQueuedJob implements QueuedJob
     }
 
     /**
-      * @return string
-      */
+     * @return string
+     */
     public function getTitle()
     {
         return sprintf(
-            'Initialising summary page link email job for %s (%d)',
+            'Initialising summary link email job for %s (%d)',
             $this->questionnaireSubmission->Questionnaire()->Name,
             $this->questionnaireSubmission->ID
         );
     }
 
     /**
-      * {@inheritDoc}
-      * @return string
-      */
+     * {@inheritDoc}
+     * @return string
+     */
     public function getJobType()
     {
         return QueuedJob::QUEUED;
     }
 
     /**
-      * Handles the meat of the CSV import process.
-      *
-      * @return mixed void | null
-      */
+     * Handles the meat of the CSV import process.
+     *
+     * @return mixed void | null
+     */
     public function process()
     {
-        $sub = 'NZTA SDLT - ' . $this->questionnaireSubmission->Questionnaire()->Name . '- Link';
-        $from = 'no-reply@nzta.govt.nz';
+        $emailDetails = QuestionnaireEmail::get()->first();
+
+        $sub = $this->replaceVariable($emailDetails->SummaryLinkEmailSubject);
+        $from = $emailDetails->FromEmailAddress;
         $to = $this->questionnaireSubmission->SubmitterEmail;
 
         $email = Email::create()
-            ->setHTMLTemplate('Email\\SummaryPageLinkEmail')
+            ->setHTMLTemplate('Email\\EmailTemplate')
             ->setData([
-                'SubmitterName' => $this->questionnaireSubmission->SubmitterName,
-                'Link'=> $this->questionnaireSubmission->getSummaryPageLink(),
-                'QuestionnaireName' => $this->questionnaireSubmission->Questionnaire()->Name
+                'Name' => $this->questionnaireSubmission->SubmitterName,
+                'Body' => $this->replaceVariable($emailDetailsSummaryLinkEmailBody),
+                'EmailSignature' => $emailDetails->EmailSignature
             ])
             ->setFrom($from)
             ->setTo($to)
@@ -78,5 +81,21 @@ class SendSummaryPageLinkEmailJob extends AbstractQueuedJob implements QueuedJob
         $email->send();
 
         $this->isComplete = true;
+    }
+
+    /**
+     * @param string $string string
+     * @return string
+     */
+    public function replaceVariable($string)
+    {
+        $questionnaireName = $this->questionnaireSubmission->Questionnaire()->Name;
+        $link = $this->questionnaireSubmission->getSummaryPageLink();
+        $summaryLink = '<a href="' . $link . '">this link</a>';
+
+        $string = str_replace('{$questionnaireName}', $questionnaireName, $string);
+        $string = str_replace('{$summaryLink}', $summaryLink, $string);
+
+        return $string;
     }
 }
