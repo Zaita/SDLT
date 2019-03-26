@@ -751,7 +751,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @return string $link link
      */
-    public function getSubmitterLink()
+    public function getStartLink()
     {
         $link = Convert::html2raw(Director::absoluteBaseURL(). '#/questionnaire/submission/' . $this->UUID);
         return $link;

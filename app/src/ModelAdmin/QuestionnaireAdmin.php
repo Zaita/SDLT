@@ -15,6 +15,7 @@ namespace NZTA\SDLT\ModelAdmin;
 
 use NZTA\SDLT\Model\Task;
 use NZTA\SDLT\Model\Questionnaire;
+use NZTA\SDLT\Model\QuestionnaireEmail;
 use NZTA\SDLT\Model\Dashboard;
 use SilverStripe\Admin\ModelAdmin;
 use SilverStripe\Forms\FieldList;
@@ -35,7 +36,8 @@ class QuestionnaireAdmin extends ModelAdmin
     private static $managed_models = [
         Dashboard::class,
         Questionnaire::class,
-        Task::class
+        Task::class,
+        QuestionnaireEmail::class
     ];
 
     /**

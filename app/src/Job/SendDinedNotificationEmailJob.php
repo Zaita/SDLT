@@ -18,6 +18,7 @@ use Symbiote\QueuedJobs\Services\AbstractQueuedJob;
 use Symbiote\QueuedJobs\Services\QueuedJobService;
 use Symbiote\QueuedJobs\Services\QueuedJob;
 use SilverStripe\Security\Member;
+use NZTA\SDLT\Model\QuestionnaireEmail;
 
 /**
  * A QueuedJob is specifically designed to be invoked from an onAfterWrite() process
@@ -33,60 +34,61 @@ class SendDeniedNotificationEmailJob extends AbstractQueuedJob implements Queued
     }
 
     /**
-      * @return string
-      */
+     * @return string
+     */
     public function getTitle()
     {
         return sprintf(
-            'Initialising denied email notification - %s (%d)',
+            'Initialising denied notification email - %s (%d)',
             $this->questionnaireSubmission->Questionnaire()->Name,
             $this->questionnaireSubmission->ID
         );
     }
 
     /**
-      * {@inheritDoc}
-      * @return string
-      */
+     * {@inheritDoc}
+     * @return string
+     */
     public function getJobType()
     {
         return QueuedJob::QUEUED;
     }
 
     /**
-      * @return mixed void | null
-      */
+     * @return mixed void | null
+     */
     public function process()
     {
-        // send email to the user
-        if ($member = $this->questionnaireSubmission->User()) {
-            $this->sendEmail($member);
-        }
-
-        $this->isComplete = true;
-    }
-
-    /**
-      * @param DataObject $member Member
-      *
-      * @return null
-      */
-    public function sendEmail($member)
-    {
-        $sub = $this->questionnaireSubmission->Questionnaire()->Name . ' is denied.';
-        $from = 'no-reply@nzta.govt.nz';
+        $emailDetails = QuestionnaireEmail::get()->first();
+        $sub = $this->replaceVariable($emailDetails->DeniedNotificationEmailSubject);
+        $from = $emailDetails->FromEmailAddress;
 
         $email = Email::create()
-            ->setHTMLTemplate('Email\\NotificationEmailOnApproved')
+            ->setHTMLTemplate('Email\\EmailTemplate')
             ->setData([
-                'Name' => $member->FirstName,
-                'Link'=> $this->questionnaireSubmission->getSummaryPageLink(),
-                'QuestionnaireName' => $this->questionnaireSubmission->Questionnaire()->Name
+                'Name' => $this->questionnaireSubmission->SubmitterName,
+                'Body' => $this->replaceVariable($emailDetails->DeniedNotificationEmailBody),
+                'EmailSignature' => $emailDetails->EmailSignature
             ])
             ->setFrom($from)
             ->setTo($member->Email)
             ->setSubject($sub);
 
         $email->send();
+
+        $this->isComplete = true;
+    }
+
+    /**
+     * @param string $string string
+     * @return string
+     */
+    public function replaceVariable($string)
+    {
+        $questionnaireName = $this->questionnaireSubmission->Questionnaire()->Name;
+
+        $string = str_replace('{$questionnaireName}', $questionnaireName, $string);
+
+        return $string;
     }
 }
