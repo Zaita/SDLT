@@ -1,6 +1,6 @@
 <?php
 /**
- * This file contains the "MemberGraghQLProvider" class.
+ * This file contains the "MemberGraphQLProvider" class.
  *
  * @category SilverStripe_Project
  * @package SDLT
@@ -20,9 +20,9 @@ use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 
 /**
- * Class MemberGraghQLProvider
+ * Class MemberGraphQLProvider
  */
-class MemberGraghQLProvider implements ScaffoldingProvider
+class MemberGraphQLProvider implements ScaffoldingProvider
 {
     /**
      * @param SchemaScaffolder $scaffolder Scaffolder
