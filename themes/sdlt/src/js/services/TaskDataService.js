@@ -34,7 +34,7 @@ export default class TaskDataService {
         }
 
         const taskID = action.taskID;
-        if (!taskID) {
+        if (!taskID || Number.parseInt(taskID) <= 0) {
           return;
         }
 
