@@ -25,11 +25,13 @@ use SilverStripe\Security\Member;
 class SendApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJob
 {
     /**
-     * @param QuestionnaireSubmission $questionnaireSubmission $questionnaireSubmission
+     * @param QuestionnaireSubmission $questionnaireSubmission questionnaireSubmission
+     * @param array                   $members                 members id list
      */
-    public function __construct($questionnaireSubmission = null)
+    public function __construct($questionnaireSubmission = null, $members = [])
     {
         $this->questionnaireSubmission = $questionnaireSubmission;
+        $this->Member = $members;
     }
 
     /**
@@ -38,7 +40,7 @@ class SendApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJob
     public function getTitle()
     {
         return sprintf(
-            'Initialising approval page link email for - %s (%d)',
+            'Initialising approval link email for - %s (%d)',
             $this->questionnaireSubmission->Questionnaire()->Name,
             $this->questionnaireSubmission->ID
         );
@@ -58,11 +60,9 @@ class SendApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJob
       */
     public function process()
     {
-        $toEmailAddressList = $this->questionnaireSubmission->getApprovalMemerIDList();
-
         // send email to stack holder (CISO and Security Architect group)
-        foreach ($toEmailAddressList as $toEmailAddress) {
-            $member = Member::get()->byID($toEmailAddress);
+        foreach ($this->Member as $memberId) {
+            $member = Member::get()->byID($memberId);
             if ($member) {
                 $this->sendEmail($member);
             }
