@@ -40,6 +40,7 @@ export default class GraphQLRequestHelper {
     const errorMessage = _.get(json, "errors.0.message", null);
     if (errorMessage) {
       // Check auth error
+      // TODO: need a better way to identify the auth error (e.g, ERROR_CODE)
       if (errorMessage === "Please log in first...") {
         URLUtil.redirectToLogin();
       }

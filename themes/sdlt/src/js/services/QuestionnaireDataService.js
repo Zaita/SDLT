@@ -4,8 +4,9 @@ import type {QuestionnaireStartState, QuestionnaireSubmissionState} from "../sto
 import GraphQLRequestHelper from "../utils/GraphQLRequestHelper";
 import _ from "lodash";
 import {DEFAULT_NETWORK_ERROR} from "../constants/errors";
-import type {AnswerAction, AnswerInput, Question, SubmissionQuestionData, Task} from "../types/Questionnaire";
+import type {AnswerAction, AnswerInput, Question, SubmissionQuestionData} from "../types/Questionnaire";
 import StringUtil from "../utils/StringUtil";
+import type {TaskSubmissionDisplay} from "../types/Task";
 
 export default class QuestionnaireDataService {
 
@@ -101,6 +102,11 @@ query {
     BusinessOwnerApprovalStatus
     SecurityArchitectApprovalStatus
     IsCurrentUserAnApprover
+    TaskSubmissions {
+      UUID
+      TaskName
+      Status
+    }
   }
   readSiteConfig {
     Title
@@ -250,6 +256,10 @@ query {
                 action.goto = StringUtil.toString(_.get(actionSchema, "GotoID", ""));
               }
 
+              // Task of action
+              const taskID = StringUtil.toString(_.get(actionSchema, "TaskID", ""));
+              action.taskID = taskID;
+
               // Data of action
               if (actionAnswers && Array.isArray(actionAnswers) && actionAnswers.length > 0) {
                 const answer = _.head(actionAnswers.filter((answer) => answer.id === actionID));
@@ -282,7 +292,17 @@ query {
           }
 
           return question;
-        })
+        }),
+        taskSubmissions: _
+          .toArray(_.get(submissionJSON, "TaskSubmissions", []))
+          .map((item) => {
+            const taskSubmission: TaskSubmissionDisplay = {
+              uuid: _.toString(_.get(item, "UUID", "")),
+              taskName: _.toString(_.get(item, "TaskName", "")),
+              status: _.toString(_.get(item, "Status", ""))
+            };
+            return taskSubmission;
+          })
       }
     };
 

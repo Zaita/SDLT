@@ -3,10 +3,7 @@
 // Questionnaire Schema
 
 import type {User} from "./User";
-
-export type Task = {
-  id: string
-};
+import type {TaskSubmissionDisplay} from "./Task";
 
 export type AnswerInput = {
   id: string,
@@ -24,7 +21,7 @@ export type AnswerAction = {
   type: string, //"continue" | "goto" | "message" | "finish",
   isChose: boolean,
   message?: string,
-  task?: Task,
+  taskID?: string,
   goto?: string
 }
 
@@ -53,7 +50,8 @@ export type Submission = {
     chiefInformationSecurityOfficer: string,
     businessOwner: string,
     securityArchitect: string
-  }
+  },
+  taskSubmissions: Array<TaskSubmissionDisplay>
 };
 
 // Submission Data

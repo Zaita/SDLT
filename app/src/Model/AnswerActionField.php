@@ -69,7 +69,8 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
     private static $summary_fields = [
         'Label',
         'ActionType',
-        'ActionDescription'
+        'ActionDescription',
+        'Task.Name' => 'Task'
     ];
 
     /**

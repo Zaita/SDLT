@@ -40,6 +40,9 @@ use Ramsey\Uuid\Uuid;
  *
  * @property string Name
  * @property string KeyInformation
+ *
+ * @method Questionnaire Questionnaire()
+ * @method Member User()
  */
 class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 {
@@ -86,6 +89,13 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'CisoApprover' => Member::class,
         'SecurityArchitectApprover' => Member::class,
         'BusinessOwner' => Member::class,
+    ];
+
+    /**
+     * @var array
+     */
+    private static $has_many = [
+        'TaskSubmissions' => TaskSubmission::class
     ];
 
     /**
@@ -182,6 +192,11 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'IsCurrentUserAnApprover',
                 'SendEmailToSecurityArchitect'
             ]);
+
+        $submissionScaffolder
+            ->nestedQuery('TaskSubmissions')
+            ->setUsePagination(false)
+            ->end();
 
         $submissionScaffolder
             ->operation(SchemaScaffolder::READ)

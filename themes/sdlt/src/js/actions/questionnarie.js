@@ -17,6 +17,7 @@ import CSRFTokenService from "../services/CSRFTokenService";
 import _ from "lodash";
 import SubmissionDataUtil from "../utils/SubmissionDataUtil";
 import URLUtil from "../utils/URLUtil";
+import TaskDataService from "../services/TaskDataService";
 
 // Start
 
@@ -260,11 +261,25 @@ export function moveToPreviousQuestion(targetQuestion: Question): ThunkAction {
   };
 }
 
-export function submitQuestionnaire(submissionID: string): ThunkAction {
+export function submitQuestionnaire(): ThunkAction {
   return async (dispatch, getState) => {
     try {
+      const rootState: RootState = getState();
+      const submissionState = rootState.questionnaireState.submissionState;
+      const submission = submissionState.submission;
+      if (!submission) {
+        return;
+      }
+
+      // Check if the questionnaire is answered properly (only have answered and non-applicable questions)
+      if (SubmissionDataUtil.existsUnansweredQuestion(submission.questions)) {
+        alert("There are questions not answered properly, please check your answers");
+        return;
+      }
+
       const csrfToken = await CSRFTokenService.getCSRFToken();
-      const {uuid} = await QuestionnaireDataService.submitQuestionnaire({submissionID, csrfToken});
+      const {uuid} = await QuestionnaireDataService.submitQuestionnaire({submissionID: submission.submissionID, csrfToken});
+      await TaskDataService.createTasksForQuestionnaireSubmission({questionnaireSubmission: submission, csrfToken});
       URLUtil.redirectToQuestionnaireSummary(uuid);
     } catch(error) {
       // TODO: errors
