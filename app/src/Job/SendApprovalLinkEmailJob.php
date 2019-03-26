@@ -18,6 +18,7 @@ use Symbiote\QueuedJobs\Services\AbstractQueuedJob;
 use Symbiote\QueuedJobs\Services\QueuedJobService;
 use Symbiote\QueuedJobs\Services\QueuedJob;
 use SilverStripe\Security\Member;
+use NZTA\SDLT\Model\QuestionnaireEmail;
 
 /**
  * A QueuedJob is specifically designed to be invoked from an onAfterWrite() process
@@ -35,8 +36,8 @@ class SendApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJob
     }
 
     /**
-      * @return string
-      */
+     * @return string
+     */
     public function getTitle()
     {
         return sprintf(
@@ -47,17 +48,17 @@ class SendApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJob
     }
 
     /**
-      * {@inheritDoc}
-      * @return string
-      */
+     * {@inheritDoc}
+     * @return string
+     */
     public function getJobType()
     {
         return QueuedJob::QUEUED;
     }
 
     /**
-      * @return mixed void | null
-      */
+     * @return mixed void | null
+     */
     public function process()
     {
         // send email to stack holder (CISO and Security Architect group)
@@ -72,28 +73,49 @@ class SendApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJob
     }
 
     /**
-      * @param DataObject $member Member
-      *
-      * @return null
-      */
+     * @param DataObject $member Member
+     *
+     * @return null
+     */
     public function sendEmail($member)
     {
-        $sub = 'Please Approve - ' . $this->questionnaireSubmission->Questionnaire()->Name;
-        $from = 'no-reply@nzta.govt.nz';
+        $emailDetails = QuestionnaireEmail::get()->first();
+
+        $sub = $this->replaceVariable($emailDetails->ApprovalLinkEmailSubject);
+        $from = $emailDetails->FromEmailAddress;
 
         $email = Email::create()
-            ->setHTMLTemplate('Email\\ApprovalLinkEmail')
+            ->setHTMLTemplate('Email\\EmailTemplate')
             ->setData([
-                'SubmitterName' => $this->questionnaireSubmission->SubmitterName,
-                'SubmitterEmail' => $this->questionnaireSubmission->SubmitterEmail,
-                'ReviewerName' => $member->FirstName,
-                'Link'=> $this->questionnaireSubmission->getSummaryPageLink(),
-                'QuestionnaireName' => $this->questionnaireSubmission->Questionnaire()->Name
+                'Name' => $member->FirstName,
+                'Body' => $this->replaceVariable($emailDetails->ApprovalLinkEmailBody),
+                'EmailSignature' => $emailDetails->EmailSignature
+
             ])
             ->setFrom($from)
             ->setTo($member->Email)
             ->setSubject($sub);
 
         $email->send();
+    }
+
+    /**
+     * @param string $string string
+     * @return string
+     */
+    public function replaceVariable($string)
+    {
+        $questionnaireName = $this->questionnaireSubmission->Questionnaire()->Name;
+        $SubmitterName = $this->questionnaireSubmission->SubmitterName;
+        $SubmitterEmail = $this->questionnaireSubmission->SubmitterEmail;
+        $link = $this->questionnaireSubmission->getSummaryPageLink();
+        $summaryLink = '<a href="' . $link . '">this link</a>';
+
+        $string = str_replace('{$questionnaireName}', $questionnaireName, $string);
+        $string = str_replace('{$summaryLink}', $summaryLink, $string);
+        $string = str_replace('{$submitterName}', $SubmitterName, $string);
+        $string = str_replace('{$submitterEmail}', $SubmitterEmail, $string);
+
+        return $string;
     }
 }
