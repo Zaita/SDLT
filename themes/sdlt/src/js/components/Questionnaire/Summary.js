@@ -8,6 +8,8 @@ import pdfIcon from "../../../img/icons/pdf.svg";
 import {Link} from "react-router-dom";
 import editIcon from "../../../img/icons/edit.svg";
 import _ from "lodash";
+import URLUtil from "../../utils/URLUtil";
+import SubmissionDataUtil from "../../utils/SubmissionDataUtil";
 
 type Props = {
   submission: Submission | null,
@@ -49,6 +51,7 @@ class Summary extends Component<Props> {
     return (
       <div className="Summary">
         {this.renderSubmitterInfo(submission)}
+        {this.renderTasks(submission)}
         {this.renderApprovals(submission)}
         {this.renderButtons(submission)}
       </div>
@@ -69,14 +72,22 @@ class Summary extends Component<Props> {
     );
   }
 
-  renderTasks(tasks: Array<{ name: string, url: string, status: string }>) {
-    // TODO: Render tasks with links to complete them
+  renderTasks(submission: Submission) {
+    const taskSubmissions = submission.taskSubmissions;
+    if (taskSubmissions.length === 0) {
+      return null;
+    }
+
     return (
       <div className="tasks">
         <h3>Tasks</h3>
-        {tasks.map((task) => {
+        {taskSubmissions.map(({uuid, taskName, status}) => {
           return (
-            <div key={task.name}><Link to={task.url}>{task.name} ({task.status})</Link></div>
+            <div key={uuid}>
+              <Link to={URLUtil.getTaskSubmissionURL(uuid)}>
+                {taskName} ({prettifyStatus(status)})
+              </Link>
+            </div>
           );
         })}
       </div>
@@ -133,6 +144,7 @@ class Summary extends Component<Props> {
         sendForApprovalButton = (
           <DarkButton title="SEND FOR APPROVAL"
                       classes={["button"]}
+                      disabled={SubmissionDataUtil.existsIncompleteTaskSubmission(submission.taskSubmissions)}
                       onClick={handleSubmitButtonClick}
           />
         );

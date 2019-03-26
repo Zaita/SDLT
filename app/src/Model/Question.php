@@ -33,8 +33,8 @@ use SilverStripe\Forms\GridField\GridFieldPaginator;
  *
  * @property Questionnaire Questionnaire
  *
- * @method HasManyList Inputs()
- * @method HasManyList Actions()
+ * @method HasManyList AnswerInputFields()
+ * @method HasManyList AnswerActionFields()
  */
 class Question extends DataObject implements ScaffoldingProvider
 {
@@ -104,6 +104,7 @@ class Question extends DataObject implements ScaffoldingProvider
         $fields = parent::getCMSFields();
 
         $fields->removeByName('QuestionnaireID');
+        $fields->removeByName('TaskID');
 
         $answerInputFields = $fields->dataFieldByName('AnswerInputFields');
 
@@ -180,5 +181,49 @@ class Question extends DataObject implements ScaffoldingProvider
     public function canView($member = null)
     {
         return (Security::getCurrentUser() !== null);
+    }
+
+    /**
+     *
+     * @return array
+     */
+    public function getAnswerInputFieldsData()
+    {
+        $inputFieldsData = [];
+
+        foreach ($this->AnswerInputFields() as $answerInputField) {
+            $inputFieldData['ID'] = $answerInputField->ID;
+            $inputFieldData['Label'] = $answerInputField->Label;
+            $inputFieldData['InputType'] = $answerInputField->InputType;
+            $inputFieldData['Required'] = $answerInputField->Required;
+            $inputFieldData['MinLength'] = $answerInputField->MinLength;
+            $inputFieldData['PlaceHolder'] = $answerInputField->PlaceHolder;
+            $inputFieldData['IsProductOwner'] = $answerInputField->IsProductOwner;
+            $inputFieldsData[] = $inputFieldData;
+        }
+
+        return $inputFieldsData;
+    }
+
+    /**
+     *
+     * @return array
+     */
+    public function getAnswerActionFieldsData()
+    {
+        $actionFieldsData = [];
+
+        foreach ($this->AnswerActionFields() as $answerActionField) {
+            $actionFieldData['ID'] = $answerActionField->ID;
+            $actionFieldData['Label'] = $answerActionField->Label;
+            $actionFieldData['ActionType'] = $answerActionField->ActionType;
+            $actionFieldData['Message'] = $answerActionField->Message;
+            $actionFieldData['GotoID'] = $answerActionField->GotoID;
+            $actionFieldData['QuestionID'] = $answerActionField->QuestionID;
+            $actionFieldData['TaskID'] = $answerActionField->TaskID;
+            $actionFieldsData[] = $actionFieldData;
+        }
+
+        return $actionFieldsData;
     }
 }

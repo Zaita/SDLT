@@ -17,3 +17,4 @@ SilverStripe\GraphQL\Manager:
         - NZTA\SDLT\GraphQL\MemberGraghQLProvider
         - NZTA\SDLT\Extension\SDLTSiteConfigExtension
         - NZTA\SDLT\Model\QuestionnaireSubmission
+        - NZTA\SDLT\Model\TaskSubmission
