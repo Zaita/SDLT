@@ -52,9 +52,16 @@ export default class TaskDataService {
       });
     });
 
+    const uniqueTaskIDList = _.uniq(taskIDList);
+
+    // Stop if there is no task to create
+    if (uniqueTaskIDList.length  === 0) {
+      return;
+    }
+
     // Create task submissions in a batch manner
     const mutations = [];
-    _.uniq(taskIDList).forEach((taskID) => {
+    uniqueTaskIDList.forEach((taskID) => {
       const query = `
 createTaskSubmission${taskID}: createTaskSubmission(TaskID: "${taskID}", QuestionnaireSubmissionID: "${questionnaireSubmission.submissionID}") {
   ID
