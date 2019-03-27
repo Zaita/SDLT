@@ -124,107 +124,44 @@ export function putDataInQuestionnaireAnswer(payload: Question): ThunkAction {
 
 export function moveAfterQuestionAnswered(answeredQuestion: Question): ThunkAction {
   return async (dispatch, getState) => {
-    let targetIndex = null;
-    const nonApplicableIndexes = [];
-
     const rootState: RootState = getState();
     const submission = rootState.questionnaireState.submissionState.submission;
     if (!submission) {
       return;
     }
 
-    const currentIndex = submission.questions.findIndex((question) => question.id === answeredQuestion.id);
-
-    // If it is already the last question, move to review page
-    if (currentIndex === submission.questions.length - 1) {
-      URLUtil.redirectToQuestionnaireReview(submission.submissionUUID);
-      return;
-    }
-
-    // If answered question is input type, move to next question
-    if (answeredQuestion.type === "input") {
-      targetIndex = currentIndex + 1;
-    }
-
-    // If answered question is action type, move to the defined target
-    if (answeredQuestion.type === "action") {
-      if (!answeredQuestion.actions) {
-        return;
-      }
-
-      const choseAction = answeredQuestion.actions.find((item) => {
-        return item.isChose;
-      });
-      if (!choseAction) {
-        return;
-      }
-
-      // "continue" | "goto" | "message" | "finish"
-      if (choseAction.type === "finish") {
-        // Mark all questions later to be non-applicable
-        for (let i = currentIndex + 1; i < submission.questions.length; i++) {
-          nonApplicableIndexes.push(i);
-        }
-
-        dispatch({
-          type: ActionType.QUESTIONNAIRE.MARK_QUESTIONNAIRE_QUESTION_NOT_APPLICABLE,
-          nonApplicableIndexes
-        });
-
-        await batchUpdateSubmissionData(getState(), nonApplicableIndexes);
-
-        // Move to review page
-        URLUtil.redirectToQuestionnaireReview(submission.submissionUUID);
-        return;
-      }
-      if (choseAction.type === "message") {
-        // Display message, don't move
-        return;
-      }
-      if (choseAction.type === "continue") {
-        targetIndex = currentIndex + 1;
-      }
-      if (choseAction.type === "goto") {
-        // Go to another question, need to mark questions between current and target to be non-applicable
-        const targetID = choseAction.goto;
-        targetIndex = submission.questions.findIndex((item) => {
-          return item.id === targetID;
-        });
-
-        // Don't move if the target index is wrong
-        if (targetIndex <= currentIndex) {
-          return;
-        }
-
-        // Find questions between target and current to be "not applicable"
-        if (targetIndex - currentIndex > 1) {
-          let cursor = currentIndex + 1;
-          while (cursor < targetIndex) {
-            nonApplicableIndexes.push(cursor);
-            cursor++;
-          }
-        }
-
-        if (nonApplicableIndexes.length > 0) {
-          dispatch({
-            type: ActionType.QUESTIONNAIRE.MARK_QUESTIONNAIRE_QUESTION_NOT_APPLICABLE,
-            nonApplicableIndexes
-          });
-        }
-      }
-    }
-
-    if (!targetIndex) {
-      throw new Error("Can't find a target question");
-    }
-
-    dispatch({
-      type: ActionType.QUESTIONNAIRE.MOVE_TO_ANOTHER_QUESTIONNAIRE_QUESTION,
-      targetIndex
+    const {
+      currentIndex,
+      targetIndex,
+      nonApplicableIndexes,
+      complete
+    } = SubmissionDataUtil.calculateCursorMoveFromQuestion({
+      question: answeredQuestion,
+      questions: submission.questions
     });
 
+    // Mark non applicable questions
+    if (nonApplicableIndexes.length > 0) {
+      dispatch({
+        type: ActionType.QUESTIONNAIRE.MARK_QUESTIONNAIRE_QUESTION_NOT_APPLICABLE,
+        nonApplicableIndexes
+      });
+    }
+
+    // Move cursor if target question is valid
+    if (targetIndex > currentIndex) {
+      dispatch({
+        type: ActionType.QUESTIONNAIRE.MOVE_TO_ANOTHER_QUESTIONNAIRE_QUESTION,
+        targetIndex
+      });
+    }
+
     // Batch update states for all related questions to cloud
-    await batchUpdateSubmissionData(getState(), [currentIndex, ...nonApplicableIndexes, targetIndex]);
+    await batchUpdateSubmissionData(getState(), _.uniq([currentIndex, ...nonApplicableIndexes, targetIndex]));
+
+    if (complete) {
+      URLUtil.redirectToQuestionnaireReview(submission.submissionUUID);
+    }
   };
 }
 
@@ -279,7 +216,7 @@ export function submitQuestionnaire(): ThunkAction {
 
       const csrfToken = await CSRFTokenService.getCSRFToken();
       const {uuid} = await QuestionnaireDataService.submitQuestionnaire({submissionID: submission.submissionID, csrfToken});
-      await TaskDataService.createTasksForQuestionnaireSubmission({questionnaireSubmission: submission, csrfToken});
+      await TaskDataService.createTaskSubmissionsForQuestionnaireSubmission({questionnaireSubmission: submission, csrfToken});
       URLUtil.redirectToQuestionnaireSummary(uuid);
     } catch(error) {
       // TODO: errors

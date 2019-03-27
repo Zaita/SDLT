@@ -3,7 +3,7 @@
 export default class URLUtil {
 
   static getTaskSubmissionURL(uuid: string) {
-    return `/tasks/submission/${uuid}`;
+    return `/task/submission/${uuid}`;
   }
 
   static redirectToQuestionnaireEditing(uuid: string) {
