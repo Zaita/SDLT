@@ -15,9 +15,11 @@ namespace NZTA\SDLT\Model;
 
 use Exception;
 use GraphQL\Type\Definition\ResolveInfo;
+use NZTA\SDLT\GraphQL\GraphQLAuthFailure;
 use Ramsey\Uuid\Uuid;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ResolverInterface;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
+use SilverStripe\GraphQL\Scaffolding\Scaffolders\DataObjectScaffolder;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
@@ -117,8 +119,21 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      */
     public function provideGraphQLScaffolding(SchemaScaffolder $scaffolder)
     {
-        // Provide entity type
-        $scaffolder
+        $dataObjectScaffolder = $this->provideGraphQLScaffoldingForEntityType($scaffolder);
+        $this->provideGraphQLScaffoldingForCreateTaskSubmission($scaffolder);
+        $this->provideGraphQLScaffoldingForUpdateTaskSubmission($scaffolder);
+        $this->provideGraphQLScaffoldingForCompleteTaskSubmission($scaffolder);
+        $this->provideGraphQLScaffoldingForEditTaskSubmission($scaffolder);
+        $this->provideGraphQLScaffoldingForReadTaskSubmission($dataObjectScaffolder);
+    }
+
+    /**
+     * @param SchemaScaffolder $scaffolder The scaffolder of the schema
+     * @return DataObjectScaffolder
+     */
+    private function provideGraphQLScaffoldingForEntityType(SchemaScaffolder $scaffolder)
+    {
+        return $scaffolder
             ->type(TaskSubmission::class)
             ->addFields([
                 'ID',
@@ -128,14 +143,22 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'Status',
                 'Result',
                 'Submitter',
-                'TaskName'
+                'TaskName',
+                'QuestionnaireSubmission'
             ]);
+    }
 
+    /**
+     * @param SchemaScaffolder $scaffolder The scaffolder of the schema
+     * @return void
+     */
+    private function provideGraphQLScaffoldingForCreateTaskSubmission(SchemaScaffolder $scaffolder)
+    {
         $scaffolder
             ->mutation('createTaskSubmission', TaskSubmission::class)
             ->addArgs([
-                'taskID' => 'String!',
-                'questionnaireSubmissionID' => 'String!'
+                'TaskID' => 'String!',
+                'QuestionnaireSubmissionID' => 'String!'
             ])
             ->setResolver(new class implements ResolverInterface
             {
@@ -143,10 +166,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                  * Invoked by the Executor class to resolve this mutation / query
                  * @see Executor
                  *
-                 * @param mixed       $object  object
-                 * @param array       $args    args
-                 * @param mixed       $context context
-                 * @param ResolveInfo $info    info
+                 * @param mixed $object object
+                 * @param array $args args
+                 * @param mixed $context context
+                 * @param ResolveInfo $info info
                  * @throws Exception
                  * @return mixed
                  */
@@ -155,13 +178,12 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     $submitter = Security::getCurrentUser();
 
                     // Check authentication
-                    // TODO: use a custom Exception for all authenticate failures
                     if (!$submitter) {
-                        throw new Exception('Please log in first.');
+                        throw new GraphQLAuthFailure();
                     }
 
-                    $taskID = (int)$args['taskID'];
-                    $questionnaireSubmissionID = (int)$args['questionnaireSubmissionID'];
+                    $taskID = (int)$args['TaskID'];
+                    $questionnaireSubmissionID = (int)$args['QuestionnaireSubmissionID'];
                     $submitterID = (int)$submitter->ID;
 
                     if (!$taskID || !$questionnaireSubmissionID || !$submitterID) {
@@ -220,5 +242,196 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         $taskSubmission->write();
 
         return $taskSubmission;
+    }
+
+    private function provideGraphQLScaffoldingForUpdateTaskSubmission(SchemaScaffolder $scaffolder)
+    {
+        $scaffolder
+            ->mutation('updateTaskSubmission', TaskSubmission::class)
+            ->addArgs([
+                'UUID' => 'String!',
+                'QuestionID' => 'ID!',
+                'AnswerData' => 'String'
+            ])
+            ->setResolver(new class implements ResolverInterface
+            {
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed $object object
+                 * @param array $args args
+                 * @param mixed $context context
+                 * @param ResolveInfo $info info
+                 * @throws Exception
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    $submitter = Security::getCurrentUser();
+
+                    // Check authentication
+                    if (!$submitter) {
+                        throw new GraphQLAuthFailure();
+                    }
+
+                    /* @var $submission TaskSubmission */
+                    $submission = TaskSubmission::get()->where(['UUID' => $args['UUID']])->first();
+                    if (!$submission) {
+                        throw new Exception('Task submission does not exist');
+                    }
+
+                    // AnswerData is generated by `window.btoa(JSON.stringify(answerData))` in JavaScript
+                    // This is to avoid parsing issue caused by `quote`, `\n` and other special characters
+                    $questionAnswerData = json_decode(base64_decode($args['AnswerData']), true);
+
+                    $allAnswerData = json_decode($submission->AnswerData, true);
+                    $allAnswerData[$args['QuestionID']] = $questionAnswerData;
+                    $submission->AnswerData = json_encode($allAnswerData);
+                    $submission->write();
+
+                    return $submission;
+                }
+            })
+            ->end();
+    }
+
+    private function provideGraphQLScaffoldingForCompleteTaskSubmission(SchemaScaffolder $scaffolder)
+    {
+        $scaffolder
+            ->mutation('completeTaskSubmission', TaskSubmission::class)
+            ->addArgs([
+                'UUID' => 'String!',
+            ])
+            ->setResolver(new class implements ResolverInterface
+            {
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed $object object
+                 * @param array $args args
+                 * @param mixed $context context
+                 * @param ResolveInfo $info info
+                 * @throws Exception
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    $submitter = Security::getCurrentUser();
+
+                    // Check authentication
+                    if (!$submitter) {
+                        throw new GraphQLAuthFailure();
+                    }
+
+                    /* @var $submission TaskSubmission */
+                    $submission = TaskSubmission::get()->where(['UUID' => $args['UUID']])->first();
+                    if (!$submission) {
+                        throw new Exception('Task submission does not exist');
+                    }
+
+                    $submission->Status = TaskSubmission::STATUS_COMPLETE;
+                    $submission->write();
+
+                    return $submission;
+                }
+            })
+            ->end();
+    }
+
+    private function provideGraphQLScaffoldingForEditTaskSubmission(SchemaScaffolder $scaffolder)
+    {
+        $scaffolder
+            ->mutation('editTaskSubmission', TaskSubmission::class)
+            ->addArgs([
+                'UUID' => 'String!',
+            ])
+            ->setResolver(new class implements ResolverInterface
+            {
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed $object object
+                 * @param array $args args
+                 * @param mixed $context context
+                 * @param ResolveInfo $info info
+                 * @throws Exception
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    $submitter = Security::getCurrentUser();
+
+                    // Check authentication
+                    if (!$submitter) {
+                        throw new GraphQLAuthFailure();
+                    }
+
+                    /* @var $submission TaskSubmission */
+                    $submission = TaskSubmission::get()->where(['UUID' => $args['UUID']])->first();
+                    if (!$submission) {
+                        throw new Exception('Task submission does not exist');
+                    }
+
+                    $submission->Status = TaskSubmission::STATUS_IN_PROGRESS;
+                    $submission->write();
+
+                    return $submission;
+                }
+            })
+            ->end();
+    }
+
+    /**
+     * @param DataObjectScaffolder $scaffolder The scaffolder of the data object
+     * @return void
+     */
+    private function provideGraphQLScaffoldingForReadTaskSubmission(DataObjectScaffolder $scaffolder)
+    {
+        $scaffolder
+            ->operation(SchemaScaffolder::READ)
+            ->setName('readTaskSubmission')
+            ->addArg('UUID', 'String!')
+            ->setUsePagination(false)
+            ->setResolver(new class implements ResolverInterface
+            {
+
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed $object object
+                 * @param array $args args
+                 * @param mixed $context context
+                 * @param ResolveInfo $info info
+                 * @throws Exception
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    $member = Security::getCurrentUser();
+                    $uuid = htmlentities(trim($args['UUID']));
+
+                    // Check authentication
+                    if (!$member) {
+                        throw new GraphQLAuthFailure();
+                    }
+
+                    // Check argument
+                    if (!$uuid) {
+                        throw new Exception('Wrong argument');
+                    }
+
+                    // Filter data by UUID
+                    $data = TaskSubmission::get()->where([
+                        'UUID' => $uuid
+                    ]);
+
+                    return $data;
+                }
+            })
+            ->end();
     }
 }
