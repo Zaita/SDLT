@@ -146,6 +146,7 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     public function createDefaultSDLTMemberGroups()
     {
         $cisoGroup = Group::get()->find('Code', 'sdlt-ciso');
+
         if (!($cisoGroup && $cisoGroup->ID)) {
             $cisoGroup = Group::create();
             $cisoGroup->Title = 'NZTA-SDLT-CISO';
@@ -155,15 +156,16 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
 
         $adminGroup = Group::get()->find('Code', 'administrators');
         $saGroup = Group::get()->find('Code', 'sdlt-security-architect');
+
         if (!($saGroup && $saGroup->ID)) {
             $saGroup = Group::create();
             $saGroup->Title = 'NZTA-SDLT-SecurityArchitect';
             $saGroup->Code = 'sdlt-security-architect';
             $saGroup->write();
-            // $adminGroup->Groups()->add($saGroup);
         }
 
         $usersGroup = Group::get()->find('Code', 'sdlt-users');
+
         if (!($usersGroup && $usersGroup->ID)) {
             $usersGroup = Group::create();
             $usersGroup->Title = 'NZTA-SDLT-Users';
