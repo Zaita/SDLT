@@ -119,19 +119,19 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      */
     public function provideGraphQLScaffolding(SchemaScaffolder $scaffolder)
     {
-        $dataObjectScaffolder = $this->provideGraphQLScaffolding_EntityType($scaffolder);
-        $this->provideGraphQLScaffolding_CreateTaskSubmission($scaffolder);
-        $this->provideGraphQLScaffolding_UpdateTaskSubmission($scaffolder);
-        $this->provideGraphQLScaffolding_CompleteTaskSubmission($scaffolder);
-        $this->provideGraphQLScaffolding_EditTaskSubmission($scaffolder);
-        $this->provideGraphQLScaffolding_ReadTaskSubmission($dataObjectScaffolder);
+        $dataObjectScaffolder = $this->provideGraphQLScaffoldingForEntityType($scaffolder);
+        $this->provideGraphQLScaffoldingForCreateTaskSubmission($scaffolder);
+        $this->provideGraphQLScaffoldingForUpdateTaskSubmission($scaffolder);
+        $this->provideGraphQLScaffoldingForCompleteTaskSubmission($scaffolder);
+        $this->provideGraphQLScaffoldingForEditTaskSubmission($scaffolder);
+        $this->provideGraphQLScaffoldingForReadTaskSubmission($dataObjectScaffolder);
     }
 
     /**
      * @param SchemaScaffolder $scaffolder The scaffolder of the schema
      * @return DataObjectScaffolder
      */
-    private function provideGraphQLScaffolding_EntityType(SchemaScaffolder $scaffolder)
+    private function provideGraphQLScaffoldingForEntityType(SchemaScaffolder $scaffolder)
     {
         return $scaffolder
             ->type(TaskSubmission::class)
@@ -152,7 +152,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      * @param SchemaScaffolder $scaffolder The scaffolder of the schema
      * @return void
      */
-    private function provideGraphQLScaffolding_CreateTaskSubmission(SchemaScaffolder $scaffolder)
+    private function provideGraphQLScaffoldingForCreateTaskSubmission(SchemaScaffolder $scaffolder)
     {
         $scaffolder
             ->mutation('createTaskSubmission', TaskSubmission::class)
@@ -244,7 +244,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         return $taskSubmission;
     }
 
-    private function provideGraphQLScaffolding_UpdateTaskSubmission(SchemaScaffolder $scaffolder)
+    private function provideGraphQLScaffoldingForUpdateTaskSubmission(SchemaScaffolder $scaffolder)
     {
         $scaffolder
             ->mutation('updateTaskSubmission', TaskSubmission::class)
@@ -296,7 +296,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             ->end();
     }
 
-    private function provideGraphQLScaffolding_CompleteTaskSubmission(SchemaScaffolder $scaffolder)
+    private function provideGraphQLScaffoldingForCompleteTaskSubmission(SchemaScaffolder $scaffolder)
     {
         $scaffolder
             ->mutation('completeTaskSubmission', TaskSubmission::class)
@@ -340,7 +340,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             ->end();
     }
 
-    private function provideGraphQLScaffolding_EditTaskSubmission(SchemaScaffolder $scaffolder)
+    private function provideGraphQLScaffoldingForEditTaskSubmission(SchemaScaffolder $scaffolder)
     {
         $scaffolder
             ->mutation('editTaskSubmission', TaskSubmission::class)
@@ -388,7 +388,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      * @param DataObjectScaffolder $scaffolder The scaffolder of the data object
      * @return void
      */
-    private function provideGraphQLScaffolding_ReadTaskSubmission(DataObjectScaffolder $scaffolder)
+    private function provideGraphQLScaffoldingForReadTaskSubmission(DataObjectScaffolder $scaffolder)
     {
         $scaffolder
             ->operation(SchemaScaffolder::READ)
