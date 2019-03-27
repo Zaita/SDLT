@@ -117,6 +117,16 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     ];
 
     /**
+     * @var string
+     */
+    private static $ciso_group_code = 'sdlt-ciso';
+
+    /**
+     * @var string
+     */
+    private static $security_architect_group_code = 'sdlt-security-architect';
+
+    /**
      * Default sort ordering
      *
      * @var array
@@ -590,7 +600,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $questionnaireSubmission->QuestionnaireStatus = 'waiting_for_security_architect_approval';
 
                     if (!$questionnaireSubmission->SendEmailToSecurityArchitect) {
-                        $members = $questionnaireSubmission->getApprovalMembersListByGroup('security-architect');
+                        $members = $questionnaireSubmission->getApprovalMembersListByGroup(QuestionnaireSubmission::$security_architect_group_code);
 
                         if (!$members) {
                             throw new Exception('Please add member in Security architect group.');
@@ -976,7 +986,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             throw new Exception($accessDetail['message']);
         }
 
-        if ($accessDetail['group'] == 'security-architect') {
+        if ($accessDetail['group'] == QuestionnaireSubmission::$security_architect_group_code) {
             // update Security-Architect member details
             $this->updateSecurityArchitectDetail($member, $status);
 
@@ -984,7 +994,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 $this->QuestionnaireStatus = 'waiting_for_approval';
 
                 // get CISO group member list
-                $members = $this->getApprovalMembersListByGroup('ciso');
+                $members = $this->getApprovalMembersListByGroup('QuestionnaireSubmission::$ciso_architect_group_code');
 
                 // send email to CISO group and Business owner
                 $qs = QueuedJobService::create();
@@ -1002,7 +1012,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         }
 
         // update CISO member details
-        if ($accessDetail['group'] == 'ciso') {
+        if ($accessDetail['group'] == QuestionnaireSubmission::$ciso_group_code) {
             $this->updateCisoDetail($member, $status);
             $this->write();
         }
@@ -1079,7 +1089,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     */
     public function getSecurityArchitectAccessDetail($member)
     {
-        $group = 'security-architect';
+        $group = QuestionnaireSubmission::$security_architect_group_code;
 
         // check member groups
         $ismemberInGroup = $member->Groups()->filter('Code', $group)->first();
@@ -1139,7 +1149,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     */
     public function getCISOAccessDetail($member)
     {
-        $group = 'ciso';
+        $group = QuestionnaireSubmission::$ciso_architect_group_code;
 
         // check member groups
         $ismemberInGroup = $member->Groups()->filter('Code', $group)->first();
@@ -1488,20 +1498,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      */
     public function getApprovalMembersListByGroup($group)
     {
-        // get CISO group's member
-        if ($group == 'ciso') {
-            $group = Group::get()->filter('code', $group)->first();
-            if ($group) {
-                $members = $group->Members();
-            }
-        }
-
-        // get Security Architect group's member
-        if ($group == 'security-architect') {
-            $group = Group::get()->filter('code', $group)->first();
-            if ($group) {
-                $members = $group->Members();
-            }
+        $group = Group::get()->filter('code', $group)->first();
+        if ($group) {
+            $members = $group->Members();
         }
 
         if (!$members) {
