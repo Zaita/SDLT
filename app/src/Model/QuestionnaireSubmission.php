@@ -288,6 +288,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 {
                     QuestionnaireSubmission::is_user_logged_in();
 
+                    $member = Security::getCurrentUser();
+
                     // Check submission ID
                     if (empty($args['QuestionnaireID']) || !is_numeric($args['QuestionnaireID'])) {
                         throw new Exception('Please enter a valid ID.');
@@ -1435,7 +1437,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      * @throws Exception
      * @return void
      */
-    public function is_user_logged_in()
+    public static function is_user_logged_in()
     {
         $member = Security::getCurrentUser();
 
