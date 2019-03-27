@@ -43,7 +43,7 @@ class Review extends Component<Props> {
 
     return (
       <div className="Review">
-        <AnswersPreview submission={submission}/>
+        <AnswersPreview questions={submission.questions}/>
         <div className="buttons">
           <LightButton title="EDIT ANSWERS"
                        iconImage={editIcon}

@@ -4,13 +4,14 @@ import type {QuestionnaireStartState, QuestionnaireSubmissionState} from "../sto
 import GraphQLRequestHelper from "../utils/GraphQLRequestHelper";
 import _ from "lodash";
 import {DEFAULT_NETWORK_ERROR} from "../constants/errors";
-import type {AnswerAction, AnswerInput, Question, SubmissionQuestionData} from "../types/Questionnaire";
-import StringUtil from "../utils/StringUtil";
+import type {SubmissionQuestionData} from "../types/Questionnaire";
 import type {TaskSubmissionDisplay} from "../types/Task";
+import QuestionParser from "../utils/QuestionParser";
+import UserParser from "../utils/UserParser";
 
 export default class QuestionnaireDataService {
 
-  static async createInProgressSubmission(argument: {questionnaireID: string, csrfToken: string}): Promise<string> {
+  static async createInProgressSubmission(argument: { questionnaireID: string, csrfToken: string }): Promise<string> {
     const {questionnaireID, csrfToken} = {...argument};
     const query = `
 mutation {
@@ -54,7 +55,7 @@ query {
     const questionnaireData = _.get(json, "data.readQuestionnaire", null);
     const siteData = _.get(json, "data.readSiteConfig.0", null);
 
-    if(!memberData || !questionnaireData || !siteData) {
+    if (!memberData || !questionnaireData || !siteData) {
       throw DEFAULT_NETWORK_ERROR;
     }
 
@@ -114,184 +115,37 @@ query {
 }`;
     const json = await GraphQLRequestHelper.request({query});
 
-    const memberData = _.get(json, "data.readCurrentMember.0", null);
-
-    const submissionJSON = _.get(json, "data.readQuestionnaireSubmission.0", null);
-    if(!submissionJSON) {
+    const memberData = _.get(json, "data.readCurrentMember.0", {});
+    const submissionJSON = _.get(json, "data.readQuestionnaireSubmission.0", {});
+    if (!memberData || !submissionJSON) {
       throw DEFAULT_NETWORK_ERROR;
     }
-
-    const schema = JSON.parse(_.get(submissionJSON, "QuestionnaireData", ""));
-    if(!schema || !Array.isArray(schema)) {
-      throw DEFAULT_NETWORK_ERROR;
-    }
-
-    // Construct answers object for data parse (need key to be string)
-    const answersJSON = _.get(submissionJSON, "AnswerData", "");
-    const answersRaw = answersJSON ? JSON.parse(answersJSON) : {};
-    const answers = {};
-    if (answersRaw) {
-      _.keys(answersRaw).forEach((key) => {
-        answers[StringUtil.toString(key)] = answersRaw[key];
-      });
-    }
-
-    // Find the current question
-    let currentQuestionID;
-    _.keys(answers).forEach((questionID) => {
-      const answer = answers[questionID];
-      if (!currentQuestionID && Boolean(_.get(answer, `isCurrent`, false))) {
-        currentQuestionID = questionID;
-      }
-    });
-
-    let status = StringUtil.toString(_.get(submissionJSON, "QuestionnaireStatus", "")).toLowerCase().replace("-","_");
 
     const data: QuestionnaireSubmissionState = {
-      title: StringUtil.toString(_.get(submissionJSON, "Questionnaire.Name", "")),
-      siteTitle: StringUtil.toString(_.get(json, "data.readSiteConfig.0.Title", "")),
-      user: {
-        id: StringUtil.toString(_.get(memberData, "ID")),
-        name: `${_.get(memberData, "FirstName")} ${_.get(memberData, "Surname")}`,
-        role: _.get(memberData, "UserRole"),
-        email: _.get(memberData, "Email"),
-      },
+      title: _.toString(_.get(submissionJSON, "Questionnaire.Name", "")),
+      siteTitle: _.toString(_.get(json, "data.readSiteConfig.0.Title", "")),
+      user: UserParser.parseUserFromJSON(memberData),
       isCurrentUserApprover: Boolean(_.get(submissionJSON, "IsCurrentUserAnApprover", "")),
       submission: {
-        questionnaireID: StringUtil.toString(_.get(submissionJSON, "Questionnaire.ID", "")),
-        questionnaireTitle: StringUtil.toString(_.get(submissionJSON, "Questionnaire.Name", "")),
-        submissionID: StringUtil.toString(_.get(submissionJSON, "ID", "")),
-        submissionUUID: StringUtil.toString(_.get(submissionJSON, "UUID", "")),
+        questionnaireID: _.toString(_.get(submissionJSON, "Questionnaire.ID", "")),
+        questionnaireTitle: _.toString(_.get(submissionJSON, "Questionnaire.Name", "")),
+        submissionID: _.toString(_.get(submissionJSON, "ID", "")),
+        submissionUUID: _.toString(_.get(submissionJSON, "UUID", "")),
         submitter: {
-          id: StringUtil.toString(_.get(submissionJSON, "User.ID")),
-          name: StringUtil.toString(_.get(submissionJSON, "SubmitterName", "")),
-          role: StringUtil.toString(_.get(submissionJSON, "SubmitterRole", "")),
-          email: StringUtil.toString(_.get(submissionJSON, "SubmitterEmail", "")),
+          id: _.toString(_.get(submissionJSON, "User.ID")),
+          name: _.toString(_.get(submissionJSON, "SubmitterName", "")),
+          role: _.toString(_.get(submissionJSON, "SubmitterRole", "")),
+          email: _.toString(_.get(submissionJSON, "SubmitterEmail", "")),
         },
-        status: status,
+        status: _.toString(_.get(submissionJSON, "QuestionnaireStatus", "")).toLowerCase().replace("-", "_"),
         approvalStatus: {
-          chiefInformationSecurityOfficer: StringUtil.toString(_.get(submissionJSON, "CisoApprovalStatus", "")),
-          businessOwner: StringUtil.toString(_.get(submissionJSON, "BusinessOwnerApprovalStatus", "")),
-          securityArchitect: StringUtil.toString(_.get(submissionJSON, "SecurityArchitectApprovalStatus", ""))
+          chiefInformationSecurityOfficer: _.toString(_.get(submissionJSON, "CisoApprovalStatus", "")),
+          businessOwner: _.toString(_.get(submissionJSON, "BusinessOwnerApprovalStatus", "")),
+          securityArchitect: _.toString(_.get(submissionJSON, "SecurityArchitectApprovalStatus", "")),
         },
-        questions: schema.map((questionSchema, schemaIndex) => {
-          const questionID = StringUtil.toString(_.get(questionSchema, "ID", ""));
-          const hasAnswer = Boolean(_.get(answers, `${questionID}.hasAnswer`, false));
-          const isApplicable = Boolean(_.get(answers, `${questionID}.isApplicable`, true));
-
-          let isCurrent = false;
-          if (currentQuestionID) {
-            isCurrent = (currentQuestionID === questionID);
-          } else {
-            // The first question will be the current one by default
-            isCurrent = (schemaIndex === 0);
-          }
-
-          let inputs = null;
-          let actions = null;
-
-          const inputAnswers = hasAnswer ? _.get(answers, `${questionID}.inputs`, []) : [];
-          const actionAnswers = hasAnswer ? _.get(answers, `${questionID}.actions`, []) : [];
-
-          const inputSchemas = _.get(questionSchema, "AnswerInputFields", []);
-          const actionSchemas = _.get(questionSchema, "AnswerActionFields", []);
-
-          if (inputSchemas && Array.isArray(inputSchemas) && inputSchemas.length > 0) {
-            inputs = inputSchemas.map((inputSchema) => {
-              // Schema of input
-              let type = StringUtil.toString(_.get(inputSchema, "InputType", "")).toLowerCase();
-              const validTypes = ["text", "email", "textarea", "date"];
-              if (!validTypes.includes(type)) {
-                type = "text";
-              }
-
-              const inputID = StringUtil.toString(_.get(inputSchema, "ID", ""));
-              const input: AnswerInput = {
-                id: inputID,
-                label: StringUtil.toString(_.get(inputSchema, "Label", "")),
-                type: type,
-                required: Boolean(_.get(inputSchema, "Required", false)),
-                minLength: Number.parseInt(StringUtil.toString(_.get(inputSchema, "MinLength", 0))),
-                placeholder: StringUtil.toString(_.get(inputSchema, "PlaceHolder", "")),
-                data: null
-              };
-
-              // Data of input
-              if (inputAnswers && Array.isArray(inputAnswers) && inputAnswers.length > 0) {
-                const answer = _.head(inputAnswers.filter((answer) => answer.id === inputID));
-                if (answer) {
-                  const inputData = StringUtil.toString(_.get(answer, "data", null));
-                  if (inputData) {
-                    input.data = inputData;
-                  }
-                }
-              }
-
-              return input;
-            });
-          }
-
-          if (actionSchemas && Array.isArray(actionSchemas) && actionSchemas.length > 0) {
-            actions = actionSchemas.map((actionSchema) => {
-              // Schema of action
-              let type = StringUtil.toString(_.get(actionSchema, "ActionType", "")).toLowerCase();
-              const validTypes = ["continue", "goto", "message", "finish"];
-              if (!validTypes.includes(type)) {
-                type = "continue";
-              }
-
-              const actionID = StringUtil.toString(_.get(actionSchema, "ID", ""));
-              const action: AnswerAction = {
-                id: actionID,
-                label: StringUtil.toString(_.get(actionSchema, "Label", "")),
-                type: type,
-                isChose: false,
-              };
-
-              if (type === "message") {
-                action.message = StringUtil.toString(_.get(actionSchema, "Message", ""))
-              }
-
-              if (type === "goto") {
-                action.goto = StringUtil.toString(_.get(actionSchema, "GotoID", ""));
-              }
-
-              // Task of action
-              const taskID = StringUtil.toString(_.get(actionSchema, "TaskID", ""));
-              action.taskID = taskID;
-
-              // Data of action
-              if (actionAnswers && Array.isArray(actionAnswers) && actionAnswers.length > 0) {
-                const answer = _.head(actionAnswers.filter((answer) => answer.id === actionID));
-                if (answer) {
-                  const isChose = Boolean(_.get(answer, "isChose", false));
-                  action.isChose = isChose;
-                }
-              }
-
-              return action;
-            });
-          }
-
-          const question: Question = {
-            id: questionID,
-            title: StringUtil.toString(_.get(questionSchema, "Title", "")),
-            heading: StringUtil.toString(_.get(questionSchema, "Question", "")),
-            description: StringUtil.toString(_.get(questionSchema, "Description", "")),
-            type: StringUtil.toString(_.get(questionSchema, "AnswerFieldType", "")).toLowerCase() === "input" ? "input" : "action",
-            isCurrent: isCurrent,
-            hasAnswer: hasAnswer,
-            isApplicable: isApplicable
-          };
-
-          if (inputs) {
-            question.inputs = inputs;
-          }
-          if (actions) {
-            question.actions = actions;
-          }
-
-          return question;
+        questions: QuestionParser.parseQuestionsFromJSON({
+          schemaJSON: _.toString(_.get(submissionJSON, "QuestionnaireData", "")),
+          answersJSON: _.toString(_.get(submissionJSON, "AnswerData", "")),
         }),
         taskSubmissions: _
           .toArray(_.get(submissionJSON, "TaskSubmissions", []))
@@ -299,11 +153,11 @@ query {
             const taskSubmission: TaskSubmissionDisplay = {
               uuid: _.toString(_.get(item, "UUID", "")),
               taskName: _.toString(_.get(item, "TaskName", "")),
-              status: _.toString(_.get(item, "Status", ""))
+              status: _.toString(_.get(item, "Status", "")),
             };
             return taskSubmission;
-          })
-      }
+          }),
+      },
     };
 
     return data;
@@ -345,7 +199,6 @@ mutation {
       throw DEFAULT_NETWORK_ERROR;
     }
 
-
     let mutations = [];
     for (let index = 0; index < questionIDList.length; index++) {
       const questionID = questionIDList[index];
@@ -372,7 +225,7 @@ mutation {
     }
   }
 
-  static async submitQuestionnaire(argument: {submissionID: string, csrfToken: string}): Promise<{uuid: string}> {
+  static async submitQuestionnaire(argument: { submissionID: string, csrfToken: string }): Promise<{ uuid: string }> {
     const {submissionID, csrfToken} = {...argument};
     const query = `
 mutation {
@@ -382,33 +235,35 @@ mutation {
  }
 }`;
     const json = await GraphQLRequestHelper.request({query, csrfToken});
-    const status = StringUtil.toString(_.get(json, "data.updateQuestionnaireStatusToSubmitted.QuestionnaireStatus", null));
-    const uuid = StringUtil.toString(_.get(json, "data.updateQuestionnaireStatusToSubmitted.UUID", null));
+    const status = _.toString(
+      _.get(json, "data.updateQuestionnaireStatusToSubmitted.QuestionnaireStatus", null));
+    const uuid = _.toString(_.get(json, "data.updateQuestionnaireStatusToSubmitted.UUID", null));
     if (!status || !uuid) {
       throw DEFAULT_NETWORK_ERROR;
     }
     return {uuid};
   }
 
-  static async submitQuestionnaireForApproval(argument: {submissionID: string, csrfToken: string}): Promise<{uuid: string}> {
+  static async submitQuestionnaireForApproval(argument: { submissionID: string, csrfToken: string }): Promise<{ uuid: string }> {
     const {submissionID, csrfToken} = {...argument};
     const query = `
 mutation {
- updateQuestionnaireStatusToWaitingForApproval(ID: "${submissionID}") {
+ updateQuestionnaireStatusToWaitingForSecurityArchitectApproval(ID: "${submissionID}") {
    QuestionnaireStatus
    UUID
  }
 }`;
     const json = await GraphQLRequestHelper.request({query, csrfToken});
-    const status = StringUtil.toString(_.get(json, "data.updateQuestionnaireStatusToWaitingForApproval.QuestionnaireStatus", null));
-    const uuid = StringUtil.toString(_.get(json, "data.updateQuestionnaireStatusToWaitingForApproval.UUID", null));
+    const status = _.toString(
+      _.get(json, "data.updateQuestionnaireStatusToWaitingForSecurityArchitectApproval.QuestionnaireStatus", null));
+    const uuid = _.toString(_.get(json, "data.updateQuestionnaireStatusToWaitingForSecurityArchitectApproval.UUID", null));
     if (!status || !uuid) {
       throw DEFAULT_NETWORK_ERROR;
     }
     return {uuid};
   }
 
-  static async approveQuestionnaireSubmission(argument: {submissionID: string, csrfToken: string}): Promise<{uuid: string}>  {
+  static async approveQuestionnaireSubmission(argument: { submissionID: string, csrfToken: string }): Promise<{ uuid: string }> {
     const {submissionID, csrfToken} = {...argument};
     const query = `
 mutation {
@@ -418,15 +273,16 @@ mutation {
  }
 }`;
     const json = await GraphQLRequestHelper.request({query, csrfToken});
-    const status = StringUtil.toString(_.get(json, "data.updateQuestionnaireStatusToApproved.QuestionnaireStatus", null));
-    const uuid = StringUtil.toString(_.get(json, "data.updateQuestionnaireStatusToApproved.UUID", null));
+    const status = _.toString(
+      _.get(json, "data.updateQuestionnaireStatusToApproved.QuestionnaireStatus", null));
+    const uuid = _.toString(_.get(json, "data.updateQuestionnaireStatusToApproved.UUID", null));
     if (!status || !uuid) {
       throw DEFAULT_NETWORK_ERROR;
     }
     return {uuid};
   }
 
-  static async denyQuestionnaireSubmission(argument: {submissionID: string, csrfToken: string}): Promise<{uuid: string}>  {
+  static async denyQuestionnaireSubmission(argument: { submissionID: string, csrfToken: string }): Promise<{ uuid: string }> {
     const {submissionID, csrfToken} = {...argument};
     const query = `
 mutation {
@@ -436,8 +292,8 @@ mutation {
  }
 }`;
     const json = await GraphQLRequestHelper.request({query, csrfToken});
-    const status = StringUtil.toString(_.get(json, "data.updateQuestionnaireStatusToDenied.QuestionnaireStatus", null));
-    const uuid = StringUtil.toString(_.get(json, "data.updateQuestionnaireStatusToDenied.UUID", null));
+    const status = _.toString(_.get(json, "data.updateQuestionnaireStatusToDenied.QuestionnaireStatus", null));
+    const uuid = _.toString(_.get(json, "data.updateQuestionnaireStatusToDenied.UUID", null));
     if (!status || !uuid) {
       throw DEFAULT_NETWORK_ERROR;
     }

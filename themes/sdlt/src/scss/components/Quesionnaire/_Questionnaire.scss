@@ -1,19 +1,19 @@
 .QuestionnaireContainer {
-
     .Questionnaire {
-
         margin-bottom: 80px;
+    }
+}
 
-        .major {
-            max-width: 1136px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-start;
-            align-items: stretch;
+.Questionnaire {
+    .major {
+        max-width: 1136px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: stretch;
 
-            @import "LeftBar";
-            @import "QuestionForm";
-        }
+        @import "LeftBar";
+        @import "QuestionForm";
     }
 }
