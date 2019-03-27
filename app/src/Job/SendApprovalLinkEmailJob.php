@@ -27,12 +27,14 @@ class SendApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJob
 {
     /**
      * @param QuestionnaireSubmission $questionnaireSubmission questionnaireSubmission
-     * @param array                   $members                 members id list
+     * @param DataObject              $members                 members
+     * @param DataObject              $businessOwnerEmail      business Owner Email
      */
-    public function __construct($questionnaireSubmission = null, $members = [])
+    public function __construct($questionnaireSubmission = null, $members = [], $businessOwnerEmail = '')
     {
         $this->questionnaireSubmission = $questionnaireSubmission;
-        $this->Member = $members;
+        $this->members = $members;
+        $this->businessOwnerEmail = $businessOwnerEmail;
     }
 
     /**
@@ -62,57 +64,66 @@ class SendApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJob
     public function process()
     {
         // send email to stack holder (CISO and Security Architect group)
-        foreach ($this->Member as $memberId) {
-            $member = Member::get()->byID($memberId);
-            if ($member) {
-                $this->sendEmail($member);
-            }
+        foreach ($this->members as $member) {
+            $this->sendEmail($member->FirstName, $member->Email, false);
+        }
+
+        if (!empty($this->businessOwnerEmail)) {
+            $this->sendEmail('', $this->businessOwnerEmail, true);
         }
 
         $this->isComplete = true;
     }
 
     /**
-     * @param DataObject $member Member
+     * @param string  $name            name
+     * @param string  $toEmail         to Email
+     * @param boolean $isBusinessOwner is BusinessOwner
      *
      * @return null
      */
-    public function sendEmail($member)
+    public function sendEmail($name, $toEmail, $isBusinessOwner = false)
     {
         $emailDetails = QuestionnaireEmail::get()->first();
 
-        $sub = $this->replaceVariable($emailDetails->ApprovalLinkEmailSubject);
+        $sub = $this->replaceVariable($emailDetails->ApprovalLinkEmailSubject, $isBusinessOwner);
         $from = $emailDetails->FromEmailAddress;
 
         $email = Email::create()
             ->setHTMLTemplate('Email\\EmailTemplate')
             ->setData([
-                'Name' => $member->FirstName,
-                'Body' => $this->replaceVariable($emailDetails->ApprovalLinkEmailBody),
+                'Name' => $name,
+                'Body' => $this->replaceVariable($emailDetails->ApprovalLinkEmailBody, $isBusinessOwner),
                 'EmailSignature' => $emailDetails->EmailSignature
 
             ])
             ->setFrom($from)
-            ->setTo($member->Email)
+            ->setTo($toEmail)
             ->setSubject($sub);
 
         $email->send();
     }
 
     /**
-     * @param string $string string
+     * @param string  $string          string
+     * @param boolean $isBusinessOwner true/false
      * @return string
      */
-    public function replaceVariable($string)
+    public function replaceVariable($string = '', $isBusinessOwner = false)
     {
         $questionnaireName = $this->questionnaireSubmission->Questionnaire()->Name;
         $SubmitterName = $this->questionnaireSubmission->SubmitterName;
         $SubmitterEmail = $this->questionnaireSubmission->SubmitterEmail;
+
         $link = $this->questionnaireSubmission->getSummaryPageLink();
-        $summaryLink = '<a href="' . $link . '">this link</a>';
+        if ($isBusinessOwner) {
+            $link = $this->questionnaireSubmission->getApprovalPageLink();
+        }
+
+        $approvalLink = '<a href="' . $link . '">this link</a>';
 
         $string = str_replace('{$questionnaireName}', $questionnaireName, $string);
-        $string = str_replace('{$summaryLink}', $summaryLink, $string);
+        $string = str_replace('{$approvalLink}', $approvalLink, $string);
         $string = str_replace('{$submitterName}', $SubmitterName, $string);
         $string = str_replace('{$submitterEmail}', $SubmitterEmail, $string);
 
