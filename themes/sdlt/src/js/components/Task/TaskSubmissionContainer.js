@@ -56,7 +56,11 @@ class TaskSubmissionContainer extends Component<Props> {
   }
 
   render() {
-    const {dispatchSaveAnsweredQuestionAction, dispatchMoveToPreviousQuestionAction} = {...this.props};
+    const {
+      dispatchSaveAnsweredQuestionAction,
+      dispatchMoveToPreviousQuestionAction,
+      dispatchEditAnswersAction
+    } = {...this.props};
     const {siteTitle, currentUser, taskSubmission} = {...this.props.state};
 
     if (!currentUser || !taskSubmission) {
@@ -70,6 +74,7 @@ class TaskSubmissionContainer extends Component<Props> {
           taskSubmission={taskSubmission}
           saveAnsweredQuestion={dispatchSaveAnsweredQuestionAction}
           moveToPreviousQuestion={dispatchMoveToPreviousQuestionAction}
+          editAnswers={dispatchEditAnswersAction}
         />
         <Footer/>
       </div>
