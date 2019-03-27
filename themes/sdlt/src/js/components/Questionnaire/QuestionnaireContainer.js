@@ -59,17 +59,31 @@ class QuestionnaireContainer extends Component<Props> {
     const {dispatchSaveAnsweredQuestionAction, dispatchMoveToPreviousQuestionAction} = {...this.props};
     const {title, siteTitle, user, submission} = {...this.props.submissionState};
 
-    if (!user) {
+    if (!user || !submission) {
       return null;
     }
+
+    if (submission.status !== "in_progress") {
+      return (
+        <div className="QuestionnaireContainer">
+          <Header title={title} subtitle={siteTitle} />
+          <div className="Questionnaire">
+            <h1>
+              The questionnaire is not in progress...
+            </h1>
+          </div>
+          <Footer/>
+        </div>
+      );
+    }
+
 
     return (
       <div className="QuestionnaireContainer">
         <Header title={title} subtitle={siteTitle} />
 
         <Questionnaire
-          user={user}
-          submission={submission}
+          questions={submission.questions}
           saveAnsweredQuestion={(answeredQuestion) => {
             dispatchSaveAnsweredQuestionAction(answeredQuestion);
           }}

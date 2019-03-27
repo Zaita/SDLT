@@ -6,22 +6,18 @@ import _ from "lodash";
 import moment from "moment";
 
 type Props = {
-  submission: Submission | null,
+  questions: Array<Question>
 };
 
 class AnswersPreview extends Component<Props> {
 
   render() {
-    const {submission} = {...this.props};
-
-    if (!submission) {
-      return null;
-    }
+    const {questions} = {...this.props};
 
     return (
       <div className="AnswersPreview">
         <div className="questions">
-          {submission.questions.map((question, index, all) => {
+          {questions.map((question, index, all) => {
             const renderedData = this.renderData(question);
             return (
               <div className="row" key={question.id}>

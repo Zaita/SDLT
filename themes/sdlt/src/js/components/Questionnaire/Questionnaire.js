@@ -2,16 +2,13 @@
 
 import React, {Component} from "react";
 import {FormikBag} from "formik";
-import {Redirect} from "react-router-dom";
-import type {User} from "../../types/User";
 import type {AnswerAction, Question, Submission} from "../../types/Questionnaire";
 import LeftBar from "./LeftBar";
 import QuestionForm from "./QuestionForm";
 import _ from "lodash";
 
 type Props = {
-  user: User | null,
-  submission: Submission | null,
+  questions: Array<Question>,
   saveAnsweredQuestion: (question: Question) => void,
   onLeftBarItemClick: (question: Question) => void
 };
@@ -19,13 +16,10 @@ type Props = {
 class Questionnaire extends Component<Props> {
 
   handleFormSubmit(formik: FormikBag, values: Object) {
-    const {submission, saveAnsweredQuestion} = {...this.props};
-    if (!submission) {
-      return;
-    }
+    const {questions, saveAnsweredQuestion} = {...this.props};
 
     // Generate new question with data
-    const currentQuestion = submission.questions.find((question) => {
+    const currentQuestion = questions.find((question) => {
       return question.isCurrent === true;
     });
     if (!currentQuestion) {
@@ -46,13 +40,10 @@ class Questionnaire extends Component<Props> {
   }
 
   handleActionClick(action: AnswerAction) {
-    const {submission, saveAnsweredQuestion} = {...this.props};
-    if (!submission) {
-      return;
-    }
+    const {questions, saveAnsweredQuestion} = {...this.props};
 
     // Generate new question with data
-    const currentQuestion = submission.questions.find((question) => {
+    const currentQuestion = questions.find((question) => {
       return question.isCurrent === true;
     });
     if (!currentQuestion) {
@@ -61,45 +52,26 @@ class Questionnaire extends Component<Props> {
 
     const answeredQuestion = {...currentQuestion};
     answeredQuestion.actions = answeredQuestion.actions.map((item) => {
-      if (item.id === action.id) {
-        item.isChose = true;
-      } else {
-        item.isChose = false;
-      }
+      item.isChose = (item.id === action.id);
       return item;
     });
     answeredQuestion.hasAnswer = true;
     answeredQuestion.isApplicable = true;
 
-    saveAnsweredQuestion(answeredQuestion)
+    saveAnsweredQuestion(answeredQuestion);
   }
 
   render() {
-    const {user, submission, onLeftBarItemClick} = {...this.props};
+    const {questions, onLeftBarItemClick} = {...this.props};
 
-    if (!user || !submission) {
-      return null;
-    }
-
-    if (submission.status !== "in_progress") {
-      return (
-        <div className="Questionnaire">
-          <h1>
-            The questionnaire is not in progress...
-          </h1>
-          <Redirect to="/"/>
-        </div>
-      );
-    }
-
-    const currentQuestion = submission.questions.find((question) => {
+    const currentQuestion = questions.find((question) => {
       return question.isCurrent === true;
     });
 
     return (
       <div className="Questionnaire mx-1">
         <div className="major">
-          <LeftBar questions={submission.questions} onItemClick={onLeftBarItemClick}/>
+          <LeftBar questions={questions} onItemClick={onLeftBarItemClick}/>
           {currentQuestion && <QuestionForm
             key={currentQuestion.id}
             question={currentQuestion}
