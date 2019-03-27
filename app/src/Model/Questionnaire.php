@@ -21,6 +21,7 @@ use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 use SilverStripe\Forms\GridField\GridFieldPaginator;
+use SilverStripe\Security\Group;
 
 /**
  * Class Questionnaire
@@ -125,6 +126,52 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     {
         return (Security::getCurrentUser() !== null);
     }
+
+    /**
+     * Generate default security groups for the SDLT application
+     *
+     * @return void
+     */
+    public function requireDefaultRecords()
+    {
+        parent::requireDefaultRecords();
+        $this->createDefaultSDLTMemberGroups();
+    }
+
+    /**
+     * Generate default security groups for the SDLT application
+     *
+     * @return void
+     */
+    public function createDefaultSDLTMemberGroups()
+    {
+        $cisoGroup = Group::get()->find('Code', 'sdlt-ciso');
+        if (!($cisoGroup && $cisoGroup->ID)) {
+            $cisoGroup = Group::create();
+            $cisoGroup->Title = 'NZTA-SDLT-CISO';
+            $cisoGroup->Code = 'sdlt-ciso';
+            $cisoGroup->write();
+        }
+
+        $adminGroup = Group::get()->find('Code', 'administrators');
+        $saGroup = Group::get()->find('Code', 'sdlt-security-architect');
+        if (!($saGroup && $saGroup->ID)) {
+            $saGroup = Group::create();
+            $saGroup->Title = 'NZTA-SDLT-SecurityArchitect';
+            $saGroup->Code = 'sdlt-security-architect';
+            $saGroup->write();
+            // $adminGroup->Groups()->add($saGroup);
+        }
+
+        $usersGroup = Group::get()->find('Code', 'sdlt-users');
+        if (!($usersGroup && $usersGroup->ID)) {
+            $usersGroup = Group::create();
+            $usersGroup->Title = 'NZTA-SDLT-Users';
+            $usersGroup->Code = 'sdlt-users';
+            $usersGroup->write();
+        }
+    }
+
 
     /**
      * @return array
