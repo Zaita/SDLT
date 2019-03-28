@@ -8,6 +8,6 @@ test:
     - kubernetes
   script:
     - cd "${CI_PROJECT_DIR}"
-    - composer -n install --prefer-dist --ignore-platform-reqs
+    - composer -n install --no-progress --no-suggest --prefer-dist --ignore-platform-reqs
     - vendor/bin/sake dev/build flush=all
     - vendor/bin/phpunit
