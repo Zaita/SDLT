@@ -402,6 +402,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     }
 
                     $submission->Status = TaskSubmission::STATUS_IN_PROGRESS;
+                    $submission->Result = "";
                     $submission->write();
 
                     return $submission;
