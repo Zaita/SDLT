@@ -60,7 +60,7 @@ class TaskSubmission extends Component<Props> {
       <LightButton title={"EDIT ANSWERS"} onClick={editAnswers} iconImage={editIcon}/>
     ) : null;
 
-    const result = taskSubmission.result ? (
+    const result = taskSubmission.result && taskSubmission.status === "complete" ? (
       <div className="result">
         <h3>Result:</h3>
         <div>{taskSubmission.result}</div>
