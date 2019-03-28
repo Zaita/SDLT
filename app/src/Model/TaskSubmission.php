@@ -302,6 +302,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             ->mutation('completeTaskSubmission', TaskSubmission::class)
             ->addArgs([
                 'UUID' => 'String!',
+                'Result' => 'String'
             ])
             ->setResolver(new class implements ResolverInterface
             {
@@ -332,6 +333,11 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     }
 
                     $submission->Status = TaskSubmission::STATUS_COMPLETE;
+
+                    if (isset($args['Result'])) {
+                        $submission->Result = trim($args['Result']);
+                    }
+
                     $submission->write();
 
                     return $submission;

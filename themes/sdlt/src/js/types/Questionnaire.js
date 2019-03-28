@@ -22,7 +22,8 @@ export type AnswerAction = {
   isChose: boolean,
   message?: string,
   taskID?: string,
-  goto?: string
+  goto?: string,
+  result?: string
 }
 
 export type Question = {

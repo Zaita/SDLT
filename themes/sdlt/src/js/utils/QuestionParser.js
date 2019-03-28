@@ -135,6 +135,10 @@ export default class QuestionParser {
             action.goto = _.toString(_.get(actionSchema, "GotoID", ""));
           }
 
+          if (type === "finish") {
+            action.result = _.toString(_.get(actionSchema, "Result", ""));
+          }
+
           // Task of action
           const taskID = _.toString(_.get(actionSchema, "TaskID", ""));
           action.taskID = taskID;

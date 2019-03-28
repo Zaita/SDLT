@@ -13,6 +13,7 @@ export type TaskSubmission = {
   uuid: string,
   taskName: string,
   status: string,
+  result: string,
   questions: Array<Question>,
   questionnaireSubmissionUUID: string
 };

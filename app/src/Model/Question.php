@@ -105,6 +105,7 @@ class Question extends DataObject implements ScaffoldingProvider
 
         $fields->removeByName('QuestionnaireID');
         $fields->removeByName('TaskID');
+        $fields->removeByName('SortOrder');
 
         $answerInputFields = $fields->dataFieldByName('AnswerInputFields');
 
@@ -221,6 +222,7 @@ class Question extends DataObject implements ScaffoldingProvider
             $actionFieldData['GotoID'] = $answerActionField->GotoID;
             $actionFieldData['QuestionID'] = $answerActionField->QuestionID;
             $actionFieldData['TaskID'] = $answerActionField->TaskID;
+            $actionFieldData['Result'] = $answerActionField->Result;
             $actionFieldsData[] = $actionFieldData;
         }
 

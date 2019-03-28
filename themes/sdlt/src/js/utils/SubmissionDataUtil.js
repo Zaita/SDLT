@@ -5,7 +5,7 @@ import _ from "lodash";
 import type {TaskSubmissionDisplay} from "../types/Task";
 
 type CalculateCursorMoveFromQuestionArgument = {
-  question: Question,
+  answeredQuestion: Question,
   questions: Array<Question>
 };
 
@@ -14,7 +14,8 @@ type CalculateCursorMoveFromQuestionReturn = {
   targetIndex: number,
   nonApplicableIndexes: Array<number>,
   complete: boolean,
-  terminate: boolean
+  terminate: boolean,
+  result: string
 };
 
 export default class SubmissionDataUtil {
@@ -75,39 +76,41 @@ export default class SubmissionDataUtil {
     return exists;
   }
 
-  static calculateCursorMoveFromQuestion(
+  static getDataUpdateIntent(
     argument: CalculateCursorMoveFromQuestionArgument,
   ): CalculateCursorMoveFromQuestionReturn {
-    const {question, questions} = {...argument};
+    const {answeredQuestion, questions} = {...argument};
 
     const returnPackage = {
-      currentIndex: questions.findIndex((item) => item.id === question.id),
+      currentIndex: questions.findIndex((question) => question.id === answeredQuestion.id),
       nonApplicableIndexes: [],
       targetIndex: 0,
       complete: false,
       terminate: false,
+      result: ""
     };
 
-    // If it is already the last question, mark the task submission as complete
-    if (returnPackage.currentIndex === questions.length - 1) {
-      returnPackage.complete = true;
-      return returnPackage;
-    }
+    // Process for input question
+    if (answeredQuestion.type === "input") {
+      if (returnPackage.currentIndex === questions.length - 1) {
+        // Mark complete if this is the last question
+        returnPackage.complete = true;
+      } else {
+        // Move to next question
+        returnPackage.targetIndex = returnPackage.currentIndex + 1;
+      }
 
-    // If question is input type, move to next question
-    if (question.type === "input") {
-      returnPackage.targetIndex = returnPackage.currentIndex + 1;
       return returnPackage;
     }
 
     // If question is action type, move to the defined target
-    if (question.type === "action") {
-      if (!question.actions) {
+    if (answeredQuestion.type === "action") {
+      if (!answeredQuestion.actions) {
         throw new Error("This question does not have any action!");
       }
 
-      const choseAction = question.actions.find((item) => {
-        return item.isChose;
+      const choseAction = answeredQuestion.actions.find((action) => {
+        return action.isChose;
       });
       if (!choseAction) {
         throw new Error("This question does not have any chosen action!");
@@ -120,25 +123,23 @@ export default class SubmissionDataUtil {
           returnPackage.nonApplicableIndexes.push(i);
         }
 
+        returnPackage.result = choseAction.result || "";
         returnPackage.complete = true;
-        return returnPackage;
       }
 
       if (choseAction.type === "message") {
         returnPackage.terminate = true;
-        return returnPackage;
       }
 
       if (choseAction.type === "continue") {
         returnPackage.targetIndex = returnPackage.currentIndex + 1;
-        return returnPackage;
       }
 
       if (choseAction.type === "goto") {
         // Go to another question, need to mark questions between current and target to be non-applicable
         const targetID = choseAction.goto;
-        returnPackage.targetIndex = questions.findIndex((item) => {
-          return item.id === targetID;
+        returnPackage.targetIndex = questions.findIndex((question) => {
+          return question.id === targetID;
         });
 
         // Don't move if the target index is wrong
@@ -154,9 +155,13 @@ export default class SubmissionDataUtil {
             cursor++;
           }
         }
-
-        return returnPackage;
       }
+
+      if (returnPackage.currentIndex === questions.length - 1) {
+        // Mark complete if this is the last question
+        returnPackage.complete = true;
+      }
+      return returnPackage;
     }
 
     throw new Error("Wrong question type!");
