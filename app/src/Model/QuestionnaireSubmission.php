@@ -34,6 +34,7 @@ use NZTA\SDLT\Job\SendDeniedNotificationEmailJob;
 use Silverstripe\Control\Director;
 use SilverStripe\Core\Convert;
 use Ramsey\Uuid\Uuid;
+use NZTA\SDLT\GraphQL\GraphQLAuthFailure;
 
 /**
  * Class Questionnaire
@@ -949,7 +950,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         if ($status == 'approved') {
             $this->QuestionnaireStatus = $status;
 
-            // send denied email to the user (submitter)
+            // send approved email notification to the user (submitter)
             $queuedJobService = QueuedJobService::create();
             $queuedJobService->queueJob(
                 new SendApprovedNotificationEmailJob($this),
@@ -958,7 +959,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         } else {
             $this->QuestionnaireStatus = $status;
 
-            // send denied email to the user (submitter)
+            // send denied email notification to the user (submitter)
             $queuedJobService = QueuedJobService::create();
             $queuedJobService->queueJob(
                 new SendDeniedNotificationEmailJob($this),
@@ -1444,7 +1445,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * @throws Exception
+     * @throws GraphQLAuthFailure
      * @return void
      */
     public static function is_user_logged_in()
@@ -1453,7 +1454,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
         // Check authentication
         if (!$member) {
-            throw new Exception('Please log in first.');
+            throw new GraphQLAuthFailure();
         }
     }
 
