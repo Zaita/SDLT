@@ -8,8 +8,6 @@ import SubmissionDataUtil from "../utils/SubmissionDataUtil";
 import _ from "lodash";
 import CSRFTokenService from "../services/CSRFTokenService";
 import type {TaskSubmission} from "../types/Task";
-import type {RootState} from "../store/RootState";
-import QuestionnaireDataService from "../services/QuestionnaireDataService";
 
 export function loadTaskSubmissionState(uuid: string): ThunkAction {
   return async (dispatch) => {
@@ -56,8 +54,9 @@ export function saveAnsweredQuestion(answeredQuestion: Question): ThunkAction {
       targetIndex,
       complete,
       terminate,
-    } = SubmissionDataUtil.calculateCursorMoveFromQuestion({
-      question: answeredQuestion,
+      result
+    } = SubmissionDataUtil.getDataUpdateIntent({
+      answeredQuestion,
       questions: taskSubmission.questions,
     });
 
@@ -86,6 +85,7 @@ export function saveAnsweredQuestion(answeredQuestion: Question): ThunkAction {
     if (complete) {
       const {uuid} = await TaskDataService.completeTaskSubmission({
         uuid: taskSubmission.uuid,
+        result: result,
         csrfToken: await CSRFTokenService.getCSRFToken()
       });
       dispatch(loadTaskSubmissionState(uuid));

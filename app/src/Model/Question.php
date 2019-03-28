@@ -103,8 +103,7 @@ class Question extends DataObject implements ScaffoldingProvider
     {
         $fields = parent::getCMSFields();
 
-        $fields->removeByName('QuestionnaireID');
-        $fields->removeByName('TaskID');
+        $fields->removeByName(['QuestionnaireID', 'SortOrder', 'TaskID']);
 
         $answerInputFields = $fields->dataFieldByName('AnswerInputFields');
 
@@ -221,6 +220,7 @@ class Question extends DataObject implements ScaffoldingProvider
             $actionFieldData['GotoID'] = $answerActionField->GotoID;
             $actionFieldData['QuestionID'] = $answerActionField->QuestionID;
             $actionFieldData['TaskID'] = $answerActionField->TaskID;
+            $actionFieldData['Result'] = $answerActionField->Result;
             $actionFieldsData[] = $actionFieldData;
         }
 
