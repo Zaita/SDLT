@@ -40,7 +40,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
      */
     private static $db = [
         'Label' => 'Varchar(255)',
-        'InputType' => 'Enum(array("text", "email", "textarea", "date"))',
+        'InputType' => 'Enum(array("text", "email", "textarea", "date", "url"))',
         'Required' => 'Boolean',
         'MinLength' => 'Int',
         'PlaceHolder' => 'Varchar(255)',
