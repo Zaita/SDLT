@@ -96,24 +96,25 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
     {
         $fields = parent::getCMSFields();
 
-        $fields->removeByName('QuestionID');
-        $fields->removeByName('SortOrder');
+        $fields->removeByName(['QuestionID', 'SortOrder']);
 
         // get questionnaire Id
         $questionnaireID = $this->Question()->Questionnaire()->ID;
 
         $questionList = Question::get()->filter('QuestionnaireID', $questionnaireID);
 
+        $fields->dataFieldByName('Result')->setDescription('The result will be used only if Questionnaire type is a task.');
+
         $fields->dataFieldByName('GotoID')->setSource($questionList);
 
-        $mainTab = $fields->findOrMakeTab('Root.Main');
+        /** @noinspection PhpUndefinedMethodInspection */
+        $fields->dataFieldByName('GotoID')->displayIf('ActionType')->isEqualTo('goto');
 
         /** @noinspection PhpUndefinedMethodInspection */
-        $mainTab->fieldByName('GotoID')->displayIf('ActionType')->isEqualTo('goto');
+        $fields->dataFieldByName('Message')->displayIf('ActionType')->isEqualTo('message');
+
         /** @noinspection PhpUndefinedMethodInspection */
-        $mainTab->fieldByName('Message')->displayIf('ActionType')->isEqualTo('message');
-        /** @noinspection PhpUndefinedMethodInspection */
-        $mainTab->fieldByName('Result')->displayIf('ActionType')->isEqualTo('finish');
+        $fields->dataFieldByName('Result')->displayIf('ActionType')->isEqualTo('finish');
 
         return $fields;
     }
