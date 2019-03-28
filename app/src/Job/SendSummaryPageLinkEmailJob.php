@@ -70,7 +70,7 @@ class SendSummaryPageLinkEmailJob extends AbstractQueuedJob implements QueuedJob
             ->setHTMLTemplate('Email\\EmailTemplate')
             ->setData([
                 'Name' => $this->questionnaireSubmission->SubmitterName,
-                'Body' => $this->replaceVariable($emailDetailsSummaryLinkEmailBody),
+                'Body' => $this->replaceVariable($emailDetails->SummaryLinkEmailBody),
                 'EmailSignature' => $emailDetails->EmailSignature
             ])
             ->setFrom($from)
