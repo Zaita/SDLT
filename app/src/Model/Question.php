@@ -103,9 +103,7 @@ class Question extends DataObject implements ScaffoldingProvider
     {
         $fields = parent::getCMSFields();
 
-        $fields->removeByName('QuestionnaireID');
-        $fields->removeByName('TaskID');
-        $fields->removeByName('SortOrder');
+        $fields->removeByName(['QuestionnaireID', 'SortOrder', 'TaskID']);
 
         $answerInputFields = $fields->dataFieldByName('AnswerInputFields');
 
