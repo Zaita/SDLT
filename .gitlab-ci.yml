@@ -1,6 +1,8 @@
 image: gitlab.catalyst.net.nz:4567/silverstripe/security-development-lifecycle-tool/devenv/silverstripe4:18.04
 
 before_script:
+  - apt-get -q update
+  - apt-get -q install -y unzip
   - puppet-devenv-apply -t composer -d '{"devenv::tools::nodejs::version":"8.x"}'
 
 test:
