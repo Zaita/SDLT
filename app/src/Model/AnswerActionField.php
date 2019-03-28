@@ -36,6 +36,9 @@ use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
  * @property Question Goto
  * @property Question Question
  *
+ * @method Task Task()
+ * @method Question Goto()
+ * @method Question Question()
  */
 class AnswerActionField extends DataObject implements ScaffoldingProvider
 {
@@ -52,6 +55,7 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
         'ActionType' => 'Enum(array("continue", "goto", "message", "finish"))',
         'Message' => 'HTMLText',
         'SortOrder' => 'Int',
+        'Result' => 'Varchar(255)'
     ];
 
     /**
@@ -93,6 +97,7 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
         $fields = parent::getCMSFields();
 
         $fields->removeByName('QuestionID');
+        $fields->removeByName('SortOrder');
 
         // get questionnaire Id
         $questionnaireID = $this->Question()->Questionnaire()->ID;
@@ -107,6 +112,8 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
         $mainTab->fieldByName('GotoID')->displayIf('ActionType')->isEqualTo('goto');
         /** @noinspection PhpUndefinedMethodInspection */
         $mainTab->fieldByName('Message')->displayIf('ActionType')->isEqualTo('message');
+        /** @noinspection PhpUndefinedMethodInspection */
+        $mainTab->fieldByName('Result')->displayIf('ActionType')->isEqualTo('finish');
 
         return $fields;
     }
