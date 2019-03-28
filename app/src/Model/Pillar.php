@@ -91,6 +91,8 @@ class Pillar extends DataObject implements ScaffoldingProvider
     {
         $fields = parent::getCMSFields();
 
+        $fields->removeByName('SortOrder');
+
         $fields->addFieldToTab(
             'Root.Main',
             DropdownField::create(

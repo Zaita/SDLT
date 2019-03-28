@@ -135,8 +135,8 @@ export function moveAfterQuestionAnswered(answeredQuestion: Question): ThunkActi
       targetIndex,
       nonApplicableIndexes,
       complete
-    } = SubmissionDataUtil.calculateCursorMoveFromQuestion({
-      question: answeredQuestion,
+    } = SubmissionDataUtil.getDataUpdateIntent({
+      answeredQuestion,
       questions: submission.questions
     });
 

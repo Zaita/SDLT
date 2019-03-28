@@ -100,6 +100,7 @@ query {
     UUID
     TaskName
     Status
+    Result
     QuestionnaireSubmission {
       UUID
     }
@@ -123,6 +124,7 @@ query {
         uuid: _.toString(_.get(submissionJSONObject, "UUID", "")),
         taskName: _.toString(_.get(submissionJSONObject, "TaskName", "")),
         status: _.toString(_.get(submissionJSONObject, "Status", "")),
+        result: _.toString(_.get(submissionJSONObject, "Result", "")),
         questionnaireSubmissionUUID: _.toString(_.get(submissionJSONObject, "QuestionnaireSubmission.UUID", "")),
         questions: QuestionParser.parseQuestionsFromJSON({
           schemaJSON: _.toString(_.get(submissionJSONObject, "QuestionnaireData", "")),
@@ -167,15 +169,20 @@ mutation {
     }
   }
 
-  static async completeTaskSubmission(argument: { uuid: string, csrfToken: string }): Promise<{ uuid: string }> {
-    const {uuid, csrfToken} = {...argument};
-    const query = `
+  static async completeTaskSubmission(argument: {
+    uuid: string,
+    result: string,
+    csrfToken: string
+  }): Promise<{ uuid: string }> {
+    const {uuid, result, csrfToken} = {...argument};
+    let query = `
 mutation {
- completeTaskSubmission(UUID: "${uuid}") {
+ completeTaskSubmission(UUID: "${uuid}", Result: "${result}") {
    UUID
    Status
  }
 }`;
+
     const json = await GraphQLRequestHelper.request({query, csrfToken});
     if (!_.get(json, "data.completeTaskSubmission.UUID", null)) {
       throw DEFAULT_NETWORK_ERROR;

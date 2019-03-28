@@ -83,7 +83,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
     {
         $fields = parent::getCMSFields();
 
-        $fields->removeByName('QuestionID');
+        $fields->removeByName(['QuestionID', 'SortOrder']);
 
         /** @noinspection PhpUndefinedMethodInspection */
         $fields->dataFieldByName('IsBusinessOwner')->displayIf('InputType')->isEqualTo('email');
