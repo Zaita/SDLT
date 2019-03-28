@@ -166,10 +166,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                  * Invoked by the Executor class to resolve this mutation / query
                  * @see Executor
                  *
-                 * @param mixed $object object
-                 * @param array $args args
-                 * @param mixed $context context
-                 * @param ResolveInfo $info info
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
                  * @throws Exception
                  * @return mixed
                  */
@@ -235,7 +235,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         $questionnaireData = $task->getQuestionsData();
         $taskSubmission->QuestionnaireData = json_encode($questionnaireData);
 
-        // Initial statue of the submission
+        // Initial status of the submission
         $taskSubmission->Status = TaskSubmission::STATUS_IN_PROGRESS;
         $taskSubmission->UUID = (string)Uuid::uuid4();
 
@@ -244,6 +244,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         return $taskSubmission;
     }
 
+    /**
+     * @param DataObjectScaffolder $scaffolder The scaffolder of the data object
+     * @return void
+     */
     private function provideGraphQLScaffoldingForUpdateTaskSubmission(SchemaScaffolder $scaffolder)
     {
         $scaffolder
@@ -259,10 +263,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                  * Invoked by the Executor class to resolve this mutation / query
                  * @see Executor
                  *
-                 * @param mixed $object object
-                 * @param array $args args
-                 * @param mixed $context context
-                 * @param ResolveInfo $info info
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
                  * @throws Exception
                  * @return mixed
                  */
@@ -285,9 +289,17 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     // This is to avoid parsing issue caused by `quote`, `\n` and other special characters
                     $questionAnswerData = json_decode(base64_decode($args['AnswerData']), true);
 
+                    if (is_null($questionAnswerData)) {
+                        throw new Exception('data is not a vaild json object.');
+                    }
+
+                    // add validation here
+
+                    // if everything is ok, then please add/update AnswerData
                     $allAnswerData = json_decode($submission->AnswerData, true);
                     $allAnswerData[$args['QuestionID']] = $questionAnswerData;
                     $submission->AnswerData = json_encode($allAnswerData);
+
                     $submission->write();
 
                     return $submission;
@@ -296,6 +308,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             ->end();
     }
 
+    /**
+     * @param DataObjectScaffolder $scaffolder The scaffolder of the data object
+     * @return void
+     */
     private function provideGraphQLScaffoldingForCompleteTaskSubmission(SchemaScaffolder $scaffolder)
     {
         $scaffolder
@@ -309,10 +325,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                  * Invoked by the Executor class to resolve this mutation / query
                  * @see Executor
                  *
-                 * @param mixed $object object
-                 * @param array $args args
-                 * @param mixed $context context
-                 * @param ResolveInfo $info info
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
                  * @throws Exception
                  * @return mixed
                  */
@@ -340,6 +356,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             ->end();
     }
 
+    /**
+     * @param DataObjectScaffolder $scaffolder The scaffolder of the data object
+     * @return void
+     */
     private function provideGraphQLScaffoldingForEditTaskSubmission(SchemaScaffolder $scaffolder)
     {
         $scaffolder
@@ -353,10 +373,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                  * Invoked by the Executor class to resolve this mutation / query
                  * @see Executor
                  *
-                 * @param mixed $object object
-                 * @param array $args args
-                 * @param mixed $context context
-                 * @param ResolveInfo $info info
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
                  * @throws Exception
                  * @return mixed
                  */
@@ -402,10 +422,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                  * Invoked by the Executor class to resolve this mutation / query
                  * @see Executor
                  *
-                 * @param mixed $object object
-                 * @param array $args args
-                 * @param mixed $context context
-                 * @param ResolveInfo $info info
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
                  * @throws Exception
                  * @return mixed
                  */
