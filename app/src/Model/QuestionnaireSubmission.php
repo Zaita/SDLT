@@ -79,7 +79,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SecurityArchitectStatusUpdateDate' => 'Varchar(255)',
         'SendApprovedNotificatonToSecurityArchitect' => 'Boolean',
         'IsApprovalEmailSentToSA' => 'Boolean',
-        'ApprovalLinkToken' => 'Varchar(255)',
+        'ApprovalLinkToken' => 'Varchar(64)',
     ];
 
     /**
@@ -898,7 +898,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      */
     public function getApprovalPageLink()
     {
-        $link = Convert::html2raw(Director::absoluteBaseURL(). 'businessownerapproval/#/questionnaire/summary/' . $this->UUID);
+        $link = Convert::html2raw(Director::absoluteBaseURL(). 'businessOwnerApproval/#/questionnaire/summary/' . $this->ApprovalLinkToken);
         return $link;
     }
 
