@@ -8,7 +8,7 @@ module.exports = (env, argv) => {
   return {
     entry: {
       common: "./src/js/common.js",
-      main: "./src/js/main.js",
+      main: "./src/js/main.js"
     },
     mode: mode,
     module: {

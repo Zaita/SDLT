@@ -32,13 +32,13 @@ const prettifyStatus = (status: string) => {
 class Summary extends Component<Props> {
 
   render() {
-    const {submission} = {...this.props};
+    const {submission, viewAs} = {...this.props};
 
     if (!submission) {
       return null;
     }
 
-    if (submission.status === "in_progress") {
+    if (submission.status === "in_progress" && viewAs === "submitter") {
       return (
         <div className="Summary">
           <h3>
@@ -100,27 +100,100 @@ class Summary extends Component<Props> {
       handleSubmitButtonClick,
       handlePDFDownloadButtonClick,
       handleApproveButtonClick,
-      handleDenyButtonClick
+      handleDenyButtonClick,
     } = {...this.props};
 
-    let editAnswersButton = null;
-    let sendForApprovalButton = null;
     const downloadPDFButton = (
       <LightButton title="DOWNLOAD PDF OF ANSWERS"
                    iconImage={pdfIcon}
                    classes={["button"]}
                    onClick={handlePDFDownloadButtonClick}/>
     );
-    let approveButton = null;
-    let denyButton = null;
 
-    if (submission.status === "approved" || submission.status === "denied") {
+    // Display buttons for submitter
+    if (viewAs === "submitter") {
+      // Render edit answers button for submitter in all cases
+      const editAnswersButton = (
+        <LightButton title="EDIT ANSWERS"
+                     iconImage={editIcon}
+                     classes={["button"]}
+        />
+      );
+
+      // Render send for approval button for submitter only in specific submission status
+      const sendForApprovalButton = (
+        <DarkButton title="SEND FOR APPROVAL"
+                    classes={["button"]}
+                    disabled={SubmissionDataUtil.existsIncompleteTaskSubmission(submission.taskSubmissions)}
+                    onClick={handleSubmitButtonClick}
+        />
+      );
+
+      if (submission.status === "submitted") {
+        return (
+          <div className="buttons">
+            <div>
+              {editAnswersButton}
+              {downloadPDFButton}
+              {sendForApprovalButton}
+            </div>
+            <div/>
+          </div>
+        );
+      }
+
+      if (submission.status === "waiting_for_security_architect_approval") {
+        return (
+          <div className="buttons">
+            <div>
+              {editAnswersButton}
+              {downloadPDFButton}
+            </div>
+            <div/>
+          </div>
+        );
+      }
+
       return (
         <div className="buttons">
           <div>
-            {editAnswersButton}
             {downloadPDFButton}
-            {sendForApprovalButton}
+          </div>
+          <div/>
+        </div>
+      );
+    }
+
+    // Display buttons for approvers
+    if (viewAs === "approver") {
+      const approveButton = (
+        <DarkButton title="APPROVE"
+                    classes={["button"]}
+                    onClick={handleApproveButtonClick}
+        />
+      );
+      const denyButton = (
+        <LightButton title="DENY"
+                     classes={["button"]}
+                     onClick={handleDenyButtonClick}
+        />
+      );
+
+      if (submission.status === "submitted") {
+        return (
+          <div className="buttons">
+            <div>
+              {downloadPDFButton}
+            </div>
+            <div/>
+          </div>
+        );
+      }
+
+      return (
+        <div className="buttons">
+          <div>
+            {downloadPDFButton}
           </div>
           <div>
             {approveButton}
@@ -130,61 +203,22 @@ class Summary extends Component<Props> {
       );
     }
 
-    // Display buttons for submitter when status is "submitted"
-    if (viewAs === "submitter") {
-      editAnswersButton = (
-        <LightButton title="EDIT ANSWERS"
-                     iconImage={editIcon}
-                     classes={["button"]}
-                     disabled={true}
-        />
-      );
-
-      if (submission.status === "submitted") {
-        sendForApprovalButton = (
-          <DarkButton title="SEND FOR APPROVAL"
-                      classes={["button"]}
-                      disabled={SubmissionDataUtil.existsIncompleteTaskSubmission(submission.taskSubmissions)}
-                      onClick={handleSubmitButtonClick}
-          />
-        );
-      }
-    }
-
-    // Display "APPROVE" and "DENY" for approvers when status is "waiting for approval"
-    if (viewAs === "approver") {
-      approveButton = (
-        <DarkButton title="APPROVE"
-                    classes={["button"]}
-                    onClick={handleApproveButtonClick}
-        />
-      );
-      denyButton = (
-        <LightButton title="DENY"
-                     classes={["button"]}
-                     onClick={handleDenyButtonClick}
-        />
-      );
-    }
-
+    // Display buttons for others (either a submitter not an approver)
     return (
       <div className="buttons">
         <div>
-          {editAnswersButton}
           {downloadPDFButton}
-          {sendForApprovalButton}
         </div>
-        <div>
-          {approveButton}
-          {denyButton}
-        </div>
+        <div/>
       </div>
     );
   }
 
   renderApprovals(submission: Submission) {
     // TODO: Refactor - consider using constants instead of string literal
-    if (submission.status === "in_progress" || submission.status === "submitted") {
+    if (submission.status === "in_progress" ||
+      submission.status === "submitted"
+    ) {
       return null;
     }
 
