@@ -125,7 +125,7 @@ query {
       title: _.toString(_.get(submissionJSON, "Questionnaire.Name", "")),
       siteTitle: _.toString(_.get(json, "data.readSiteConfig.0.Title", "")),
       user: UserParser.parseUserFromJSON(memberData),
-      isCurrentUserApprover: Boolean(_.get(submissionJSON, "IsCurrentUserAnApprover", "")),
+      isCurrentUserApprover: _.get(submissionJSON, "IsCurrentUserAnApprover", "false") === "true",
       submission: {
         questionnaireID: _.toString(_.get(submissionJSON, "Questionnaire.ID", "")),
         questionnaireTitle: _.toString(_.get(submissionJSON, "Questionnaire.Name", "")),
@@ -267,15 +267,15 @@ mutation {
     const {submissionID, csrfToken} = {...argument};
     const query = `
 mutation {
- updateQuestionnaireStatusToApproved(ID: "${submissionID}") {
+ updateQuestionnaireOnApproveByGroupMember(ID: "${submissionID}") {
    QuestionnaireStatus
    UUID
  }
 }`;
     const json = await GraphQLRequestHelper.request({query, csrfToken});
     const status = _.toString(
-      _.get(json, "data.updateQuestionnaireStatusToApproved.QuestionnaireStatus", null));
-    const uuid = _.toString(_.get(json, "data.updateQuestionnaireStatusToApproved.UUID", null));
+      _.get(json, "data.updateQuestionnaireOnApproveByGroupMember.QuestionnaireStatus", null));
+    const uuid = _.toString(_.get(json, "data.updateQuestionnaireOnApproveByGroupMember.UUID", null));
     if (!status || !uuid) {
       throw DEFAULT_NETWORK_ERROR;
     }
@@ -286,14 +286,14 @@ mutation {
     const {submissionID, csrfToken} = {...argument};
     const query = `
 mutation {
- updateQuestionnaireStatusToDenied(ID: "${submissionID}") {
+ updateQuestionnaireOnDenyByGroupMember(ID: "${submissionID}") {
    QuestionnaireStatus
    UUID
  }
 }`;
     const json = await GraphQLRequestHelper.request({query, csrfToken});
-    const status = _.toString(_.get(json, "data.updateQuestionnaireStatusToDenied.QuestionnaireStatus", null));
-    const uuid = _.toString(_.get(json, "data.updateQuestionnaireStatusToDenied.UUID", null));
+    const status = _.toString(_.get(json, "data.updateQuestionnaireOnDenyByGroupMember.QuestionnaireStatus", null));
+    const uuid = _.toString(_.get(json, "data.updateQuestionnaireOnDenyByGroupMember.UUID", null));
     if (!status || !uuid) {
       throw DEFAULT_NETWORK_ERROR;
     }

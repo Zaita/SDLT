@@ -15,6 +15,7 @@ namespace NZTA\SDLT\Model;
 
 use Exception;
 use GraphQL\Type\Definition\ResolveInfo;
+use NZTA\SDLT\GraphQL\GraphQLAuthFailure;
 use NZTA\SDLT\Job\SendApprovedNotificationEmailJob;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ResolverInterface;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
@@ -34,7 +35,6 @@ use NZTA\SDLT\Job\SendDeniedNotificationEmailJob;
 use Silverstripe\Control\Director;
 use SilverStripe\Core\Convert;
 use Ramsey\Uuid\Uuid;
-use NZTA\SDLT\GraphQL\GraphQLAuthFailure;
 
 /**
  * Class Questionnaire
@@ -61,7 +61,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SubmitterEmail'=> 'Varchar(255)',
         'QuestionnaireData' => 'Text',
         'AnswerData' => 'Text',
-        'QuestionnaireStatus' => 'Enum(array("in_progress", "submitted", "waiting_for_security_architect_approval","waiting_for_approval" "approved", "denied"))',
+        'QuestionnaireStatus' => 'Enum(array("in_progress", "submitted", "waiting_for_security_architect_approval","waiting_for_approval", "approved", "denied"))',
         'UUID' => 'Varchar(36)',
         'StartEmailSendStatus' => 'Boolean',
         'SendEmailToSecurityArchitect' => 'Boolean',
@@ -120,12 +120,12 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @var string
      */
-    private static $ciso_group_code = 'sdlt-ciso';
+    public static $ciso_group_code = 'sdlt-ciso';
 
     /**
      * @var string
      */
-    private static $security_architect_group_code = 'sdlt-security-architect';
+    public static $security_architect_group_code = 'sdlt-security-architect';
 
     /**
      * Default sort ordering
@@ -216,6 +216,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ->operation(SchemaScaffolder::READ)
             ->setName('readQuestionnaireSubmission')
             ->addArg('UUID', 'String!')
+            ->addArg('SecureToken', 'String')
             ->setUsePagination(false)
             ->setResolver(new class implements ResolverInterface {
 
@@ -234,10 +235,14 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 {
                     $member = Security::getCurrentUser();
                     $uuid = htmlentities(trim($args['UUID']));
+                    $secureToken = isset($args['SecureToken']) ? trim($args['SecureToken']) : null;
 
                     // Check authentication
                     if (!$member) {
-                        throw new Exception('Please log in first...');
+                        // TODO: Validate secure token
+                        if (!$secureToken) {
+                            throw new GraphQLAuthFailure();
+                        }
                     }
 
                     // Check argument
@@ -262,8 +267,14 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $this->updateQuestionnaireStatusToSubmitted($scaffolder);
         $this->updateQuestionnaireStatusToInProgress($scaffolder);
         $this->updateQuestionnaireStatusToWaitingForSecurityArchitectApproval($scaffolder);
+
+        // Approve/Deny for Business Owner
         $this->updateQuestionnaireStatusToApproved($scaffolder);
         $this->updateQuestionnaireStatusToDenied($scaffolder);
+
+        // Approve/Deny for Security Architect and Chief Information Security Officer
+        $this->updateQuestionnaireOnApproveByGroupMember($scaffolder);
+        $this->updateQuestionnaireOnDenyByGroupMember($scaffolder);
 
         return $scaffolder;
     }
@@ -637,7 +648,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     public function updateQuestionnaireOnApproveByGroupMember(SchemaScaffolder $scaffolder)
     {
         $scaffolder
-            ->mutation('updateQuestionnaireApproverDetails', QuestionnaireSubmission::class)
+            ->mutation('updateQuestionnaireOnApproveByGroupMember', QuestionnaireSubmission::class)
             ->addArgs([
                 'ID' => 'ID!',
             ])
@@ -678,7 +689,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     public function updateQuestionnaireOnDenyByGroupMember(SchemaScaffolder $scaffolder)
     {
         $scaffolder
-            ->mutation('updateQuestionnaireApproverDetails', QuestionnaireSubmission::class)
+            ->mutation('updateQuestionnaireOnDenyByGroupMember', QuestionnaireSubmission::class)
             ->addArgs([
                 'ID' => 'ID!',
             ])
@@ -899,7 +910,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      */
     public function getApprovalPageLink()
     {
-        $link = Convert::html2raw(Director::absoluteBaseURL(). 'businessOwnerApproval/#/questionnaire/summary/' . $this->ApprovalLinkToken);
+        $link = Convert::html2raw(Director::absoluteBaseURL(). "businessOwnerApproval/#/questionnaire/summary/{$this->UUID}?token={$this->ApprovalLinkToken}");
         return $link;
     }
 
@@ -983,6 +994,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
         $accessDetail = $this->doesCurrentUserHasAccessToApproveDeny($member);
 
+
         if (!$accessDetail['hasAccess'] || !$accessDetail['group']) {
             throw new Exception($accessDetail['message']);
         }
@@ -995,7 +1007,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 $this->QuestionnaireStatus = 'waiting_for_approval';
 
                 // get CISO group member list
-                $members = $this->getApprovalMembersListByGroup('QuestionnaireSubmission::$ciso_architect_group_code');
+                $members = $this->getApprovalMembersListByGroup(QuestionnaireSubmission::$ciso_group_code);
 
                 // send email to CISO group and Business owner
                 $qs = QueuedJobService::create();
@@ -1150,7 +1162,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     */
     public function getCISOAccessDetail($member)
     {
-        $group = QuestionnaireSubmission::$ciso_architect_group_code;
+        $group = QuestionnaireSubmission::$ciso_group_code;
 
         // check member groups
         $ismemberInGroup = $member->Groups()->filter('Code', $group)->first();
@@ -1210,7 +1222,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         }
 
         // check access details for CISO
-        if (in_array($this->QuestionnaireStatus, ['waiting_for_approval', 'pending', 'approved'])) {
+        if (in_array($this->QuestionnaireStatus, ['waiting_for_approval', 'denied', 'approved'])) {
             return $this->getCISOAccessDetail($member);
         }
 
@@ -1462,7 +1474,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      * @param int $submissionID Questionnaire Submission ID
      *
      * @throws Exception
-     * @return Dataobject
+     * @return QuestionnaireSubmission
      */
     public static function validate_before_updating_questionnaire_submission($submissionID)
     {
@@ -1472,7 +1484,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         }
 
         // get QuestionnaireSubmission
-        $questionnaireSubmission = QuestionnaireSubmission::get()->byID($submissionID);
+        $questionnaireSubmission = QuestionnaireSubmission::get_by_id($submissionID);
 
         if (!$questionnaireSubmission) {
             throw new Exception('No data available for Questionnaire Submission. Please start again');
