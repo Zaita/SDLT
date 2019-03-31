@@ -79,7 +79,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SecurityArchitectApproverIPAddress' => 'Varchar(255)',
         'SecurityArchitectApproverMachineName' => 'Varchar(255)',
         'SecurityArchitectStatusUpdateDate' => 'Varchar(255)',
-        'SendApprovedNotificatonToSecurityArchitect' => 'Boolean',
+        'SendApprovedNotificationToSecurityArchitect' => 'Boolean',
         'ApprovalLinkToken' => 'Varchar(64)',
     ];
 
@@ -202,7 +202,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'SecurityArchitectApproverIPAddress',
                 'SecurityArchitectApproverMachineName',
                 'SecurityArchitectStatusUpdateDate',
-                'SendApprovedNotificatonToSecurityArchitect',
+                'SendApprovedNotificationToSecurityArchitect',
                 'IsCurrentUserAnApprover',
                 'IsEmailSentToSecurityArchitect',
                 'IsSubmitLinkEmailSent'
@@ -354,7 +354,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $model->UserID = $member->ID;
                     $model->StartEmailSendStatus = 0;
                     $model->IsEmailSentToSecurityArchitect = 0;
-                    $model->SendApprovedNotificatonToSecurityArchitect = $questionnaire->SendApprovedNotificatonToSecurityArchitect;
+                    $model->SendApprovedNotificationToSecurityArchitect = $questionnaire->SendApprovedNotificationToSecurityArchitect;
 
                     $uuid = Uuid::uuid4();
                     $model->UUID = (string) $uuid;
@@ -1294,7 +1294,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 throw new Exception(
                     sprintf(
                         'Sorry, no data available for input field ID: %d',
-                        $inputfieldArr['id']
+                        $inputfieldDetails->id
                     )
                 );
             }
