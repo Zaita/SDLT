@@ -239,7 +239,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     // Check authentication
                     if (!$member) {
-                        // TODO: Validate secure token
+                        // if there is no member, then Validate secure token
                         if (!$secureToken) {
                             throw new GraphQLAuthFailure();
                         }
@@ -252,10 +252,15 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     // Filter data by UUID
                     // The questionnaire can be read by other users
-                    // TODO: we may limit the access to "submitter", "business owner" and "chief security officer"
                     $data = QuestionnaireSubmission::get()->where([
                         'UUID' => $uuid
                     ]);
+
+                    // if token is not empty and is not equal approval link
+                    // then throe exception
+                    if (!empty($secureToken) && $data->ApprovalLinkToken != $secureToken) {
+                        throw new Exception('Sorry, wrong security token.');
+                    }
 
                     return $data;
                 }
