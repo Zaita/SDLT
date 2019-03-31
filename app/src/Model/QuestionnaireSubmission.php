@@ -64,7 +64,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'QuestionnaireStatus' => 'Enum(array("in_progress", "submitted", "waiting_for_security_architect_approval","waiting_for_approval", "approved", "denied"))',
         'UUID' => 'Varchar(36)',
         'StartEmailSendStatus' => 'Boolean',
-        'SendEmailToSecurityArchitect' => 'Boolean',
+        'IsEmailSentToSecurityArchitect' => 'Boolean',
+        'IsSubmitLinkEmailSent' => 'Boolean',
         'CisoApprovalStatus' => 'Enum(array("not_applicable", "pending", "approved", "denied"))',
         'CisoApproverIPAddress' => 'Varchar(255)',
         'CisoApproverMachineName' => 'Varchar(255)',
@@ -79,7 +80,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SecurityArchitectApproverMachineName' => 'Varchar(255)',
         'SecurityArchitectStatusUpdateDate' => 'Varchar(255)',
         'SendApprovedNotificatonToSecurityArchitect' => 'Boolean',
-        'IsApprovalEmailSentToSA' => 'Boolean',
         'ApprovalLinkToken' => 'Varchar(64)',
     ];
 
@@ -204,7 +204,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'SecurityArchitectStatusUpdateDate',
                 'SendApprovedNotificatonToSecurityArchitect',
                 'IsCurrentUserAnApprover',
-                'SendEmailToSecurityArchitect'
+                'IsEmailSentToSecurityArchitect',
+                'IsSubmitLinkEmailSent'
             ]);
 
         $submissionScaffolder
@@ -352,7 +353,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     $model->UserID = $member->ID;
                     $model->StartEmailSendStatus = 0;
-                    $model->SendEmailToSecurityArchitect = 0;
+                    $model->IsEmailSentToSecurityArchitect = 0;
                     $model->SendApprovedNotificatonToSecurityArchitect = $questionnaire->SendApprovedNotificatonToSecurityArchitect;
 
                     $uuid = Uuid::uuid4();
@@ -524,10 +525,16 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     // to the submitter
                     $queuedJobService = QueuedJobService::create();
 
-                    $queuedJobService->queueJob(
-                        new SendSummaryPageLinkEmailJob($questionnaireSubmission),
-                        date('Y-m-d H:i:s', time() + 30)
-                    );
+                    if (!$questionnaireSubmission->IsSubmitLinkEmailSent) {
+                        $questionnaireSubmission->IsSubmitLinkEmailSent = 1;
+
+                        $queuedJobService->queueJob(
+                            new SendSummaryPageLinkEmailJob($questionnaireSubmission),
+                            date('Y-m-d H:i:s', time() + 30)
+                        );
+                    }
+
+                    $questionnaireSubmission->write();
 
                     return $questionnaireSubmission;
                 }
@@ -616,14 +623,14 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     $questionnaireSubmission->QuestionnaireStatus = 'waiting_for_security_architect_approval';
 
-                    if (!$questionnaireSubmission->SendEmailToSecurityArchitect) {
+                    if (!$questionnaireSubmission->IsEmailSentToSecurityArchitect) {
                         $members = $questionnaireSubmission->getApprovalMembersListByGroup(QuestionnaireSubmission::$security_architect_group_code);
 
                         if (!$members) {
                             throw new Exception('Please add member in Security architect group.');
                         }
 
-                        $questionnaireSubmission->SendEmailToSecurityArchitect = 1;
+                        $questionnaireSubmission->IsEmailSentToSecurityArchitect = 1;
 
                         // Send Email to Security Architect group for Approval
                         $qs = QueuedJobService::create();
