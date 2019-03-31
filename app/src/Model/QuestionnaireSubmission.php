@@ -41,6 +41,7 @@ use Ramsey\Uuid\Uuid;
  *
  * @property string Name
  * @property string KeyInformation
+ * @property string ApprovalLinkToken
  *
  * @method Questionnaire Questionnaire()
  * @method Member User()
@@ -238,12 +239,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $uuid = htmlentities(trim($args['UUID']));
                     $secureToken = isset($args['SecureToken']) ? trim($args['SecureToken']) : null;
 
-                    // Check authentication
-                    if (!$member) {
-                        // if there is no member, then Validate secure token
-                        if (!$secureToken) {
-                            throw new GraphQLAuthFailure();
-                        }
+                    // To continue the data fetching, user has to be logged-in or has secure token
+                    if (!$member && !$secureToken) {
+                        throw new GraphQLAuthFailure();
                     }
 
                     // Check argument
@@ -253,13 +251,13 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     // Filter data by UUID
                     // The questionnaire can be read by other users
-                    $data = QuestionnaireSubmission::get()->where([
-                        'UUID' => $uuid
-                    ]);
+                    /* @var $data QuestionnaireSubmission */
+                    $data = QuestionnaireSubmission::get()
+                        ->where(['UUID' => $uuid])
+                        ->first();
 
-                    // if token is not empty and is not equal approval link
-                    // then throe exception
-                    if (!empty($secureToken) && $data->ApprovalLinkToken != $secureToken) {
+                    // If the user is not logged-in and the secure token is not valid, throw error
+                    if (!$member && $data->ApprovalLinkToken != $secureToken) {
                         throw new Exception('Sorry, wrong security token.');
                     }
 
