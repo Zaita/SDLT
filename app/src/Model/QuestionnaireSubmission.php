@@ -64,7 +64,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'AnswerData' => 'Text',
         'QuestionnaireStatus' => 'Enum(array("in_progress", "submitted", "waiting_for_security_architect_approval","waiting_for_approval", "approved", "denied"))',
         'UUID' => 'Varchar(36)',
-        'StartEmailSendStatus' => 'Boolean',
+        'IsStartLinkEmailSent' => 'Boolean',
         'IsEmailSentToSecurityArchitect' => 'Boolean',
         'IsSubmitLinkEmailSent' => 'Boolean',
         'CisoApprovalStatus' => 'Enum(array("not_applicable", "pending", "approved", "denied"))',
@@ -80,7 +80,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SecurityArchitectApproverIPAddress' => 'Varchar(255)',
         'SecurityArchitectApproverMachineName' => 'Varchar(255)',
         'SecurityArchitectStatusUpdateDate' => 'Varchar(255)',
-        'SendApprovedNotificationToSecurityArchitect' => 'Boolean',
         'ApprovalLinkToken' => 'Varchar(64)',
     ];
 
@@ -114,7 +113,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'BusinessOwnerApprovalStatus',
         'SecurityArchitectApprovalStatus',
         'UUID',
-        'StartEmailSendStatus',
+        'IsStartLinkEmailSent',
         'Created' => 'Created date'
     ];
 
@@ -136,8 +135,73 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     private static $default_sort = ['ID' => 'DESC'];
 
     /**
-    * @return string
-    */
+     * CMS Fields
+     * @return FieldList
+     */
+    public function getCMSFields()
+    {
+        $fields = parent::getCMSFields();
+
+        $fields->addFieldsToTab(
+            'Root.QuestionnaireAnswerData',
+            [
+                $fields->dataFieldByName('QuestionnaireData'),
+                $fields->dataFieldByName('AnswerData')
+            ]
+        );
+
+        $fields->addFieldsToTab(
+            'Root.SumitterDetails',
+            [
+                $fields->dataFieldByName('UserID'),
+                $fields->dataFieldByName('SubmitterName'),
+                $fields->dataFieldByName('SubmitterEmail'),
+                $fields->dataFieldByName('SubmitterRole'),
+                $fields->dataFieldByName('IsStartLinkEmailSent'),
+                $fields->dataFieldByName('IsSubmitLinkEmailSent')
+            ]
+        );
+
+        $fields->addFieldsToTab(
+            'Root.SecurityArchitectDetails',
+            [
+                $fields->dataFieldByName('SecurityArchitectApproverID'),
+                $fields->dataFieldByName('SecurityArchitectApprovalStatus'),
+                $fields->dataFieldByName('SecurityArchitectApproverIPAddress'),
+                $fields->dataFieldByName('SecurityArchitectApproverMachineName'),
+                $fields->dataFieldByName('SecurityArchitectStatusUpdateDate'),
+                $fields->dataFieldByName('IsEmailSentToSecurityArchitect')
+            ]
+        );
+
+        $fields->addFieldsToTab(
+            'Root.CisoDetails',
+            [
+                $fields->dataFieldByName('CisoApproverID'),
+                $fields->dataFieldByName('CisoApprovalStatus'),
+                $fields->dataFieldByName('CisoApproverIPAddress'),
+                $fields->dataFieldByName('CisoApproverMachineName'),
+                $fields->dataFieldByName('CisoApprovalStatusUpdateDate')
+            ]
+        );
+
+        $fields->addFieldsToTab(
+            'Root.BusinessOwnerDetails',
+            [
+                $fields->dataFieldByName('BusinessOwnerEmailAddress'),
+                $fields->dataFieldByName('BusinessOwnerApprovalStatus'),
+                $fields->dataFieldByName('BusinessOwnerIPAddress'),
+                $fields->dataFieldByName('BusinessOwnerMachineName'),
+                $fields->dataFieldByName('BusinessOwnerStatusUpdateDate')
+            ]
+        );
+
+        return $fields;
+    }
+
+    /**
+     * @return string
+     */
     public function getQuestionnaireName()
     {
         return $this->Questionnaire()->Name;
@@ -203,7 +267,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'SecurityArchitectApproverIPAddress',
                 'SecurityArchitectApproverMachineName',
                 'SecurityArchitectStatusUpdateDate',
-                'SendApprovedNotificationToSecurityArchitect',
                 'IsCurrentUserAnApprover',
                 'IsEmailSentToSecurityArchitect',
                 'IsSubmitLinkEmailSent'
@@ -350,10 +413,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $model->QuestionnaireID = $questionnaire->ID;
 
                     $model->UserID = $member->ID;
-                    $model->StartEmailSendStatus = 0;
+                    $model->IsStartLinkEmailSent = 0;
                     $model->IsEmailSentToSecurityArchitect = 0;
-                    $model->SendApprovedNotificationToSecurityArchitect = $questionnaire->SendApprovedNotificationToSecurityArchitect;
-
                     $uuid = Uuid::uuid4();
                     $model->UUID = (string) $uuid;
 
@@ -814,14 +875,14 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     {
         parent::onAfterWrite();
 
-        if (!$this->StartEmailSendStatus) {
+        if (!$this->IsStartLinkEmailSent) {
             singleton(QueuedJobService::class)
                 ->queueJob(
                     new SendStartLinkEmailJob($this),
                     date('Y-m-d H:i:s', time() + 30)
                 );
 
-            $this->StartEmailSendStatus = 1;
+            $this->IsStartLinkEmailSent = 1;
 
             $this->write();
         }
