@@ -35,6 +35,7 @@ use NZTA\SDLT\Job\SendDeniedNotificationEmailJob;
 use Silverstripe\Control\Director;
 use SilverStripe\Core\Convert;
 use Ramsey\Uuid\Uuid;
+use SilverStripe\Forms\LiteralField;
 
 /**
  * Class Questionnaire
@@ -141,6 +142,16 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
+
+        $fields->addFieldsToTab(
+            'Root.Main',
+            [
+                LiteralField::create('SummaryPageLink', 'Summary Page Link')
+                    ->setValue('Please click on
+                        <a href="'. $this->getSummaryPageLink() .'">this link</a>
+                        to download answers in the PDF.')
+            ]
+        );
 
         $fields->addFieldsToTab(
             'Root.QuestionnaireAnswerData',
