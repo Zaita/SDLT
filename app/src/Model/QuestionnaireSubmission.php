@@ -1306,6 +1306,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             if ($inputfieldDetails->InputType == 'date') {
                 self::validate_date_field($inputAnswerfield->data, $inputfieldDetails);
             }
+
+            if ($inputfieldDetails->InputType == 'url') {
+                self::validate_url_field($inputAnswerfield->data, $inputfieldDetails);
+            }
         }
     }
 
@@ -1404,6 +1408,24 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             throw new Exception(
                 sprintf(
                     'Please enter valid email address for the %s.',
+                    $inputfieldDetails->Label
+                )
+            );
+        }
+    }
+
+    /**
+     * @param string     $url               url
+     * @param DataObject $inputfieldDetails inputfieldsDetails
+     * @throws Exception
+     * @return void
+     */
+    public static function validate_url_field($url, $inputfieldDetails)
+    {
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            throw new Exception(
+                sprintf(
+                    'Please enter valid URL for the %s.',
                     $inputfieldDetails->Label
                 )
             );
