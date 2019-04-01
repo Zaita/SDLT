@@ -68,7 +68,7 @@ class SendApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJob
             $this->sendEmail($member->FirstName, $member->Email, false);
         }
 
-        if (!empty($this->businessOwnerEmail)) {
+        if ($this->businessOwnerEmail != '') {
             $this->sendEmail('', $this->businessOwnerEmail, true);
         }
 
@@ -82,7 +82,7 @@ class SendApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJob
      *
      * @return null
      */
-    public function sendEmail($name, $toEmail, $isBusinessOwner = false)
+    public function sendEmail($name = '', $toEmail = '', $isBusinessOwner = false)
     {
         $emailDetails = QuestionnaireEmail::get()->first();
 
@@ -116,6 +116,7 @@ class SendApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJob
         $SubmitterEmail = $this->questionnaireSubmission->SubmitterEmail;
 
         $link = $this->questionnaireSubmission->getSummaryPageLink();
+
         if ($isBusinessOwner) {
             $link = $this->questionnaireSubmission->getApprovalPageLink();
         }
