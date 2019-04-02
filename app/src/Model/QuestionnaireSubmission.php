@@ -1047,7 +1047,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             $queuedJobService = QueuedJobService::create();
             $queuedJobService->queueJob(
                 new SendApprovedNotificationEmailJob($this),
-                date('Y-m-d H:i:s', time() + 90)
+                date('Y-m-d H:i:s', time() + 30)
             );
         } else {
             $this->QuestionnaireStatus = $status;
@@ -1056,7 +1056,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             $queuedJobService = QueuedJobService::create();
             $queuedJobService->queueJob(
                 new SendDeniedNotificationEmailJob($this),
-                date('Y-m-d H:i:s', time() + 90)
+                date('Y-m-d H:i:s', time() + 30)
             );
         }
 
