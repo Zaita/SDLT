@@ -7,7 +7,7 @@
         .logo {
             width: 370px;
             height: auto;
-            margin-bottom: 76px;
+            margin-bottom: 45px;
         }
 
         .layout {
@@ -17,7 +17,7 @@
             @extend .align-items-center;
             @extend .w-100;
             @extend .h-100;
-            padding-top: 98px;
+            padding-top: 0;
         }
 
         h1 {
@@ -28,7 +28,7 @@
             letter-spacing: normal;
             text-align: center;
             color: #ffffff;
-            margin-bottom: 43px;
+            margin-bottom: 40px;
         }
 
         h2 {
@@ -39,7 +39,7 @@
             letter-spacing: normal;
             text-align: center;
             color: #ffffff;
-            margin-bottom: 29px;
+            margin-bottom: 30px;
         }
 
         .pillars {
@@ -57,7 +57,7 @@
             justify-content: center;
             align-items: flex-start;
             flex-wrap: wrap;
-            margin-bottom: 150px;
+            margin-bottom: 110px;
 
             @import "TaskButton";
         }
