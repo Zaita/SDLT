@@ -3,7 +3,7 @@
 import GraphQLRequestHelper from "../utils/GraphQLRequestHelper";
 import _ from "lodash";
 import {DEFAULT_NETWORK_ERROR} from "../constants/errors";
-import type {Submission, SubmissionQuestionData} from "../types/Questionnaire";
+import type {Question, Submission, SubmissionQuestionData} from "../types/Questionnaire";
 import QuestionParser from "../utils/QuestionParser";
 import UserParser from "../utils/UserParser";
 import type {TaskSubmissionState} from "../store/TaskSubmissionState";
@@ -25,8 +25,13 @@ export default class TaskDataService {
 
     // Find task id list for questionnaire submission
     const taskIDList = [];
-    questionnaireSubmission.questions.forEach((question) => {
-      // Only action question can generate tasks
+    questionnaireSubmission.questions.forEach((question: Question) => {
+      // Only applicable questions can generate task submissions
+      if (!question.isApplicable || !question.hasAnswer) {
+        return;
+      }
+
+      // Only action question can generate task submissions
       if (question.type !== "action") {
         return;
       }

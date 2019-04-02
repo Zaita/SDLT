@@ -299,4 +299,22 @@ mutation {
     }
     return {uuid};
   }
+
+  static async editQuestionnaireSubmission(argument: { submissionID: string, csrfToken: string }): Promise<{ uuid: string }> {
+    const {submissionID, csrfToken} = {...argument};
+    const query = `
+mutation {
+ updateQuestionnaireStatusToInProgress(ID: "${submissionID}") {
+   QuestionnaireStatus
+   UUID
+ }
+}`;
+    const json = await GraphQLRequestHelper.request({query, csrfToken});
+    const status = _.toString(_.get(json, "data.updateQuestionnaireStatusToInProgress.QuestionnaireStatus", null));
+    const uuid = _.toString(_.get(json, "data.updateQuestionnaireStatusToInProgress.UUID", null));
+    if (!status || !uuid) {
+      throw DEFAULT_NETWORK_ERROR;
+    }
+    return {uuid};
+  }
 }

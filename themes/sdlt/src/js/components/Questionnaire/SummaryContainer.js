@@ -8,7 +8,9 @@ import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import type {QuestionnaireSubmissionState} from "../../store/QuestionnaireState";
 import {
-  approveQuestionnaireSubmission, denyQuestionnaireSubmission,
+  approveQuestionnaireSubmission,
+  denyQuestionnaireSubmission,
+  editQuestionnaireSubmission,
   loadQuestionnaireSubmissionState,
   submitQuestionnaireForApproval,
 } from "../../actions/questionnarie";
@@ -35,6 +37,9 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
     dispatchDenySubmissionAction(submissionID: string) {
       dispatch(denyQuestionnaireSubmission(submissionID));
     },
+    dispatchEditSubmissionAction(submissionID: string) {
+      dispatch(editQuestionnaireSubmission(submissionID));
+    },
   };
 };
 
@@ -48,6 +53,7 @@ type reduxProps = {
   dispatchSubmitForApprovalAction: (submissionID: string) => void,
   dispatchApproveSubmissionAction: (submissionID: string) => void,
   dispatchDenySubmissionAction: (submissionID: string) => void,
+  dispatchEditSubmissionAction: (submissionID: string) => void,
 };
 
 type Props = ownProps & reduxProps;
@@ -91,6 +97,7 @@ class SummaryContainer extends Component<Props> {
                  handleSubmitButtonClick={this.handleSubmitButtonClick.bind(this)}
                  handleApproveButtonClick={this.handleApproveButtonClick.bind(this)}
                  handleDenyButtonClick={this.handleDenyButtonClick.bind(this)}
+                 handleEditButtonClick={this.handleEditButtonClick.bind(this)}
                  viewAs={viewAs}
         />
         <Footer/>
@@ -140,6 +147,16 @@ class SummaryContainer extends Component<Props> {
     }
 
     this.props.dispatchDenySubmissionAction(submission.submissionID);
+  }
+
+  handleEditButtonClick() {
+    const {user, submission} = {...this.props.submissionState};
+
+    if (!user || !submission) {
+      return;
+    }
+
+    this.props.dispatchEditSubmissionAction(submission.submissionID);
   }
 }
 
