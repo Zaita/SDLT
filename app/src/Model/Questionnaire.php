@@ -174,7 +174,6 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
         }
     }
 
-
     /**
      * @return array
      */
