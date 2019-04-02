@@ -5,7 +5,6 @@ import type {Submission} from "../../types/Questionnaire";
 import LightButton from "../Button/LightButton";
 import DarkButton from "../Button/DarkButton";
 import pdfIcon from "../../../img/icons/pdf.svg";
-import {Link} from "react-router-dom";
 import editIcon from "../../../img/icons/edit.svg";
 import _ from "lodash";
 import URLUtil from "../../utils/URLUtil";
@@ -17,7 +16,9 @@ type Props = {
   handleSubmitButtonClick: () => void,
   handleApproveButtonClick: () => void,
   handleDenyButtonClick: () => void,
-  viewAs: "submitter" | "approver" | "others"
+  handleEditButtonClick: () => void,
+  viewAs: "submitter" | "approver" | "others",
+  token: string,
 };
 
 const prettifyStatus = (status: string) => {
@@ -30,6 +31,17 @@ const prettifyStatus = (status: string) => {
 };
 
 class Summary extends Component<Props> {
+
+  static defaultProps = {
+    submission: null,
+    handlePDFDownloadButtonClick: () => {},
+    handleSubmitButtonClick: () => {},
+    handleApproveButtonClick: () => {},
+    handleDenyButtonClick: () => {},
+    handleEditButtonClick: () => {},
+    viewAs: "others",
+    token: "",
+  };
 
   render() {
     const {submission, viewAs} = {...this.props};
@@ -82,11 +94,14 @@ class Summary extends Component<Props> {
       <div className="tasks">
         <h3>Tasks</h3>
         {taskSubmissions.map(({uuid, taskName, status}) => {
+          const {token} = {...this.props};
           return (
             <div key={uuid}>
-              <Link to={URLUtil.getTaskSubmissionURL(uuid)}>
+              <button className={"btn btn-link"} onClick={(event: Event) => {
+                URLUtil.redirectToTaskSubmission(uuid, token);
+              }}>
                 {taskName} ({prettifyStatus(status)})
-              </Link>
+              </button>
             </div>
           );
         })}
@@ -101,6 +116,7 @@ class Summary extends Component<Props> {
       handlePDFDownloadButtonClick,
       handleApproveButtonClick,
       handleDenyButtonClick,
+      handleEditButtonClick
     } = {...this.props};
 
     const downloadPDFButton = (
@@ -117,6 +133,7 @@ class Summary extends Component<Props> {
         <LightButton title="EDIT ANSWERS"
                      iconImage={editIcon}
                      classes={["button"]}
+                     onClick={handleEditButtonClick}
         />
       );
 

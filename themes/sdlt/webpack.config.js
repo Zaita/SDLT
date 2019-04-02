@@ -19,7 +19,13 @@ module.exports = (env, argv) => {
           loader: "babel-loader",
           options: {
             presets: [
-              ["@babel/preset-env", {"useBuiltIns": "entry"}],
+              [
+                "@babel/preset-env", {
+                "useBuiltIns": "entry",
+                "targets": {
+                  "browsers": ["last 2 versions", "ie >= 11"],
+                },
+              }],
               "@babel/preset-react",
               "@babel/preset-flow",
             ],

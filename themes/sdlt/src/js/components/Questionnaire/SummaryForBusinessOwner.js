@@ -36,6 +36,7 @@ class SummaryForBusinessOwnerContainer extends Component<Props, State> {
 
   render() {
     const {submission, siteTitle} = {...this.state};
+    const {token} = {...this.props};
 
     let summary = null;
     if (submission) {
@@ -48,10 +49,10 @@ class SummaryForBusinessOwnerContainer extends Component<Props, State> {
       summary = (
         <Summary submission={submission}
                  handlePDFDownloadButtonClick={() => { this.downloadPDF(submission, siteTitle);}}
-                 handleSubmitButtonClick={() => {}}
                  handleApproveButtonClick={() => { this.approve(submission);}}
                  handleDenyButtonClick={() => { this.deny(submission);}}
                  viewAs={viewAs}
+                 token={token}
         />
       );
     }
@@ -84,6 +85,7 @@ class SummaryForBusinessOwnerContainer extends Component<Props, State> {
     await QuestionnaireForBusinessOwnerDataService.approveQuestionnaireSubmission({
       submissionID: submission.submissionID,
       csrfToken: await CSRFTokenService.getCSRFToken(),
+      secureToken: this.props.token
     });
     await this.loadData();
   }
@@ -92,6 +94,7 @@ class SummaryForBusinessOwnerContainer extends Component<Props, State> {
     await QuestionnaireForBusinessOwnerDataService.denyQuestionnaireSubmission({
       submissionID: submission.submissionID,
       csrfToken: await CSRFTokenService.getCSRFToken(),
+      secureToken: this.props.token
     });
     await this.loadData();
   }

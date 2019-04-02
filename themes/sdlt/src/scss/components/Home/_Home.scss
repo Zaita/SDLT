@@ -43,7 +43,7 @@
         }
 
         .pillars {
-            @extend .row;
+            @extend .container;
             @extend .mx-1;
             margin-bottom: 40px;
 
