@@ -71,7 +71,7 @@ class SendDeniedNotificationEmailJob extends AbstractQueuedJob implements Queued
                 'EmailSignature' => $emailDetails->EmailSignature
             ])
             ->setFrom($from)
-            ->setTo($member->Email)
+            ->setTo($this->questionnaireSubmission->SubmitterEmail)
             ->setSubject($sub);
 
         $email->send();

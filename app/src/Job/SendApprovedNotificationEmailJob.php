@@ -71,7 +71,7 @@ class SendApprovedNotificationEmailJob extends AbstractQueuedJob implements Queu
                 'EmailSignature' => $emailDetails->EmailSignature
             ])
             ->setFrom($from)
-            ->setTo($member->Email)
+            ->setTo($this->questionnaireSubmission->SubmitterEmail)
             ->setSubject($sub);
 
         $email->send();
