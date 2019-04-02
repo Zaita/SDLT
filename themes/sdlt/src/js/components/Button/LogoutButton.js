@@ -2,7 +2,7 @@
 
 import React, {Component} from "react";
 import Icon from "../../../img/icons/user.svg";
-import URLUtil from "../../utils/URLUtil";
+import CSRFTokenService from '../../services/CSRFTokenService';
 
 type Props = {
   classes: Array<string>
@@ -19,7 +19,9 @@ class LogoutButton extends Component<Props> {
 
     return (
       <button className={`LogoutButton ${classes.join(" ")}`}
-              onClick={this.onButtonClick.bind(this)}
+        onClick={() => {
+          this.logout();
+        }}
       >
         <div>
           <img src={Icon} />
@@ -29,8 +31,10 @@ class LogoutButton extends Component<Props> {
     );
   }
 
-  onButtonClick() {
-    URLUtil.redirectToLogout();
+
+  async logout() {
+    const csrfToken = await CSRFTokenService.getCSRFToken();
+    window.location.href = `/Security/Logout?SecurityID=${csrfToken}`;
   }
 }
 
