@@ -15,7 +15,7 @@ type QuestionnaireSubmissionState = {
 
 export default class QuestionnaireForBusinessOwnerDataService {
 
-  static async fetchSubmissionData(argument: {uuid: string, secureToken: string}): Promise<QuestionnaireSubmissionState> {
+  static async fetchSubmissionData(argument: { uuid: string, secureToken: string }): Promise<QuestionnaireSubmissionState> {
     const {uuid, secureToken} = {...argument};
     const query = `
 query {
@@ -96,11 +96,13 @@ query {
     return data;
   }
 
-  static async approveQuestionnaireSubmission(argument: { submissionID: string, csrfToken: string }): Promise<{ uuid: string }> {
-    const {submissionID, csrfToken} = {...argument};
+  static async approveQuestionnaireSubmission(
+    argument: { submissionID: string, csrfToken: string, secureToken: string },
+  ): Promise<{ uuid: string }> {
+    const {submissionID, csrfToken, secureToken} = {...argument};
     const query = `
 mutation {
- updateQuestionnaireStatusToApproved(ID: "${submissionID}") {
+ updateQuestionnaireStatusToApproved(ID: "${submissionID}", SecureToken: "${secureToken}") {
    QuestionnaireStatus
    UUID
  }
@@ -115,11 +117,13 @@ mutation {
     return {uuid};
   }
 
-  static async denyQuestionnaireSubmission(argument: { submissionID: string, csrfToken: string }): Promise<{ uuid: string }> {
-    const {submissionID, csrfToken} = {...argument};
+  static async denyQuestionnaireSubmission(
+    argument: { submissionID: string, csrfToken: string, secureToken: string },
+  ): Promise<{ uuid: string }> {
+    const {submissionID, csrfToken, secureToken} = {...argument};
     const query = `
 mutation {
- updateQuestionnaireStatusToDenied(ID: "${submissionID}") {
+ updateQuestionnaireStatusToDenied(ID: "${submissionID}", SecureToken: "${secureToken}") {
    QuestionnaireStatus
    UUID
  }

@@ -159,7 +159,7 @@ class QuestionForm extends Component<Props> {
                   classes.push("error");
                 }
 
-                if (["text", "email"].includes(type)) {
+                if (["text", "email", "url"].includes(type)) {
                   return (
                     <tr key={id}>
                       <td className="label"><label>{label}</label></td>

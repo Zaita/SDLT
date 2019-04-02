@@ -264,6 +264,19 @@ export function denyQuestionnaireSubmission(submissionID: string): ThunkAction {
   }
 }
 
+export function editQuestionnaireSubmission(submissionID: string): ThunkAction {
+  return async (dispatch, getState) => {
+    try {
+      const csrfToken = await CSRFTokenService.getCSRFToken();
+      const {uuid} = await QuestionnaireDataService.editQuestionnaireSubmission({submissionID, csrfToken});
+      URLUtil.redirectToQuestionnaireEditing(uuid);
+    } catch(error) {
+      // TODO: errors
+      alert(error);
+    }
+  }
+}
+
 // Commons
 
 async function batchUpdateSubmissionData(rootState: RootState, indexesToUpdate: Array<number>) {

@@ -2,10 +2,6 @@
 
 export default class URLUtil {
 
-  static getTaskSubmissionURL(uuid: string) {
-    return `/task/submission/${uuid}`;
-  }
-
   static redirectToQuestionnaireEditing(uuid: string) {
     window.location.href = `/#/questionnaire/submission/${uuid}`;
   }
@@ -14,8 +10,22 @@ export default class URLUtil {
     window.location.href = `/#/questionnaire/review/${uuid}`;
   }
 
-  static redirectToQuestionnaireSummary(uuid: string) {
+  static redirectToQuestionnaireSummary(uuid: string, token: string = "") {
+    if (token) {
+      window.location.href = `/businessOwnerApproval/#/questionnaire/summary/${uuid}?token=${token}`;
+      return;
+    }
+
     window.location.href = `/#/questionnaire/summary/${uuid}`;
+  }
+
+  static redirectToTaskSubmission(uuid: string, token: string = "") {
+    if (token) {
+      window.location.href = `/businessOwnerApproval/#/task/submission/${uuid}?token=${token}`;
+      return;
+    }
+
+    window.location.href = `/#/task/submission/${uuid}`;
   }
 
   static redirectToLogout() {

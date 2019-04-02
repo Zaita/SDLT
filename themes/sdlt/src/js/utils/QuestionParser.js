@@ -79,7 +79,7 @@ export default class QuestionParser {
         inputs = inputSchemas.map((inputSchema) => {
           // Schema of input
           let type = _.toString(_.get(inputSchema, "InputType", "")).toLowerCase();
-          const validTypes = ["text", "email", "textarea", "date"];
+          const validTypes = ["text", "email", "textarea", "date", "url"];
           if (!validTypes.includes(type)) {
             type = "text";
           }

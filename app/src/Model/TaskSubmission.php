@@ -47,6 +47,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 {
     const STATUS_IN_PROGRESS = 'in_progress';
     const STATUS_COMPLETE = 'complete';
+    const STATUS_INVALID = 'invalid';
 
     /**
      * @var string
@@ -59,7 +60,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     private static $db = [
         'QuestionnaireData' => 'Text', // store in JSON format
         'AnswerData' => 'Text', // store in JSON format
-        'Status' => 'Enum(array("in_progress", "complete"))',
+        'Status' => 'Enum(array("in_progress", "complete", "invalid"))',
         'UUID' => 'Varchar(255)',
         'Result' => 'Varchar(255)'
     ];
@@ -189,8 +190,6 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     }
 
                     $questionnaireSubmission = QuestionnaireSubmission::get_by_id($questionnaireSubmissionID);
-
-
                     if (!$questionnaireSubmission->exists()) {
                         throw new Exception('Questionnaire submission does not exist');
                     }
@@ -220,6 +219,31 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      */
     public static function create_task_submission($taskID, $questionnaireSubmissionID, $submitterID)
     {
+        $task = Task::get_by_id($taskID);
+        if (!$task || !$task->exists()) {
+            throw new Exception('Task does not exist');
+        }
+
+        // Turn "invalid" task submission into "progress" if applicable rather than create new ones
+        /* @var $invalidTaskSubmission TaskSubmission|null */
+        $invalidTaskSubmission = TaskSubmission::get()
+            ->where([
+                'Status' => TaskSubmission::STATUS_INVALID,
+                'TaskID' => $taskID,
+                'QuestionnaireSubmissionID' => $questionnaireSubmissionID,
+                'SubmitterID' => $submitterID
+            ])
+            ->first();
+        if ($invalidTaskSubmission && $invalidTaskSubmission->exists()) {
+            // Only turn "invalid" task submissions back if the structure is not changed
+            if (json_encode($task->getQuestionsData()) == $invalidTaskSubmission->QuestionnaireData) {
+                $invalidTaskSubmission->Status = TaskSubmission::STATUS_IN_PROGRESS;
+                $invalidTaskSubmission->write();
+                return $invalidTaskSubmission;
+            }
+        }
+
+        // Create new task submission
         $taskSubmission = TaskSubmission::create();
 
         // Relations
@@ -228,10 +252,6 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         $taskSubmission->SubmitterID = $submitterID;
 
         // Structure of task questionnaire
-        $task = Task::get_by_id($taskID);
-        if (!$task->exists()) {
-            throw new Exception('Task does not exist');
-        }
         $questionnaireData = $task->getQuestionsData();
         $taskSubmission->QuestionnaireData = json_encode($questionnaireData);
 
@@ -434,6 +454,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             ->operation(SchemaScaffolder::READ)
             ->setName('readTaskSubmission')
             ->addArg('UUID', 'String!')
+            ->addArg('SecureToken', 'String')
             ->setUsePagination(false)
             ->setResolver(new class implements ResolverInterface
             {
@@ -451,17 +472,34 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                  */
                 public function resolve($object, array $args, $context, ResolveInfo $info)
                 {
-                    QuestionnaireValidation::is_user_logged_in();
-
+                    $member = Security::getCurrentUser();
                     $uuid = Convert::raw2sql($args['UUID']);
+                    $secureToken = isset($args['SecureToken']) ? Convert::raw2sql(trim($args['SecureToken'])) : null;
 
+                    // Check authentication
+                    if (!$member && !$secureToken) {
+                        throw new GraphQLAuthFailure();
+                    }
                     // Check argument
                     if (!$uuid) {
                         throw new Exception('Wrong argument');
                     }
 
                     // Filter data by UUID
-                    $data = TaskSubmission::get()->filter(['UUID' => $uuid]);
+                    /* @var $data TaskSubmission */
+                    $data = TaskSubmission::get()
+                        ->where(['UUID' => $uuid])
+                        ->exclude('Status', TaskSubmission::STATUS_INVALID)
+                        ->first();
+
+                    // If the user is not logged-in and the secure token is not valid, throw error
+                    if (!$member) {
+                        if (!$data->QuestionnaireSubmission()->exists() ||
+                            !hash_equals($data->QuestionnaireSubmission()->ApprovalLinkToken, $secureToken)
+                        ) {
+                            throw new Exception('Sorry, wrong security token.');
+                        }
+                    }
 
                     return $data;
                 }

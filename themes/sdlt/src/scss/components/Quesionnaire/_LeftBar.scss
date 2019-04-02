@@ -20,5 +20,9 @@
         color: $blue;
     }
 
+    .items {
+        width: 100%;
+    }
+
     @import "LeftBarItem";
 }

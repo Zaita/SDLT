@@ -26,15 +26,17 @@ class Home extends Component<Props> {
             {this.props.homeState.subtitle}
           </h2>
           <div className="pillars">
-            {this.props.homeState.pillars.map((pillar, index) => {
-              return (
-                <Pillar link={`/questionnaire/start/${pillar.questionnaireID}`}
-                        classes={["col", "mx-1"]}
-                        pillar={pillar}
-                        key={index}
-                />
-              );
-            })}
+            <div className="row">
+              {this.props.homeState.pillars.map((pillar, index) => {
+                return (
+                  <Pillar link={`/questionnaire/start/${pillar.questionnaireID}`}
+                          classes={["col", "mx-1"]}
+                          pillar={pillar}
+                          key={index}
+                  />
+                );
+              })}
+            </div>
           </div>
           <div className="tasks">
             <TaskButton link="/tasks/blah" classes={["mx-1"]} disabled={true} title="Information Classification"/>
