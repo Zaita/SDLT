@@ -18,7 +18,7 @@ class Home extends Component<Props> {
       <div className="Home">
         <LogoutButton classes={["clearfix","float-right", "mt-5", "mr-5"]}/>
         <div className="layout">
-          <img src={LogoImage} className="logo"/>
+          <a href="/"><img src={LogoImage} className="logo"/></a>
           <h1>
             {this.props.homeState.title}
           </h1>

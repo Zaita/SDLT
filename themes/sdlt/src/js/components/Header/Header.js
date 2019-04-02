@@ -17,7 +17,7 @@ class Header extends Component<Props> {
     return (
       <header className="Header">
         <div className="top-banner">
-          <img src={LogoImage} className="logo"/>
+          <a href="/"><img src={LogoImage} className="logo"/></a>
         </div>
         <div className="logout-wrapper">
           <LogoutButton/>
