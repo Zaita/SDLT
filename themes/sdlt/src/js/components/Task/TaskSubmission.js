@@ -65,7 +65,6 @@ class TaskSubmission extends Component<Props> {
         <h3>Result:</h3>
         <div>{taskSubmission.result}</div>
       </div>
-
     ) : null;
 
     return (

@@ -17,6 +17,7 @@ use Exception;
 use GraphQL\Type\Definition\ResolveInfo;
 use NZTA\SDLT\GraphQL\GraphQLAuthFailure;
 use NZTA\SDLT\Job\SendApprovedNotificationEmailJob;
+use SilverStripe\GraphQL\OperationResolver;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ResolverInterface;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
@@ -44,9 +45,11 @@ use SilverStripe\Forms\LiteralField;
  * @property string Name
  * @property string KeyInformation
  * @property string ApprovalLinkToken
+ * @property string QuestionnaireStatus
  *
  * @method Questionnaire Questionnaire()
  * @method Member User()
+ * @method HasManyList TaskSubmissions()
  */
 class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 {
@@ -110,7 +113,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SubmitterName',
         'SubmitterRole',
         'SubmitterEmail',
-        'QuestionnaireStatus',
+        'getPrettifyQuestionnaireStatus' => 'Questionnaire Status',
         'CisoApprovalStatus',
         'BusinessOwnerApprovalStatus',
         'SecurityArchitectApprovalStatus',
@@ -220,6 +223,23 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
+     * @return string
+     */
+    public function getPrettifyQuestionnaireStatus()
+    {
+        $mapping = [
+            'in_progress' => 'In Progress',
+            'submitted' => 'Submitted',
+            'waiting_for_security_architect_approval' => 'Awaiting Security Architect Approval',
+            'waiting_for_approval' => 'Awaiting Business Owner Approval',
+            'approved' => 'Approved',
+            'denied' => 'Denied'
+        ];
+
+        return isset($mapping[$this->QuestionnaireStatus]) ? $mapping[$this->QuestionnaireStatus] : $this->QuestionnaireStatus;
+    }
+
+    /**
      * get is current user has access for approval or not
      * and this value is only for CISO and Security-architect
      * for business owner we will use token based url
@@ -287,6 +307,22 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $submissionScaffolder
             ->nestedQuery('TaskSubmissions')
             ->setUsePagination(false)
+            ->setResolver(new class implements OperationResolver {
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param QuestionnaireSubmission $object  object
+                 * @param array                   $args    args
+                 * @param mixed                   $context context
+                 * @param ResolveInfo             $info    info
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    return $object->TaskSubmissions()->exclude('Status', TaskSubmission::STATUS_INVALID);
+                }
+            })
             ->end();
 
         $submissionScaffolder
@@ -312,7 +348,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 {
                     $member = Security::getCurrentUser();
                     $uuid = htmlentities(trim($args['UUID']));
-                    $secureToken = isset($args['SecureToken']) ? trim($args['SecureToken']) : null;
+                    $secureToken = isset($args['SecureToken']) ? Convert::raw2sql(trim($args['SecureToken'])) : null;
 
                     // To continue the data fetching, user has to be logged-in or has secure token
                     if (!$member && !$secureToken) {
@@ -332,7 +368,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         ->first();
 
                     // If the user is not logged-in and the secure token is not valid, throw error
-                    if (!$member && $data->ApprovalLinkToken != $secureToken) {
+                    if (!$member && !hash_equals($data->ApprovalLinkToken, $secureToken)) {
                         throw new Exception('Sorry, wrong security token.');
                     }
 
@@ -654,6 +690,12 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     $questionnaireSubmission->write();
 
+                    // Mark all related task submissions as "invalid"
+                    $questionnaireSubmission->TaskSubmissions()->each(function (TaskSubmission $taskSubmission) {
+                        $taskSubmission->Status = TaskSubmission::STATUS_INVALID;
+                        $taskSubmission->write();
+                    });
+
                     return $questionnaireSubmission;
                 }
             })
@@ -816,6 +858,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ->mutation('updateQuestionnaireStatusToApproved', QuestionnaireSubmission::class)
             ->addArgs([
                 'ID' => 'ID!',
+                'SecureToken' => 'String!'
             ])
             ->setResolver(new class implements ResolverInterface {
                 /**
@@ -832,6 +875,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 public function resolve($object, array $args, $context, ResolveInfo $info)
                 {
                     $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
+
+                    if (!hash_equals($questionnaireSubmission->ApprovalLinkToken, Convert::raw2sql($args['SecureToken']))) {
+                        throw new Exception('Wrong secure token');
+                    }
 
                     $questionnaireSubmission->updateQuestionnaireOnApproveAndDenyByBusinessOwner('approved');
 
@@ -854,6 +901,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ->mutation('updateQuestionnaireStatusToDenied', QuestionnaireSubmission::class)
             ->addArgs([
                 'ID' => 'ID!',
+                'SecureToken' => 'String!'
             ])
             ->setResolver(new class implements ResolverInterface {
                 /**
@@ -870,6 +918,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 public function resolve($object, array $args, $context, ResolveInfo $info)
                 {
                     $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
+
+                    if (!hash_equals($questionnaireSubmission->ApprovalLinkToken, Convert::raw2sql($args['SecureToken']))) {
+                        throw new Exception('Wrong secure token');
+                    }
 
                     $questionnaireSubmission->updateQuestionnaireOnApproveAndDenyByBusinessOwner('denied');
 
@@ -1103,6 +1155,12 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             } else {
                 // if denied- no email, internal communication between Submitter and security-architect
                 $this->QuestionnaireStatus = 'in_progress';
+
+                // Mark all related task submissions as "invalid"
+                $this->TaskSubmissions()->each(function (TaskSubmission $taskSubmission) {
+                    $taskSubmission->Status = TaskSubmission::STATUS_INVALID;
+                    $taskSubmission->write();
+                });
             }
 
             $this->write();
