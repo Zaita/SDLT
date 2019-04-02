@@ -9,6 +9,9 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Security\Authenticator;
 use SilverStripe\Security\Security;
 use SilverStripe\Security\MemberAuthenticator\MemberAuthenticator;
+use SilverStripe\CampaignAdmin\CampaignAdmin;
+use SilverStripe\Admin\CMSMenu;
+use SilverStripe\Reports\ReportAdmin;
 
 // remove PasswordValidator for SilverStripe 5.0
 $validator = PasswordValidator::create();
@@ -31,3 +34,6 @@ if (Cookie::get('showloginform')) {
         ]
     ]);
 }
+
+CMSMenu::remove_menu_class(CampaignAdmin::class);
+CMSMenu::remove_menu_class(ReportAdmin::class);
