@@ -6,10 +6,17 @@ import LogoutButton from "../Button/LogoutButton";
 
 type Props = {
   title: string,
-  subtitle: string
+  subtitle: string,
+  showLogoutButton?: boolean;
 };
 
 class Header extends Component<Props> {
+
+  static defaultProps = {
+    title: "",
+    subtitle: "",
+    showLogoutButton: true
+  };
 
   render() {
     const {title, subtitle} = {...this.props};
@@ -20,7 +27,7 @@ class Header extends Component<Props> {
           <a href="/"><img src={LogoImage} className="logo"/></a>
         </div>
         <div className="logout-wrapper">
-          <LogoutButton/>
+        {this.props.showLogoutButton && <LogoutButton/>}
         </div>
         <h1>{title}</h1>
         <h2>{subtitle}</h2>
