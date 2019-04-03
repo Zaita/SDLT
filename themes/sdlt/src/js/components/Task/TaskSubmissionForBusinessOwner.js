@@ -58,7 +58,7 @@ export default class TaskSubmissionForBusinessOwner extends Component<Props, Sta
 
     return (
       <div className="TaskSubmissionContainer">
-        <Header title={taskSubmission.taskName} subtitle={siteTitle}/>
+        <Header title={taskSubmission.taskName} subtitle={siteTitle} showLogoutButton={false}/>
         <div className="TaskSubmission">
           {result}
           <AnswersPreview questions={taskSubmission.questions}/>

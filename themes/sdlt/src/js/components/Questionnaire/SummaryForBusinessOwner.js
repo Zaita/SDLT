@@ -8,6 +8,7 @@ import QuestionnaireForBusinessOwnerDataService from "../../services/Questionnai
 import Summary from "./Summary";
 import PDFUtil from "../../utils/PDFUtil";
 import CSRFTokenService from "../../services/CSRFTokenService";
+import Header from "../Header/Header";
 
 type Props = {
   uuid: string,
@@ -38,6 +39,7 @@ class SummaryForBusinessOwnerContainer extends Component<Props, State> {
     const {submission, siteTitle} = {...this.state};
     const {token} = {...this.props};
 
+    let title = "";
     let summary = null;
     if (submission) {
       // Business owner can only approve/deny under specific status
@@ -46,6 +48,7 @@ class SummaryForBusinessOwnerContainer extends Component<Props, State> {
         submission.approvalStatus.businessOwner === "pending"
       ) ? "approver" : "others";
 
+      title = submission.questionnaireTitle;
       summary = (
         <Summary submission={submission}
                  handlePDFDownloadButtonClick={() => { this.downloadPDF(submission, siteTitle);}}
@@ -59,13 +62,7 @@ class SummaryForBusinessOwnerContainer extends Component<Props, State> {
 
     return (
       <div className="SummaryContainer">
-        <header className="Header">
-          <div className="top-banner">
-            <img src={LogoImage} className="logo"/>
-          </div>
-          <h1>SDLT</h1>
-          <h2>Summary</h2>
-        </header>
+        <Header title={title} subtitle="Summary" showLogoutButton={false}/>
         {summary}
         <Footer/>
       </div>
