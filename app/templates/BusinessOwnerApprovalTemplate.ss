@@ -1,1 +1,1 @@
-<div id="anonymous-app"></div>
+<div id="business-owner-app"></div>

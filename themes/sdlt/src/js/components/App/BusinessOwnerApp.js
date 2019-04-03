@@ -6,7 +6,7 @@ import SummaryForBusinessOwnerContainer from "../Questionnaire/SummaryForBusines
 import {parse} from "query-string";
 import TaskSubmissionForBusinessOwner from "../Task/TaskSubmissionForBusinessOwner";
 
-class AnonymousApp extends Component<*> {
+class BusinessOwnerApp extends Component<*> {
 
   render() {
 
@@ -44,4 +44,4 @@ class AnonymousApp extends Component<*> {
   }
 }
 
-export default AnonymousApp;
+export default BusinessOwnerApp;
