@@ -24,8 +24,7 @@ use SilverStripe\Forms\GridField\GridFieldPaginator;
 use SilverStripe\Security\Group;
 use SilverStripe\Forms\GridField\GridFieldSortableHeader;
 use SilverStripe\Forms\GridField\GridFieldFilterHeader;
-use NZTA\SDLT\Forms\GridField\GridFieldTitleHeader;
-
+use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
 
 /**
  * Class Questionnaire
