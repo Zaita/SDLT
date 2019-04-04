@@ -216,7 +216,11 @@ export function submitQuestionnaire(): ThunkAction {
 
       const csrfToken = await CSRFTokenService.getCSRFToken();
       const {uuid} = await QuestionnaireDataService.submitQuestionnaire({submissionID: submission.submissionID, csrfToken});
-      await TaskDataService.createTaskSubmissionsForQuestionnaireSubmission({questionnaireSubmission: submission, csrfToken});
+      await TaskDataService.createTaskSubmissionsAccordingToQuestions({
+        questions: submission.questions,
+        questionnaireSubmissionID: submission.submissionID,
+        csrfToken
+      });
       URLUtil.redirectToQuestionnaireSummary(uuid);
     } catch(error) {
       // TODO: errors

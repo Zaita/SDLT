@@ -4,6 +4,9 @@
 import type {HomeState} from "../store/HomeState";
 import {Action} from "redux";
 import type {QuestionnaireStartState, QuestionnaireSubmissionState} from "../store/QuestionnaireState";
+import type {User} from "../types/User";
+import type {TaskSubmission} from "../types/Task";
+import type {Question} from "../types/Questionnaire";
 
 export type LoadHomeStateFinishedAction = Action & {
   payload: HomeState
@@ -25,6 +28,39 @@ export type LoadQuestionnaireSubmissionAction = {
   payload: QuestionnaireSubmissionState
 }
 
+export type LoadTaskSubmissionAction = {
+  type: string,
+  payload: TaskSubmission
+};
+
+export type PutDataInTaskSubmissionAction = {
+  type: string,
+  payload: Question
+};
+
+export type MarkQuestionsNotApplicableInTaskSubmissionAction = {
+  type: string,
+  payload: Array<number>
+};
+
+export type MoveToQuestionInTaskSubmissionAction = {
+  type: string,
+  payload: {
+    currentIndex: number,
+    targetIndex: number,
+  }
+};
+
+export type SetCurrentUserAction = {
+  type: string,
+  payload: User | null
+};
+
+export type SetSiteTitleAction = {
+  type: string,
+  payload: string
+};
+
 const ActionType = {
   HOME: {
     LOAD_HOME_STATE_STARTED: "LOAD_HOME_STATE_STARTED",
@@ -39,16 +75,22 @@ const ActionType = {
     MARK_QUESTIONNAIRE_QUESTION_NOT_APPLICABLE: "MARK_QUESTIONNAIRE_QUESTION_NOT_APPLICABLE",
   },
   TASK: {
-    LOAD_TASK_SUBMISSION_STATE: "LOAD_TASK_SUBMISSION_STATE",
-    PUT_DATA_IN_TASK_SUBMISSION: "PUT_DATA_IN_TASK_SUBMISSION",
-    MARK_TASK_QUESTION_NOT_APPLICABLE: "MARK_TASK_QUESTION_NOT_APPLICABLE",
-    MOVE_TO_ANOTHER_TASK_QUESTION: "MOVE_TO_ANOTHER_TASK_QUESTION",
+    LOAD_TASK_SUBMISSION: "ACTION_TASK_LOAD_TASK_SUBMISSION",
+    PUT_DATA_IN_TASK_SUBMISSION: "ACTION_TASK_PUT_DATA_IN_TASK_SUBMISSION",
+    MARK_TASK_QUESTION_NOT_APPLICABLE: "ACTION_TASK_MARK_TASK_QUESTION_NOT_APPLICABLE",
+    MOVE_TO_ANOTHER_TASK_QUESTION: "ACTION_TASK_MOVE_TO_ANOTHER_TASK_QUESTION",
   },
   // TODO: add a global UI state to reflect loading and error
   UI: {
     LOAD_DATA_STARTED: "LOAD_DATA_STARTED",
     LOAD_DATA_FAILED: "LOAD_DATA_FAILED",
     LOAD_DATA_FINISHED: "LOAD_DATA_FINISHED"
+  },
+  USER: {
+    SET_CURRENT_USER: "ACTION_USER_SET_CURRENT_USER"
+  },
+  SITE_CONFIG: {
+    SET_SITE_TITLE: "ACTION_SITE_CONFIG_SET_SITE_TITLE"
   }
 };
 
