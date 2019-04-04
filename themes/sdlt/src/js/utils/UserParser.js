@@ -1,7 +1,8 @@
 // @flow
 
 import type {User} from "../types/User";
-import _ from "lodash";
+import get from "lodash/get";
+import toString from "lodash/toString";
 
 export default class UserParser {
 
@@ -9,10 +10,12 @@ export default class UserParser {
     const jsonObject = (typeof userJSON === "string" ? JSON.parse(userJSON) : userJSON);
 
     return {
-      id: _.toString(_.get(jsonObject, "ID")),
-      name: `${_.get(jsonObject, "FirstName")} ${_.get(jsonObject, "Surname")}`,
-      role: _.get(jsonObject, "UserRole"),
-      email: _.get(jsonObject, "Email"),
+      id: toString(get(jsonObject, "ID")),
+      name: `${get(jsonObject, "FirstName")} ${get(jsonObject, "Surname")}`,
+      role: get(jsonObject, "UserRole"),
+      email: get(jsonObject, "Email"),
+      isSA: toString(get(jsonObject, "IsSA")) === "true",
+      isCISO: toString(get(jsonObject, "IsCISO")) === "true",
     }
   }
 }

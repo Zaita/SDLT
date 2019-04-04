@@ -37,7 +37,9 @@ class MemberGraphQLProvider implements ScaffoldingProvider
                 'Email',
                 'FirstName',
                 'Surname',
-                'UserRole'
+                'UserRole',
+                'IsSA',
+                'IsCISO'
             ])
             ->operation(SchemaScaffolder::READ)
             ->setName('readCurrentMember')

@@ -8,6 +8,7 @@ import {DEFAULT_NETWORK_ERROR} from "../constants/errors";
 import type {Question, SubmissionQuestionData} from "../types/Questionnaire";
 import QuestionParser from "../utils/QuestionParser";
 import type {TaskSubmission} from "../types/Task";
+import UserParser from "../utils/UserParser";
 
 type BatchUpdateTaskSubmissionDataArgument = {
   uuid: string,
@@ -104,6 +105,15 @@ query {
       ID
       UUID
     }
+    Submitter {
+      ID
+      Email
+      FirstName
+      Surname
+      UserRole
+      IsSA
+      IsCISO
+    }
     QuestionnaireData
     AnswerData
   }
@@ -121,6 +131,7 @@ query {
       taskName: toString(get(submissionJSONObject, "TaskName", "")),
       status: toString(get(submissionJSONObject, "Status", "")),
       result: toString(get(submissionJSONObject, "Result", "")),
+      submitter: UserParser.parseUserFromJSON(get(submissionJSONObject, "Submitter")),
       questionnaireSubmissionUUID: toString(get(submissionJSONObject, "QuestionnaireSubmission.UUID", "")),
       questionnaireSubmissionID: toString(get(submissionJSONObject, "QuestionnaireSubmission.ID", "")),
       questions: QuestionParser.parseQuestionsFromJSON({

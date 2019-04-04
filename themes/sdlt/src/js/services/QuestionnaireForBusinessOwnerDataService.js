@@ -69,6 +69,8 @@ query {
           name: _.toString(_.get(submissionJSON, "SubmitterName", "")),
           role: _.toString(_.get(submissionJSON, "SubmitterRole", "")),
           email: _.toString(_.get(submissionJSON, "SubmitterEmail", "")),
+          isSA: false,
+          isCISO: false
         },
         status: _.toString(_.get(submissionJSON, "QuestionnaireStatus", "")).toLowerCase().replace("-", "_"),
         approvalStatus: {
