@@ -8,44 +8,66 @@ import SubmissionDataUtil from "../utils/SubmissionDataUtil";
 import _ from "lodash";
 import CSRFTokenService from "../services/CSRFTokenService";
 import type {TaskSubmission} from "../types/Task";
+import ErrorUtil from "../utils/ErrorUtil";
+import type {
+  LoadTaskSubmissionAction,
+  MarkQuestionsNotApplicableInTaskSubmissionAction, MoveToQuestionInTaskSubmissionAction,
+  PutDataInTaskSubmissionAction,
+} from "./ActionType";
 
-export function loadTaskSubmissionState(uuid: string): ThunkAction {
+export function loadTaskSubmission(args: {uuid: string, secureToken?: string}): ThunkAction {
+  const {uuid, secureToken} = {...args};
+
   return async (dispatch) => {
-    // TODO: loading
     try {
-      const payload = await TaskDataService.fetchTaskSubmissionState(uuid);
-      dispatch({
-        type: ActionType.TASK.LOAD_TASK_SUBMISSION_STATE,
-        payload,
+      const payload = await TaskDataService.fetchTaskSubmission({
+        uuid,
+        secureToken
       });
+      const action: LoadTaskSubmissionAction = {
+        type: ActionType.TASK.LOAD_TASK_SUBMISSION,
+        payload,
+      };
+      await dispatch(action);
     }
     catch (error) {
-      // TODO: errors
-      alert(error);
+      ErrorUtil.displayError(error);
     }
   };
 }
 
-export function saveAnsweredQuestion(answeredQuestion: Question): ThunkAction {
+export function saveAnsweredQuestionInTaskSubmission(args: {answeredQuestion: Question, secureToken?: string}): ThunkAction {
+  const {answeredQuestion, secureToken} = {...args};
+
   return async (dispatch, getState) => {
-    const taskSubmission: TaskSubmission = _.get(getState(), "taskSubmissionState.taskSubmission");
-    if (!taskSubmission) {
+
+    const getTaskSubmission = () => {
+      return getState().taskSubmissionState.taskSubmission;
+    };
+
+    if (!getTaskSubmission()) {
       return;
     }
 
     // Save local state
-    dispatch({
+    const putDataAction: PutDataInTaskSubmissionAction = {
       type: ActionType.TASK.PUT_DATA_IN_TASK_SUBMISSION,
       payload: answeredQuestion,
-    });
+    };
+    await dispatch(putDataAction);
 
     // Network request - save answer
-    await TaskDataService.batchUpdateTaskSubmissionData({
-      uuid: taskSubmission.uuid,
-      questionIDList: [answeredQuestion.id],
-      answerDataList: [SubmissionDataUtil.transformFromFullQuestionToData(answeredQuestion)],
-      csrfToken: await CSRFTokenService.getCSRFToken(),
-    });
+    try {
+      await TaskDataService.batchUpdateTaskSubmissionData({
+        uuid: getTaskSubmission().uuid,
+        questionIDList: [answeredQuestion.id],
+        answerDataList: [SubmissionDataUtil.transformFromFullQuestionToData(answeredQuestion)],
+        csrfToken: await CSRFTokenService.getCSRFToken(),
+        secureToken: secureToken,
+      });
+    } catch (error) {
+      ErrorUtil.displayError(error);
+    }
 
     // Move cursor
     const {
@@ -57,45 +79,71 @@ export function saveAnsweredQuestion(answeredQuestion: Question): ThunkAction {
       result
     } = SubmissionDataUtil.getDataUpdateIntent({
       answeredQuestion,
-      questions: taskSubmission.questions,
+      questions: getTaskSubmission().questions,
     });
 
     // Mark non applicable questions
     if (nonApplicableIndexes.length > 0) {
-      dispatch({
+      const markNotApplicableAction: MarkQuestionsNotApplicableInTaskSubmissionAction = {
         type: ActionType.TASK.MARK_TASK_QUESTION_NOT_APPLICABLE,
         payload: nonApplicableIndexes,
-      });
+      };
+      await dispatch(markNotApplicableAction);
     }
 
     // Move cursor
     if (targetIndex > currentIndex) {
-      dispatch({
+      const moveAction: MoveToQuestionInTaskSubmissionAction = {
         type: ActionType.TASK.MOVE_TO_ANOTHER_TASK_QUESTION,
         payload: {currentIndex, targetIndex},
-      });
+      };
+      await dispatch(moveAction);
     }
 
     // Network request - batch update
-    await batchUpdateTaskSubmissionData(
-      taskSubmission,
-      _.uniq([currentIndex, ...nonApplicableIndexes, targetIndex])
-    );
+    try {
+      await batchUpdateTaskSubmissionData(
+        getTaskSubmission(),
+        _.uniq([currentIndex, ...nonApplicableIndexes, targetIndex]),
+        secureToken
+      );
+    } catch(error) {
+      ErrorUtil.displayError(error);
+    }
 
     if (complete) {
-      const {uuid} = await TaskDataService.completeTaskSubmission({
-        uuid: taskSubmission.uuid,
-        result: result,
-        csrfToken: await CSRFTokenService.getCSRFToken()
-      });
-      dispatch(loadTaskSubmissionState(uuid));
+      try {
+        const csrfToken = await CSRFTokenService.getCSRFToken();
+
+        // Prevent anonymous user to create other task submissions according to the answers
+        if (!secureToken) {
+          await TaskDataService.createTaskSubmissionsAccordingToQuestions({
+            questions: getTaskSubmission().questions,
+            questionnaireSubmissionID: getTaskSubmission().questionnaireSubmissionID,
+            csrfToken
+          });
+        }
+
+        const {uuid} = await TaskDataService.completeTaskSubmission({
+          uuid: getTaskSubmission().uuid,
+          result: result,
+          secureToken: secureToken,
+          csrfToken
+        });
+
+        await dispatch(loadTaskSubmission({uuid, secureToken}));
+      } catch (error) {
+        ErrorUtil.displayError(error);
+      }
     }
   };
 }
 
-export function moveToPreviousQuestion(targetQuestion: Question): ThunkAction {
+export function moveToPreviousQuestionInTaskSubmission(args: {targetQuestion: Question, secureToken?: string}): ThunkAction {
+  const {targetQuestion, secureToken} = {...args};
   return async (dispatch, getState) => {
-    const taskSubmission: TaskSubmission = _.get(getState(), "taskSubmissionState.taskSubmission", null);
+    const taskSubmission: TaskSubmission = getState().taskSubmissionState.taskSubmission;
+
     if (!taskSubmission) {
       return;
     }
@@ -117,44 +165,48 @@ export function moveToPreviousQuestion(targetQuestion: Question): ThunkAction {
     }
 
     // Move cursor
-    dispatch({
+    const moveAction: MoveToQuestionInTaskSubmissionAction = {
       type: ActionType.TASK.MOVE_TO_ANOTHER_TASK_QUESTION,
       payload: {currentIndex, targetIndex},
-    });
+    };
+    await dispatch(moveAction);
 
     // Network request - batch update
     await batchUpdateTaskSubmissionData(
       taskSubmission,
-      _.uniq([currentIndex, targetIndex])
+      _.uniq([currentIndex, targetIndex]),
+      secureToken
     );
   };
 }
 
-export function editCompletedTaskSubmission(): ThunkAction {
+export function editCompletedTaskSubmission(args: {secureToken?: string} = {}): ThunkAction {
+  const {secureToken} = {...args};
   return async (dispatch, getState) => {
-    const taskSubmission: TaskSubmission = _.get(getState(), "taskSubmissionState.taskSubmission", null);
+    const taskSubmission: TaskSubmission = getState().taskSubmissionState.taskSubmission;
     if (!taskSubmission) {
       return;
     }
 
     const {uuid} = await TaskDataService.editTaskSubmission({
       uuid: taskSubmission.uuid,
-      csrfToken: await CSRFTokenService.getCSRFToken()
+      csrfToken: await CSRFTokenService.getCSRFToken(),
+      secureToken: secureToken,
     });
-    dispatch(loadTaskSubmissionState(uuid));
+    await dispatch(loadTaskSubmission({uuid, secureToken}));
   };
 }
 
-async function batchUpdateTaskSubmissionData(taskSubmission: TaskSubmission, indexesToUpdate: Array<number>) {
+async function batchUpdateTaskSubmissionData(taskSubmission: TaskSubmission, indexesToUpdate: Array<number>, secureToken?: string) {
   try {
     await TaskDataService.batchUpdateTaskSubmissionData({
       uuid: taskSubmission.uuid,
       questionIDList: indexesToUpdate.map((index) => taskSubmission.questions[index].id),
       answerDataList: indexesToUpdate.map((index) => SubmissionDataUtil.transformFromFullQuestionToData(taskSubmission.questions[index])),
       csrfToken: await CSRFTokenService.getCSRFToken(),
+      secureToken: secureToken,
     });
   } catch (error) {
-    // TODO: error handling
-    alert(error.message);
+    ErrorUtil.displayError(error.message);
   }
 }

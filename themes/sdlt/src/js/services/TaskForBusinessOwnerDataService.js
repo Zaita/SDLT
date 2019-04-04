@@ -28,6 +28,7 @@ query {
     Result
     QuestionnaireSubmission {
       UUID
+      ID
     }
     QuestionnaireData
     AnswerData
@@ -48,6 +49,7 @@ query {
         status: _.toString(_.get(submissionJSONObject, "Status", "")),
         result: _.toString(_.get(submissionJSONObject, "Result", "")),
         questionnaireSubmissionUUID: _.toString(_.get(submissionJSONObject, "QuestionnaireSubmission.UUID", "")),
+        questionnaireSubmissionID: _.toString(_.get(submissionJSONObject, "QuestionnaireSubmission.ID", "")),
         questions: QuestionParser.parseQuestionsFromJSON({
           schemaJSON: _.toString(_.get(submissionJSONObject, "QuestionnaireData", "")),
           answersJSON: _.toString(_.get(submissionJSONObject, "AnswerData", "")),

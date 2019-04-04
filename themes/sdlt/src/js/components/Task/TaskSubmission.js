@@ -15,9 +15,19 @@ type Props = {
   saveAnsweredQuestion: (answeredQuestion: Question) => void,
   moveToPreviousQuestion: (targetQuestion: Question) => void,
   editAnswers: () => void,
+  showBackButton: boolean,
+  showEditButton: boolean,
 };
 
 class TaskSubmission extends Component<Props> {
+
+  static defaultProps = {
+    saveAnsweredQuestion: () => {},
+    moveToPreviousQuestion: () => {},
+    editAnswers: () => {},
+    showBackButton: true,
+    showEditButton: true,
+  };
 
   render() {
     const {
@@ -25,6 +35,8 @@ class TaskSubmission extends Component<Props> {
       saveAnsweredQuestion,
       moveToPreviousQuestion,
       editAnswers,
+      showBackButton,
+      showEditButton
     } = {...this.props};
 
     let body = null;
@@ -73,8 +85,8 @@ class TaskSubmission extends Component<Props> {
         {body}
 
         <div className="buttons">
-          {editButton}
-          {backButton}
+          {showEditButton && editButton}
+          {showBackButton && backButton}
         </div>
       </div>
     );

@@ -1,25 +1,29 @@
 // @flow
 
 import type {TaskSubmissionState} from "../store/TaskSubmissionState";
+import type {LoadTaskSubmissionAction, PutDataInTaskSubmissionAction} from "../actions/ActionType";
 import ActionType from "../actions/ActionType";
 import type {Question} from "../types/Questionnaire";
-import _ from "lodash";
+import cloneDeep from "lodash/cloneDeep";
+import set from "lodash/set";
 import type {TaskSubmission} from "../types/Task";
 
 const defaultStartState: TaskSubmissionState = {
-  siteTitle: "",
-  currentUser: null,
   taskSubmission: null,
 };
 
 export function taskSubmissionState(state: TaskSubmissionState = defaultStartState, action: *): TaskSubmissionState {
   const taskSubmission: TaskSubmission | null = state.taskSubmission;
 
-  if (action.type === ActionType.TASK.LOAD_TASK_SUBMISSION_STATE) {
-    return action.payload;
+  if (action.type === ActionType.TASK.LOAD_TASK_SUBMISSION) {
+    (action: LoadTaskSubmissionAction);
+    return {
+      taskSubmission: action.payload,
+    };
   }
 
   if (action.type === ActionType.TASK.PUT_DATA_IN_TASK_SUBMISSION) {
+    (action: PutDataInTaskSubmissionAction);
     if (!taskSubmission) {
       return state;
     }
@@ -32,8 +36,8 @@ export function taskSubmissionState(state: TaskSubmissionState = defaultStartSta
       return state;
     }
 
-    const newState = {...state};
-    _.set(newState, `taskSubmission.questions.${index}`, answeredQuestion);
+    const newState = cloneDeep(state);
+    set(newState, `taskSubmission.questions.${index}`, answeredQuestion);
     return newState;
   }
 
@@ -41,7 +45,7 @@ export function taskSubmissionState(state: TaskSubmissionState = defaultStartSta
     if (!taskSubmission) {
       return state;
     }
-    const newState = {...state};
+    const newState = cloneDeep(state);
 
     // Mark questions between target and current to be "not applicable"
     const nonApplicableIndexes = action.payload;
@@ -49,7 +53,7 @@ export function taskSubmissionState(state: TaskSubmissionState = defaultStartSta
       nonApplicableIndexes.forEach(index => {
         const nonApplicableQuestion = taskSubmission.questions[index];
         nonApplicableQuestion.isApplicable = false;
-        _.set(newState, `taskSubmission.questions.${index}`, nonApplicableQuestion);
+        set(newState, `taskSubmission.questions.${index}`, nonApplicableQuestion);
       });
     }
 
@@ -68,12 +72,12 @@ export function taskSubmissionState(state: TaskSubmissionState = defaultStartSta
       return state;
     }
 
-    const newState = {...state};
+    const newState = cloneDeep(state);
 
     // Mark current question is not current anymore
-    _.set(newState, `taskSubmission.questions.${currentIndex}.isCurrent`, false);
+    set(newState, `taskSubmission.questions.${currentIndex}.isCurrent`, false);
     // Mark target question to be current
-    _.set(newState, `taskSubmission.questions.${targetIndex}.isCurrent`, true);
+    set(newState, `taskSubmission.questions.${targetIndex}.isCurrent`, true);
 
     return newState;
   }

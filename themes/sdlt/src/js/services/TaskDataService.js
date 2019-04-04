@@ -1,31 +1,34 @@
 // @flow
 
 import GraphQLRequestHelper from "../utils/GraphQLRequestHelper";
-import _ from "lodash";
+import get from "lodash/get";
+import toString from "lodash/toString";
+import uniq from "lodash/uniq";
 import {DEFAULT_NETWORK_ERROR} from "../constants/errors";
-import type {Question, Submission, SubmissionQuestionData} from "../types/Questionnaire";
+import type {Question, SubmissionQuestionData} from "../types/Questionnaire";
 import QuestionParser from "../utils/QuestionParser";
-import UserParser from "../utils/UserParser";
-import type {TaskSubmissionState} from "../store/TaskSubmissionState";
+import type {TaskSubmission} from "../types/Task";
 
 type BatchUpdateTaskSubmissionDataArgument = {
   uuid: string,
   questionIDList: Array<string>,
   answerDataList: Array<SubmissionQuestionData>,
-  csrfToken: string
+  csrfToken: string,
+  secureToken?: string,
 };
 
 export default class TaskDataService {
 
-  static async createTaskSubmissionsForQuestionnaireSubmission(argument: {
-    questionnaireSubmission: Submission,
+  static async createTaskSubmissionsAccordingToQuestions(args: {
+    questions: Array<Question>,
+    questionnaireSubmissionID: string,
     csrfToken: string,
   }): Promise<void> {
-    const {questionnaireSubmission, csrfToken} = {...argument};
+    const {questions, questionnaireSubmissionID, csrfToken} = {...args};
 
     // Find task id list for questionnaire submission
     const taskIDList = [];
-    questionnaireSubmission.questions.forEach((question: Question) => {
+    questions.forEach((question: Question) => {
       // Only applicable questions can generate task submissions
       if (!question.isApplicable || !question.hasAnswer) {
         return;
@@ -57,10 +60,10 @@ export default class TaskDataService {
       });
     });
 
-    const uniqueTaskIDList = _.uniq(taskIDList);
+    const uniqueTaskIDList = uniq(taskIDList);
 
     // Stop if there is no task to create
-    if (uniqueTaskIDList.length  === 0) {
+    if (uniqueTaskIDList.length === 0) {
       return;
     }
 
@@ -68,7 +71,7 @@ export default class TaskDataService {
     const mutations = [];
     uniqueTaskIDList.forEach((taskID) => {
       const query = `
-createTaskSubmission${taskID}: createTaskSubmission(TaskID: "${taskID}", QuestionnaireSubmissionID: "${questionnaireSubmission.submissionID}") {
+createTaskSubmission${taskID}: createTaskSubmission(TaskID: "${taskID}", QuestionnaireSubmissionID: "${questionnaireSubmissionID}") {
   ID
   UUID
 }`;
@@ -81,68 +84,56 @@ mutation {
 }`;
 
     const json = await GraphQLRequestHelper.request({query, csrfToken});
-    const updatedData = _.get(json, "data", null);
+    const updatedData = get(json, "data", null);
     if (!updatedData) {
       throw DEFAULT_NETWORK_ERROR;
     }
   }
 
-  static async fetchTaskSubmissionState(uuid: string): Promise<TaskSubmissionState> {
+  static async fetchTaskSubmission(args: {uuid: string, secureToken?: string}): Promise<TaskSubmission> {
+    const {uuid, secureToken} = {...args};
     const query = `
 query {
-  readSiteConfig {
-    Title
-  }
-  readCurrentMember {
-    ID
-    Email
-    FirstName
-    Surname
-    UserRole
-  }
-  readTaskSubmission(UUID: "${uuid}") {
+  readTaskSubmission(UUID: "${uuid}", SecureToken: "${secureToken || ""}") {
     ID
     UUID
     TaskName
     Status
     Result
     QuestionnaireSubmission {
+      ID
       UUID
     }
     QuestionnaireData
     AnswerData
   }
 }`;
-    const responseJSONObject = await GraphQLRequestHelper.request({query});
 
-    const currentMemberJSONObject = _.get(responseJSONObject, "data.readCurrentMember.0", {});
-    const submissionJSONObject = _.get(responseJSONObject, "data.readTaskSubmission.0", {});
-    if (!currentMemberJSONObject || !submissionJSONObject) {
+    const responseJSONObject = await GraphQLRequestHelper.request({query});
+    const submissionJSONObject = get(responseJSONObject, "data.readTaskSubmission.0", null);
+    if (!submissionJSONObject) {
       throw DEFAULT_NETWORK_ERROR;
     }
 
-    const data: TaskSubmissionState = {
-      siteTitle: _.toString(_.get(responseJSONObject, "data.readSiteConfig.0.Title", "")),
-      currentUser: UserParser.parseUserFromJSON(currentMemberJSONObject),
-      taskSubmission: {
-        id: _.toString(_.get(submissionJSONObject, "ID", "")),
-        uuid: _.toString(_.get(submissionJSONObject, "UUID", "")),
-        taskName: _.toString(_.get(submissionJSONObject, "TaskName", "")),
-        status: _.toString(_.get(submissionJSONObject, "Status", "")),
-        result: _.toString(_.get(submissionJSONObject, "Result", "")),
-        questionnaireSubmissionUUID: _.toString(_.get(submissionJSONObject, "QuestionnaireSubmission.UUID", "")),
-        questions: QuestionParser.parseQuestionsFromJSON({
-          schemaJSON: _.toString(_.get(submissionJSONObject, "QuestionnaireData", "")),
-          answersJSON: _.toString(_.get(submissionJSONObject, "AnswerData", "")),
-        }),
-      },
+    const data: TaskSubmission = {
+      id: toString(get(submissionJSONObject, "ID", "")),
+      uuid: toString(get(submissionJSONObject, "UUID", "")),
+      taskName: toString(get(submissionJSONObject, "TaskName", "")),
+      status: toString(get(submissionJSONObject, "Status", "")),
+      result: toString(get(submissionJSONObject, "Result", "")),
+      questionnaireSubmissionUUID: toString(get(submissionJSONObject, "QuestionnaireSubmission.UUID", "")),
+      questionnaireSubmissionID: toString(get(submissionJSONObject, "QuestionnaireSubmission.ID", "")),
+      questions: QuestionParser.parseQuestionsFromJSON({
+        schemaJSON: toString(get(submissionJSONObject, "QuestionnaireData", "")),
+        answersJSON: toString(get(submissionJSONObject, "AnswerData", "")),
+      }),
     };
 
     return data;
   }
 
-  static async batchUpdateTaskSubmissionData(argument: BatchUpdateTaskSubmissionDataArgument): Promise<void> {
-    const {uuid, questionIDList, answerDataList, csrfToken} = {...argument};
+  static async batchUpdateTaskSubmissionData(args: BatchUpdateTaskSubmissionDataArgument): Promise<void> {
+    const {uuid, questionIDList, answerDataList, csrfToken, secureToken} = {...args};
 
     if (questionIDList.length !== answerDataList.length) {
       throw DEFAULT_NETWORK_ERROR;
@@ -153,8 +144,13 @@ query {
       const questionID = questionIDList[index];
       const answerData = answerDataList[index];
       const answerDataStr = window.btoa(JSON.stringify(answerData));
-      const singleQuery = `
-updateQuestion${questionID}: updateTaskSubmission(UUID: "${uuid}", QuestionID: "${questionID}", AnswerData: "${answerDataStr}") {
+      let singleQuery = `
+updateQuestion${questionID}: updateTaskSubmission(
+  UUID: "${uuid}", 
+  QuestionID: "${questionID}", 
+  AnswerData: "${answerDataStr}", 
+  SecureToken: "${secureToken || ""}"
+) {
   UUID
   Status
 }`;
@@ -168,44 +164,47 @@ mutation {
 `;
 
     const json = await GraphQLRequestHelper.request({query, csrfToken});
-    const updatedData = _.get(json, "data", null);
+    const updatedData = get(json, "data", null);
     if (!updatedData) {
       throw DEFAULT_NETWORK_ERROR;
     }
   }
 
-  static async completeTaskSubmission(argument: {
+  static async completeTaskSubmission(args: {
     uuid: string,
     result: string,
-    csrfToken: string
+    csrfToken: string,
+    secureToken: string
   }): Promise<{ uuid: string }> {
-    const {uuid, result, csrfToken} = {...argument};
+    const {uuid, result, csrfToken, secureToken} = {...args};
     let query = `
 mutation {
- completeTaskSubmission(UUID: "${uuid}", Result: "${result}") {
+ completeTaskSubmission(UUID: "${uuid}", Result: "${result}", SecureToken: "${secureToken || ""}") {
    UUID
    Status
  }
 }`;
 
     const json = await GraphQLRequestHelper.request({query, csrfToken});
-    if (!_.get(json, "data.completeTaskSubmission.UUID", null)) {
+    if (!get(json, "data.completeTaskSubmission.UUID", null)) {
       throw DEFAULT_NETWORK_ERROR;
     }
     return {uuid};
   }
 
-  static async editTaskSubmission(argument: { uuid: string, csrfToken: string }): Promise<{ uuid: string }> {
-    const {uuid, csrfToken} = {...argument};
-    const query = `
+  static async editTaskSubmission(args: { uuid: string, csrfToken: string, secureToken?: string }): Promise<{ uuid: string }> {
+    const {uuid, csrfToken, secureToken} = {...args};
+
+    const  query = `
 mutation {
- editTaskSubmission(UUID: "${uuid}") {
+ editTaskSubmission(UUID: "${uuid}", SecureToken: "${secureToken || ""}") {
    UUID
    Status
  }
 }`;
+
     const json = await GraphQLRequestHelper.request({query, csrfToken});
-    if (!_.get(json, "data.editTaskSubmission.UUID", null)) {
+    if (!get(json, "data.editTaskSubmission.UUID", null)) {
       throw DEFAULT_NETWORK_ERROR;
     }
     return {uuid};

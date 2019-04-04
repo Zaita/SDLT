@@ -9,40 +9,49 @@ import Footer from "../Footer/Footer";
 import type {Question} from "../../types/Questionnaire";
 import {
   editCompletedTaskSubmission,
-  loadTaskSubmissionState,
-  moveToPreviousQuestion,
-  saveAnsweredQuestion,
+  loadTaskSubmission,
+  moveToPreviousQuestionInTaskSubmission,
+  saveAnsweredQuestionInTaskSubmission,
 } from "../../actions/task";
-import type {TaskSubmissionState} from "../../store/TaskSubmissionState";
 import TaskSubmission from "./TaskSubmission";
+import type {User} from "../../types/User";
+import type {TaskSubmission as TaskSubmissionType} from "../../types/Task";
+import {loadCurrentUser} from "../../actions/user";
+import {loadSiteTitle} from "../../actions/siteConfig";
 
 const mapStateToProps = (state: RootState) => {
   return {
-    state: state.taskSubmissionState,
+    taskSubmission: state.taskSubmissionState.taskSubmission,
+    siteTitle: state.siteConfigState.siteTitle,
+    currentUser: state.currentUserState.user,
   };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
   return {
-    dispatchLoadTaskSubmissionAction(uuid: string) {
-      dispatch(loadTaskSubmissionState(uuid));
+    dispatchLoadDataAction(uuid: string) {
+      dispatch(loadCurrentUser());
+      dispatch(loadSiteTitle());
+      dispatch(loadTaskSubmission({uuid}));
     },
     dispatchSaveAnsweredQuestionAction(answeredQuestion: Question) {
-      dispatch(saveAnsweredQuestion(answeredQuestion));
+      dispatch(saveAnsweredQuestionInTaskSubmission({answeredQuestion}));
     },
     dispatchMoveToPreviousQuestionAction(targetQuestion: Question) {
-      dispatch(moveToPreviousQuestion(targetQuestion))
+      dispatch(moveToPreviousQuestionInTaskSubmission({targetQuestion}));
     },
     dispatchEditAnswersAction() {
-      dispatch(editCompletedTaskSubmission())
-    }
+      dispatch(editCompletedTaskSubmission());
+    },
   };
 };
 
 type Props = {
   uuid: string,
-  state?: TaskSubmissionState,
-  dispatchLoadTaskSubmissionAction?: (uuid: string) => void,
+  taskSubmission?: TaskSubmissionType | null,
+  siteTitle?: string,
+  currentUser?: User | null,
+  dispatchLoadDataAction?: (uuid: string) => void,
   dispatchSaveAnsweredQuestionAction?: (answeredQuestion: Question) => void,
   dispatchMoveToPreviousQuestionAction?: (targetQuestion: Question) => void,
   dispatchEditAnswersAction?: () => void
@@ -51,17 +60,19 @@ type Props = {
 class TaskSubmissionContainer extends Component<Props> {
 
   componentDidMount() {
-    const {uuid, dispatchLoadTaskSubmissionAction} = {...this.props};
-    dispatchLoadTaskSubmissionAction(uuid);
+    const {uuid, dispatchLoadDataAction} = {...this.props};
+    dispatchLoadDataAction(uuid);
   }
 
   render() {
     const {
+      siteTitle,
+      currentUser,
+      taskSubmission,
       dispatchSaveAnsweredQuestionAction,
       dispatchMoveToPreviousQuestionAction,
-      dispatchEditAnswersAction
+      dispatchEditAnswersAction,
     } = {...this.props};
-    const {siteTitle, currentUser, taskSubmission} = {...this.props.state};
 
     if (!currentUser || !taskSubmission) {
       return null;
