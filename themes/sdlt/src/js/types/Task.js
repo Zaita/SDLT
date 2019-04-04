@@ -1,6 +1,7 @@
 // @flow
 
 import type {Question} from "./Questionnaire";
+import type {User} from "./User";
 
 export type TaskSubmissionDisplay = {
   uuid: string,
@@ -17,4 +18,5 @@ export type TaskSubmission = {
   questions: Array<Question>,
   questionnaireSubmissionUUID: string,
   questionnaireSubmissionID: string,
+  submitter: User
 };

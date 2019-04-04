@@ -16,6 +16,8 @@ query {
     FirstName
     Surname
     UserRole
+    IsSA
+    IsCISO
   }
 }`;
     const responseJSONObject = await GraphQLRequestHelper.request({query});

@@ -391,7 +391,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                  * @param array       $args    args
                  * @param mixed       $context context
                  * @param ResolveInfo $info    info
-                 * @throws Exception
+                 * @throws GraphQLAuthFailure
                  * @return mixed
                  */
                 public function resolve($object, array $args, $context, ResolveInfo $info)
@@ -448,7 +448,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                  * @param array       $args    args
                  * @param mixed       $context context
                  * @param ResolveInfo $info    info
-                 * @throws Exception
+                 * @throws GraphQLAuthFailure
                  * @return mixed
                  */
                 public function resolve($object, array $args, $context, ResolveInfo $info)
@@ -579,9 +579,9 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * @param TaskSubmission $taskSubmission
-     * @param Member|null $member
-     * @param string $secureToken
+     * @param TaskSubmission $taskSubmission The task submission
+     * @param Member|null    $member         The member
+     * @param string         $secureToken    The secure token
      * @return bool
      */
     public static function can_view_task_submission($taskSubmission, $member = null, $secureToken = '')
@@ -623,9 +623,9 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * @param TaskSubmission $taskSubmission
-     * @param Member|null $member
-     * @param string $secureToken
+     * @param TaskSubmission $taskSubmission The task submission
+     * @param Member|null    $member         The member
+     * @param string         $secureToken    The secure token
      * @return bool
      */
     public static function can_edit_task_submission($taskSubmission, $member = null, $secureToken = '')
@@ -638,6 +638,12 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         if ($member) {
             // Submitter can edit it
             if ((int)$taskSubmission->SubmitterID === (int)$member->ID) {
+                return true;
+            }
+
+            // SA can edit it
+            $isSA = $member->Groups()->filter('Code', QuestionnaireSubmission::$security_architect_group_code)->exists();
+            if ($isSA) {
                 return true;
             }
         }

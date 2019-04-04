@@ -78,6 +78,9 @@ class TaskSubmissionContainer extends Component<Props> {
       return null;
     }
 
+    // As logged-in user, only submitter and SA can edit answers
+    const canUpdateAnswers = currentUser.isSA || parseInt(currentUser.id) === parseInt(taskSubmission.submitter.id);
+
     return (
       <div className="TaskSubmissionContainer">
         <Header title={taskSubmission.taskName} subtitle={siteTitle}/>
@@ -86,6 +89,8 @@ class TaskSubmissionContainer extends Component<Props> {
           saveAnsweredQuestion={dispatchSaveAnsweredQuestionAction}
           moveToPreviousQuestion={dispatchMoveToPreviousQuestionAction}
           editAnswers={dispatchEditAnswersAction}
+          showEditButton={canUpdateAnswers}
+          canUpdateAnswers={canUpdateAnswers}
         />
         <Footer/>
       </div>

@@ -17,6 +17,7 @@ type Props = {
   editAnswers: () => void,
   showBackButton: boolean,
   showEditButton: boolean,
+  canUpdateAnswers: boolean
 };
 
 class TaskSubmission extends Component<Props> {
@@ -27,6 +28,7 @@ class TaskSubmission extends Component<Props> {
     editAnswers: () => {},
     showBackButton: true,
     showEditButton: true,
+    canUpdateAnswers: true
   };
 
   render() {
@@ -36,13 +38,13 @@ class TaskSubmission extends Component<Props> {
       moveToPreviousQuestion,
       editAnswers,
       showBackButton,
-      showEditButton
+      showEditButton,
+      canUpdateAnswers
     } = {...this.props};
 
     let body = null;
 
-    // Display questionnaire form for in-progress task submission
-    if (taskSubmission.status === "in_progress") {
+    if (canUpdateAnswers && taskSubmission.status === "in_progress") {
       body = (
         <Questionnaire
           questions={taskSubmission.questions}
@@ -52,14 +54,13 @@ class TaskSubmission extends Component<Props> {
       );
     }
 
-    // Display answers preview for completed task submission
-    if (taskSubmission.status === "complete") {
+    if (!canUpdateAnswers || taskSubmission.status === "complete") {
       body = (
         <AnswersPreview questions={taskSubmission.questions}/>
       );
     }
 
-    const backButton = taskSubmission.questionnaireSubmissionUUID ? (
+    const backButton = showBackButton && taskSubmission.questionnaireSubmissionUUID ? (
       <DarkButton
         title={"BACK TO QUESTIONNAIRE SUMMARY"}
         onClick={() => {
@@ -68,7 +69,7 @@ class TaskSubmission extends Component<Props> {
       />
     ) : null;
 
-    const editButton = taskSubmission.status === "complete" ? (
+    const editButton = showEditButton && taskSubmission.status === "complete" ? (
       <LightButton title={"EDIT ANSWERS"} onClick={editAnswers} iconImage={editIcon}/>
     ) : null;
 
@@ -85,8 +86,8 @@ class TaskSubmission extends Component<Props> {
         {body}
 
         <div className="buttons">
-          {showEditButton && editButton}
-          {showBackButton && backButton}
+          {editButton}
+          {backButton}
         </div>
       </div>
     );
