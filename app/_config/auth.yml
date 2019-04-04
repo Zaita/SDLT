@@ -29,9 +29,9 @@ Name: oauth_properties
 Bigfork\SilverStripeOAuth\Client\Mapper\GenericMemberMapper:
   mapping:
     'ActiveDirectory':
-      'Email': 'User.email'
-      'FirstName': 'User.given_name'
-      'Surname': 'User.family_name'
+      'Email': 'upn'
+      'FirstName': 'given_name'
+      'Surname': 'family_name'
 ---
 Name: app-auth-reset
 After:
