@@ -40,6 +40,8 @@ use SilverStripe\Core\Convert;
  * @property int TaskID
  * @property int QuestionnaireSubmissionID
  * @property boolean LockAnswersWhenComplete
+ * @property string SubmitterIPAddress
+ * @property string CompletedAt
  *
  * @method Member Submitter()
  * @method Task Task()
@@ -66,7 +68,9 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         'UUID' => 'Varchar(255)',
         'Result' => 'Varchar(255)',
         'SecureToken' => 'Varchar(64)',
-        'LockAnswersWhenComplete' => 'Boolean'
+        'LockAnswersWhenComplete' => 'Boolean',
+        'SubmitterIPAddress' => 'Varchar(255)',
+        'CompletedAt' => 'Datetime'
     ];
 
     /**
@@ -417,6 +421,11 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
                     $submission->Status = TaskSubmission::STATUS_COMPLETE;
 
+                    if ($_SERVER['REMOTE_ADDR']) {
+                        $submission->SubmitterIPAddress = Convert::raw2sql($_SERVER['REMOTE_ADDR']);
+                    }
+                    $submission->CompletedAt = date('Y-m-d H:i:s');
+
                     // TODO: validate based on answer
                     if (isset($args['Result'])) {
                         $submission->Result = trim($args['Result']);
@@ -473,7 +482,9 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     }
 
                     $submission->Status = TaskSubmission::STATUS_IN_PROGRESS;
-                    $submission->Result = "";
+                    $submission->SubmitterIPAddress = null;
+                    $submission->CompletedAt = null;
+                    $submission->Result = null;
                     $submission->write();
 
                     return $submission;
