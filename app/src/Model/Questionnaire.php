@@ -13,6 +13,7 @@
 
 namespace NZTA\SDLT\Model;
 
+use NZTA\SDLT\Constant\UserGroupConstant;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
@@ -149,34 +150,34 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
      * Generate default security groups for the SDLT application
      *
      * @return void
+     * @throws \SilverStripe\ORM\ValidationException
      */
     public function createDefaultSDLTMemberGroups()
     {
-        $cisoGroup = Group::get()->find('Code', 'sdlt-ciso');
+        $cisoGroup = Group::get()->find('Code', UserGroupConstant::GROUP_CODE_CISO);
 
         if (!($cisoGroup && $cisoGroup->ID)) {
             $cisoGroup = Group::create();
             $cisoGroup->Title = 'NZTA-SDLT-CISO';
-            $cisoGroup->Code = 'sdlt-ciso';
+            $cisoGroup->Code = UserGroupConstant::GROUP_CODE_CISO;
             $cisoGroup->write();
         }
 
-        $adminGroup = Group::get()->find('Code', 'administrators');
-        $saGroup = Group::get()->find('Code', 'sdlt-security-architect');
+        $saGroup = Group::get()->find('Code', UserGroupConstant::GROUP_CODE_SA);
 
         if (!($saGroup && $saGroup->ID)) {
             $saGroup = Group::create();
             $saGroup->Title = 'NZTA-SDLT-SecurityArchitect';
-            $saGroup->Code = 'sdlt-security-architect';
+            $saGroup->Code = UserGroupConstant::GROUP_CODE_SA;
             $saGroup->write();
         }
 
-        $usersGroup = Group::get()->find('Code', 'sdlt-users');
+        $usersGroup = Group::get()->find('Code', UserGroupConstant::GROUP_CODE_USER);
 
         if (!($usersGroup && $usersGroup->ID)) {
             $usersGroup = Group::create();
             $usersGroup->Title = 'NZTA-SDLT-Users';
-            $usersGroup->Code = 'sdlt-users';
+            $usersGroup->Code = UserGroupConstant::GROUP_CODE_USER;
             $usersGroup->write();
         }
     }

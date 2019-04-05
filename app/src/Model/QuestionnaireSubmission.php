@@ -15,6 +15,7 @@ namespace NZTA\SDLT\Model;
 
 use Exception;
 use GraphQL\Type\Definition\ResolveInfo;
+use NZTA\SDLT\Constant\UserGroupConstant;
 use NZTA\SDLT\GraphQL\GraphQLAuthFailure;
 use NZTA\SDLT\Job\SendApprovedNotificationEmailJob;
 use SilverStripe\GraphQL\OperationResolver;
@@ -121,16 +122,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'IsStartLinkEmailSent',
         'Created' => 'Created date'
     ];
-
-    /**
-     * @var string
-     */
-    public static $ciso_group_code = 'sdlt-ciso';
-
-    /**
-     * @var string
-     */
-    public static $security_architect_group_code = 'sdlt-security-architect';
 
     /**
      * Default sort ordering
@@ -738,7 +729,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $questionnaireSubmission->QuestionnaireStatus = 'waiting_for_security_architect_approval';
 
                     if (!$questionnaireSubmission->IsEmailSentToSecurityArchitect) {
-                        $members = $questionnaireSubmission->getApprovalMembersListByGroup(QuestionnaireSubmission::$security_architect_group_code);
+                        $members = $questionnaireSubmission->getApprovalMembersListByGroup(UserGroupConstant::GROUP_CODE_SA);
 
                         if (!$members) {
                             throw new Exception('Please add member in Security architect group.');
@@ -1135,7 +1126,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             throw new Exception($accessDetail['message']);
         }
 
-        if ($accessDetail['group'] == QuestionnaireSubmission::$security_architect_group_code) {
+        if ($accessDetail['group'] == UserGroupConstant::GROUP_CODE_SA) {
             // update Security-Architect member details
             $this->updateSecurityArchitectDetail($member, $status);
 
@@ -1143,7 +1134,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 $this->QuestionnaireStatus = 'waiting_for_approval';
 
                 // get CISO group member list
-                $members = $this->getApprovalMembersListByGroup(QuestionnaireSubmission::$ciso_group_code);
+                $members = $this->getApprovalMembersListByGroup(UserGroupConstant::GROUP_CODE_CISO);
 
                 // send email to CISO group and Business owner
                 $qs = QueuedJobService::create();
@@ -1167,7 +1158,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         }
 
         // update CISO member details
-        if ($accessDetail['group'] == QuestionnaireSubmission::$ciso_group_code) {
+        if ($accessDetail['group'] == UserGroupConstant::GROUP_CODE_CISO) {
             $this->updateCisoDetail($member, $status);
             $this->write();
         }
@@ -1244,7 +1235,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     */
     public function getSecurityArchitectAccessDetail($member)
     {
-        $group = QuestionnaireSubmission::$security_architect_group_code;
+        $group = UserGroupConstant::GROUP_CODE_SA;
 
         // check member groups
         $ismemberInGroup = $member->Groups()->filter('Code', $group)->first();
@@ -1304,7 +1295,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     */
     public function getCISOAccessDetail($member)
     {
-        $group = QuestionnaireSubmission::$ciso_group_code;
+        $group = UserGroupConstant::GROUP_CODE_CISO;
 
         // check member groups
         $ismemberInGroup = $member->Groups()->filter('Code', $group)->first();

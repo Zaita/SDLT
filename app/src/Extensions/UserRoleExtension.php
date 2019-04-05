@@ -13,6 +13,7 @@
 
 namespace NZTA\SDLT\Extension;
 
+use NZTA\SDLT\Constant\UserGroupConstant;
 use NZTA\SDLT\Model\QuestionnaireSubmission;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
@@ -57,7 +58,7 @@ class UserRoleExtension extends DataExtension
         // SA and CISO can view it
         return $this->owner
             ->Groups()
-            ->filter('Code', QuestionnaireSubmission::$security_architect_group_code)
+            ->filter('Code', UserGroupConstant::GROUP_CODE_SA)
             ->exists();
     }
 
@@ -70,7 +71,7 @@ class UserRoleExtension extends DataExtension
     {
         return $this->owner
             ->Groups()
-            ->filter('Code', QuestionnaireSubmission::$ciso_group_code)
+            ->filter('Code', UserGroupConstant::GROUP_CODE_CISO)
             ->exists();
     }
 }
