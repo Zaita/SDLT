@@ -101,6 +101,7 @@ query {
     TaskName
     Status
     Result
+    LockAnswersWhenComplete
     QuestionnaireSubmission {
       ID
       UUID
@@ -132,6 +133,7 @@ query {
       status: toString(get(submissionJSONObject, "Status", "")),
       result: toString(get(submissionJSONObject, "Result", "")),
       submitter: UserParser.parseUserFromJSON(get(submissionJSONObject, "Submitter")),
+      lockWhenComplete: Boolean(get(submissionJSONObject, "LockAnswersWhenComplete", false)),
       questionnaireSubmissionUUID: toString(get(submissionJSONObject, "QuestionnaireSubmission.UUID", "")),
       questionnaireSubmissionID: toString(get(submissionJSONObject, "QuestionnaireSubmission.ID", "")),
       questions: QuestionParser.parseQuestionsFromJSON({

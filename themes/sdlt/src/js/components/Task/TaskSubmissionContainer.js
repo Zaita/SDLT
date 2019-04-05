@@ -79,7 +79,11 @@ class TaskSubmissionContainer extends Component<Props> {
     }
 
     // As logged-in user, only submitter and SA can edit answers
-    const canUpdateAnswers = currentUser.isSA || parseInt(currentUser.id) === parseInt(taskSubmission.submitter.id);
+    const isCurrentUserSubmitter = parseInt(currentUser.id) === parseInt(taskSubmission.submitter.id);
+    const canUpdateAnswers = (taskSubmission.status === "in_progress") && (currentUser.isSA || isCurrentUserSubmitter);
+    const showEditButton =
+      (taskSubmission.status === "complete") &&
+      (currentUser.isSA || (isCurrentUserSubmitter && !taskSubmission.lockWhenComplete));
 
     return (
       <div className="TaskSubmissionContainer">
@@ -89,8 +93,9 @@ class TaskSubmissionContainer extends Component<Props> {
           saveAnsweredQuestion={dispatchSaveAnsweredQuestionAction}
           moveToPreviousQuestion={dispatchMoveToPreviousQuestionAction}
           editAnswers={dispatchEditAnswersAction}
-          showEditButton={canUpdateAnswers}
+          showEditButton={showEditButton}
           canUpdateAnswers={canUpdateAnswers}
+          showBackButton={!!taskSubmission.questionnaireSubmissionUUID}
         />
         <Footer/>
       </div>

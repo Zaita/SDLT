@@ -39,6 +39,7 @@ use SilverStripe\Core\Convert;
  * @property int SubmitterID
  * @property int TaskID
  * @property int QuestionnaireSubmissionID
+ * @property boolean LockAnswersWhenComplete
  *
  * @method Member Submitter()
  * @method Task Task()
@@ -64,7 +65,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         'Status' => 'Enum(array("in_progress", "complete", "invalid"))',
         'UUID' => 'Varchar(255)',
         'Result' => 'Varchar(255)',
-        'SecureToken' => 'Varchar(64)'
+        'SecureToken' => 'Varchar(64)',
+        'LockAnswersWhenComplete' => 'Boolean'
     ];
 
     /**
@@ -149,7 +151,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'Result',
                 'Submitter',
                 'TaskName',
-                'QuestionnaireSubmission'
+                'QuestionnaireSubmission',
+                'LockAnswersWhenComplete'
             ]);
     }
 
@@ -259,6 +262,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
         // Initial status of the submission
         $taskSubmission->Status = TaskSubmission::STATUS_IN_PROGRESS;
+        $taskSubmission->LockAnswersWhenComplete = $task->LockAnswersWhenComplete;
 
         $taskSubmission->UUID = (string)Uuid::uuid4();
         $taskSubmission->SecureToken = hash('sha3-256', random_bytes(64));
@@ -634,26 +638,45 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             return false;
         }
 
-        // If logged in
+        // A logged-in user will be judged by its role
         if ($member) {
-            // Submitter can edit it
-            if ((int)$taskSubmission->SubmitterID === (int)$member->ID) {
-                return true;
+            $isSubmitter = (int)$taskSubmission->SubmitterID === (int)$member->ID;
+            $isSA = $member
+                ->Groups()
+                ->filter('Code', QuestionnaireSubmission::$security_architect_group_code)
+                ->exists();
+
+            // Submitter can edit when answers are not locked
+            if ($isSubmitter) {
+                if ($taskSubmission->Status === TaskSubmission::STATUS_IN_PROGRESS) {
+                    return true;
+                }
+                if ($taskSubmission->Status === TaskSubmission::STATUS_COMPLETE) {
+                    if (!$taskSubmission->LockAnswersWhenComplete) {
+                        return true;
+                    }
+                }
             }
 
             // SA can edit it
-            $isSA = $member->Groups()->filter('Code', QuestionnaireSubmission::$security_architect_group_code)->exists();
             if ($isSA) {
                 return true;
             }
         }
 
-        // Correct SecureToken can edit it
+        // Any user with correct SecureToken can edit when answers are not locked
         if ($taskSubmission->SecureToken && @hash_equals($taskSubmission->SecureToken, $secureToken)) {
-            return true;
+            if ($taskSubmission->Status === TaskSubmission::STATUS_IN_PROGRESS) {
+                return true;
+            }
+            if ($taskSubmission->Status === TaskSubmission::STATUS_COMPLETE) {
+                if (!$taskSubmission->LockAnswersWhenComplete) {
+                    return true;
+                }
+            }
         }
 
-        // Others can not edit it
+        // Disallow editing in other cases
         return false;
     }
 }
