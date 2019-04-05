@@ -91,6 +91,8 @@ class TaskSubmissionForVendorContainer extends Component<Props> {
           moveToPreviousQuestion={dispatchMoveToPreviousQuestionAction}
           editAnswers={dispatchEditAnswersAction}
           showBackButton={false}
+          showEditButton={false}
+          canUpdateAnswers={taskSubmission.status === "in_progress"}
         />
         <Footer/>
       </div>

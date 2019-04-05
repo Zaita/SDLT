@@ -28,6 +28,7 @@ query {
     TaskName
     Status
     Result
+    LockAnswersWhenComplete
     Submitter {
       ID
       Email
@@ -62,6 +63,7 @@ query {
         submitter: UserParser.parseUserFromJSON(get(submissionJSONObject, "Submitter")),
         questionnaireSubmissionUUID: _.toString(_.get(submissionJSONObject, "QuestionnaireSubmission.UUID", "")),
         questionnaireSubmissionID: _.toString(_.get(submissionJSONObject, "QuestionnaireSubmission.ID", "")),
+        lockWhenComplete: Boolean(get(submissionJSONObject, "LockAnswersWhenComplete", false)),
         questions: QuestionParser.parseQuestionsFromJSON({
           schemaJSON: _.toString(_.get(submissionJSONObject, "QuestionnaireData", "")),
           answersJSON: _.toString(_.get(submissionJSONObject, "AnswerData", "")),

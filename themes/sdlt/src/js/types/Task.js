@@ -18,5 +18,6 @@ export type TaskSubmission = {
   questions: Array<Question>,
   questionnaireSubmissionUUID: string,
   questionnaireSubmissionID: string,
-  submitter: User
+  submitter: User,
+  lockWhenComplete: boolean
 };

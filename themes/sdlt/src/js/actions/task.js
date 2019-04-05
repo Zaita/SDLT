@@ -188,12 +188,16 @@ export function editCompletedTaskSubmission(args: {secureToken?: string} = {}): 
       return;
     }
 
-    const {uuid} = await TaskDataService.editTaskSubmission({
-      uuid: taskSubmission.uuid,
-      csrfToken: await CSRFTokenService.getCSRFToken(),
-      secureToken: secureToken,
-    });
-    await dispatch(loadTaskSubmission({uuid, secureToken}));
+    try {
+      const {uuid} = await TaskDataService.editTaskSubmission({
+        uuid: taskSubmission.uuid,
+        csrfToken: await CSRFTokenService.getCSRFToken(),
+        secureToken: secureToken,
+      });
+      await dispatch(loadTaskSubmission({uuid, secureToken}));
+    } catch (error) {
+      ErrorUtil.displayError(error);
+    }
   };
 }
 
