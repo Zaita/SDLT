@@ -15,6 +15,7 @@ namespace NZTA\SDLT\Model;
 
 use Exception;
 use GraphQL\Type\Definition\ResolveInfo;
+use NZTA\SDLT\Constant\UserGroupConstant;
 use NZTA\SDLT\GraphQL\GraphQLAuthFailure;
 use Ramsey\Uuid\Uuid;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ResolverInterface;
@@ -613,8 +614,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             }
 
             // SA and CISO can view it
-            $isSA = $member->Groups()->filter('Code', QuestionnaireSubmission::$security_architect_group_code)->exists();
-            $isCISO = $member->Groups()->filter('Code', QuestionnaireSubmission::$ciso_group_code)->exists();
+            $isSA = $member->Groups()->filter('Code', UserGroupConstant::GROUP_CODE_SA)->exists();
+            $isCISO = $member->Groups()->filter('Code', UserGroupConstant::GROUP_CODE_CISO)->exists();
             if ($isSA || $isCISO) {
                 return true;
             }
@@ -654,7 +655,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             $isSubmitter = (int)$taskSubmission->SubmitterID === (int)$member->ID;
             $isSA = $member
                 ->Groups()
-                ->filter('Code', QuestionnaireSubmission::$security_architect_group_code)
+                ->filter('Code', UserGroupConstant::GROUP_CODE_SA)
                 ->exists();
 
             // Submitter can edit when answers are not locked
