@@ -31,10 +31,6 @@ class Start extends Component<Props> {
                 <span>{user.name}</span>
               </div>
               <div className="info-line">
-                <b>Your Role: </b>
-                <span>{user.role}</span>
-              </div>
-              <div className="info-line">
                 <b>Email Address: </b>
                 <span>{user.email}</span>
               </div>

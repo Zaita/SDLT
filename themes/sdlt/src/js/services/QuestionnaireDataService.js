@@ -37,7 +37,6 @@ query {
     Email
     FirstName
     Surname
-    UserRole
     IsSA
     IsCISO
   }
@@ -78,7 +77,6 @@ query {
     Email
     FirstName
     Surname
-    UserRole
     IsSA
     IsCISO
   }
