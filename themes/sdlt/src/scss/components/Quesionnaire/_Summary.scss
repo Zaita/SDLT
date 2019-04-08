@@ -59,4 +59,17 @@
             }
         }
     }
+
+    .ReactModal__Content {
+        width: 960px;
+
+        .content {
+            margin-bottom: 40px;
+        }
+
+        .BaseButton {
+            width: 80px;
+            margin-right: 16px;
+        }
+    }
 }

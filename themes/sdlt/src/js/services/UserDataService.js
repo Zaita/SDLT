@@ -15,7 +15,6 @@ query {
     Email
     FirstName
     Surname
-    UserRole
     IsSA
     IsCISO
   }
