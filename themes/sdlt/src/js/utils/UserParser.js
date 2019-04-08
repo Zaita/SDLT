@@ -12,7 +12,6 @@ export default class UserParser {
     return {
       id: toString(get(jsonObject, "ID")),
       name: `${get(jsonObject, "FirstName")} ${get(jsonObject, "Surname")}`,
-      role: get(jsonObject, "UserRole"),
       email: get(jsonObject, "Email"),
       isSA: toString(get(jsonObject, "IsSA")) === "true",
       isCISO: toString(get(jsonObject, "IsCISO")) === "true",

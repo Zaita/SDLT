@@ -112,11 +112,6 @@ export default class PDFUtil {
     });
 
     content.push({
-      text: `Role: ${submitter.role}`,
-      margin: [0, 0, 0, defaultFontSize / 2],
-    });
-
-    content.push({
       text: `Email: ${submitter.email}`,
       margin: [0, 0, 0, defaultFontSize * 2],
     });
