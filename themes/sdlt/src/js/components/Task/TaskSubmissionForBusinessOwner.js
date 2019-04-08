@@ -3,11 +3,11 @@
 import React, {Component} from "react";
 import type {TaskSubmission} from "../../types/Task";
 import TaskForBusinessOwnerDataService from "../../services/TaskForBusinessOwnerDataService";
-import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import AnswersPreview from "../Questionnaire/AnswersPreview";
 import DarkButton from "../Button/DarkButton";
 import URLUtil from "../../utils/URLUtil";
+import Header from "../Header/Header";
 
 type Props = {
   uuid: string,

@@ -9,7 +9,9 @@ const fixture: QuestionnaireSubmissionState = {
     id: "1",
     name: "Thor Chen",
     role: "Developer",
-    email: "thor.chen@catalyst.net.nz"
+    email: "thor.chen@catalyst.net.nz",
+    isSA: false,
+    isCISO: false
   },
   isCurrentUserApprover: false,
   submission: {
@@ -21,7 +23,9 @@ const fixture: QuestionnaireSubmissionState = {
       id: "1",
       name: "Thor Chen",
       role: "Developer",
-      email: "thor.chen@catalyst.net.nz"
+      email: "thor.chen@catalyst.net.nz",
+      isSA: false,
+      isCISO: false,
     },
     approvalStatus: {
       chiefInformationSecurityOfficer: "not_applicable",

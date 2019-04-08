@@ -5,6 +5,8 @@ import _ from "lodash";
 import {DEFAULT_NETWORK_ERROR} from "../constants/errors";
 import QuestionParser from "../utils/QuestionParser";
 import type {TaskSubmission} from "../types/Task";
+import UserParser from "../utils/UserParser";
+import get from "lodash/get";
 
 type FetchTaskSubmissionDataArgument = { uuid: string, token: string };
 type FetchTaskSubmissionDataReturn = { siteTitle: string, taskSubmission: TaskSubmission };
@@ -26,8 +28,19 @@ query {
     TaskName
     Status
     Result
+    LockAnswersWhenComplete
+    Submitter {
+      ID
+      Email
+      FirstName
+      Surname
+      UserRole
+      IsSA
+      IsCISO
+    }
     QuestionnaireSubmission {
       UUID
+      ID
     }
     QuestionnaireData
     AnswerData
@@ -47,7 +60,10 @@ query {
         taskName: _.toString(_.get(submissionJSONObject, "TaskName", "")),
         status: _.toString(_.get(submissionJSONObject, "Status", "")),
         result: _.toString(_.get(submissionJSONObject, "Result", "")),
+        submitter: UserParser.parseUserFromJSON(get(submissionJSONObject, "Submitter")),
         questionnaireSubmissionUUID: _.toString(_.get(submissionJSONObject, "QuestionnaireSubmission.UUID", "")),
+        questionnaireSubmissionID: _.toString(_.get(submissionJSONObject, "QuestionnaireSubmission.ID", "")),
+        lockWhenComplete: Boolean(get(submissionJSONObject, "LockAnswersWhenComplete", false)),
         questions: QuestionParser.parseQuestionsFromJSON({
           schemaJSON: _.toString(_.get(submissionJSONObject, "QuestionnaireData", "")),
           answersJSON: _.toString(_.get(submissionJSONObject, "AnswerData", "")),

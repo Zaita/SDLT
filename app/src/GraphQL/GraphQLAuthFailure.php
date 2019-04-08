@@ -24,6 +24,6 @@ class GraphQLAuthFailure extends Exception
 {
     public function __construct()
     {
-        parent::__construct('Please log in first', 403);
+        parent::__construct('You are not authorized', 403);
     }
 }

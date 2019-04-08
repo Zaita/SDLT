@@ -28,6 +28,7 @@ use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
  * @property boolean DisplayOnHomePage
  * @property string KeyInformation
  * @property string TaskType
+ * @property boolean LockAnswersWhenComplete
  *
  * @method HasManyList Questions()
  */
@@ -45,7 +46,8 @@ class Task extends DataObject
         'Name' => 'Varchar(255)',
         'DisplayOnHomePage'=> 'Boolean',
         'KeyInformation' => 'HTMLText',
-        'TaskType' => 'Enum(array("questionnaire", "selection"))'
+        'TaskType' => 'Enum(array("questionnaire", "selection"))',
+        'LockAnswersWhenComplete' => 'Boolean'
     ];
 
     /**
@@ -83,7 +85,7 @@ class Task extends DataObject
     /**
      * Allow logged-in user to access the model
      *
-     * @param Member|null $member
+     * @param Member|null $member The member
      * @return bool
      */
     public function canView($member = null)

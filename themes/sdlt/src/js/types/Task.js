@@ -1,6 +1,7 @@
 // @flow
 
 import type {Question} from "./Questionnaire";
+import type {User} from "./User";
 
 export type TaskSubmissionDisplay = {
   uuid: string,
@@ -15,5 +16,8 @@ export type TaskSubmission = {
   status: string,
   result: string,
   questions: Array<Question>,
-  questionnaireSubmissionUUID: string
+  questionnaireSubmissionUUID: string,
+  questionnaireSubmissionID: string,
+  submitter: User,
+  lockWhenComplete: boolean
 };
