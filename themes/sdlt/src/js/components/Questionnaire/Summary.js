@@ -77,7 +77,6 @@ class Summary extends Component<Props> {
       <div className="request-info">
         <h3>Request Information</h3>
         <div><b>Submitted by:</b> {submitter.name}</div>
-        <div><b>Role:</b> {submitter.role}</div>
         <div><b>Email:</b> {submitter.email}</div>
         <div><b>Status:</b> {prettifyStatus(submission.status)}</div>
       </div>
