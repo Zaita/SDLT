@@ -29,6 +29,10 @@ use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use NZTA\SDLT\Validation\QuestionnaireValidation;
 use SilverStripe\Core\Convert;
+use SilverStripe\Control\Director;
+use Symbiote\QueuedJobs\Services\QueuedJobService;
+use NZTA\SDLT\Job\SendTaskSubmissionEmailJob;
+use SilverStripe\Forms\TextField;
 
 /**
  * Class TaskSubmission
@@ -73,7 +77,9 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         'SecureToken' => 'Varchar(64)',
         'LockAnswersWhenComplete' => 'Boolean',
         'SubmitterIPAddress' => 'Varchar(255)',
-        'CompletedAt' => 'Datetime'
+        'CompletedAt' => 'Datetime',
+        'SendEmailAfterSubmission' => 'Boolean',
+        'EmailRelativeLinkToTask' => 'Varchar(255)'
     ];
 
     /**
@@ -140,6 +146,23 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             ->setDatetimeFormat('yyyy-MM-dd HH:mm:ss')
             ->setReadonly(true)
             ->setDescription('');
+
+        $secureLink = $this->SecureLink();
+        $anonLink = $this->AnonymousAccessLink();
+        $fields->addFieldsToTab('Root.Links', [
+            TextField::create(microtime(), 'Secure link')
+                ->setValue($secureLink)
+                ->setReadonly(true)
+                ->setDescription('This is the link emailed to authenticated'
+                    .' users of the application'),
+            TextField::create(microtime(), 'Anonymous access link')
+                ->setValue($anonLink)
+                ->setReadonly(true)
+                ->setDescription('This is the link emailed to anonymous users'
+                    .' of the application. Anyone possessing the link can view'
+                    .' the submission')
+        ]);
+
         return $fields;
     }
 
@@ -231,7 +254,6 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                         $questionnaireSubmissionID,
                         $submitterID
                     );
-                    return $taskSubmission;
                 }
             })
             ->end();
@@ -302,10 +324,16 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         $taskSubmission->Status = TaskSubmission::STATUS_IN_PROGRESS;
         $taskSubmission->LockAnswersWhenComplete = $task->LockAnswersWhenComplete;
 
-        $taskSubmission->UUID = (string)Uuid::uuid4();
-        $taskSubmission->SecureToken = hash('sha3-256', random_bytes(64));
-
         $taskSubmission->write();
+
+        // after submit the questionnaire, please send a summary page link
+        // to the submitter
+        $queuedJobService = QueuedJobService::create();
+
+        $queuedJobService->queueJob(
+            new SendTaskSubmissionEmailJob($taskSubmission, [Security::getCurrentUser()]),
+            date('Y-m-d H:i:s', time() + 30)
+        );
 
         return $taskSubmission;
     }
@@ -723,5 +751,73 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
         // Disallow editing in other cases
         return false;
+    }
+
+    /**
+     * onbeforewrite
+     *
+     * @return void
+     */
+    public function onBeforeWrite()
+    {
+        parent::onBeforeWrite();
+
+        if (!$this->UUID) {
+            $this->UUID = (string) Uuid::uuid4();
+        }
+
+        if (!$this->SecureToken) {
+            $this->SecureToken = hash('sha3-256', random_bytes(64));
+        }
+    }
+
+    /**
+     * Display a link to the task submission.
+     * This also generates an email link, which always sures the submission is
+     * routed properly in case the user is not logged in when receiving the
+     * email
+     *
+     * Not used directly, it's only for generating SecureLink or AnonymousAccessLink
+     *
+     * @return string
+     */
+    private function Link()
+    {
+        return '#/task/submission/' . $this->UUID;
+    }
+
+    /**
+     * Check login status first before viewing the task submission
+     *
+     * @return void
+     */
+    public function SecureLink()
+    {
+        $route = $this->Link();
+        $secureLink = 'Security/login/?BackURL='.rawurlencode($route);
+
+        return Director::absoluteBaseURL() . $secureLink;
+    }
+
+    /**
+     * Anonymous access link
+     * Allows vendors to login to view the task with a secure token
+     *
+     * @param string $prefix controller route to follow that grants user access
+     *                       for GCIO105, this is 'vendorApp'
+     * @return void
+     */
+    public function AnonymousAccessLink($prefix = 'vendorApp')
+    {
+        if (strlen($prefix) > 0) {
+            $anonLink = sprintf(
+                "%s/%s?token=%s",
+                $prefix,
+                $this->Link(),
+                $this->SecureToken
+            );
+
+            return Director::absoluteBaseURL() . $anonLink;
+        }
     }
 }
