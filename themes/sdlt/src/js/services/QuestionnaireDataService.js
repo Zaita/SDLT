@@ -38,6 +38,8 @@ query {
     FirstName
     Surname
     UserRole
+    IsSA
+    IsCISO
   }
   readQuestionnaire(ID: ${questionnaireID}) {
     ID
@@ -64,12 +66,7 @@ query {
       subtitle: _.get(siteData, "Title", ""),
       questionnaireID: _.get(questionnaireData, "ID", ""),
       keyInformation: _.get(questionnaireData, "KeyInformation", ""),
-      user: {
-        id: _.get(memberData, "ID"),
-        name: `${_.get(memberData, "FirstName")} ${_.get(memberData, "Surname")}`,
-        role: _.get(memberData, "UserRole"),
-        email: _.get(memberData, "Email"),
-      },
+      user: UserParser.parseUserFromJSON(memberData),
     };
   }
 
@@ -82,6 +79,8 @@ query {
     FirstName
     Surname
     UserRole
+    IsSA
+    IsCISO
   }
   readQuestionnaireSubmission(UUID: "${submissionHash}") {
     ID
@@ -136,6 +135,8 @@ query {
           name: _.toString(_.get(submissionJSON, "SubmitterName", "")),
           role: _.toString(_.get(submissionJSON, "SubmitterRole", "")),
           email: _.toString(_.get(submissionJSON, "SubmitterEmail", "")),
+          isSA: false,
+          isCISO: false,
         },
         status: _.toString(_.get(submissionJSON, "QuestionnaireStatus", "")).toLowerCase().replace("-", "_"),
         approvalStatus: {

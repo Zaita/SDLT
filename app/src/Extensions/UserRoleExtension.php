@@ -13,6 +13,8 @@
 
 namespace NZTA\SDLT\Extension;
 
+use NZTA\SDLT\Constant\UserGroupConstant;
+use NZTA\SDLT\Model\QuestionnaireSubmission;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\DataExtension;
@@ -44,5 +46,32 @@ class UserRoleExtension extends DataExtension
             'Root.Main',
             TextField::create("UserRole", "User Role")
         );
+    }
+
+    /**
+     * Check if the member is a Security Architect
+     *
+     * @return boolean
+     */
+    public function getIsSA()
+    {
+        // SA and CISO can view it
+        return $this->owner
+            ->Groups()
+            ->filter('Code', UserGroupConstant::GROUP_CODE_SA)
+            ->exists();
+    }
+
+    /**
+     * Check if the member is a Chief Information Security Officer
+     *
+     * @return boolean
+     */
+    public function getIsCISO()
+    {
+        return $this->owner
+            ->Groups()
+            ->filter('Code', UserGroupConstant::GROUP_CODE_CISO)
+            ->exists();
     }
 }

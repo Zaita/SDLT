@@ -15,6 +15,9 @@ type Props = {
   saveAnsweredQuestion: (answeredQuestion: Question) => void,
   moveToPreviousQuestion: (targetQuestion: Question) => void,
   editAnswers: () => void,
+  showBackButton: boolean,
+  showEditButton: boolean,
+  canUpdateAnswers: boolean
 };
 
 class TaskSubmission extends Component<Props> {
@@ -25,12 +28,16 @@ class TaskSubmission extends Component<Props> {
       saveAnsweredQuestion,
       moveToPreviousQuestion,
       editAnswers,
+      showBackButton,
+      showEditButton,
+      canUpdateAnswers
     } = {...this.props};
 
-    let body = null;
+    let body = (
+      <AnswersPreview questions={taskSubmission.questions}/>
+    );
 
-    // Display questionnaire form for in-progress task submission
-    if (taskSubmission.status === "in_progress") {
+    if (canUpdateAnswers) {
       body = (
         <Questionnaire
           questions={taskSubmission.questions}
@@ -40,14 +47,7 @@ class TaskSubmission extends Component<Props> {
       );
     }
 
-    // Display answers preview for completed task submission
-    if (taskSubmission.status === "complete") {
-      body = (
-        <AnswersPreview questions={taskSubmission.questions}/>
-      );
-    }
-
-    const backButton = taskSubmission.questionnaireSubmissionUUID ? (
+    const backButton = showBackButton ? (
       <DarkButton
         title={"BACK TO QUESTIONNAIRE SUMMARY"}
         onClick={() => {
@@ -56,7 +56,7 @@ class TaskSubmission extends Component<Props> {
       />
     ) : null;
 
-    const editButton = taskSubmission.status === "complete" ? (
+    const editButton = showEditButton ? (
       <LightButton title={"EDIT ANSWERS"} onClick={editAnswers} iconImage={editIcon}/>
     ) : null;
 
