@@ -16,6 +16,9 @@ import {
 } from "../../actions/questionnarie";
 import Summary from "./Summary";
 import PDFUtil from "../../utils/PDFUtil";
+import ReactModal from "react-modal";
+import DarkButton from "../Button/DarkButton";
+import LightButton from "../Button/LightButton";
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -58,7 +61,18 @@ type reduxProps = {
 
 type Props = ownProps & reduxProps;
 
-class SummaryContainer extends Component<Props> {
+type State = {
+  showModal: boolean
+};
+
+class SummaryContainer extends Component<Props, State> {
+
+  constructor() {
+    super();
+    this.state = {
+      showModal: false,
+    };
+  }
 
   componentDidMount() {
     const {submissionHash, dispatchLoadSubmissionAction} = {...this.props};
@@ -97,10 +111,25 @@ class SummaryContainer extends Component<Props> {
                  handleSubmitButtonClick={this.handleSubmitButtonClick.bind(this)}
                  handleApproveButtonClick={this.handleApproveButtonClick.bind(this)}
                  handleDenyButtonClick={this.handleDenyButtonClick.bind(this)}
-                 handleEditButtonClick={this.handleEditButtonClick.bind(this)}
+                 handleEditButtonClick={this.handleOpenModal.bind(this)}
                  viewAs={viewAs}
         />
         <Footer/>
+        <ReactModal
+          isOpen={this.state.showModal}
+          parentSelector={() => {return document.querySelector(".SummaryContainer");}}
+        >
+          <h3>
+            Are you sure you want to edit this submission?
+          </h3>
+          <div className="content">
+            This will cancel your current submission and require it to be resubmitted for approval.
+          </div>
+          <div>
+            <DarkButton title="Yes" onClick={this.handleEditButtonClick.bind(this)}/>
+            <LightButton title="No" onClick={this.handleCloseModal.bind(this)}/>
+          </div>
+        </ReactModal>
       </div>
     );
   }
@@ -156,7 +185,16 @@ class SummaryContainer extends Component<Props> {
       return;
     }
 
+    this.handleCloseModal();
     this.props.dispatchEditSubmissionAction(submission.submissionID);
+  }
+
+  handleOpenModal() {
+    this.setState({showModal: true});
+  }
+
+  handleCloseModal() {
+    this.setState({showModal: false});
   }
 }
 
