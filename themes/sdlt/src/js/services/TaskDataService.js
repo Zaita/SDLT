@@ -7,8 +7,9 @@ import uniq from "lodash/uniq";
 import {DEFAULT_NETWORK_ERROR} from "../constants/errors";
 import type {Question, SubmissionQuestionData} from "../types/Questionnaire";
 import QuestionParser from "../utils/QuestionParser";
-import type {TaskSubmission} from "../types/Task";
+import type {Task, TaskSubmission} from "../types/Task";
 import UserParser from "../utils/UserParser";
+import TaskParser from "../utils/TaskParser";
 
 type BatchUpdateTaskSubmissionDataArgument = {
   uuid: string,
@@ -220,5 +221,27 @@ mutation {
       throw DEFAULT_NETWORK_ERROR;
     }
     return {uuid};
+  }
+
+  static async fetchStandaloneTask(args: {taskId: string}): Promise<Task> {
+    const {taskId} = {...args};
+    const query = `
+query {
+  readTask(ID: "${taskId}") {
+    ID
+    Name
+    TaskType
+    QuestionsDataJSON
+  }
+}`;
+
+    const responseJSONObject = await GraphQLRequestHelper.request({query});
+    const taskJSONObject = get(responseJSONObject, "data.readTask", null);
+    if (!taskJSONObject) {
+      throw DEFAULT_NETWORK_ERROR;
+    }
+    const task = TaskParser.parseFromJSONObject(taskJSONObject);
+
+    return task;
   }
 }

@@ -13,8 +13,14 @@
 
 namespace NZTA\SDLT\Model;
 
+use GraphQL\Type\Definition\ResolveInfo;
+use NZTA\SDLT\GraphQL\GraphQLAuthFailure;
+use SilverStripe\Core\Convert;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\GraphQL\OperationResolver;
+use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
+use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\HasManyList;
 use SilverStripe\Security\Member;
@@ -32,7 +38,7 @@ use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
  *
  * @method HasManyList Questions()
  */
-class Task extends DataObject
+class Task extends DataObject implements ScaffoldingProvider
 {
     /**
      * @var string
@@ -114,5 +120,56 @@ class Task extends DataObject
         }
 
         return $questionsData;
+    }
+
+    /**
+     * @return string
+     */
+    public function getQuestionsDataJSON()
+    {
+        return (string)json_encode($this->getQuestionsData());
+    }
+
+    /**
+     * @param SchemaScaffolder $scaffolder
+     */
+    public function provideGraphQLScaffolding(SchemaScaffolder $scaffolder)
+    {
+        $typeScaffolder = $scaffolder
+            ->type(self::class)
+            ->addFields([
+                'ID',
+                'Name',
+                'TaskType',
+                'QuestionsDataJSON'
+            ]);
+
+        $typeScaffolder
+            ->operation(SchemaScaffolder::READ_ONE)
+            ->setName('readTask')
+            ->setResolver(new class implements OperationResolver {
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
+                 * @throws Exception
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    $member = Security::getCurrentUser();
+                    if (!$member) {
+                        throw new GraphQLAuthFailure();
+                    }
+
+                    $task = Task::get_by_id(Convert::raw2sql(trim($args['ID'])));
+                    return $task;
+                }
+            })
+            ->end();
     }
 }

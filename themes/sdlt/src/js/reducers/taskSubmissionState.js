@@ -82,6 +82,24 @@ export function taskSubmissionState(state: TaskSubmissionState = defaultStartSta
     return newState;
   }
 
+  if (action.type === ActionType.TASK.COMPLETE_TASK_SUBMISSION) {
+    const newState = cloneDeep(state);
+    set(newState, `taskSubmission.status`, "complete");
+
+    if (action.payload) {
+      set(newState, `taskSubmission.result`, action.payload);
+    }
+
+    return newState;
+  }
+
+  if (action.type === ActionType.TASK.EDIT_TASK_SUBMISSION) {
+    const newState = cloneDeep(state);
+    set(newState, `taskSubmission.status`, "in_progress");
+    set(newState, `taskSubmission.result`, null);
+    return newState;
+  }
+
   return state;
 }
 
