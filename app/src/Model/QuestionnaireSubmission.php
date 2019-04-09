@@ -1019,7 +1019,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      */
     public function getStartLink()
     {
-        $link = Convert::html2raw(Director::absoluteBaseURL(). '#/questionnaire/submission/' . $this->UUID);
+        $link = Convert::html2raw(Director::absoluteBaseURL(). 'Security/login?BackURL='.rawurlencode('/#/questionnaire/submission/' . $this->UUID));
         return $link;
     }
 
@@ -1028,7 +1028,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      */
     public function getSummaryPageLink()
     {
-        $link = Convert::html2raw(Director::absoluteBaseURL(). '#/questionnaire/summary/' . $this->UUID);
+        $link = Convert::html2raw(Director::absoluteBaseURL(). 'Security/login?BackURL='.rawurlencode('/#/questionnaire/summary/' . $this->UUID));
         return $link;
     }
 
@@ -1037,7 +1037,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      */
     public function getApprovalPageLink()
     {
-        $link = Convert::html2raw(Director::absoluteBaseURL(). "businessOwnerApproval/#/questionnaire/summary/{$this->UUID}?token={$this->ApprovalLinkToken}");
+        $link = Convert::html2raw(Director::absoluteBaseURL(). 'Security/login?BackURL='.rawurlencode("/businessOwnerApproval/#/questionnaire/summary/{$this->UUID}?token={$this->ApprovalLinkToken}"));
         return $link;
     }
 
