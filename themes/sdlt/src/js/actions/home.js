@@ -1,46 +1,23 @@
 // @flow
 
-import type {HomeState} from "../store/HomeState";
+import type {LoadHomeStateFinishedAction} from "./ActionType";
 import ActionType from "./ActionType";
-import type {LoadHomeStateFailedAction, LoadHomeStateFinishedAction} from "./ActionType";
 import {ThunkAction} from "redux-thunk";
 import HomeDataService from "../services/HomeDataService";
-import {Action} from "redux";
+import ErrorUtil from "../utils/ErrorUtil";
 
 export function loadHomeState(): ThunkAction {
   return async (dispatch) => {
-    // TODO: maybe dispatch a global loading action
-    dispatch(loadingHomeState());
-
     try {
       const homeState = await HomeDataService.fetchHomeData();
-      dispatch(loadedHomeState(homeState));
-    } catch (error) {
-      dispatch(failedHomeState(error));
-      // TODO: maybe dispatch a global error action
-      // TODO: maybe better error alert
-      console.error(error);
-      alert(error.message);
+      const action: LoadHomeStateFinishedAction = {
+        type: ActionType.HOME.LOAD_HOME_STATE_FINISHED,
+        payload: homeState,
+      };
+      dispatch(action);
     }
-  };
-}
-
-export function loadingHomeState(): Action {
-  return {
-    type: ActionType.HOME.LOAD_HOME_STATE_STARTED
-  };
-}
-
-export function failedHomeState(error: Error): LoadHomeStateFailedAction {
-  return {
-    type: ActionType.HOME.LOAD_HOME_STATE_FAILED,
-    error: error
-  };
-}
-
-export function loadedHomeState(homeState: HomeState): LoadHomeStateFinishedAction {
-  return {
-    type: ActionType.HOME.LOAD_HOME_STATE_FINISHED,
-    payload: homeState
+    catch (error) {
+      ErrorUtil.displayError(error);
+    }
   };
 }

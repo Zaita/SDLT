@@ -7,13 +7,14 @@ import type {Question} from "../types/Questionnaire";
 import SubmissionDataUtil from "../utils/SubmissionDataUtil";
 import _ from "lodash";
 import CSRFTokenService from "../services/CSRFTokenService";
-import type {TaskSubmission} from "../types/Task";
+import type {Task, TaskSubmission} from "../types/Task";
 import ErrorUtil from "../utils/ErrorUtil";
 import type {
   LoadTaskSubmissionAction,
   MarkQuestionsNotApplicableInTaskSubmissionAction, MoveToQuestionInTaskSubmissionAction,
   PutDataInTaskSubmissionAction,
 } from "./ActionType";
+import type {User} from "../types/User";
 
 export function loadTaskSubmission(args: {uuid: string, secureToken?: string}): ThunkAction {
   const {uuid, secureToken} = {...args};
@@ -36,8 +37,45 @@ export function loadTaskSubmission(args: {uuid: string, secureToken?: string}): 
   };
 }
 
-export function saveAnsweredQuestionInTaskSubmission(args: {answeredQuestion: Question, secureToken?: string}): ThunkAction {
-  const {answeredQuestion, secureToken} = {...args};
+export function loadStandaloneTaskSubmission(args: {taskId: string}): ThunkAction {
+  const {taskId} = {...args};
+
+  return async (dispatch, getState) => {
+    try {
+      const task = await TaskDataService.fetchStandaloneTask({taskId});
+
+      const payload: TaskSubmission = {
+        id: "",
+        uuid: "",
+        taskName: task.name,
+        status: "in_progress",
+        result: "",
+        questions: task.questions,
+        questionnaireSubmissionUUID: "",
+        questionnaireSubmissionID: "",
+        submitter: getState().currentUserState,
+        lockWhenComplete: false
+      };
+
+      const action: LoadTaskSubmissionAction = {
+        type: ActionType.TASK.LOAD_TASK_SUBMISSION,
+        payload,
+      };
+      await dispatch(action);
+    }
+    catch (error) {
+      ErrorUtil.displayError(error);
+    }
+  };
+}
+
+export function saveAnsweredQuestionInTaskSubmission(
+  args: {
+    answeredQuestion: Question,
+    secureToken?: string,
+    bypassNetwork?: boolean
+  }): ThunkAction {
+  const {answeredQuestion, secureToken, bypassNetwork} = {...args};
 
   return async (dispatch, getState) => {
 
@@ -57,16 +95,18 @@ export function saveAnsweredQuestionInTaskSubmission(args: {answeredQuestion: Qu
     await dispatch(putDataAction);
 
     // Network request - save answer
-    try {
-      await TaskDataService.batchUpdateTaskSubmissionData({
-        uuid: getTaskSubmission().uuid,
-        questionIDList: [answeredQuestion.id],
-        answerDataList: [SubmissionDataUtil.transformFromFullQuestionToData(answeredQuestion)],
-        csrfToken: await CSRFTokenService.getCSRFToken(),
-        secureToken: secureToken,
-      });
-    } catch (error) {
-      ErrorUtil.displayError(error);
+    if (!bypassNetwork) {
+      try {
+        await TaskDataService.batchUpdateTaskSubmissionData({
+          uuid: getTaskSubmission().uuid,
+          questionIDList: [answeredQuestion.id],
+          answerDataList: [SubmissionDataUtil.transformFromFullQuestionToData(answeredQuestion)],
+          csrfToken: await CSRFTokenService.getCSRFToken(),
+          secureToken: secureToken,
+        });
+      } catch (error) {
+        ErrorUtil.displayError(error);
+      }
     }
 
     // Move cursor
@@ -101,46 +141,62 @@ export function saveAnsweredQuestionInTaskSubmission(args: {answeredQuestion: Qu
     }
 
     // Network request - batch update
-    try {
-      await batchUpdateTaskSubmissionData(
-        getTaskSubmission(),
-        _.uniq([currentIndex, ...nonApplicableIndexes, targetIndex]),
-        secureToken
-      );
-    } catch(error) {
-      ErrorUtil.displayError(error);
+    if (!bypassNetwork) {
+      try {
+        await batchUpdateTaskSubmissionData(
+          getTaskSubmission(),
+          _.uniq([currentIndex, ...nonApplicableIndexes, targetIndex]),
+          secureToken
+        );
+      } catch(error) {
+        ErrorUtil.displayError(error);
+      }
     }
 
-    if (complete) {
-      try {
-        const csrfToken = await CSRFTokenService.getCSRFToken();
 
-        // Prevent anonymous user to create other task submissions according to the answers
-        if (!secureToken) {
-          await TaskDataService.createTaskSubmissionsAccordingToQuestions({
-            questions: getTaskSubmission().questions,
-            questionnaireSubmissionID: getTaskSubmission().questionnaireSubmissionID,
+    if (complete) {
+      if (!bypassNetwork) {
+        try {
+          const csrfToken = await CSRFTokenService.getCSRFToken();
+
+          // Prevent anonymous user to create other task submissions according to the answers
+          if (!secureToken) {
+            await TaskDataService.createTaskSubmissionsAccordingToQuestions({
+              questions: getTaskSubmission().questions,
+              questionnaireSubmissionID: getTaskSubmission().questionnaireSubmissionID,
+              csrfToken
+            });
+          }
+
+          const {uuid} = await TaskDataService.completeTaskSubmission({
+            uuid: getTaskSubmission().uuid,
+            result: result,
+            secureToken: secureToken,
             csrfToken
           });
+
+          await dispatch(loadTaskSubmission({uuid, secureToken}));
+        } catch (error) {
+          ErrorUtil.displayError(error);
         }
-
-        const {uuid} = await TaskDataService.completeTaskSubmission({
-          uuid: getTaskSubmission().uuid,
-          result: result,
-          secureToken: secureToken,
-          csrfToken
+      } else {
+        await dispatch({
+          type: ActionType.TASK.COMPLETE_TASK_SUBMISSION,
+          payload: result
         });
-
-        await dispatch(loadTaskSubmission({uuid, secureToken}));
-      } catch (error) {
-        ErrorUtil.displayError(error);
       }
     }
   };
 }
 
-export function moveToPreviousQuestionInTaskSubmission(args: {targetQuestion: Question, secureToken?: string}): ThunkAction {
-  const {targetQuestion, secureToken} = {...args};
+export function moveToPreviousQuestionInTaskSubmission(
+  args: {
+    targetQuestion: Question,
+    secureToken?: string,
+    bypassNetwork?: boolean
+  }): ThunkAction {
+  const {targetQuestion, secureToken, bypassNetwork} = {...args};
+
   return async (dispatch, getState) => {
     const taskSubmission: TaskSubmission = getState().taskSubmissionState.taskSubmission;
 
@@ -172,31 +228,44 @@ export function moveToPreviousQuestionInTaskSubmission(args: {targetQuestion: Qu
     await dispatch(moveAction);
 
     // Network request - batch update
-    await batchUpdateTaskSubmissionData(
-      taskSubmission,
-      _.uniq([currentIndex, targetIndex]),
-      secureToken
-    );
+    if (!bypassNetwork) {
+      await batchUpdateTaskSubmissionData(
+        taskSubmission,
+        _.uniq([currentIndex, targetIndex]),
+        secureToken
+      );
+    }
   };
 }
 
-export function editCompletedTaskSubmission(args: {secureToken?: string} = {}): ThunkAction {
-  const {secureToken} = {...args};
+export function editCompletedTaskSubmission(
+  args: {
+    secureToken?: string,
+    bypassNetwork?: boolean
+  } = {}): ThunkAction {
+  const {secureToken, bypassNetwork} = {...args};
+
   return async (dispatch, getState) => {
     const taskSubmission: TaskSubmission = getState().taskSubmissionState.taskSubmission;
     if (!taskSubmission) {
       return;
     }
 
-    try {
-      const {uuid} = await TaskDataService.editTaskSubmission({
-        uuid: taskSubmission.uuid,
-        csrfToken: await CSRFTokenService.getCSRFToken(),
-        secureToken: secureToken,
-      });
-      await dispatch(loadTaskSubmission({uuid, secureToken}));
-    } catch (error) {
-      ErrorUtil.displayError(error);
+    if (!bypassNetwork) {
+      try {
+        const {uuid} = await TaskDataService.editTaskSubmission({
+          uuid: taskSubmission.uuid,
+          csrfToken: await CSRFTokenService.getCSRFToken(),
+          secureToken: secureToken,
+        });
+        await dispatch(loadTaskSubmission({uuid, secureToken}));
+      } catch (error) {
+        ErrorUtil.displayError(error);
+      }
+    } else {
+      dispatch({
+        type: ActionType.TASK.EDIT_TASK_SUBMISSION
+      })
     }
   };
 }
