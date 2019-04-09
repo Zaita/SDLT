@@ -6,25 +6,20 @@ a.TaskButton {
     padding: 15px 20px;
     margin-bottom: 10px;
 
-    .title {
-        font-size: 18px;
-        font-weight: 600;
-        font-style: normal;
-        font-stretch: normal;
-        line-height: 1.78;
-        letter-spacing: normal;
-        text-align: center;
-        color: $blue;
-        overflow: visible;
-        white-space: nowrap;
-    }
+    font-size: 18px;
+    font-weight: 600;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: 1.78;
+    letter-spacing: normal;
+    text-align: center;
+    color: $blue;
+    overflow: visible;
+    white-space: nowrap;
 
     &:hover {
         text-decoration: none;
         border: solid 2px $orange;
-
-        .title {
-            color: $orange;
-        }
+        color: $orange;
     }
 }

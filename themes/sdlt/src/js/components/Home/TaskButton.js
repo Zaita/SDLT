@@ -7,23 +7,16 @@ type Props = {
   link: string,
   title: string,
   classes: Array<string>,
-  disabled: boolean
 };
 
 class TaskButton extends Component<Props> {
 
   render() {
+    const classes = ["TaskButton", ...this.props.classes];
+
     return (
-      <Link className={`TaskButton ${this.props.classes.join(" ")}`}
-            to={this.props.link}
-            onClick={(event) => {
-              if(this.props.disabled) {
-                event.preventDefault();
-                alert("Coming soon...");
-              }
-            }}
-      >
-        <div className="title">{this.props.title}</div>
+      <Link className={classes.join(" ")} to={this.props.link}>
+        {this.props.title}
       </Link>
     );
   }
