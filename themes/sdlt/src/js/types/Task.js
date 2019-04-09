@@ -3,6 +3,13 @@
 import type {Question} from "./Questionnaire";
 import type {User} from "./User";
 
+export type Task = {
+  id: string,
+  name: string,
+  type: "questionnaire" | "selection",
+  questions: Array<Question>
+};
+
 export type TaskSubmissionDisplay = {
   uuid: string,
   taskName: string,

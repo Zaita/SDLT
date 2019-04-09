@@ -1,22 +1,15 @@
 // @flow
 
-
 import type {HomeState} from "../store/HomeState";
-import {Action} from "redux";
 import type {QuestionnaireStartState, QuestionnaireSubmissionState} from "../store/QuestionnaireState";
 import type {User} from "../types/User";
 import type {TaskSubmission} from "../types/Task";
 import type {Question} from "../types/Questionnaire";
 
-export type LoadHomeStateFinishedAction = Action & {
+export type LoadHomeStateFinishedAction = {
+  type: string,
   payload: HomeState
 }
-
-export type LoadHomeStateFailedAction = Action & {
-  error: Error
-}
-
-export type LoadHomeStateAction = Action | LoadHomeStateFinishedAction | LoadHomeStateFailedAction;
 
 export type LoadQuestionnaireStartAction = {
   type: string,
@@ -79,19 +72,21 @@ const ActionType = {
     PUT_DATA_IN_TASK_SUBMISSION: "ACTION_TASK_PUT_DATA_IN_TASK_SUBMISSION",
     MARK_TASK_QUESTION_NOT_APPLICABLE: "ACTION_TASK_MARK_TASK_QUESTION_NOT_APPLICABLE",
     MOVE_TO_ANOTHER_TASK_QUESTION: "ACTION_TASK_MOVE_TO_ANOTHER_TASK_QUESTION",
+    COMPLETE_TASK_SUBMISSION: "ACTION_TASK_COMPLETE_TASK_SUBMISSION",
+    EDIT_TASK_SUBMISSION: "ACTION_TASK_EDIT_TASK_SUBMISSION",
   },
   // TODO: add a global UI state to reflect loading and error
   UI: {
     LOAD_DATA_STARTED: "LOAD_DATA_STARTED",
     LOAD_DATA_FAILED: "LOAD_DATA_FAILED",
-    LOAD_DATA_FINISHED: "LOAD_DATA_FINISHED"
+    LOAD_DATA_FINISHED: "LOAD_DATA_FINISHED",
   },
   USER: {
-    SET_CURRENT_USER: "ACTION_USER_SET_CURRENT_USER"
+    SET_CURRENT_USER: "ACTION_USER_SET_CURRENT_USER",
   },
   SITE_CONFIG: {
-    SET_SITE_TITLE: "ACTION_SITE_CONFIG_SET_SITE_TITLE"
-  }
+    SET_SITE_TITLE: "ACTION_SITE_CONFIG_SET_SITE_TITLE",
+  },
 };
 
 export default ActionType;

@@ -6,6 +6,7 @@ import Pillar from "./Pillar";
 import TaskButton from "./TaskButton";
 import type {HomeState} from "../../store/HomeState";
 import LogoutButton from "../Button/LogoutButton";
+import type {Task} from "../../types/Task";
 
 type Props = {
   homeState: HomeState
@@ -14,20 +15,22 @@ type Props = {
 class Home extends Component<Props> {
 
   render() {
+    const {title, subtitle, pillars, tasks} = {...this.props.homeState};
+
     return (
       <div className="Home">
         <LogoutButton classes={["clearfix","float-right", "mt-5", "mr-5"]}/>
         <div className="layout">
           <a href="/"><img src={LogoImage} className="logo"/></a>
           <h1>
-            {this.props.homeState.title}
+            {title}
           </h1>
           <h2>
-            {this.props.homeState.subtitle}
+            {subtitle}
           </h2>
           <div className="pillars">
             <div className="row">
-              {this.props.homeState.pillars.map((pillar, index) => {
+              {pillars.map((pillar, index) => {
                 return (
                   <Pillar link={`/questionnaire/start/${pillar.questionnaireID}`}
                           classes={["col", "mx-1"]}
@@ -39,11 +42,11 @@ class Home extends Component<Props> {
             </div>
           </div>
           <div className="tasks">
-            <TaskButton link="/tasks/blah" classes={["mx-1"]} disabled={true} title="Information Classification"/>
-            <TaskButton link="/tasks/blah" classes={["mx-1"]} disabled={true} title="Information Classification"/>
-            <TaskButton link="/tasks/blah" classes={["mx-1"]} disabled={true} title="Information Classification"/>
-            <TaskButton link="/tasks/blah" classes={["mx-1"]} disabled={true} title="Information Classification"/>
-            <TaskButton link="/tasks/blah" classes={["mx-1"]} disabled={true} title="Information Classification"/>
+            {tasks.map((task: Task) => {
+              return (
+                <TaskButton link={`/tasks/standalone/${task.id}`} classes={["mx-1"]} title={task.name}/>
+              );
+            })}
           </div>
         </div>
       </div>

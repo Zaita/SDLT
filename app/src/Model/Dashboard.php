@@ -114,6 +114,11 @@ class Dashboard extends DataObject implements ScaffoldingProvider
             ->end();
 
         $dashboardScaffolder
+            ->nestedQuery('Tasks')
+            ->setUsePagination(false)
+            ->end();
+
+        $dashboardScaffolder
             ->operation(SchemaScaffolder::READ)
             ->setName('readDashboard')
             ->setUsePagination(false)
