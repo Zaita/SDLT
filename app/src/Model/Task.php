@@ -60,7 +60,8 @@ class Task extends DataObject implements ScaffoldingProvider
      * @var array
      */
     private static $has_many = [
-        'Questions' => Question::class
+        'Questions' => Question::class,
+        'SubmissionEmails' => TaskSubmissionEmail::class
     ];
 
     /**
