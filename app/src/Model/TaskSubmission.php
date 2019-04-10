@@ -18,6 +18,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use NZTA\SDLT\Constant\UserGroupConstant;
 use NZTA\SDLT\GraphQL\GraphQLAuthFailure;
 use Ramsey\Uuid\Uuid;
+use SilverStripe\Forms\FieldList;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ResolverInterface;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\DataObjectScaffolder;
@@ -122,6 +123,19 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             return "";
         }
         return $task->Name;
+    }
+
+    /**
+     * @return FieldList
+     */
+    public function getCMSFields()
+    {
+        $fields = parent::getCMSFields();
+        $fields
+            ->findTab('Root.Main')
+            ->fieldByName('CompletedAt')
+            ->setDescription('');
+        return $fields;
     }
 
     /**
