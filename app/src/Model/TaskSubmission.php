@@ -137,7 +137,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         $completedAtField = $fields->dataFieldByName('CompletedAt');
         $completedAtField
             ->setHTML5(false)
-            ->setDatetimeFormat('yyyy-mm-dd HH:mm:ss')
+            ->setDatetimeFormat('yyyy-MM-dd HH:mm:ss')
+            ->setReadonly(true)
             ->setDescription('');
         return $fields;
     }
