@@ -13,6 +13,7 @@
 
 namespace NZTA\SDLT\Model;
 
+use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
@@ -74,7 +75,7 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
         'Label',
         'ActionType',
         'ActionDescription',
-        'Task.Name' => 'Task'
+        'Task.Name' => 'Create Task'
     ];
 
     /**
@@ -102,6 +103,13 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
         $questionnaireID = $this->Question()->Questionnaire()->ID;
 
         $questionList = Question::get()->filter('QuestionnaireID', $questionnaireID);
+
+        /* @var $taskField DropdownField */
+        $taskField = $fields->dataFieldByName('TaskID');
+        $taskField
+            ->setTitle('Create Task')
+            ->setEmptyString('-- No task will be created --')
+            ->setDescription('If the user choose this action, the associated task will be created');
 
         $fields->dataFieldByName('Result')->setDescription('The result will be used only if Questionnaire type is a task.');
 
