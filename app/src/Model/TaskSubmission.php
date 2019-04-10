@@ -18,6 +18,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use NZTA\SDLT\Constant\UserGroupConstant;
 use NZTA\SDLT\GraphQL\GraphQLAuthFailure;
 use Ramsey\Uuid\Uuid;
+use SilverStripe\Forms\DatetimeField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ResolverInterface;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
@@ -131,9 +132,12 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
-        $fields
-            ->findTab('Root.Main')
-            ->fieldByName('CompletedAt')
+
+        /* @var $completedAtField DatetimeField */
+        $completedAtField = $fields->dataFieldByName('CompletedAt');
+        $completedAtField
+            ->setHTML5(false)
+            ->setDatetimeFormat('yyyy-mm-dd HH:mm:ss')
             ->setDescription('');
         return $fields;
     }
