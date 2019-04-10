@@ -234,10 +234,24 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             throw new Exception('Task does not exist');
         }
 
+        // Avoid creating duplicated task submission: invalid the existing one first
+        /* @var $existingTaskSubmission TaskSubmission */
+        $existingTaskSubmission = TaskSubmission::get()
+            ->filter([
+                'TaskID' => $taskID,
+                'QuestionnaireSubmissionID' => $questionnaireSubmissionID,
+                'SubmitterID' => $submitterID
+            ])
+            ->first();
+        if ($existingTaskSubmission && $existingTaskSubmission->exists()) {
+            $existingTaskSubmission->Status = TaskSubmission::STATUS_INVALID;
+            $existingTaskSubmission->write();
+        }
+
         // Turn "invalid" task submission into "progress" if applicable rather than create new ones
         /* @var $invalidTaskSubmission TaskSubmission|null */
         $invalidTaskSubmission = TaskSubmission::get()
-            ->where([
+            ->filter([
                 'Status' => TaskSubmission::STATUS_INVALID,
                 'TaskID' => $taskID,
                 'QuestionnaireSubmissionID' => $questionnaireSubmissionID,
