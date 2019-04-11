@@ -139,13 +139,19 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     {
         $fields = parent::getCMSFields();
 
-        /* @var $completedAtField DatetimeField */
-        $completedAtField = $fields->dataFieldByName('CompletedAt');
-        $completedAtField
-            ->setHTML5(false)
-            ->setDatetimeFormat('yyyy-MM-dd HH:mm:ss')
-            ->setReadonly(true)
-            ->setDescription('');
+        if (!$this->CompletedAt) {
+            $fields->removebyName('CompletedAt');
+        } else {
+            /* @var $completedAtField DatetimeField */
+            $completedAtField = $fields->dataFieldByName('CompletedAt');
+            $completedAtField
+                ->setHTML5(false)
+                // ->setDatetimeFormat('yyyy-MM-dd HH:mm:ss')
+                ->setDatetimeFormat('dd/MM/yyyy hh:mm a')
+                ->setReadonly(true)
+                ->setDescription(null);
+        }
+
 
         $secureLink = $this->SecureLink();
         $anonLink = $this->AnonymousAccessLink();
