@@ -113,7 +113,7 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
 
         $fields->dataFieldByName('Result')->setDescription('The result will be used only if Questionnaire type is a task.');
 
-        // $fields->dataFieldByName('GotoID')->setSource($questionList);
+        $fields->addFieldToTab('Root.Main', DropdownField::create('GotoID', 'Go to', $questionList));
 
         /** @noinspection PhpUndefinedMethodInspection */
         $fields->dataFieldByName('GotoID')->displayIf('ActionType')->isEqualTo('goto');
