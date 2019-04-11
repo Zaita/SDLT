@@ -17,7 +17,7 @@ SilverStripe\Core\Injector\Injector:
         # From Azure AD => Properties => Directory ID
         tenant: '`AZURE_TENANT_ID`'
         # Add in Azure AD => App registrations => {App} => Reply URLs
-        redirectUri: https://sdlt-uat.catalystdemo.net.nz/oauth/callback/
+        redirectUri: '`AZURE_OAUTH_CALLBACK`'
 Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator:
   providers:
     'ActiveDirectory':
