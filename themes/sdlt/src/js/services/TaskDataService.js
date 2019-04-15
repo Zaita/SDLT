@@ -10,6 +10,8 @@ import QuestionParser from "../utils/QuestionParser";
 import type {Task, TaskSubmission} from "../types/Task";
 import UserParser from "../utils/UserParser";
 import TaskParser from "../utils/TaskParser";
+import SecurityComponentParser from "../utils/SecurityComponentParser";
+import JiraTicketParser from "../utils/JiraTicketParser";
 
 type BatchUpdateTaskSubmissionDataArgument = {
   uuid: string,
@@ -92,7 +94,7 @@ mutation {
     }
   }
 
-  static async fetchTaskSubmission(args: {uuid: string, secureToken?: string}): Promise<TaskSubmission> {
+  static async fetchTaskSubmission(args: { uuid: string, secureToken?: string }): Promise<TaskSubmission> {
     const {uuid, secureToken} = {...args};
     const query = `
 query {
@@ -100,6 +102,7 @@ query {
     ID
     UUID
     TaskName
+    TaskType
     Status
     Result
     LockAnswersWhenComplete
@@ -117,6 +120,16 @@ query {
     }
     QuestionnaireData
     AnswerData
+    SelectedComponents {
+      ID
+      Name
+      Description
+    }
+    JiraTickets {
+      ID
+      JiraKey
+      TicketLink
+    }
   }
 }`;
 
@@ -130,6 +143,7 @@ query {
       id: toString(get(submissionJSONObject, "ID", "")),
       uuid: toString(get(submissionJSONObject, "UUID", "")),
       taskName: toString(get(submissionJSONObject, "TaskName", "")),
+      taskType: toString(get(submissionJSONObject, "TaskType", "")),
       status: toString(get(submissionJSONObject, "Status", "")),
       result: toString(get(submissionJSONObject, "Result", "")),
       submitter: UserParser.parseUserFromJSON(get(submissionJSONObject, "Submitter")),
@@ -140,6 +154,8 @@ query {
         schemaJSON: toString(get(submissionJSONObject, "QuestionnaireData", "")),
         answersJSON: toString(get(submissionJSONObject, "AnswerData", "")),
       }),
+      selectedComponents: SecurityComponentParser.parseFromJSONOArray(get(submissionJSONObject, "SelectedComponents", [])),
+      jiraTickets: JiraTicketParser.parseFromJSONArray(get(submissionJSONObject, "JiraTickets", []))
     };
 
     return data;
@@ -208,7 +224,7 @@ mutation {
   static async editTaskSubmission(args: { uuid: string, csrfToken: string, secureToken?: string }): Promise<{ uuid: string }> {
     const {uuid, csrfToken, secureToken} = {...args};
 
-    const  query = `
+    const query = `
 mutation {
  editTaskSubmission(UUID: "${uuid}", SecureToken: "${secureToken || ""}") {
    UUID
@@ -223,7 +239,7 @@ mutation {
     return {uuid};
   }
 
-  static async fetchStandaloneTask(args: {taskId: string}): Promise<Task> {
+  static async fetchStandaloneTask(args: { taskId: string }): Promise<Task> {
     const {taskId} = {...args};
     const query = `
 query {
@@ -243,5 +259,34 @@ query {
     const task = TaskParser.parseFromJSONObject(taskJSONObject);
 
     return task;
+  }
+
+  static async updateTaskSubmissionWithSelectedComponents(
+    args: {
+      uuid: string,
+      csrfToken: string,
+      componentIDs: Array<string>,
+      jiraKey: string
+    }
+  ): Promise<{ uuid: string }> {
+    const {uuid, csrfToken, componentIDs, jiraKey} = {...args};
+
+    const query = `
+mutation {
+ updateTaskSubmissionWithSelectedComponents(
+ UUID: "${uuid}", 
+ ComponentIDs: "${window.btoa(JSON.stringify(componentIDs))}", 
+ JiraKey: "${jiraKey}"
+ ) {
+   UUID
+   Status
+ }
+}`;
+
+    const json = await GraphQLRequestHelper.request({query, csrfToken});
+    if (!get(json, "data.updateTaskSubmissionWithSelectedComponents.UUID", null)) {
+      throw DEFAULT_NETWORK_ERROR;
+    }
+    return {uuid};
   }
 }

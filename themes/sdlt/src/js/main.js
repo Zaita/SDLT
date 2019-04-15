@@ -45,7 +45,13 @@ window.addEventListener("load", () => {
 
   const businessOwnerContainer = document.getElementById("business-owner-app");
   if (businessOwnerContainer) {
-    ReactDOM.render((<BusinessOwnerApp/>), businessOwnerContainer);
+    ReactDOM.render((
+      <HashRouter>
+        <Provider store={store}>
+          <BusinessOwnerApp/>
+        </Provider>
+      </HashRouter>
+    ), businessOwnerContainer);
   }
 
   const vendorContainer = document.getElementById("vendor-app");

@@ -1,0 +1,42 @@
+@import "../../variables";
+
+.LeftBarItem {
+    display:flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    font-size: 14px;
+
+    img {
+        margin-right: 2px;
+        width: 18px;
+        height: 18px;
+    }
+
+    i {
+        font-size: 18px;
+        margin-right: 2px;
+    }
+
+    i.current {
+        color: $green;
+    }
+
+    i.success {
+        color: $green;
+    }
+
+    i.not-applicable {
+        color: #93c3e8;
+    }
+
+    i.pending {
+        color: #b9b9b9;
+    }
+
+    .btn {
+        background: $white;
+        padding-left: 0;
+        text-align: left;
+    }
+}

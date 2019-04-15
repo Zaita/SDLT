@@ -25,6 +25,7 @@ use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\DataObjectScaffolder;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\HasManyList;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use NZTA\SDLT\Validation\QuestionnaireValidation;
@@ -49,10 +50,13 @@ use SilverStripe\Forms\TextField;
  * @property boolean LockAnswersWhenComplete
  * @property string SubmitterIPAddress
  * @property string CompletedAt
+ * @property string JiraKey
  *
  * @method Member Submitter()
  * @method Task Task()
  * @method QuestionnaireSubmission QuestionnaireSubmission()
+ * @method HasManyList SelectedComponents()
+ * @method HasManyList JiraTickets()
  */
 class TaskSubmission extends DataObject implements ScaffoldingProvider
 {
@@ -79,7 +83,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         'SubmitterIPAddress' => 'Varchar(255)',
         'CompletedAt' => 'Datetime',
         'SendEmailAfterSubmission' => 'Boolean',
-        'EmailRelativeLinkToTask' => 'Varchar(255)'
+        'EmailRelativeLinkToTask' => 'Varchar(255)',
+        'JiraKey' => 'Varchar(255)'
     ];
 
     /**
@@ -89,6 +94,20 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         'Submitter' => Member::class,
         'Task' => Task::class,
         'QuestionnaireSubmission' => QuestionnaireSubmission::class
+    ];
+
+    /**
+     * @var array
+     */
+    private static $has_many = [
+        'JiraTickets' => JiraTicket::class
+    ];
+
+    /**
+     * @var array
+     */
+    private static $many_many = [
+        'SelectedComponents' => SecurityComponent::class,
     ];
 
     /**
@@ -130,6 +149,18 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             return "";
         }
         return $task->Name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTaskType()
+    {
+        $task = $this->Task();
+        if (!$task->exists()) {
+            return "";
+        }
+        return $task->TaskType;
     }
 
     /**
@@ -184,6 +215,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         $this->provideGraphQLScaffoldingForUpdateTaskSubmission($scaffolder);
         $this->provideGraphQLScaffoldingForCompleteTaskSubmission($scaffolder);
         $this->provideGraphQLScaffoldingForEditTaskSubmission($scaffolder);
+        $this->provideGraphQLScaffoldingForUpdateTaskSubmissionWithSelectedComponents($scaffolder);
         $this->provideGraphQLScaffoldingForReadTaskSubmission($dataObjectScaffolder);
     }
 
@@ -193,7 +225,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      */
     private function provideGraphQLScaffoldingForEntityType(SchemaScaffolder $scaffolder)
     {
-        return $scaffolder
+        $dataObjectScaffolder = $scaffolder
             ->type(TaskSubmission::class)
             ->addFields([
                 'ID',
@@ -204,9 +236,23 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'Result',
                 'Submitter',
                 'TaskName',
+                'TaskType',
                 'QuestionnaireSubmission',
-                'LockAnswersWhenComplete'
+                'LockAnswersWhenComplete',
+                'JiraKey',
             ]);
+
+        $dataObjectScaffolder
+            ->nestedQuery('SelectedComponents')
+            ->setUsePagination(false)
+            ->end();
+
+        $dataObjectScaffolder
+            ->nestedQuery('JiraTickets')
+            ->setUsePagination(false)
+            ->end();
+
+        return $dataObjectScaffolder;
     }
 
     /**
@@ -789,6 +835,9 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      */
     private function Link()
     {
+        if ($this->Task()->TaskType == 'selection') {
+            return "#/component-selection/submission/{$this->UUID}";
+        }
         return '#/task/submission/' . $this->UUID;
     }
 
@@ -825,5 +874,63 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
             return Director::absoluteBaseURL() . $anonLink;
         }
+    }
+
+    private function provideGraphQLScaffoldingForUpdateTaskSubmissionWithSelectedComponents(SchemaScaffolder $scaffolder)
+    {
+        $scaffolder
+            ->mutation('updateTaskSubmissionWithSelectedComponents', TaskSubmission::class)
+            ->addArgs([
+                'UUID' => 'String!',
+                'ComponentIDs' => 'String!',
+                'JiraKey' => 'String!'
+            ])
+            ->setResolver(new class implements ResolverInterface
+            {
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
+                 * @throws Exception
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    // TODO: Write it in a serious way
+                    /* @var $submission TaskSubmission */
+                    $submission = TaskSubmission::get()
+                        ->filter(['UUID' => $args['UUID']])
+                        ->first();
+                    $componentIDs = json_decode(base64_decode($args['ComponentIDs']), true);
+
+                    $submission->SelectedComponents()->removeAll();
+                    foreach($componentIDs as $componentID) {
+                        $component = SecurityComponent::get_by_id($componentID);
+                        $submission->SelectedComponents()->add($component);
+                    }
+
+                    $submission->JiraKey = $args['JiraKey'];
+
+                    $submission->write();
+
+                    // TODO: Create Jira tickets
+                    foreach($componentIDs as $componentID) {
+                        $component = SecurityComponent::get_by_id($componentID);
+                        $jiraTicket = JiraTicket::create();
+                        $jiraTicket->JiraKey = $submission->JiraKey;
+                        $jiraTicket->TicketLink = "https://www.catalyst.net.nz/404/component-{$component->Name}";
+                        $jiraTicket->write();
+
+                        $submission->JiraTickets()->add($jiraTicket);
+                    }
+
+                    return $submission;
+                }
+            })
+            ->end();
     }
 }

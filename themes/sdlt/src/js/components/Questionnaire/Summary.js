@@ -92,11 +92,15 @@ class Summary extends Component<Props> {
     return (
       <div className="tasks">
         <h3>Tasks</h3>
-        {taskSubmissions.map(({uuid, taskName, status}) => {
+        {taskSubmissions.map(({uuid, taskName, taskType, status}) => {
           const {token} = {...this.props};
           return (
             <div key={uuid}>
               <button className={"btn btn-link"} onClick={(event: Event) => {
+                if (taskType === "selection") {
+                  URLUtil.redirectToComponentSelectionSubmission(uuid, token);
+                  return;
+                }
                 URLUtil.redirectToTaskSubmission(uuid, token);
               }}>
                 {taskName} ({prettifyStatus(status)})

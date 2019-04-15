@@ -43,8 +43,12 @@ class Home extends Component<Props> {
           </div>
           <div className="tasks">
             {tasks.map((task: Task) => {
+              let link = `/tasks/standalone/${task.id}`;
+              if (task.type === "selection") {
+                link = "/component-selection/standalone";
+              }
               return (
-                <TaskButton link={`/tasks/standalone/${task.id}`} classes={["mx-1"]} title={task.name}/>
+                <TaskButton link={link} classes={["mx-1"]} title={task.name}/>
               );
             })}
           </div>

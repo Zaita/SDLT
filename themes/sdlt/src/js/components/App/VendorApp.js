@@ -8,8 +8,6 @@ import TaskSubmissionForVendorContainer from "../Task/TaskSubmissionForVendorCon
 class VendorApp extends Component<*> {
 
   render() {
-    // TODO: Render task submission for the vendor using secure token
-
     return (
       <div>
         <main>
