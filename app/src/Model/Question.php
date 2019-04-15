@@ -22,6 +22,7 @@ use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 use SilverStripe\Forms\GridField\GridFieldPaginator;
+use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 
 /**
  * Class Question
@@ -113,6 +114,7 @@ class Question extends DataObject implements ScaffoldingProvider
             $inputGridconfig->addComponent(
                 new GridFieldOrderableRows('SortOrder')
             );
+            $inputGridconfig->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
 
             $pageConfig = $inputGridconfig->getComponentByType(GridFieldPaginator::class);
             $pageConfig->setItemsPerPage(250);
@@ -126,6 +128,7 @@ class Question extends DataObject implements ScaffoldingProvider
             $actionGridconfig->addComponent(
                 new GridFieldOrderableRows('SortOrder')
             );
+            $actionGridconfig->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
 
             $pageConfig = $actionGridconfig->getComponentByType(GridFieldPaginator::class);
             $pageConfig->setItemsPerPage(250);

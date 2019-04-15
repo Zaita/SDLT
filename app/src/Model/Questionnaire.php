@@ -26,6 +26,7 @@ use SilverStripe\Security\Group;
 use SilverStripe\Forms\GridField\GridFieldSortableHeader;
 use SilverStripe\Forms\GridField\GridFieldFilterHeader;
 use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
+use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 
 /**
  * Class Questionnaire
@@ -85,6 +86,7 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
 
             $config->removeComponentsByType(GridFieldSortableHeader::class);
             $config->removeComponentsByType(GridFieldFilterHeader::class);
+            $config->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
             $config->addComponent(new GridFieldTitleHeader());
 
             $pageConfig = $config->getComponentByType(GridFieldPaginator::class);
