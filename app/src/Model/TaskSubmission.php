@@ -876,6 +876,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         }
     }
 
+    /**
+     * @param SchemaScaffolder $scaffolder scaffolder
+     * @return void
+     */
     private function provideGraphQLScaffoldingForUpdateTaskSubmissionWithSelectedComponents(SchemaScaffolder $scaffolder)
     {
         $scaffolder
@@ -900,31 +904,39 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                  */
                 public function resolve($object, array $args, $context, ResolveInfo $info)
                 {
-                    // TODO: Write it in a serious way
                     /* @var $submission TaskSubmission */
                     $submission = TaskSubmission::get()
-                        ->filter(['UUID' => $args['UUID']])
+                        ->filter(['UUID' => Convert::raw2sql($args['UUID'])])
                         ->first();
-                    $componentIDs = json_decode(base64_decode($args['ComponentIDs']), true);
-
-                    $submission->SelectedComponents()->removeAll();
-                    foreach($componentIDs as $componentID) {
-                        $component = SecurityComponent::get_by_id($componentID);
-                        $submission->SelectedComponents()->add($component);
+                    if (!$submission || !$submission->exists()) {
+                        throw new Exception('Task submission with the given UUID can not be found');
                     }
 
-                    $submission->JiraKey = $args['JiraKey'];
+                    $componentIDs = json_decode(base64_decode($args['ComponentIDs']), true);
 
+                    $components = [];
+                    $submission->SelectedComponents()->removeAll();
+                    foreach ($componentIDs as $componentID) {
+                        $component = SecurityComponent::get_by_id(Convert::raw2sql($componentID));
+                        if ($component) {
+                            $components[] = $component;
+                            $submission->SelectedComponents()->add($component);
+                        }
+                    }
+
+                    if (!$components) {
+                        throw new Exception('No components have been selected');
+                    }
+
+                    $submission->JiraKey = Convert::raw2sql($args['JiraKey']);
                     $submission->write();
 
-                    // TODO: Create Jira tickets
-                    foreach($componentIDs as $componentID) {
-                        $component = SecurityComponent::get_by_id($componentID);
+                    // TODO: Create real Jira tickets
+                    foreach ($components as $component) {
                         $jiraTicket = JiraTicket::create();
                         $jiraTicket->JiraKey = $submission->JiraKey;
                         $jiraTicket->TicketLink = "https://www.catalyst.net.nz/404/component-{$component->Name}";
                         $jiraTicket->write();
-
                         $submission->JiraTickets()->add($jiraTicket);
                     }
 
