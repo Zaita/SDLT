@@ -13,9 +13,10 @@
 
 namespace NZTA\SDLT\Model;
 
+use Exception;
 use GraphQL\Type\Definition\ResolveInfo;
-use NZTA\SDLT\GraphQL\GraphQLAuthFailure;
-use SilverStripe\GraphQL\Scaffolding\Interfaces\ResolverInterface;
+use SilverStripe\Core\Convert;
+use SilverStripe\GraphQL\OperationResolver;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
@@ -70,24 +71,27 @@ class JiraTicket extends DataObject implements ScaffoldingProvider
                 'ComponentID' => 'ID!',
                 'JiraKey' => 'String!',
             ])
-            ->setResolver(new class implements ResolverInterface
+            ->setResolver(new class implements OperationResolver
             {
                 /**
                  * Invoked by the Executor class to resolve this mutation / query
-                 * @param mixed $object object
-                 * @param array $args args
-                 * @param mixed $context context
-                 * @param ResolveInfo $info info
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
                  * @return mixed
-                 * @throws GraphQLAuthFailure
                  * @see Executor
-                 *
+                 * @throws Exception
                  */
                 public function resolve($object, array $args, $context, ResolveInfo $info)
                 {
-                    // TODO: Write the logic seriously
-                    $component = SecurityComponent::get_by_id($args['ComponentID']);
+                    $componentID = Convert::raw2sql($args['ComponentID']);
+                    $component = SecurityComponent::get_by_id($componentID);
+                    if (!$component) {
+                        throw new Exception("Can not find component with ID: {$componentID}");
+                    }
 
+                    // TODO: Create real Jira tickets based on the component
                     $jiraTicket = JiraTicket::create();
                     $jiraTicket->TicketLink = "https://catalyst.net.nz/{$component->Name}";
                     $jiraTicket->JiraKey = $args['JiraKey'];
