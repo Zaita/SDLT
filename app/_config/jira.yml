@@ -1,0 +1,7 @@
+SilverStripe\Core\Injector\Injector:
+  NZTA\SDLT\Helper\JIRA:
+    properties:
+      username: '`JIRA_USERNAME`'
+      api_key: '`JIRA_API_KEY`'
+      atlassian_instance: '`JIRA_ATLASSIAN_INSTANCE`'
+      project_name: '`JIRA_PROJECT_NAME`'
