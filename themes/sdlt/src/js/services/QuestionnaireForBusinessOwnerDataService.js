@@ -42,6 +42,7 @@ query {
     TaskSubmissions {
       UUID
       TaskName
+      TaskType
       Status
     }
   }
@@ -88,6 +89,7 @@ query {
             const taskSubmission: TaskSubmissionDisplay = {
               uuid: _.toString(_.get(item, "UUID", "")),
               taskName: _.toString(_.get(item, "TaskName", "")),
+              taskType: _.toString(_.get(item, "TaskType", "")),
               status: _.toString(_.get(item, "Status", "")),
             };
             return taskSubmission;

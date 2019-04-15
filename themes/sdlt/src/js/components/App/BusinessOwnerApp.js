@@ -5,6 +5,8 @@ import {HashRouter, Route, Switch} from "react-router-dom";
 import SummaryForBusinessOwnerContainer from "../Questionnaire/SummaryForBusinessOwner";
 import {parse} from "query-string";
 import TaskSubmissionForBusinessOwner from "../Task/TaskSubmissionForBusinessOwner";
+import ComponentSelectionForBusinessOwnerContainer
+  from "../ComponentSelection/ComponentSelectionForBusinessOwnerContainer";
 
 class BusinessOwnerApp extends Component<*> {
 
@@ -31,6 +33,16 @@ class BusinessOwnerApp extends Component<*> {
                   return (
                     <div className="gray-bg">
                       <TaskSubmissionForBusinessOwner uuid={match.params.uuid} token={query.token || ""}/>
+                    </div>
+                  );
+                }}
+              </Route>
+              <Route path='/component-selection/submission/:uuid'>
+                {({match, location}) => {
+                  const query = parse(location.search);
+                  return (
+                    <div className="gray-bg">
+                      <ComponentSelectionForBusinessOwnerContainer uuid={match.params.uuid} token={query.token || ""}/>
                     </div>
                   );
                 }}

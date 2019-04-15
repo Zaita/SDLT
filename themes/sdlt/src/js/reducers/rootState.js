@@ -7,11 +7,13 @@ import questionnaireState from "./questionnaireState";
 import {taskSubmissionState} from "./taskSubmissionState";
 import {currentUserState} from "./currentUserState";
 import {siteConfigState} from "./siteConfigState";
+import {componentSelectionState} from "./componentSelectionState";
 
 export default combineReducers<RootState>({
   homeState,
   questionnaireState,
   taskSubmissionState,
   currentUserState,
-  siteConfigState
+  siteConfigState,
+  componentSelectionState
 });
