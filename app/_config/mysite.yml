@@ -13,3 +13,7 @@ SilverStripe\CMS\Model\SiteTree:
 
 SilverStripe\Core\Injector\Injector:
   Swift_Transport: Swift_SendmailTransport
+
+DNADesign\Populate\Populate:
+  include_yaml_fixtures:
+    - 'app/populate/populate-security-components.yml'

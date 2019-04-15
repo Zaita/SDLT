@@ -45,12 +45,13 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider
     /**
      * @var array
      */
-    private static $has_many = [
+    private static $many_many = [
         'Controls' => SecurityControl::class,
     ];
 
     /**
      * @param SchemaScaffolder $scaffolder The scaffolder
+     * @return SchemaScaffolder
      */
     public function provideGraphQLScaffolding(SchemaScaffolder $scaffolder)
     {

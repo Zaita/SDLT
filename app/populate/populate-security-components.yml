@@ -1,0 +1,25 @@
+NZTA\SDLT\Model\SecurityComponent:
+  mycomponent:
+    Name: My component
+    Description: ''
+NZTA\SDLT\Model\SecurityControl:
+  loginattempts:
+    Name: Log all login attempts
+    Description: All user login attempts must be logged to a central logging platform
+    Component: =>NZTA\SDLT\Model\SecurityComponent.mycomponent
+  logging:
+    Name: Integrate Logging information with SIEM
+    Description: All logged messages must be integrated with central logging system that is integrated with AlienVault
+    Component: =>NZTA\SDLT\Model\SecurityComponent.mycomponent
+  mfa:
+    Name: Enable Multifactor Authentication
+    Description: No description
+    Component: =>NZTA\SDLT\Model\SecurityComponent.mycomponent
+  sshpassword:
+    Name: Disable password logins for SSH services
+    Description:
+    Component: =>NZTA\SDLT\Model\SecurityComponent.mycomponent
+  passwordpolicy:
+    Name: adhere to password policy
+    Description: Password policy can be found at localhost
+    Component: =>NZTA\SDLT\Model\SecurityComponent.mycomponent
