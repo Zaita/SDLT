@@ -26,6 +26,7 @@ use SilverStripe\ORM\HasManyList;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
+use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 
 /**
  * Class Task
@@ -80,6 +81,7 @@ class Task extends DataObject implements ScaffoldingProvider
             $config->addComponent(
                 new GridFieldOrderableRows('SortOrder')
             );
+            $config->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
         }
 
         if ($this->TaskType === 'selection') {
@@ -132,7 +134,9 @@ class Task extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * @param SchemaScaffolder $scaffolder
+     * Provide GraphQL scaffolding
+     * @param SchemaScaffolder $scaffolder scaffolder
+     * @return SchemaScaffolder
      */
     public function provideGraphQLScaffolding(SchemaScaffolder $scaffolder)
     {
@@ -157,7 +161,7 @@ class Task extends DataObject implements ScaffoldingProvider
                  * @param array       $args    args
                  * @param mixed       $context context
                  * @param ResolveInfo $info    info
-                 * @throws Exception
+                 * @throws GraphQLAuthFailure
                  * @return mixed
                  */
                 public function resolve($object, array $args, $context, ResolveInfo $info)
