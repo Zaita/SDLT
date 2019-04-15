@@ -159,7 +159,7 @@ export function saveAnsweredQuestionInTaskSubmission(
 
 
     if (complete) {
-      await dispatch(completeTaskSubmission({bypassNetwork, secureToken}));
+      await dispatch(completeTaskSubmission({bypassNetwork, secureToken, result}));
     }
   };
 }
@@ -192,9 +192,10 @@ export function saveSelectedComponents(jiraKey: string): ThunkAction {
 
 export function completeTaskSubmission(args: {
   secureToken?: string,
-  bypassNetwork?: boolean
+  bypassNetwork?: boolean,
+  result?: string
 } = {}): ThunkAction {
-  const {secureToken, bypassNetwork} = {...args};
+  const {secureToken, bypassNetwork, result} = {...args};
 
   return async (dispatch, getState) => {
     const getTaskSubmission = () => {
@@ -216,7 +217,7 @@ export function completeTaskSubmission(args: {
 
         const {uuid} = await TaskDataService.completeTaskSubmission({
           uuid: getTaskSubmission().uuid,
-          result: "",
+          result: result || "",
           secureToken: secureToken,
           csrfToken
         });
