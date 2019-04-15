@@ -37,7 +37,10 @@ class SecurityControl extends DataObject
         'Description' => 'Text',
     ];
 
-    private static $has_one = [
+    /**
+     * @var array
+     */
+    private static $belongs_many_many = [
         'Component' => SecurityComponent::class
     ];
 }

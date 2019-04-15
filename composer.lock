@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c698d21a8e4a312bfb8a49e98311d86b",
+    "content-hash": "ee6be1d75ae032528b09477b354577c9",
     "packages": [
         {
             "name": "asyncphp/doorman",
@@ -2263,7 +2263,7 @@
             ],
             "authors": [
                 {
-                    "name": "Sam Minnée",
+                    "name": "Sam Minnee",
                     "email": "sam@silverstripe.com"
                 }
             ],
@@ -3181,7 +3181,7 @@
                 },
                 {
                     "name": "Gert de Pagter",
-                    "email": "BackEndTea@gmail.com"
+                    "email": "backendtea@gmail.com"
                 }
             ],
             "description": "Symfony polyfill for ctype functions",
@@ -3885,6 +3885,51 @@
                 "performance"
             ],
             "time": "2019-01-28T20:25:53+00:00"
+        },
+        {
+            "name": "dnadesign/silverstripe-populate",
+            "version": "2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dnadesign/silverstripe-populate.git",
+                "reference": "ecc20bb62948bf581136acdf0d0415755da04ccc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dnadesign/silverstripe-populate/zipball/ecc20bb62948bf581136acdf0d0415755da04ccc",
+                "reference": "ecc20bb62948bf581136acdf0d0415755da04ccc",
+                "shasum": ""
+            },
+            "require": {
+                "silverstripe/framework": "^4@stable",
+                "silverstripe/versioned": "^1@dev"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.8"
+            },
+            "type": "silverstripe-vendormodule",
+            "autoload": {
+                "psr-4": {
+                    "DNADesign\\Populate\\": "code/",
+                    "DNADesign\\Populate\\Tests\\": "tests/php/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Will Rossiter",
+                    "email": "will.rossiter@dna.co.nz"
+                }
+            ],
+            "description": "Populate your database through YAML files",
+            "keywords": [
+                "silverstripe",
+                "yaml"
+            ],
+            "time": "2018-07-11T02:32:18+00:00"
         },
         {
             "name": "doctrine/annotations",

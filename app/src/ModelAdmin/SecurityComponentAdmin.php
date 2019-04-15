@@ -43,24 +43,4 @@ class SecurityComponentAdmin extends ModelAdmin
      * @var string
      */
     private static $menu_title = 'Security Components';
-
-    /**
-     * @param int $id ID
-     * @param FieldList $fields Fields
-     * @return Form
-     */
-    public function getEditForm($id = null, $fields = null)
-    {
-        $form = parent::getEditForm($id, $fields);
-
-        $gridFieldName = $this->sanitiseClassName($this->modelClass);
-
-        /* @var GridField $gridField */
-        $gridField = $form->Fields()->fieldByName($gridFieldName);
-        $config = GridFieldConfig_RelationEditor::create();
-        $config->AddComponents(new GridFieldViewButton());
-        $gridField->setConfig($config);
-
-        return $form;
-    }
 }
