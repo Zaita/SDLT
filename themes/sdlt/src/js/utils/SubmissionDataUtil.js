@@ -81,8 +81,11 @@ export default class SubmissionDataUtil {
   ): CalculateCursorMoveFromQuestionReturn {
     const {answeredQuestion, questions} = {...argument};
 
+    const currentIndex = questions.findIndex((question) => question.id === answeredQuestion.id);
+    const isLastQuestion = (currentIndex === questions.length - 1);
+
     const returnPackage = {
-      currentIndex: questions.findIndex((question) => question.id === answeredQuestion.id),
+      currentIndex: currentIndex,
       nonApplicableIndexes: [],
       targetIndex: 0,
       complete: false,
@@ -92,7 +95,7 @@ export default class SubmissionDataUtil {
 
     // Process for input question
     if (answeredQuestion.type === "input") {
-      if (returnPackage.currentIndex === questions.length - 1) {
+      if (isLastQuestion) {
         // Mark complete if this is the last question
         returnPackage.complete = true;
       } else {
@@ -131,7 +134,7 @@ export default class SubmissionDataUtil {
         returnPackage.terminate = true;
       }
 
-      if (choseAction.type === "continue") {
+      if (choseAction.type === "continue" && !isLastQuestion) {
         returnPackage.targetIndex = returnPackage.currentIndex + 1;
       }
 
@@ -157,7 +160,7 @@ export default class SubmissionDataUtil {
         }
       }
 
-      if (returnPackage.currentIndex === questions.length - 1) {
+      if (isLastQuestion) {
         // Mark complete if this is the last question
         returnPackage.complete = true;
       }
