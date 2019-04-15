@@ -99,10 +99,14 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
 
         $fields->removeByName(['QuestionID', 'SortOrder']);
 
-        // get questionnaire Id
-        $questionnaireID = $this->Question()->Questionnaire()->ID;
-
-        $questionList = Question::get()->filter('QuestionnaireID', $questionnaireID);
+        //Questions are used on both Task and Questionnaire: we don't know which
+        //one this action field applies to, so we need to merge the sets of both
+        //in rare cases, the question may be used on both a Questionnaire and a
+        //task
+        $questionList =
+            $this->Question()->Task()->Questions()->map()->toArray()
+            +
+            $this->Question()->Questionnaire()->Questions()->map()->toArray();
 
         /* @var $taskField DropdownField */
         $taskField = $fields->dataFieldByName('TaskID');
