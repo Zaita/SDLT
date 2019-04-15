@@ -80,4 +80,49 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider
     {
         return (Security::getCurrentUser() !== null);
     }
+
+    /**
+     * Generate a checklist of security controls in JIRA format
+     *
+     * @return string
+     */
+    public function getChecklist()
+    {
+        $controls = $this->Controls();
+        $list = '';
+        foreach ($controls as $control) {
+            $intro =
+            $list .= sprintf("\t* *(/) %s*\n\t\t%s\n", $control->Name, $control->Description);
+        }
+        return $list;
+    }
+
+    /**
+     * Generate a JIRA instruction panel with a title and background colour
+     *
+     * @param string $introTitle defaults to 'Instruction'
+     * @param string $bgColor    hexadecimal RGB colour, defaults to FFFFCE
+     * @return string
+     */
+    public function getIntro($introTitle = 'Instruction', $bgColor = "FFFFCE")
+    {
+
+        return sprintf(
+            "{panel:title=(on) %s|bgColor=#%s}%s{panel}\t\n*%s*\n",
+            $introTitle,
+            $bgColor,
+            $this->Description,
+            $this->Name
+        );
+    }
+
+    /**
+     * Generate an instruction panel followed by a checklist
+     *
+     * @return string
+     */
+    public function getJIRABody()
+    {
+        return $this->getIntro() . $this->getChecklist();
+    }
 }
