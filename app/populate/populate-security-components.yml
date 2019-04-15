@@ -1,7 +1,7 @@
 NZTA\SDLT\Model\SecurityComponent:
   mycomponent:
     Name: My component
-    Description: ''
+    Description: 'Please complete the checklist below.\n\t\tMark the items (/) to complete the checklist. Once all of the checklist is completed then move this tickets status to \"*Done*\" and enter resolution \"*Done*\"'
 NZTA\SDLT\Model\SecurityControl:
   loginattempts:
     Name: Log all login attempts
