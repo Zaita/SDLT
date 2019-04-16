@@ -931,13 +931,17 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     $submission->JiraKey = Convert::raw2sql($args['JiraKey']);
                     $submission->write();
 
-                    // TODO: Create real Jira tickets
                     foreach ($components as $component) {
-                        $jiraTicket = JiraTicket::create();
-                        $jiraTicket->JiraKey = $submission->JiraKey;
-                        $jiraTicket->TicketLink = "https://www.catalyst.net.nz/404/component-{$component->Name}";
-                        $jiraTicket->write();
-                        $submission->JiraTickets()->add($jiraTicket);
+                            $jiraTicket = JiraTicket::create();
+                            $jiraTicket->JiraKey = Convert::raw2sql($args['JiraKey']);
+                            $link = JIRA::create()->addTask(
+                                $jiraTicket->JiraKey,
+                                $component->Name,
+                                $component->getJIRABody()
+                            );
+                            $jiraTicket->TicketLink = $link;
+                            $jiraTicket->write();
+                            $submission->JiraTickets()->add($jiraTicket);
                     }
 
                     return $submission;
