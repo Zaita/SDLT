@@ -1037,8 +1037,14 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      */
     public function getApprovalPageLink()
     {
-        $link = Convert::html2raw(Director::absoluteBaseURL(). 'Security/login?BackURL='.rawurlencode("/businessOwnerApproval/#/questionnaire/summary/{$this->UUID}?token={$this->ApprovalLinkToken}"));
-        return $link;
+        $link = sprintf(
+            "%s%s%s?token=%s",
+            Director::absoluteBaseURL(),
+            "businessOwnerApproval/#/questionnaire/summary/",
+            $this->UUID,
+            $this->ApprovalLinkToken
+        );
+        return Convert::html2raw($link);
     }
 
     /**
