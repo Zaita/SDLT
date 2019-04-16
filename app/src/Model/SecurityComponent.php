@@ -19,6 +19,9 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\HasManyList;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
+use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\TextareaField;
+use SilverStripe\Forms\LiteralField;
 
 /**
  * Class SecurityComponent
@@ -92,7 +95,7 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider
         $list = '';
         foreach ($controls as $control) {
             $intro =
-            $list .= sprintf("\t* *(/) %s*\n\t\t%s\n", $control->Name, $control->Description);
+            $list .= sprintf("\t* *(x) %s*\n\t\t%s\n", $control->Name, $control->Description);
         }
         return $list;
     }
@@ -124,5 +127,39 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider
     public function getJIRABody()
     {
         return $this->getIntro() . $this->getChecklist();
+    }
+
+    /**
+     * get cms fields
+     *
+     * @return FieldList
+     */
+    public function getCMSFields()
+    {
+        $fields = parent::getCMSFields();
+
+        $instructions = LiteralField::create(
+            'JIRAControlsChecklistMessage',
+            sprintf(
+                "<div class='warning message'>%s</div>",
+                'Each of these controls is a line on a checklist generated on'
+                .' the JIRA ticket. They will all be combined and shown as'
+                .' "unchecked" with the Title followed by the description when'
+                .' submitted to JIRA.'
+            )
+        );
+
+        $name = TextField::create('Name')
+            ->setDescription('This is the title of the component. It is'
+            .' displayed on the component selection screen.');
+
+        $description = TextareaField::create('Description')
+            ->setDescription('This contains the instructions that appear inside'
+            .' the panel at the top of the JIRA story.');
+
+        $fields->addFieldsToTab('Root.Main', [$name, $description]);
+        $fields->addFieldToTab('Root.Controls', $instructions);
+
+        return $fields;
     }
 }

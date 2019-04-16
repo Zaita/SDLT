@@ -20,6 +20,7 @@ use SilverStripe\GraphQL\OperationResolver;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
+use NZTA\SDLT\Helper\JIRA;
 
 /**
  * Class JiraTicket
@@ -91,11 +92,16 @@ class JiraTicket extends DataObject implements ScaffoldingProvider
                         throw new Exception("Can not find component with ID: {$componentID}");
                     }
 
-                    // TODO: Create real Jira tickets based on the component
                     $jiraTicket = JiraTicket::create();
-                    $jiraTicket->TicketLink = "https://catalyst.net.nz/{$component->Name}";
-                    $jiraTicket->JiraKey = $args['JiraKey'];
+                    $jiraTicket->JiraKey = Convert::raw2sql($args['JiraKey']);
+                    $link = JIRA::create()->addTask(
+                        $jiraTicket->JiraKey,
+                        $component->Name,
+                        $component->getJIRABody()
+                    );
+                    $jiraTicket->TicketLink = $link;
                     $jiraTicket->write();
+
 
                     return $jiraTicket;
                 }

@@ -36,7 +36,6 @@ class JIRA
      *      username: '`JIRA_USERNAME`'
      *      api_key: '`JIRA_API_KEY`'
      *      atlassian_instance: '`JIRA_ATLASSIAN_INSTANCE`'
-     *      project_name: '`JIRA_PROJECT_NAME`'
      * ```
      *
      * Set these constants in .env
@@ -57,35 +56,35 @@ class JIRA
             ],
             'body' => $data,
             'headers' => [
-                'Content-Type' => 'application/json'
+                'Accept'     => 'application/json',
+                'Content-Type' => 'application/json',
             ]
         ]);
 
-        $result = null;
-        if ($response->getStatusCode() == 200) {
-            $result = (string) $response->getBody();
+        $result = (string) $response->getBody();
+        if ($result) {
+            return $result;
         }
 
-        return $result;
+        return null;
     }
 
     /**
      * Adds a task to the JIRA board
      *
+     * @param string $projectName name of the JIRA board to post issues to
      * @param string $name        This shows at the title of the JIRA story
      * @param string $description This is the body of the JIRA story
      * @param string $issueType   defaults to Task, other options unknown
      * @throws \Exception when project name is not set
      * @return Client
      */
-    public function addTask($name, $description, $issueType = 'Task')
+    public function addTask($projectName, $name, $description, $issueType = 'Task')
     {
-        if (!$this->project_name) {
-            throw new \Exception('Project name is not set');
-        }
+        $projectName = strtoupper($projectName);
         $data['fields'] = [
             'project' => [
-                'key' => $this->project_name
+                'key' => $projectName
             ],
             'summary' => $name,
             'description' => $description,
@@ -96,6 +95,16 @@ class JIRA
 
         $body = json_encode($data);
 
-        return $this->call('/rest/api/2/issue', $body);
+        if ($result = $this->call('/rest/api/2/issue', $body)) {
+            $json = json_decode($result);
+            if (isset($json->key)) {
+                return sprintf(
+                    "%s/projects/%s/issues/%s",
+                    $this->atlassian_instance,
+                    $projectName,
+                    $json->key
+                );
+            }
+        }
     }
 }
