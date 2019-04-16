@@ -63,7 +63,7 @@ class QuestionnaireAdmin extends ModelAdmin
 
         /* @var GridField $gridField */
         $gridField = $form->Fields()->fieldByName($gridFieldName);
-        $config = GridFieldConfig_RelationEditor::create();
+        $config = GridFieldConfig_RelationEditor::create(250);
         $gridField->setConfig($config);
 
         return $form;
