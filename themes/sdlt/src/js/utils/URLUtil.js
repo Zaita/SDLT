@@ -28,11 +28,24 @@ export default class URLUtil {
     window.location.href = `/#/task/submission/${uuid}`;
   }
 
+  static redirectToComponentSelectionSubmission(uuid: string, token: string = "") {
+    if (token) {
+      window.location.href = `/businessOwnerApproval/#/component-selection/submission/${uuid}?token=${token}`;
+      return;
+    }
+
+    window.location.href = `/#/component-selection/submission/${uuid}`;
+  }
+
   static redirectToLogout() {
     window.location.href = "/Security/Logout";
   }
 
   static redirectToLogin() {
     window.location.href = "/Security/login?BackURL=%2F";
+  }
+
+  static redirectToHome() {
+    window.location.href = "/";
   }
 }

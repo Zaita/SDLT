@@ -5,6 +5,7 @@ import type {QuestionnaireStartState, QuestionnaireSubmissionState} from "../sto
 import type {User} from "../types/User";
 import type {TaskSubmission} from "../types/Task";
 import type {Question} from "../types/Questionnaire";
+import type {JiraTicket, SecurityComponent} from "../types/SecurityComponent";
 
 export type LoadHomeStateFinishedAction = {
   type: string,
@@ -54,6 +55,21 @@ export type SetSiteTitleAction = {
   payload: string
 };
 
+export type LoadAvailableComponentsAction = {
+  type: string,
+  payload: Array<SecurityComponent>
+}
+
+export type AddSelectedComponentAction = {
+  type: string,
+  payload: string,
+};
+
+export type RemoveSelectedComponentAction = {
+  type: string,
+  payload: string,
+};
+
 const ActionType = {
   HOME: {
     LOAD_HOME_STATE_STARTED: "LOAD_HOME_STATE_STARTED",
@@ -74,6 +90,13 @@ const ActionType = {
     MOVE_TO_ANOTHER_TASK_QUESTION: "ACTION_TASK_MOVE_TO_ANOTHER_TASK_QUESTION",
     COMPLETE_TASK_SUBMISSION: "ACTION_TASK_COMPLETE_TASK_SUBMISSION",
     EDIT_TASK_SUBMISSION: "ACTION_TASK_EDIT_TASK_SUBMISSION",
+  },
+  COMPONENT_SELECTION: {
+    SET_AVAILABLE_COMPONENTS: "ACTION_COMPONENT_SELECTION_SET_AVAILABLE_COMPONENTS",
+    ADD_SELECTED_COMPONENT: "ACTION_COMPONENT_SELECTION_ADD_SELECTED_COMPONENT",
+    REMOVE_SELECTED_COMPONENT: "ACTION_COMPONENT_SELECTION_REMOVE_SELECTED_COMPONENT",
+    SET_JIRA_TICKETS: "ACTION_COMPONENT_SELECTION_SET_JIRA_TICKETS",
+    SET_VIEW_MODE: "ACTION_COMPONENT_SELECTION_SET_VIEW_MODE"
   },
   // TODO: add a global UI state to reflect loading and error
   UI: {

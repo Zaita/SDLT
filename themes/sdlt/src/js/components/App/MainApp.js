@@ -9,6 +9,8 @@ import ReviewContainer from "../Questionnaire/ReviewContainer";
 import SummaryContainer from "../Questionnaire/SummaryContainer";
 import TaskSubmissionContainer from "../Task/TaskSubmissionContainer";
 import TaskStandaloneContainer from "../Task/TaskStandaloneContainer";
+import ComponentSelectionStandaloneContainer from "../ComponentSelection/ComponentSelectionStandaloneContainer";
+import ComponentSelectionContainer from "../ComponentSelection/ComponentSelectionContainer";
 
 class MainApp extends Component<*> {
 
@@ -72,6 +74,20 @@ class MainApp extends Component<*> {
                 return (
                   <div className="gray-bg">
                     <TaskStandaloneContainer taskId={match.params.taskId}/>
+                  </div>
+                );
+              }}
+            </Route>
+            <Route path='/component-selection/standalone'>
+              <div className="gray-bg">
+                <ComponentSelectionStandaloneContainer/>
+              </div>
+            </Route>
+            <Route path='/component-selection/submission/:uuid'>
+              {({match}) => {
+                return (
+                  <div className="gray-bg">
+                    <ComponentSelectionContainer uuid={match.params.uuid}/>
                   </div>
                 );
               }}
