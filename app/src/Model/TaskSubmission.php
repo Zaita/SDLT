@@ -34,6 +34,8 @@ use SilverStripe\Control\Director;
 use Symbiote\QueuedJobs\Services\QueuedJobService;
 use NZTA\SDLT\Job\SendTaskSubmissionEmailJob;
 use SilverStripe\Forms\TextField;
+use NZTA\SDLT\Helper\JIRA;
+use NZTA\SDLT\Model\JiraTicket;
 
 /**
  * Class TaskSubmission

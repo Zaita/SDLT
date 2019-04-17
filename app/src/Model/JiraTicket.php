@@ -52,6 +52,14 @@ class JiraTicket extends DataObject implements ScaffoldingProvider
     ];
 
     /**
+     * @var array
+     */
+    private static $summary_fields = [
+        'JiraKey' => 'JIRA Board',
+        'TicketLink' => 'Link to ticket'
+    ];
+
+    /**
      * @param SchemaScaffolder $scaffolder The scaffolder of the schema
      *
      * @return void
