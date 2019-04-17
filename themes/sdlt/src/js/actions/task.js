@@ -15,6 +15,7 @@ import type {
   PutDataInTaskSubmissionAction,
 } from "./ActionType";
 import type {User} from "../types/User";
+import type {RootState} from "../store/RootState";
 
 export function loadTaskSubmission(args: {uuid: string, secureToken?: string}): ThunkAction {
   const {uuid, secureToken} = {...args};
@@ -48,9 +49,12 @@ export function loadStandaloneTaskSubmission(args: {taskId: string}): ThunkActio
         id: "",
         uuid: "",
         taskName: task.name,
+        taskType: "questionnaire",
         status: "in_progress",
         result: "",
         questions: task.questions,
+        selectedComponents: [],
+        jiraTickets: [],
         questionnaireSubmissionUUID: "",
         questionnaireSubmissionID: "",
         submitter: getState().currentUserState,
@@ -155,36 +159,78 @@ export function saveAnsweredQuestionInTaskSubmission(
 
 
     if (complete) {
-      if (!bypassNetwork) {
-        try {
-          const csrfToken = await CSRFTokenService.getCSRFToken();
+      await dispatch(completeTaskSubmission({bypassNetwork, secureToken, result}));
+    }
+  };
+}
 
-          // Prevent anonymous user to create other task submissions according to the answers
-          if (!secureToken) {
-            await TaskDataService.createTaskSubmissionsAccordingToQuestions({
-              questions: getTaskSubmission().questions,
-              questionnaireSubmissionID: getTaskSubmission().questionnaireSubmissionID,
-              csrfToken
-            });
-          }
+export function saveSelectedComponents(jiraKey: string): ThunkAction {
+  return async (dispatch, getState) => {
+    const rootState: RootState = getState();
+    const taskSubmission = rootState.taskSubmissionState.taskSubmission;
+    if (!taskSubmission) {
+      return;
+    }
 
-          const {uuid} = await TaskDataService.completeTaskSubmission({
-            uuid: getTaskSubmission().uuid,
-            result: result,
-            secureToken: secureToken,
+    const componentIDs = rootState.componentSelectionState.selectedComponents.map((component) => {
+      return component.id
+    });
+
+    try {
+      await TaskDataService.updateTaskSubmissionWithSelectedComponents({
+        jiraKey,
+        componentIDs,
+        uuid: taskSubmission.uuid,
+        csrfToken: await CSRFTokenService.getCSRFToken()
+      });
+      await dispatch(completeTaskSubmission());
+    } catch(error) {
+      ErrorUtil.displayError(error);
+    }
+  };
+}
+
+export function completeTaskSubmission(args: {
+  secureToken?: string,
+  bypassNetwork?: boolean,
+  result?: string
+} = {}): ThunkAction {
+  const {secureToken, bypassNetwork, result} = {...args};
+
+  return async (dispatch, getState) => {
+    const getTaskSubmission = () => {
+      return getState().taskSubmissionState.taskSubmission;
+    };
+
+    if (!bypassNetwork) {
+      try {
+        const csrfToken = await CSRFTokenService.getCSRFToken();
+
+        // Prevent anonymous user to create other task submissions according to the answers
+        if (!secureToken) {
+          await TaskDataService.createTaskSubmissionsAccordingToQuestions({
+            questions: getTaskSubmission().questions,
+            questionnaireSubmissionID: getTaskSubmission().questionnaireSubmissionID,
             csrfToken
           });
-
-          await dispatch(loadTaskSubmission({uuid, secureToken}));
-        } catch (error) {
-          ErrorUtil.displayError(error);
         }
-      } else {
-        await dispatch({
-          type: ActionType.TASK.COMPLETE_TASK_SUBMISSION,
-          payload: result
+
+        const {uuid} = await TaskDataService.completeTaskSubmission({
+          uuid: getTaskSubmission().uuid,
+          result: result || "",
+          secureToken: secureToken,
+          csrfToken
         });
+
+        await dispatch(loadTaskSubmission({uuid, secureToken}));
+      } catch (error) {
+        ErrorUtil.displayError(error);
       }
+    } else {
+      await dispatch({
+        type: ActionType.TASK.COMPLETE_TASK_SUBMISSION,
+        payload: ""
+      });
     }
   };
 }

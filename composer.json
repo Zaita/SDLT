@@ -22,7 +22,8 @@
         "sensiolabs/security-checker": "^5.0.1",
         "squizlabs/php_codesniffer": "^3.3.2",
         "lekoala/silverstripe-debugbar": "^2.0",
-        "silverstripe/graphql-devtools": "^1.0@dev"
+        "silverstripe/graphql-devtools": "^1.0@dev",
+        "dnadesign/silverstripe-populate": "^2.0"
     },
     "extra": {
         "project-files-installed": [

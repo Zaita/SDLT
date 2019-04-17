@@ -1,0 +1,21 @@
+@import "../../variables";
+
+.ComponentSelectionReview {
+  max-width: map_get($container-max-widths, xl);
+  margin: 0 auto 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+
+  .section {
+    @extend .bg-white;
+    @extend .mb-3;
+    @extend .p-3;
+
+    h4 {
+      font-weight: 600;
+      color: $blue;
+    }
+  }
+}
