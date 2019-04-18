@@ -105,7 +105,7 @@ class SummaryContainer extends Component<Props, State> {
 
     return (
       <div className="SummaryContainer">
-        <Header title={title} subtitle="Summary"/>
+        <Header title={title} subtitle="Summary" username={user.name}/>
         <Summary submission={submission}
                  handlePDFDownloadButtonClick={this.handlePDFDownloadButtonClick.bind(this)}
                  handleSubmitButtonClick={this.handleSubmitButtonClick.bind(this)}
