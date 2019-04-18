@@ -66,7 +66,7 @@ class QuestionnaireContainer extends Component<Props> {
     if (submission.status !== "in_progress") {
       return (
         <div className="QuestionnaireContainer">
-          <Header title={title} subtitle={siteTitle} />
+          <Header title={title} subtitle={siteTitle} username={user.name}/>
           <div className="Questionnaire">
             <h1>
               The questionnaire is not in progress...
@@ -80,7 +80,7 @@ class QuestionnaireContainer extends Component<Props> {
 
     return (
       <div className="QuestionnaireContainer">
-        <Header title={title} subtitle={siteTitle} />
+        <Header title={title} subtitle={siteTitle} username={user.name} />
 
         <Questionnaire
           questions={submission.questions}
