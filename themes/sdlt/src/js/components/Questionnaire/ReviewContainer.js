@@ -58,7 +58,7 @@ class ReviewContainer extends Component<Props> {
 
     return (
       <div className="ReviewContainer">
-        <Header title={title} subtitle="Review Responses"/>
+        <Header title={title} subtitle="Review Responses" username={user.name}/>
         <Review siteTitle={siteTitle}
                 submission={submission}
                 handleSubmitButtonClick={this.handleSubmitButtonClick.bind(this)}

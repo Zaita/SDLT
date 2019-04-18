@@ -56,7 +56,7 @@ class StartContainer extends Component<Props> {
 
     return (
       <div className="StartContainer">
-        <Header title={title} subtitle={subtitle} />
+        <Header title={title} subtitle={subtitle} username={user.name}/>
 
         <Start keyInformation={keyInformation}
                user={user}
