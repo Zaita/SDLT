@@ -27,6 +27,7 @@ use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
+use SilverStripe\Forms\GridField\GridFieldPaginator;
 
 /**
  * Class Task
@@ -82,6 +83,8 @@ class Task extends DataObject implements ScaffoldingProvider
                 new GridFieldOrderableRows('SortOrder')
             );
             $config->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
+            $config->getComponentByType(GridFieldPaginator::class)
+                ->setItemsPerPage(250);
         }
 
         if ($this->TaskType === 'selection') {
