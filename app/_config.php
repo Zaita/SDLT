@@ -32,13 +32,15 @@ $validator = PasswordValidator::create();
 Member::set_password_validator($validator);
 
 
-
+// for the initial release, Azure Active Directory is the default login scheme.
+// A future release will make AAD optional.
 // we need the default authenticator to be available for two reasons:
-// * when a developer or non-NZTA user needs to login with the locally managed users
+// * when a non-AAD user needs to login with a SilverStripe-managed Member
 // * when any non-Silverstripe user needs to log out
 //
 // The first case passes in a showloginform=1 parameter. This makes the default
-// authenticator available for logins
+// authenticator available for logins. This will set a cookie to be utilised on
+// subsequent login/logout requests throughout the session.
 //
 // The second case appears whenever a SecurityID is present as a GET parameter
 // This makes the default authenticator available for one request, but is not

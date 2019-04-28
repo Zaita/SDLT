@@ -75,8 +75,8 @@ gulp.task("watch", () => {
   // When dist files change, refresh browser
 
   // The way browserSync works is:
-  // Developer --> [External URL (https://10.221.213.41:3000/)] ---proxy--> [Nginx URL (https://sdlt)]
-  // We can use [UI URL (http://10.221.213.41:3001/)] to monitor the process
+  // Developer --> [External URL (https://10.0.123.45:3000/)] ---proxy--> [Nginx URL (https://sdlt)]
+  // We can use [UI URL (http://10.0.123.45:3001/)] to monitor the process
   browserSync.init({
     proxy: {
       target: "https://sdlt"

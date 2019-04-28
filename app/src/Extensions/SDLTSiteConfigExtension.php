@@ -43,7 +43,7 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
      * @var array
      */
     private static $has_one = [
-        'NZTALogo' => Image::class,
+        'Logo' => Image::class,
         'LoginHeroImage' => Image::class
     ];
 
@@ -53,7 +53,7 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
      * @var array
      */
     private static $owns = [
-        'NZTALogo',
+        'Logo',
         'LoginHeroImage'
     ];
 
@@ -68,8 +68,8 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
         $fields->addFieldsToTab(
             'Root.Images',
             [
-                UploadField::create('NZTALogo', 'NZTA Logo')
-                    ->setDescription('This is official NZTA logo that appears throughout the application. Should be an SVG'),
+                UploadField::create('Logo', 'Logo')
+                    ->setDescription('This is official logo that appears throughout the application. Should be an SVG'),
                 UploadField::create('LoginHeroImage', 'Login screen background image')
                     ->setDescription('This is the background image shown on the login screen.'),
             ]

@@ -1,9 +1,3 @@
-# Catalyst I.T. SilverStripe Team Standard Grumphp configuration
-# SilverStripe Team 2016-2018 <silverstripedev@catalyst.net.nz>
-#
-# Question: Why would we not run these checks from within our IDEs?
-# Answer: We use too many: Sublime, Netbeans and Atom (so far)
-#
 parameters:
   bin_dir: "./vendor/bin"
   git_dir: "."
@@ -31,8 +25,6 @@ parameters:
         - "localhost"
         - ".dev"
         - ".local"
-        - "wgtn.cat-it"
-        - "http://gitlab.catalyst.net.nz"
         - "phpinfo"
         - "<<<<"
         - "===="
