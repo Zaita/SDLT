@@ -835,7 +835,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      *
      * @return string
      */
-    private function Link()
+    public function Link()
     {
         if ($this->Task()->TaskType == 'selection') {
             return "#/component-selection/submission/{$this->UUID}";

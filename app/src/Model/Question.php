@@ -57,7 +57,6 @@ class Question extends DataObject implements ScaffoldingProvider
 
     /**
      * A question's answer can have fields type either inputs or actions, but not both
-     * This will be enforced by the `getCMSFields` and `beforeWrite`(//TODO)
      *
      * @var array
      */

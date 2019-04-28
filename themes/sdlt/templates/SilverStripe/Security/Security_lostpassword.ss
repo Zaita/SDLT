@@ -17,7 +17,7 @@
 
         <div class="row align-items-center">
             <div class="col login ">
-            <img src="$SiteConfig.NZTALogo.URL" />
+            <img src="$SiteConfig.Logo.URL" />
             <hr />
             $Form
             </div>

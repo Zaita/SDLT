@@ -6,7 +6,6 @@
         "php": ">=7.2",
         "silverstripe/recipe-plugin": "^1.2",
         "silverstripe/recipe-cms": "4.3.0@stable",
-        "phptek/sentry": "^2.0.1",
         "silverstripe/postgresql": "^2.1.0",
         "unclecheese/display-logic": "^2.0",
         "symbiote/silverstripe-gridfieldextensions": "^3.2",
@@ -44,6 +43,9 @@
             "app/css",
             "themes/sdlt/dist"
         ]
+    },
+    "suggest": {
+        "phptek/sentry": "Advanced logging of bugs and exceptions throughout your codebase"
     },
     "config": {
         "process-timeout": 600
