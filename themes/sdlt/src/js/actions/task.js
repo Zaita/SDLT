@@ -229,7 +229,7 @@ export function completeTaskSubmission(args: {
     } else {
       await dispatch({
         type: ActionType.TASK.COMPLETE_TASK_SUBMISSION,
-        payload: ""
+        payload: result
       });
     }
   };

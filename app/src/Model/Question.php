@@ -80,7 +80,8 @@ class Question extends DataObject implements ScaffoldingProvider
     private static $summary_fields = [
         'Title',
         'Question',
-        'AnswerFieldType'
+        'AnswerFieldType',
+        'ShowActionResult' => 'Results',
     ];
 
     /**
@@ -228,5 +229,16 @@ class Question extends DataObject implements ScaffoldingProvider
         }
 
         return $actionFieldsData;
+    }
+
+    /**
+     * Show all potential AnswerAction.Result values in the summary field
+     *
+     * @return string
+     */
+    public function ShowActionResult()
+    {
+        $results = $this->AnswerActionFields()->map('ID', 'Result')->toArray();
+        return implode('; ', $results);
     }
 }
