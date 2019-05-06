@@ -1,8 +1,14 @@
 # NZTA Software Development Lifecycle Tool
-(project description here)
+The SDLT is a digital Questionnaire and Task management system for walking technology deliverables through Security Assurance.
+
+A user of the SDLT can answer a series of questions about their product deliverable. The SDLT will create and manage the necessary security assurance tasks (e.g. PCI-DSS compliance, penetration test, information classification). Once the user has completed the tasks, the SDLT will handle the approvals for the submission by having security architects, chief information security officer and business owner approve it digitally.
 
 ## Installation
-(todo)
+This assumes all PHP requirements are met, Apache is configured with rewrite rules and `AllowOverride All` set, and has a virtualhost pointing at `/path/to/sdlt/public`. See SilverStripe installation instructions for more information
+
+1. Clone the repository using Git clone to /path/to/sdlt
+2. Run `composer install`
+3. Run `vendor/bin/sake dev/build flush=` on the terminal
 
 ## Configuration and Personalisation
 
