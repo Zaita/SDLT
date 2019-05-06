@@ -7,6 +7,6 @@ SilverStripe\Core\Injector\Injector:
   Swift_Transport:
     class: Swift_SmtpTransport
     properties:
-      Host: smtprelay3.catalyst.net.nz
+      Host: '`SDLT_SMTPMAIL_SERVER`'
       Port: 587
       Encryption: tls

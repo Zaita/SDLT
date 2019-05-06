@@ -1,4 +1,4 @@
-<!-- themes/mysite/templates/forms/FormAction_OAuth_Facebook.ss -->
-<button type="submit" name="{$Name}" id="{$ID}" class="nzta-login">
+<!-- themes/mysite/templates/forms/FormAction_OAuth_ActiveDirectory.ss -->
+<button type="submit" name="{$Name}" id="{$ID}" class="sdlt-login">
     Connect with your NZTA Login
 </button>

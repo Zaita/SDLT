@@ -4,7 +4,7 @@ import original from "./QuestionnaireSubmissionState";
 const fixture = Object.assign({}, original);
 
 fixture.submission.questions[0].inputs[0].data = "product";
-fixture.submission.questions[0].inputs[1].data = "thor.chen@catalyst.net.nz";
+fixture.submission.questions[0].inputs[1].data = "xxx.yyy@example.net.nz";
 fixture.submission.questions[0].inputs[2].data = "a long text in this area";
 fixture.submission.questions[0].inputs[3].data = "07/03/2019";
 fixture.submission.questions[0].isCurrent = false;
