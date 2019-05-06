@@ -9,6 +9,7 @@ This assumes all PHP requirements are met, Apache is configured with rewrite rul
 1. Clone the repository using Git clone to /path/to/sdlt
 2. Run `composer install`
 3. Run `vendor/bin/sake dev/build flush=` on the terminal
+4. You will need to copy the .env.example to a .env file and replace the values with your own. The user defined on SS_DATABASE_USER will need to have high enough privileges to create a database
 
 ## Configuration and Personalisation
 
