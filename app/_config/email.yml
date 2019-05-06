@@ -1,0 +1,12 @@
+---
+Name: sdltemailconfig
+After:
+  - '#emailconfig'
+---
+SilverStripe\Core\Injector\Injector:
+  Swift_Transport:
+    class: Swift_SmtpTransport
+    properties:
+      Host: '`SDLT_SMTPMAIL_SERVER`'
+      Port: 587
+      Encryption: tls

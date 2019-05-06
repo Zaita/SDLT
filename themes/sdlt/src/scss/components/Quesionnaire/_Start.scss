@@ -1,0 +1,67 @@
+@import "../../variables";
+
+.StartContainer {
+    .Start {
+        margin-bottom: 80px;
+
+        .start-form {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .info-box {
+            width: 770px;
+            margin: 0 auto;
+            background-color: $white;
+            padding: 45px 50px;
+            font-size: 14px;
+            font-weight: normal;
+            font-style: normal;
+            font-stretch: normal;
+            line-height: 1.57;
+            letter-spacing: normal;
+            text-align: left;
+            color: $gray-800;
+
+            .info-line {
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        .key-info-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: $blue;
+        }
+
+        ol {
+            list-style-type: none;
+            padding-top: 1rem;
+            padding-left: 0;
+            margin-bottom: 2rem;
+            counter-reset: key-info-counter;
+
+            li {
+                margin-left: 0;
+                margin-bottom: 0.5rem;
+                position: relative;
+                counter-increment: key-info-counter;
+
+                &::before {
+                    content: counter(key-info-counter) ". ";
+                    font-weight: bold;
+                    color: $blue;
+                }
+            }
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;
+            align-items: flex-start;
+        }
+    }
+}

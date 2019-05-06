@@ -1,0 +1,65 @@
+@import "../../variables";
+
+.HomeContainer {
+
+    .Home {
+
+        .logo {
+            width: 370px;
+            height: auto;
+            margin-bottom: 45px;
+        }
+
+        .layout {
+            @extend .d-flex;
+            @extend .flex-column;
+            @extend .justify-content-start;
+            @extend .align-items-center;
+            @extend .w-100;
+            @extend .h-100;
+            padding-top: 0;
+        }
+
+        h1 {
+            font-size: 50px;
+            font-weight: 300;
+            font-style: normal;
+            font-stretch: normal;
+            letter-spacing: normal;
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            font-size: 30px;
+            font-weight: normal;
+            font-style: normal;
+            font-stretch: normal;
+            letter-spacing: normal;
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 30px;
+        }
+
+        .pillars {
+            @extend .container;
+            @extend .mx-1;
+            margin-bottom: 40px;
+
+            @import "Pillar";
+        }
+
+        .tasks {
+            max-width: 1000px;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            margin-bottom: 110px;
+
+            @import "TaskButton";
+        }
+    }
+}

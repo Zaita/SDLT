@@ -1,0 +1,28 @@
+@import "../../variables";
+
+.LeftBar {
+    width: 277px;
+    margin-right: 19px;
+    background-color: $white;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+
+    padding-top: 45px;
+    padding-bottom: 45px;
+    padding-left: 23px;
+
+    .title {
+        margin-left: 18px;
+        font-size: 14px;
+        font-weight: bold;
+        color: $blue;
+    }
+
+    .items, .children {
+        width: 100%;
+    }
+
+    @import "LeftBarItem";
+}

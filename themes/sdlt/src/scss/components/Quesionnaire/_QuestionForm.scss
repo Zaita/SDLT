@@ -1,0 +1,59 @@
+@import "../../variables";
+
+.QuestionForm {
+    background-color: $white;
+    width: 840px;
+    padding: 45px;
+    font-size: 14px;
+    color: $black;
+
+    .heading {
+        font-size: 24px;
+        font-weight: 300;
+        color: $blue;
+        margin-bottom: 2rem;
+        white-space: pre-line;
+    }
+
+    .description {
+        margin-bottom: 2rem;
+        white-space: pre-line;
+    }
+
+    td {
+        padding-bottom: 1rem;
+        vertical-align: top;
+    }
+
+    td.label {
+        width: auto;
+        padding-right: 1rem;
+        white-space: nowrap;
+    }
+
+    input, textarea {
+        @extend .rounded-0;
+        border: solid 1px #959595;
+        width: 355px;
+    }
+
+    textarea {
+        height: 119px;
+    }
+
+    input.error, textarea.error {
+        border: solid 1px $red;
+    }
+
+    .actions {
+        margin-bottom: 2rem;
+    }
+
+    .message {
+        font-size: 16px;
+    }
+
+    .DarkButton, .LightButton {
+        min-width: 84px;
+    }
+}

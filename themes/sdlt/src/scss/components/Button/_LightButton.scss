@@ -1,0 +1,12 @@
+@import "../../variables";
+
+.LightButton {
+    border: solid 2px $blue;
+    background-color: $white;
+    color: $blue;
+
+    &:hover {
+        color: $orange;
+        border: solid 2px $orange;
+    }
+}

@@ -1,0 +1,19 @@
+SilverStripe\Core\Manifest\ModuleManifest:
+  project: app
+SilverStripe\Security\LoginAttempt:
+  summary_fields:
+    LastEdited: Login time
+    Status: Status
+    IP: IP Address
+    Hostname: Hostname
+  default_sort: Created DESC
+
+SilverStripe\CMS\Model\SiteTree:
+  create_default_pages: false
+
+SilverStripe\Core\Injector\Injector:
+  Swift_Transport: Swift_SendmailTransport
+
+DNADesign\Populate\Populate:
+  include_yaml_fixtures:
+    - 'app/populate/populate-security-components.yml'

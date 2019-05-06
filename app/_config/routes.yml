@@ -1,0 +1,9 @@
+---
+Name: approutes
+After: framework/_config/routes#coreroutes
+---
+SilverStripe\Control\Director:
+  rules:
+    'getCSRFToken': 'NZTA\SDLT\Controller\GraphQLTokenController'
+    'businessOwnerApproval': 'NZTA\SDLT\Controller\BusinessOwnerApprovalPageController'
+    'vendorApp': 'NZTA\SDLT\Controller\VendorPageController'

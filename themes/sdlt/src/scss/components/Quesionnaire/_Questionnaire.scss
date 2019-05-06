@@ -1,0 +1,20 @@
+@import "../../variables";
+
+.QuestionnaireContainer {
+    .Questionnaire {
+        margin-bottom: 80px;
+    }
+}
+
+.Questionnaire {
+    .major {
+        max-width: map_get($container-max-widths, xl);
+        margin: 0 auto;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: stretch;
+
+        @import "QuestionForm";
+    }
+}

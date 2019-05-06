@@ -1,0 +1,40 @@
+# For more information about the properties used in
+# this file, please see the EditorConfig documentation:
+# http://editorconfig.org/
+
+root = true
+
+[*]
+charset = utf-8
+# Unix line-nedings
+end_of_line = lf
+insert_final_newline = true
+indent_size = 4
+indent_style = space
+trim_trailing_whitespace = true
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.yml]
+indent_size = 2
+indent_style = space
+
+[*.ss]
+indent_size = 2
+indent_style = space
+
+[{.travis.yml,package.json}]
+# The indent size used in the `package.json` file cannot be changed
+# https://github.com/npm/npm/pull/3180#issuecomment-16336516
+indent_size = 2
+indent_style = space
+
+# Catalyst standard editorconfig settings
+# See: https://github.com/jenofdoom/catalyst-frontend/blob/master/.editorconfig
+[*.js]
+indent_style = space
+indent_size = 2
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
