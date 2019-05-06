@@ -1,4 +1,4 @@
-# NZTA Software Development Lifecycle Tool
+# NZTA Security Development Lifecycle Tool
 (project description here)
 
 ## Installation
