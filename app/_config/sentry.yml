@@ -1,7 +1,0 @@
----
-Name: site-myappsentryconfig
----
-
-PhpTek\Sentry\Adaptor\SentryClientAdaptor:
-  opts:
-    dsn: '`SENTRY_DSN`'

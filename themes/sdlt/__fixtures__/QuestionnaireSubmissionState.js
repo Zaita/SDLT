@@ -7,9 +7,9 @@ const fixture: QuestionnaireSubmissionState = {
   siteTitle: "Security Development Lifecycle Tool",
   user: {
     id: "1",
-    name: "Thor Chen",
+    name: "XXX YYY",
     role: "Developer",
-    email: "thor.chen@catalyst.net.nz",
+    email: "xxx.yyy@example.net.nz",
     isSA: false,
     isCISO: false
   },
@@ -21,9 +21,9 @@ const fixture: QuestionnaireSubmissionState = {
     submissionUUID: "uuid",
     submitter: {
       id: "1",
-      name: "Thor Chen",
+      name: "XXX YYY",
       role: "Developer",
-      email: "thor.chen@catalyst.net.nz",
+      email: "xxx.yyy@example.net.nz",
       isSA: false,
       isCISO: false,
     },
