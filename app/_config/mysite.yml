@@ -17,3 +17,10 @@ SilverStripe\Core\Injector\Injector:
 DNADesign\Populate\Populate:
   include_yaml_fixtures:
     - 'app/populate/populate-security-components.yml'
+
+SilverStripe\Control\Session:
+  timeout: 7200
+  cookie_secure: 1
+
+SilverStripe\Security\Security:
+  frame_options: 'DENY'
