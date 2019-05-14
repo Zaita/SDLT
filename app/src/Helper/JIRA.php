@@ -6,8 +6,8 @@
  * @package SDLT
  * @author  Catalyst I.T. SilverStripe Team 2019 <silverstripedev@catalyst.net.nz>
  * @copyright 2019 Catalyst.Net Ltd
- * @license https://www.catalyst.net.nz (Commercial)
- * @link https://www.catalyst.net.nz
+ * @license https://nzta.govt.nz (BSD-3)
+ * @link https://nzta.govt.nz
  */
 
 namespace NZTA\SDLT\Helper;

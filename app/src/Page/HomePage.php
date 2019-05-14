@@ -5,10 +5,10 @@
  *
  * @category SilverStripe_Project
  * @package SDLT
- * @author  Catalyst I.T. SilverStripe Team 2018 <silverstripedev@catalyst.net.nz>
- * @copyright 2018 Catalyst.Net Ltd
- * @license https://www.catalyst.net.nz (Commercial)
- * @link https://www.catalyst.net.nz
+ * @author  Catalyst I.T.
+ * @copyright 2019 New Zealand Transport Agency
+ * @license https://nzta.govt.nz (BSD-3)
+ * @link https://nzta.govt.nz
  */
 
 namespace NZTA\SDLT\Page;
