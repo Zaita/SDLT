@@ -68,26 +68,29 @@ class QuestionnaireValidation
      */
     public static function validate_input_field($data, $inputfieldDetails)
     {
-        // validate required field
-        if ($inputfieldDetails->Required && empty($data)) {
-            throw new Exception(
-                sprintf(
-                    '%s is required.',
-                    $inputfieldDetails->Label
-                )
-            );
-        }
+        // validate if field is required
+        if ($inputfieldDetails->Required) {
+            // validate field for none empty value
+            if (empty($data)) {
+                throw new Exception(
+                    sprintf(
+                        '%s is required.',
+                        $inputfieldDetails->Label
+                    )
+                );
+            }
 
-        // validate minimum length
-        if ($inputfieldDetails->MinLength > 0 &&
-            strlen($data) < $inputfieldDetails->MinLength) {
-            throw new Exception(
-                sprintf(
-                    'Please enter a value with at least %d characters for %s.',
-                    $inputfieldDetails->MinLength,
-                    $inputfieldDetails->Label
-                )
-            );
+            // validate field for minimum length
+            if ($inputfieldDetails->MinLength > 0 &&
+                strlen($data) < $inputfieldDetails->MinLength) {
+                throw new Exception(
+                    sprintf(
+                        'Please enter a value with at least %d characters for %s.',
+                        $inputfieldDetails->MinLength,
+                        $inputfieldDetails->Label
+                    )
+                );
+            }
         }
     }
 
