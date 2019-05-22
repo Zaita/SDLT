@@ -21,33 +21,9 @@ use SilverStripe\ORM\DataExtension;
 
 /**
  * Class UserRoleExtension
- *
- * Add `UserRole` field */
+ */
 class UserRoleExtension extends DataExtension
 {
-    /**
-     * new database fields
-     *
-     * @var array
-     */
-    private static $db = [
-        'UserRole' => 'Varchar(255)'
-    ];
-
-    /**
-     * Update CMS fields
-     *
-     * @param FieldList $fields fields
-     * @return void
-     */
-    public function updateCMSFields(FieldList $fields)
-    {
-        $fields->addFieldToTab(
-            'Root.Main',
-            TextField::create("UserRole", "User Role")
-        );
-    }
-
     /**
      * Check if the member is a Security Architect
      *

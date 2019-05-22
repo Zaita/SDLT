@@ -64,7 +64,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      */
     private static $db = [
         'SubmitterName' => 'Varchar(255)',
-        'SubmitterRole' => 'Varchar(255)',
         'SubmitterEmail'=> 'Varchar(255)',
         'QuestionnaireData' => 'Text',
         'AnswerData' => 'Text',
@@ -87,6 +86,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SecurityArchitectApproverMachineName' => 'Varchar(255)',
         'SecurityArchitectStatusUpdateDate' => 'Varchar(255)',
         'ApprovalLinkToken' => 'Varchar(64)',
+        'ProductName' => 'Varchar(64)',
     ];
 
     /**
@@ -112,7 +112,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     private static $summary_fields = [
         'getQuestionnaireName' => 'Questionnaire Name',
         'SubmitterName',
-        'SubmitterRole',
         'SubmitterEmail',
         'getPrettifyQuestionnaireStatus' => 'Questionnaire Status',
         'CisoApprovalStatus',
@@ -162,7 +161,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 $fields->dataFieldByName('UserID'),
                 $fields->dataFieldByName('SubmitterName'),
                 $fields->dataFieldByName('SubmitterEmail'),
-                $fields->dataFieldByName('SubmitterRole'),
                 $fields->dataFieldByName('IsStartLinkEmailSent'),
                 $fields->dataFieldByName('IsSubmitLinkEmailSent')
             ]
@@ -267,7 +265,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'ID',
                 'UUID',
                 'SubmitterName',
-                'SubmitterRole',
                 'SubmitterEmail',
                 'QuestionnaireStatus',
                 'CisoApprovalStatus',
@@ -292,7 +289,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'SecurityArchitectStatusUpdateDate',
                 'IsCurrentUserAnApprover',
                 'IsEmailSentToSecurityArchitect',
-                'IsSubmitLinkEmailSent'
+                'IsSubmitLinkEmailSent',
+                'ProductName'
             ]);
 
         $submissionScaffolder
@@ -437,7 +435,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $model = QuestionnaireSubmission::create();
 
                     $model->SubmitterName = $member->FirstName;
-                    $model->SubmitterRole = $member->UserRole;
                     $model->SubmitterEmail = $member->Email;
                     $model->QuestionnaireStatus = 'in_progress';
 
@@ -557,6 +554,17 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         // if it is business owner email field, then add product owner email address
                         if (!is_bool($businessOwnerEmail)) {
                             $questionnaireSubmission->BusinessOwnerEmailAddress = $businessOwnerEmail;
+                        }
+
+                        $isProductName = QuestionnaireSubmission::is_product_name_field(
+                            $jsonDecodeAnswerData->inputs,
+                            $questionnaireSubmission->QuestionnaireData,
+                            $args['QuestionID']
+                        );
+
+                        // if it is product name text field, then add product name
+                        if (!is_bool($isProductName)) {
+                            $questionnaireSubmission->ProductName = $isProductName;
                         }
                     }
 
@@ -985,6 +993,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             $inputFields['MinLength'] = $answerInputField->MinLength;
             $inputFields['PlaceHolder'] = $answerInputField->PlaceHolder;
             $inputFields['IsBusinessOwner'] = $answerInputField->IsBusinessOwner;
+            $inputFields['IsProductName'] = $answerInputField->IsProductName;
             $finalInputFields[] = $inputFields;
         }
 
@@ -1374,6 +1383,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
+     * Check if field type is business owner
+     *
      * @param array  $inputAnswerFields inputfields
      * @param string $questionsData     questions
      * @param int    $questionId        question id
@@ -1386,6 +1397,28 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             $inputfieldDetails = QuestionnaireValidation::get_field_details($questionsData, $questionId, $inputAnswerField->id);
 
             if ($inputfieldDetails->InputType == 'email' && $inputfieldDetails->IsBusinessOwner) {
+                return $inputAnswerField->data;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if field type is product name
+     *
+     * @param array  $inputAnswerFields inputfields
+     * @param string $questionsData     questions
+     * @param int    $questionId        question id
+     * @throws Exception
+     * @return mixed
+     */
+    public static function is_product_name_field($inputAnswerFields, $questionsData, $questionId)
+    {
+        foreach ($inputAnswerFields as $inputAnswerField) {
+            $inputfieldDetails = QuestionnaireValidation::get_field_details($questionsData, $questionId, $inputAnswerField->id);
+
+            if ($inputfieldDetails->InputType == 'text' && $inputfieldDetails->IsProductName) {
                 return $inputAnswerField->data;
             }
         }
