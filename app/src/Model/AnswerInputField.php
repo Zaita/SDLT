@@ -91,7 +91,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
             ->displayIf('InputType')
             ->isEqualTo('email');
         $fields->dataFieldByName('IsProductName')
-            ->setTitle('Is this field is used for Product Name?')
+            ->setTitle('Does this field contain a product name?')
             ->displayIf('InputType')
             ->isEqualTo('text');
 

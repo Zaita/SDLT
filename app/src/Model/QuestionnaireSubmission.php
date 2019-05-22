@@ -86,7 +86,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SecurityArchitectApproverMachineName' => 'Varchar(255)',
         'SecurityArchitectStatusUpdateDate' => 'Varchar(255)',
         'ApprovalLinkToken' => 'Varchar(64)',
-        'ProductName' => 'Varchar(64)',
+        'ProductName' => 'Text',
     ];
 
     /**
@@ -563,7 +563,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         );
 
                         // if it is product name text field, then add product name
-                        if (!is_bool($isProductName)) {
+                        if (is_string($isProductName)) {
                             $questionnaireSubmission->ProductName = $isProductName;
                         }
                     }
