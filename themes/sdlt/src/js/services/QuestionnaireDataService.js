@@ -87,7 +87,6 @@ query {
       ID
     }
     SubmitterName,
-    SubmitterRole,
     SubmitterEmail,
     QuestionnaireStatus
     Questionnaire {
@@ -132,7 +131,6 @@ query {
         submitter: {
           id: _.toString(_.get(submissionJSON, "User.ID")),
           name: _.toString(_.get(submissionJSON, "SubmitterName", "")),
-          role: _.toString(_.get(submissionJSON, "SubmitterRole", "")),
           email: _.toString(_.get(submissionJSON, "SubmitterEmail", "")),
           isSA: false,
           isCISO: false,

@@ -37,7 +37,6 @@ class MemberGraphQLProvider implements ScaffoldingProvider
                 'Email',
                 'FirstName',
                 'Surname',
-                'UserRole',
                 'IsSA',
                 'IsCISO'
             ])

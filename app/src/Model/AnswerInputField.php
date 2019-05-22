@@ -45,7 +45,8 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         'MinLength' => 'Int',
         'PlaceHolder' => 'Varchar(255)',
         'SortOrder' => 'Int',
-        'IsBusinessOwner' => 'Boolean'
+        'IsBusinessOwner' => 'Boolean',
+        'IsProductName' => 'Boolean'
     ];
 
     /**
@@ -86,7 +87,13 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         $fields->removeByName(['QuestionID', 'SortOrder']);
 
         /** @noinspection PhpUndefinedMethodInspection */
-        $fields->dataFieldByName('IsBusinessOwner')->displayIf('InputType')->isEqualTo('email');
+        $fields->dataFieldByName('IsBusinessOwner')
+            ->displayIf('InputType')
+            ->isEqualTo('email');
+        $fields->dataFieldByName('IsProductName')
+            ->setTitle('Is this field is used for Product Name?')
+            ->displayIf('InputType')
+            ->isEqualTo('text');
 
         return $fields;
     }
