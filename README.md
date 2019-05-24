@@ -1,4 +1,4 @@
-# NZTA Software Development Lifecycle Tool
+# NZTA Security Development Lifecycle Tool
 The SDLT is a digital Questionnaire and Task management system for walking technology deliverables through Security Assurance.
 
 A user of the SDLT can answer a series of questions about their product deliverable. The SDLT will create and manage the necessary security assurance tasks (e.g. PCI-DSS compliance, penetration test, information classification). Once the user has completed the tasks, the SDLT will handle the approvals for the submission by having security architects, chief information security officer and business owner approve it digitally.
