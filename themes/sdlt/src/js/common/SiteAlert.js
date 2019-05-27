@@ -9,16 +9,18 @@ class SiteAlert {
       const siteAlertElement = document.querySelector("#site-alert");
       const bodyElement = document.querySelector("body");
 
-      if (siteAlertClosed !== "true") {
-        siteAlertElement.style.display = "flex";
-        bodyElement.style.paddingTop = siteAlertElement.offsetHeight + "px";
-      }
+      if(siteAlertElement) {
+        if (siteAlertClosed !== "true") {
+          siteAlertElement.style.display = "flex";
+          bodyElement.style.paddingTop = siteAlertElement.offsetHeight + "px";
+        }
 
-      document.querySelector("#site-alert .close-icon").addEventListener("click", () => {
-        sessionStorage.setItem("SiteAlertClosed", "true");
-        siteAlertElement.style.display = "none";
-        bodyElement.style.paddingTop = 0;
-      });
+        document.querySelector("#site-alert .close-icon").addEventListener("click", () => {
+          sessionStorage.setItem("SiteAlertClosed", "true");
+          siteAlertElement.style.display = "none";
+          bodyElement.style.paddingTop = 0;
+        });
+      }
     });
   }
 }
