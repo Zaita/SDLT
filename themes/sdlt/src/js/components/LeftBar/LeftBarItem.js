@@ -1,4 +1,5 @@
 // @flow
+// This is used for component selection
 
 import React, {Component} from "react";
 import EditingIcon from "../../../img/icons/question-editing.svg";
@@ -24,7 +25,7 @@ export default class LeftBarItem extends Component<Props> {
                   event.preventDefault();
                   onItemClick();
                 }}>
-          {title}
+                {title}
         </button>
       </div>
     );

@@ -11,6 +11,7 @@ import "react-datepicker/dist/react-datepicker.css";
 
 type Props = {
   question: Question,
+  index: number,
   handleFormSubmit: (formik: FormikBag, values: Object) => void,
   handleActionClick: (action: AnswerAction) => void
 };
@@ -18,12 +19,12 @@ type Props = {
 class QuestionForm extends Component<Props> {
 
   render() {
-    const {question} = {...this.props};
+    const {question, index} = {...this.props};
 
     return (
       <div className="QuestionForm">
         <div className="heading">
-          {question.heading}
+          {index+1}. {question.heading}
         </div>
         <div className="description">
           {question.description}
