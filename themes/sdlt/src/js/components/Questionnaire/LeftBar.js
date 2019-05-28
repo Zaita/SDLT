@@ -18,8 +18,8 @@ class LeftBar extends Component<Props> {
       <div className="LeftBar">
         <div className="title">QUESTIONS:</div>
         <div className="items">
-          {questions.map((question) => {
-            return <LeftBarItem question={question} onItemClick={onItemClick} key={question.id}/>;
+          {questions.map((question, index) => {
+            return <LeftBarItem question={question} onItemClick={onItemClick} key={question.id} index={index}/>;
           })}
         </div>
       </div>
