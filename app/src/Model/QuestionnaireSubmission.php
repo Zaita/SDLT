@@ -86,7 +86,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SecurityArchitectApproverMachineName' => 'Varchar(255)',
         'SecurityArchitectStatusUpdateDate' => 'Varchar(255)',
         'ApprovalLinkToken' => 'Varchar(64)',
-        'ProductName' => 'Text',
+        'ProductName' => 'Text'
     ];
 
     /**
