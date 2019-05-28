@@ -1,4 +1,5 @@
 // @flow
+// This is used for component selection
 
 import React, {Component} from "react";
 
