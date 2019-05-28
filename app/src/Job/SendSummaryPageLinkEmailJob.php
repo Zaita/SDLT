@@ -91,10 +91,12 @@ class SendSummaryPageLinkEmailJob extends AbstractQueuedJob implements QueuedJob
     {
         $questionnaireName = $this->questionnaireSubmission->Questionnaire()->Name;
         $link = $this->questionnaireSubmission->getSummaryPageLink();
+        $productName = $this->questionnaireSubmission->ProductName;
         $summaryLink = '<a href="' . $link . '">this link</a>';
 
         $string = str_replace('{$questionnaireName}', $questionnaireName, $string);
         $string = str_replace('{$summaryLink}', $summaryLink, $string);
+        $string = str_replace('{$productName}', $productName, $string);
 
         return $string;
     }
