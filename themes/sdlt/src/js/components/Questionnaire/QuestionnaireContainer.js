@@ -8,7 +8,7 @@ import {
   loadQuestionnaireSubmissionState,
   moveAfterQuestionAnswered, moveToPreviousQuestion,
   putDataInQuestionnaireAnswer,
-} from "../../actions/questionnarie";
+} from "../../actions/questionnaire";
 import type {QuestionnaireSubmissionState} from "../../store/QuestionnaireState";
 import Questionnaire from "./Questionnaire";
 import Header from "../Header/Header";
