@@ -6,6 +6,7 @@ import Pillar from "./Pillar";
 import TaskButton from "./TaskButton";
 import type {HomeState} from "../../store/HomeState";
 import LogoutButton from "../Button/LogoutButton";
+import MySubmissionButton from "../Button/MySubmissionButton";
 import type {Task} from "../../types/Task";
 
 type Props = {
@@ -20,6 +21,9 @@ class Home extends Component<Props> {
     return (
       <div className="Home">
         <LogoutButton classes={["clearfix","float-right", "mt-5", "mr-5"]}/>
+
+        <MySubmissionButton classes={["clearfix","float-right", "mt-5", "mr-1"]}/>
+
         <div className="layout">
           <a href="/"><img src={LogoImage} className="logo"/></a>
           <h1>

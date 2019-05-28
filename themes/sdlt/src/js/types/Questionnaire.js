@@ -75,3 +75,14 @@ export type SubmissionQuestionData = {
   inputs?: Array<SubmissionInputData>,
   actions?: Array<SubmissionActionData>
 };
+
+export type MyQuestionnaireItem = {
+  id: string,
+  uuid: string,
+  questionnaireName: string,
+  created: string,
+  productName: string,
+  status: string,
+  startLink: string,
+  summaryPageLink: string
+};

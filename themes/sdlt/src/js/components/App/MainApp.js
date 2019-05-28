@@ -11,6 +11,8 @@ import TaskSubmissionContainer from "../Task/TaskSubmissionContainer";
 import TaskStandaloneContainer from "../Task/TaskStandaloneContainer";
 import ComponentSelectionStandaloneContainer from "../ComponentSelection/ComponentSelectionStandaloneContainer";
 import ComponentSelectionContainer from "../ComponentSelection/ComponentSelectionContainer";
+import MySubmissionList from "../MySubmission/MySubmissionList";
+
 
 class MainApp extends Component<*> {
 
@@ -88,6 +90,15 @@ class MainApp extends Component<*> {
                 return (
                   <div className="gray-bg">
                     <ComponentSelectionContainer uuid={match.params.uuid}/>
+                  </div>
+                );
+              }}
+            </Route>
+            <Route path='/MySubmissions'>
+              {({match}) => {
+                return (
+                  <div className="gray-bg">
+                    <MySubmissionList/>
                   </div>
                 );
               }}

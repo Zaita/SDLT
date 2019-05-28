@@ -290,7 +290,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'IsCurrentUserAnApprover',
                 'IsEmailSentToSecurityArchitect',
                 'IsSubmitLinkEmailSent',
-                'ProductName'
+                'ProductName',
+                'QuestionnaireName',
+                'Created'
             ]);
 
         $submissionScaffolder
@@ -317,7 +319,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $submissionScaffolder
             ->operation(SchemaScaffolder::READ)
             ->setName('readQuestionnaireSubmission')
-            ->addArg('UUID', 'String!')
+            ->addArg('UUID', 'String')
+            ->addArg('UserID', 'String')
             ->addArg('SecureToken', 'String')
             ->setUsePagination(false)
             ->setResolver(new class implements ResolverInterface {
@@ -336,7 +339,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 public function resolve($object, array $args, $context, ResolveInfo $info)
                 {
                     $member = Security::getCurrentUser();
-                    $uuid = htmlentities(trim($args['UUID']));
+                    $uuid = isset($args['UUID']) ? htmlentities(trim($args['UUID'])) : null;
+                    $userID = isset($args['UserID']) ? htmlentities(trim($args['UserID'])) : null;
                     $secureToken = isset($args['SecureToken']) ? Convert::raw2sql(trim($args['SecureToken'])) : null;
 
                     // To continue the data fetching, user has to be logged-in or has secure token
@@ -345,16 +349,26 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     }
 
                     // Check argument
-                    if (!$uuid) {
-                        throw new Exception('Sorry, wrong UUID.');
+                    if (!$uuid && !$userID) {
+                        throw new Exception('Sorry, wrong UUID or user Id.');
                     }
+
+                    if (!empty($userID) && $member->ID != $userID) {
+                        throw new Exception('Sorry, wrong user Id.');
+                    }
+
 
                     // Filter data by UUID
                     // The questionnaire can be read by other users
                     /* @var $data QuestionnaireSubmission */
-                    $data = QuestionnaireSubmission::get()
-                        ->where(['UUID' => $uuid])
-                        ->first();
+                    $data = null;
+                    if ($uuid) {
+                        $data = QuestionnaireSubmission::get()->filter(['UUID' => $uuid])->first();
+                    }
+
+                    if ($userID) {
+                        $data = QuestionnaireSubmission::get()->filter(['UserID' => $userID]);
+                    }
 
                     // If the user is not logged-in and the secure token is not valid, throw error
                     if (!$member && !hash_equals($data->ApprovalLinkToken, $secureToken)) {

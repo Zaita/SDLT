@@ -4,7 +4,7 @@ import type {QuestionnaireStartState, QuestionnaireSubmissionState} from "../sto
 import GraphQLRequestHelper from "../utils/GraphQLRequestHelper";
 import _ from "lodash";
 import {DEFAULT_NETWORK_ERROR} from "../constants/errors";
-import type {SubmissionQuestionData} from "../types/Questionnaire";
+import type {SubmissionQuestionData, MyQuestionnaireItem} from "../types/Questionnaire";
 import type {TaskSubmissionDisplay} from "../types/Task";
 import QuestionParser from "../utils/QuestionParser";
 import UserParser from "../utils/UserParser";
@@ -315,5 +315,37 @@ mutation {
       throw DEFAULT_NETWORK_ERROR;
     }
     return {uuid};
+  }
+
+  static async fetchUserSubmissionList(userID: string): Promise<Array<MyQuestionnaireItem>> {
+    const query = `query {
+      readQuestionnaireSubmission(UserID: "${userID}") {
+        ID
+        UUID
+        QuestionnaireStatus
+        QuestionnaireName
+        Created
+        ProductName
+      }
+    }`;
+
+    const json = await GraphQLRequestHelper.request({query});
+
+    // TODO: parse data
+    const data = _.get(json, 'data.readQuestionnaireSubmission', []);
+    if (!Array.isArray(data)) {
+      throw 'error';
+    }
+
+    return data.map((item: any) : MyQuestionnaire => {
+      let obj = {};
+      obj['id'] = _.get(item, 'ID', '');
+      obj['uuid'] = _.get(item, 'UUID', '');
+      obj['status'] = _.get(item, 'QuestionnaireStatus', '');
+      obj['productName'] = _.get(item, 'ProductName', '');
+      obj['questionnaireName'] = _.get(item, 'QuestionnaireName', '');
+      obj['created'] = _.get(item, 'Created', '');
+      return obj;
+    });
   }
 }
