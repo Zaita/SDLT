@@ -76,7 +76,7 @@ class QuestionnaireEmail extends DataObject
                 ),
                 LiteralField::create(
                     'StartEmailHelpText',
-                    'Please use variable {$questionnaireName} for quesionnaire name and
+                    'Please use variable {$questionnaireName} for questionnaire name and
                         {$startLink} for start link in the email body and Subject.
                         {$startLink} will be replaced by "this link" label.'
                 )
@@ -96,7 +96,7 @@ class QuestionnaireEmail extends DataObject
                 ),
                 LiteralField::create(
                     'SummaryLinkEmailHelpText',
-                    'Please use variable {$questionnaireName} for quesionnaire name and
+                    'Please use variable {$questionnaireName} for questionnaire name, {$productName} for product name  and
                         {$summaryLink} for summary link in the email body and subject.
                         {$summaryLink} will be replaced by "this link" label.'
                 )
