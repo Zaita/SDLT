@@ -42,7 +42,6 @@ export function loadQuestionnaireStartStateFinished(payload: QuestionnaireStartS
 }
 
 // Submission
-
 export function createInProgressSubmission(questionnaireID: string): ThunkAction {
   return async (dispatch) => {
     // TODO: maybe dispatch a global loading action
@@ -281,8 +280,21 @@ export function editQuestionnaireSubmission(submissionID: string): ThunkAction {
   }
 }
 
-// Commons
+export function loadMySubmissionList(): ThunkAction {
+  return async (dispatch: any, getState: () => RootState) => {
+    const user = getState().currentUserState.user;
+    if (!user) {
+      return;
+    }
+    const data = await QuestionnaireDataService.fetchUserSubmissionList(user.id);
+    dispatch({
+      type: ActionType.QUESTIONNAIRE.FETCH_MY_SUBMISSION_LIST,
+      payload: data
+    });
+  };
+}
 
+// Commons
 async function batchUpdateSubmissionData(rootState: RootState, indexesToUpdate: Array<number>) {
   const submission = rootState.questionnaireState.submissionState.submission;
   if (!submission) {
