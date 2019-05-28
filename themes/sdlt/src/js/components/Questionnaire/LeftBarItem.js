@@ -6,13 +6,14 @@ import QuesiontEditingIcon from "../../../img/icons/question-editing.svg";
 
 type Props = {
   question: Question,
-  onItemClick: (question: Question) => void
+  onItemClick: (question: Question) => void,
+  index: number
 };
 
 export default class LeftBarItem extends Component<Props> {
 
   render() {
-    const {question, onItemClick} = {...this.props};
+    const {question, onItemClick, index} = {...this.props};
 
     return (
       <div className="LeftBarItem">
@@ -22,7 +23,7 @@ export default class LeftBarItem extends Component<Props> {
                 onClick={(event) => {
                   onItemClick(question);
                 }}>
-          {question.title}
+          {index+1}. {question.title}
         </button>
       </div>
     );
