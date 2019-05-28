@@ -5,7 +5,7 @@ import {connect} from "react-redux";
 import type {RootState} from "../../store/RootState";
 import {Dispatch} from "redux";
 import Start from "./Start";
-import {createInProgressSubmission, loadQuestionnaireStartState} from "../../actions/questionnarie";
+import {createInProgressSubmission, loadQuestionnaireStartState} from "../../actions/questionnaire";
 import type {QuestionnaireStartState} from "../../store/QuestionnaireState";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";

@@ -7,7 +7,7 @@ import {Dispatch} from "redux";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import type {QuestionnaireSubmissionState} from "../../store/QuestionnaireState";
-import {loadQuestionnaireSubmissionState, submitQuestionnaire} from "../../actions/questionnarie";
+import {loadQuestionnaireSubmissionState, submitQuestionnaire} from "../../actions/questionnaire";
 import Review from "./Review";
 import PDFUtil from "../../utils/PDFUtil";
 import _ from "lodash";

@@ -13,7 +13,7 @@ import {
   editQuestionnaireSubmission,
   loadQuestionnaireSubmissionState,
   submitQuestionnaireForApproval,
-} from "../../actions/questionnarie";
+} from "../../actions/questionnaire";
 import Summary from "./Summary";
 import PDFUtil from "../../utils/PDFUtil";
 import ReactModal from "react-modal";
