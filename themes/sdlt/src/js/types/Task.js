@@ -30,6 +30,7 @@ export type TaskSubmission = {
   jiraTickets: Array<JiraTicket>,
   questionnaireSubmissionUUID: string,
   questionnaireSubmissionID: string,
+  questionnaireSubmissionStatus: string,
   submitter: User,
   lockWhenComplete: boolean
 };
