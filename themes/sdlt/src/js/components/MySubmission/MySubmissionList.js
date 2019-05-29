@@ -5,10 +5,10 @@ import {Dispatch} from "redux";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import type {User} from "../../types/User";
-import type {MyQuestionnaireItem} from "../../types/Questionnarie";
+import type {MyQuestionnaireItem} from "../../types/Questionnaire";
 import {loadCurrentUser} from "../../actions/user";
 import {loadSiteTitle} from "../../actions/siteConfig";
-import {loadMySubmissionList} from "../../actions/questionnarie";
+import {loadMySubmissionList} from "../../actions/questionnaire";
 import moment from "moment";
 
 const mapStateToProps = (state: RootState) => {
