@@ -114,6 +114,7 @@ class SendApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJob
         $questionnaireName = $this->questionnaireSubmission->Questionnaire()->Name;
         $SubmitterName = $this->questionnaireSubmission->SubmitterName;
         $SubmitterEmail = $this->questionnaireSubmission->SubmitterEmail;
+        $productName = $this->questionnaireSubmission->ProductName;
 
         $link = $this->questionnaireSubmission->getSummaryPageLink();
 
@@ -127,6 +128,7 @@ class SendApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJob
         $string = str_replace('{$approvalLink}', $approvalLink, $string);
         $string = str_replace('{$submitterName}', $SubmitterName, $string);
         $string = str_replace('{$submitterEmail}', $SubmitterEmail, $string);
+        $string = str_replace('{$productName}', $productName, $string);
 
         return $string;
     }
