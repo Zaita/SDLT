@@ -116,7 +116,7 @@ class QuestionnaireEmail extends DataObject
                 ),
                 LiteralField::create(
                     'ApprovalLinkEmailHelpText',
-                    'Please use variable {$questionnaireName} for quesionnaire name, {$approvalLink} for
+                    'Please use variable {$questionnaireName} for questionnaire name, {$productName} for product name, {$approvalLink} for
                         approval link, {$submitterName} for submitter name and {$submitterEmail} for submitter
                         email in the email body and subject. {$approvalLink} will be replaced by "this link" label.'
                 )
@@ -136,7 +136,7 @@ class QuestionnaireEmail extends DataObject
                 ),
                 LiteralField::create(
                     'ApprovedNotificationEmailhelpText',
-                    'Please use variable {$questionnaireName} for quesionnaire name in the email body and subject.'
+                    'Please use variable {$questionnaireName} for questionnaire name and {$productName} for product name in the email body and subject.'
                 )
             ]
         );
@@ -154,7 +154,7 @@ class QuestionnaireEmail extends DataObject
                 ),
                 LiteralField::create(
                     'DeniedNotificationEmailhelpText',
-                    'Please use variable {$questionnaireName} for quesionnaire name in the email body and subject.'
+                    'Please use variable {$questionnaireName} for questionnaire name and {$productName} for product name in the email body and subject.'
                 )
             ]
         );

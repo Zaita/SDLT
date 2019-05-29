@@ -86,9 +86,10 @@ class SendApprovedNotificationEmailJob extends AbstractQueuedJob implements Queu
     public function replaceVariable($string)
     {
         $questionnaireName = $this->questionnaireSubmission->Questionnaire()->Name;
+        $productName = $this->questionnaireSubmission->ProductName;
 
         $string = str_replace('{$questionnaireName}', $questionnaireName, $string);
-
+        $string = str_replace('{$productName}', $productName, $string);
         return $string;
     }
 }
