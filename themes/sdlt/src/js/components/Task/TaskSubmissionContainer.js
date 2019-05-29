@@ -21,6 +21,7 @@ import {loadSiteTitle} from "../../actions/siteConfig";
 
 const mapStateToProps = (state: RootState) => {
   return {
+    questionnaireSubmission: state.questionnaireState.submissionState,
     taskSubmission: state.taskSubmissionState.taskSubmission,
     siteTitle: state.siteConfigState.siteTitle,
     currentUser: state.currentUserState.user,
@@ -82,7 +83,7 @@ class TaskSubmissionContainer extends Component<Props> {
     const isCurrentUserSubmitter = parseInt(currentUser.id) === parseInt(taskSubmission.submitter.id);
     const canUpdateAnswers = (taskSubmission.status === "in_progress") && (currentUser.isSA || isCurrentUserSubmitter);
     const showEditButton =
-      (taskSubmission.status === "complete") &&
+      (taskSubmission.status === "complete") && (taskSubmission.questionnaireSubmissionStatus === "submitted")&&
       (currentUser.isSA || (isCurrentUserSubmitter && !taskSubmission.lockWhenComplete));
 
     return (
