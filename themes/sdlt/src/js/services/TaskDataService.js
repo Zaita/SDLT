@@ -109,6 +109,7 @@ query {
     QuestionnaireSubmission {
       ID
       UUID
+      QuestionnaireStatus
     }
     Submitter {
       ID
@@ -150,6 +151,7 @@ query {
       lockWhenComplete: Boolean(get(submissionJSONObject, "LockAnswersWhenComplete", false)),
       questionnaireSubmissionUUID: toString(get(submissionJSONObject, "QuestionnaireSubmission.UUID", "")),
       questionnaireSubmissionID: toString(get(submissionJSONObject, "QuestionnaireSubmission.ID", "")),
+      questionnaireSubmissionStatus: toString(get(submissionJSONObject, "QuestionnaireSubmission.QuestionnaireStatus", "")),
       questions: QuestionParser.parseQuestionsFromJSON({
         schemaJSON: toString(get(submissionJSONObject, "QuestionnaireData", "")),
         answersJSON: toString(get(submissionJSONObject, "AnswerData", "")),
@@ -175,9 +177,9 @@ query {
       const answerDataStr = window.btoa(JSON.stringify(answerData));
       let singleQuery = `
 updateQuestion${questionID}: updateTaskSubmission(
-  UUID: "${uuid}", 
-  QuestionID: "${questionID}", 
-  AnswerData: "${answerDataStr}", 
+  UUID: "${uuid}",
+  QuestionID: "${questionID}",
+  AnswerData: "${answerDataStr}",
   SecureToken: "${secureToken || ""}"
 ) {
   UUID
@@ -274,8 +276,8 @@ query {
     const query = `
 mutation {
  updateTaskSubmissionWithSelectedComponents(
- UUID: "${uuid}", 
- ComponentIDs: "${window.btoa(JSON.stringify(componentIDs))}", 
+ UUID: "${uuid}",
+ ComponentIDs: "${window.btoa(JSON.stringify(componentIDs))}",
  JiraKey: "${jiraKey}"
  ) {
    UUID
