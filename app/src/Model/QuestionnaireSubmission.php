@@ -111,6 +111,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      */
     private static $summary_fields = [
         'getQuestionnaireName' => 'Questionnaire Name',
+        'ProductName',
         'SubmitterName',
         'SubmitterEmail',
         'getPrettifyQuestionnaireStatus' => 'Questionnaire Status',
