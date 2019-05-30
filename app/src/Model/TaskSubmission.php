@@ -951,4 +951,22 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             })
             ->end();
     }
+
+    /**
+     * Event handler called after writing to the database.
+     * @return void
+     */
+    public function onAfterWrite()
+    {
+        parent::onAfterWrite();
+
+        $changed = $this->getChangedFields(['Status'], 1);
+
+        if (array_key_exists('Status', $changed) &&
+            $changed['Status']['before'] == 'complete' &&
+            $changed['Status']['after'] == 'in_progress') {
+            $this->QuestionnaireSubmission()->QuestionnaireStatus = 'submitted';
+            $this->QuestionnaireSubmission()->write();
+        }
+    }
 }
