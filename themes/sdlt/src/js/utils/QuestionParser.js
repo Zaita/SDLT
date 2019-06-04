@@ -89,7 +89,7 @@ export default class QuestionParser {
             id: inputID,
             label: _.toString(_.get(inputSchema, "Label", "")),
             type: type,
-            required: Boolean(_.get(inputSchema, "Required", false)),
+            required: Boolean(_.toInteger(_.get(inputSchema, "Required", false))),
             minLength: Number.parseInt(_.toString(_.get(inputSchema, "MinLength", 0))),
             placeholder: _.toString(_.get(inputSchema, "PlaceHolder", "")),
             data: null,
