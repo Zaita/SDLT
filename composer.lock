@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4d299b0edfc92c66bec41073724953f9",
+    "content-hash": "0c6f6908de8ae08ca6353f817c998602",
     "packages": [
         {
             "name": "asyncphp/doorman",
@@ -143,6 +143,39 @@
                 "silverstripe"
             ],
             "time": "2019-01-28T14:08:20+00:00"
+        },
+        {
+            "name": "catalyst/silverstripe-active-directory",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "git@gitlab.catalyst.net.nz:SilverStripe/silverstripe-active-directory.git",
+                "reference": "72533b260982e05e48fc73a35f1b3bd6d87d62ef"
+            },
+            "require": {
+                "bigfork/silverstripe-oauth-login": "^2",
+                "php": ">=7.2",
+                "thenetworg/oauth2-azure": "^1.4.2"
+            },
+            "type": "silverstripe-vendormodule",
+            "extra": {
+                "installer-name": "active-diectory"
+            },
+            "authors": [
+                {
+                    "name": "Elliot sawyer",
+                    "email": "elliotsawyer@catalyst.net.nz"
+                },
+                {
+                    "name": "Roopam",
+                    "email": "roopamjain@catalyst.net.nz"
+                }
+            ],
+            "keywords": [
+                "active-dirctory",
+                "silverstripe"
+            ],
+            "time": "2019-06-10T02:33:06+00:00"
         },
         {
             "name": "composer/ca-bundle",
