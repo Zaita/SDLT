@@ -68,7 +68,7 @@ export default class PDFUtil {
       fontSize: defaultFontSize
     };
     const info = {
-      title: `${questionnaireTitle} - ${submitter.name}`
+      title: `${questionnaireTitle} - ${submitter.name}.pdf`
     };
 
     const {vfs} = vfsFonts.pdfMake;
