@@ -48,7 +48,7 @@ const list = (mySubmissionList: MyQuestionnaireItem) => {
     return (
       <div className="container">
         <div class="alert alert-danger">
-          Sorry, No data to dispaly.
+          Sorry, No data to display.
         </div>
       </div>
     );
