@@ -561,7 +561,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     if ($jsonDecodeAnswerData->answerType == "input") {
                         // check if input field is business owner email field
                         $businessOwnerEmail = QuestionnaireSubmission::is_business_owner_email_field(
-                            $jsonDecodeAnswerData->inputs,
+                            isset($jsonDecodeAnswerData->inputs) ? $jsonDecodeAnswerData->inputs : [],
                             $questionnaireSubmission->QuestionnaireData,
                             $args['QuestionID']
                         );
@@ -572,7 +572,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         }
 
                         $isProductName = QuestionnaireSubmission::is_product_name_field(
-                            $jsonDecodeAnswerData->inputs,
+                            isset($jsonDecodeAnswerData->inputs) ? $jsonDecodeAnswerData->inputs : [],
                             $questionnaireSubmission->QuestionnaireData,
                             $args['QuestionID']
                         );
