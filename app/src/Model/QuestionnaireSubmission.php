@@ -323,6 +323,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ->addArg('UUID', 'String')
             ->addArg('UserID', 'String')
             ->addArg('SecureToken', 'String')
+            ->addArg('IsBusinessOwnerSummaryPage', 'String')
             ->setUsePagination(false)
             ->setResolver(new class implements ResolverInterface {
 
@@ -343,6 +344,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $uuid = isset($args['UUID']) ? htmlentities(trim($args['UUID'])) : null;
                     $userID = isset($args['UserID']) ? htmlentities(trim($args['UserID'])) : null;
                     $secureToken = isset($args['SecureToken']) ? Convert::raw2sql(trim($args['SecureToken'])) : null;
+                    $isBusinessOwnerSummaryPage= isset($args['IsBusinessOwnerSummaryPage']) ? Convert::raw2sql(trim($args['IsBusinessOwnerSummaryPage'])) : '0';
 
                     // To continue the data fetching, user has to be logged-in or has secure token
                     if (!$member && !$secureToken) {
@@ -356,6 +358,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     if (!empty($userID) && $member->ID != $userID) {
                         throw new Exception('Sorry, wrong user Id.');
+                    }
+
+                    if ($isBusinessOwnerSummaryPage && empty($secureToken)) {
+                        throw new Exception('Sorry, please enter token value as well.');
                     }
 
 
@@ -372,7 +378,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     }
 
                     // If the user is not logged-in and the secure token is not valid, throw error
-                    if (!$member && !hash_equals($data->ApprovalLinkToken, $secureToken)) {
+                    if (!empty($secureToken) && !hash_equals($data->ApprovalLinkToken, $secureToken)) {
                         throw new Exception('Sorry, wrong security token.');
                     }
 
