@@ -26,14 +26,12 @@ export default class GraphQLRequestHelper {
       variables: variables,
     };
 
-    const inst = axios.create({
+    const response = await axios.request({
       url: "/graphql",
       method: "post",
       data: data,
       headers: headers,
     });
-
-    const response = await inst.request();
     const json = response.data;
 
     // Deal with common error
