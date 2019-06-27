@@ -64,10 +64,9 @@ class ReviewContainer extends Component<Props> {
                 handleSubmitButtonClick={this.handleSubmitButtonClick.bind(this)}
                 handlePDFDownloadButtonClick={this.handlePDFDownloadButtonClick.bind(this)}
                 handleEditAnswerButtonClick={this.handleEditAnswerButtonClick.bind(this)}/>
-        <Footer/>;
+        <Footer/>
       </div>
-    )
-      ;
+    );
   }
 
   handleSubmitButtonClick() {
