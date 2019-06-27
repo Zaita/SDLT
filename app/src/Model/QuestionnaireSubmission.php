@@ -1029,9 +1029,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             $actionFields['Label'] = $answerActionField->Label;
             $actionFields['ActionType'] = $answerActionField->ActionType;
             $actionFields['Message'] = $answerActionField->Message;
-            $actionFields['GotoID'] = $answerActionField->GotoID;
-            $actionFields['QuestionID'] = $answerActionField->QuestionID;
-            $actionFields['TaskID'] = $answerActionField->TaskID;
+            $actionFields['GotoID'] = $answerActionField->Goto()->ID;
+            $actionFields['QuestionID'] = $answerActionField->Question()->ID;
+            $actionFields['TaskID'] = $answerActionField->Task()->ID;
             $finalActionFields[] = $actionFields;
         }
 
