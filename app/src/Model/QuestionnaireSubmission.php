@@ -254,6 +254,29 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
+     * get is current user is business and has access to approve and deny
+     *
+     * @return boolean
+     */
+    public function getIsCurrentUserABusinessOwnerApprover()
+    {
+        $member = Security::getCurrentUser();
+
+        if (!$member) {
+            return false;
+        }
+
+        // check access details for business owner
+        if ($this->QuestionnaireStatus == 'waiting_for_approval' &&
+            $this->BusinessOwnerApprovalStatus == 'pending' &&
+            $member->Email == $this->BusinessOwnerEmailAddress) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * @param SchemaScaffolder $scaffolder Scaffolder
      * @return SchemaScaffolder
      */
@@ -265,6 +288,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ->addFields([
                 'ID',
                 'UUID',
+                'ApprovalLinkToken',
                 'SubmitterName',
                 'SubmitterEmail',
                 'QuestionnaireStatus',
@@ -289,6 +313,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'SecurityArchitectApproverMachineName',
                 'SecurityArchitectStatusUpdateDate',
                 'IsCurrentUserAnApprover',
+                'IsCurrentUserABusinessOwnerApprover',
                 'IsEmailSentToSecurityArchitect',
                 'IsSubmitLinkEmailSent',
                 'ProductName',
@@ -878,7 +903,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ->mutation('updateQuestionnaireStatusToApproved', QuestionnaireSubmission::class)
             ->addArgs([
                 'ID' => 'ID!',
-                'SecureToken' => 'String!'
+                'SecureToken' => 'String'
             ])
             ->setResolver(new class implements ResolverInterface {
                 /**
@@ -896,7 +921,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 {
                     $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
 
-                    if (!hash_equals($questionnaireSubmission->ApprovalLinkToken, Convert::raw2sql($args['SecureToken']))) {
+                    $secureToken = isset($args['SecureToken']) ? Convert::raw2sql($args['SecureToken']) : '';
+
+                    if (!empty($secureToken) && !hash_equals($questionnaireSubmission->ApprovalLinkToken, $secureToken)) {
                         throw new Exception('Wrong secure token');
                     }
 
@@ -921,7 +948,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ->mutation('updateQuestionnaireStatusToDenied', QuestionnaireSubmission::class)
             ->addArgs([
                 'ID' => 'ID!',
-                'SecureToken' => 'String!'
+                'SecureToken' => 'String'
             ])
             ->setResolver(new class implements ResolverInterface {
                 /**
@@ -939,7 +966,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 {
                     $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
 
-                    if (!hash_equals($questionnaireSubmission->ApprovalLinkToken, Convert::raw2sql($args['SecureToken']))) {
+                    $secureToken = isset($args['SecureToken']) ? Convert::raw2sql($args['SecureToken']) : '';
+
+                    if (!empty($secureToken) && !hash_equals($questionnaireSubmission->ApprovalLinkToken, $secureToken)) {
                         throw new Exception('Wrong secure token');
                     }
 

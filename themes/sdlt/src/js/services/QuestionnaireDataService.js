@@ -83,6 +83,7 @@ query {
   readQuestionnaireSubmission(UUID: "${submissionHash}") {
     ID
     UUID
+    ApprovalLinkToken
     User {
       ID
     }
@@ -99,6 +100,7 @@ query {
     BusinessOwnerApprovalStatus
     SecurityArchitectApprovalStatus
     IsCurrentUserAnApprover
+    IsCurrentUserABusinessOwnerApprover
     TaskSubmissions {
       UUID
       TaskName
@@ -121,13 +123,16 @@ query {
     const data: QuestionnaireSubmissionState = {
       title: _.toString(_.get(submissionJSON, "Questionnaire.Name", "")),
       siteTitle: _.toString(_.get(json, "data.readSiteConfig.0.Title", "")),
+
       user: UserParser.parseUserFromJSON(memberData),
       isCurrentUserApprover: _.get(submissionJSON, "IsCurrentUserAnApprover", "false") === "true",
+      isCurrentUserABusinessOwnerApprover: _.get(submissionJSON, "IsCurrentUserABusinessOwnerApprover", "false") === "true",
       submission: {
         questionnaireID: _.toString(_.get(submissionJSON, "Questionnaire.ID", "")),
         questionnaireTitle: _.toString(_.get(submissionJSON, "Questionnaire.Name", "")),
         submissionID: _.toString(_.get(submissionJSON, "ID", "")),
         submissionUUID: _.toString(_.get(submissionJSON, "UUID", "")),
+        submissionToken: _.toString(_.get(submissionJSON, "ApprovalLinkToken", "")),
         submitter: {
           id: _.toString(_.get(submissionJSON, "User.ID")),
           name: _.toString(_.get(submissionJSON, "SubmitterName", "")),

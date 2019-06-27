@@ -18,7 +18,7 @@ import _ from "lodash";
 import SubmissionDataUtil from "../utils/SubmissionDataUtil";
 import URLUtil from "../utils/URLUtil";
 import TaskDataService from "../services/TaskDataService";
-
+import QuestionnaireForBusinessOwnerDataService from "../services/QuestionnaireForBusinessOwnerDataService";
 // Start
 
 export function loadQuestionnaireStartState(questionnaireID: string): ThunkAction {
@@ -259,6 +259,32 @@ export function denyQuestionnaireSubmission(submissionID: string): ThunkAction {
     try {
       const csrfToken = await CSRFTokenService.getCSRFToken();
       const {uuid} = await QuestionnaireDataService.denyQuestionnaireSubmission({submissionID, csrfToken});
+      dispatch(loadQuestionnaireSubmissionState(uuid));
+    } catch(error) {
+      // TODO: errors
+      alert(error);
+    }
+  }
+}
+
+export function approveQuestionnaireSubmissionFromBusinessOwner(submissionID: string): ThunkAction {
+  return async (dispatch, getState) => {
+    try {
+      const csrfToken = await CSRFTokenService.getCSRFToken();
+      const {uuid} = await QuestionnaireForBusinessOwnerDataService.approveQuestionnaireSubmission({submissionID, csrfToken, secureToken:''});
+      dispatch(loadQuestionnaireSubmissionState(uuid));
+    } catch(error) {
+      // TODO: errors
+      alert(error);
+    }
+  }
+}
+
+export function denyQuestionnaireSubmissionFromBusinessOwner(submissionID: string): ThunkAction {
+  return async (dispatch, getState) => {
+    try {
+      const csrfToken = await CSRFTokenService.getCSRFToken();
+      const {uuid} = await QuestionnaireForBusinessOwnerDataService.denyQuestionnaireSubmission({submissionID, csrfToken, secureToken:''});
       dispatch(loadQuestionnaireSubmissionState(uuid));
     } catch(error) {
       // TODO: errors
