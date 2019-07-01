@@ -148,8 +148,6 @@ echo "[SSTeam] Configuring RDBMS"
 
 if [ "$rdbms" = 'mysql' ]; then
   cd /vagrant && sed -i -e 's#PostgreSQLDatabase#MySQLDatabase#g' .env
-  mysql -e "GRANT ALL ON \`ss_tmpdb\_%\`.* TO '$project_name'@'localhost' IDENTIFIED BY '$project_name'"
-  mysql -e "FLUSH PRIVILEGES"
 fi
 
 # The "current" verson of PHP may have changed away from the default, thus making php<version>-rpm service calls fail
