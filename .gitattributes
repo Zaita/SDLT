@@ -1,3 +1,5 @@
+# Deployment tools ignore the following filename patterns
+# Review .gitignore also. If files are not in VCS, then deploy tools will ignore these too
 /.gitattributes export-ignore
 /.editorconfig export-ignore
 /.gitlab-ci.yml edxport ignore
@@ -11,4 +13,3 @@
 /phpunit.xml.dist export-ignore
 /grumphp.yml export-ignore
 /Vagrantfile export-ignore
-/index.ss4.php export-ignore
