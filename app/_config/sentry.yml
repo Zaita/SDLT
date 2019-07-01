@@ -2,6 +2,33 @@
 Name: site-myappsentryconfig
 ---
 
+---
+Only:
+  environment: test
+---
 PhpTek\Sentry\Adaptor\SentryClientAdaptor:
   opts:
-    dsn: '`SENTRY_DSN`'
+    dsn: 'https://<replace-me>@***REMOVED***/<123456>'
+    # CWP (Test) specific proxy constants
+    #http_proxy:
+    #  host: '`SS_OUTBOUND_PROXY`'
+    #  port: '`SS_OUTBOUND_PROXY_PORT`'
+---
+Except:
+  environment: test
+---
+PhpTek\Sentry\Adaptor\SentryClientAdaptor:
+  opts:
+    dsn: 'https://<replace-me>@***REMOVED***/<123456>'
+    # CWP (Prod) specific proxy constants
+    #http_proxy:
+    #  host: '`SS_OUTBOUND_PROXY`'
+    #  port: '`SS_OUTBOUND_PROXY_PORT`'
+---
+Only:
+  environment: dev
+---
+PhpTek\Sentry\Adaptor\SentryClientAdaptor:
+  opts:
+    dsn: null
+---

@@ -1,0 +1,14 @@
+/.gitattributes export-ignore
+/.editorconfig export-ignore
+/.gitlab-ci.yml edxport ignore
+/.git-completion.sh export-ignore
+/.packages export-ignore
+/.phpexts.json export-ignore
+/.ps1 export-ignore
+/.tools export-ignore
+/README.md export-ignore
+/phpcs.xml.dist export-ignore
+/phpunit.xml.dist export-ignore
+/grumphp.yml export-ignore
+/Vagrantfile export-ignore
+/index.ss4.php export-ignore

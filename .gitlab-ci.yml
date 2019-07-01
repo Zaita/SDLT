@@ -1,0 +1,15 @@
+image: gitlab.wgtn.cat-it.co.nz:4567/devtools/packer-templates/devenv/silverstripe4:18.04
+
+before_script:
+  - apt-get -q update
+  - apt-get -q install -y unzip
+  - puppet-devenv-apply -t composer -d '{"devenv::tools::nodejs::version":"8.x"}'
+
+test:
+  tags:
+    - kubernetes
+  script:
+    - cd "${CI_PROJECT_DIR}"
+    - composer install --no-interaction --no-progress --no-suggest --prefer-dist --ignore-platform-reqs
+    - vendor/bin/sake dev/build flush=all
+    - vendor/bin/phpunit
