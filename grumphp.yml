@@ -1,3 +1,6 @@
+# Catalyst I.T. SilverStripe Team Standard Grumphp configuration
+# SilverStripe Team 2016-2019 <silverstripedev@catalyst.net.nz>
+#
 parameters:
   bin_dir: "./vendor/bin"
   git_dir: "."
@@ -25,6 +28,7 @@ parameters:
         - "localhost"
         - ".dev"
         - ".local"
+        - "cat-it"
         - "phpinfo"
         - "<<<<"
         - "===="
@@ -41,10 +45,9 @@ parameters:
       metadata:
         priority: 90
         # Ensure commit messages are standard. Helps us when future debugging to see the story to which the commit relates
-      warning_severity: 0
     git_conflict: ~
     git_commit_message:
       matchers:
-        - '/^(INIT|NEW|MINOR|FIX|API):\s(RM|WR)\#?[\d]+\s.+$/'
+        - '/^(Revert|(INIT|NEW|MINOR|FIX|API):\s(RM|WR)\#?[\d]+)\s.+$/'
       multiline: true
   extensions: []

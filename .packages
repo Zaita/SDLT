@@ -1,0 +1,8 @@
+dev-n:phptek/sentry:^2.0.1
+dev-n:silverstripe/postgresql:^2.1.0
+dev-n:friendsofsilverstripe/backendmessages:^4.0.3
+dev-y:phpro/grumphp:^v0.14.2
+dev-y:friendsofphp/php-cs-fixer:^v2.13.1
+dev-y:sensiolabs/security-checker:^5.0.1
+dev-y:squizlabs/php_codesniffer:^3.3.2
+dev-y:lekoala/silverstripe-debugbar:^2.0

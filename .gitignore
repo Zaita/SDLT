@@ -24,6 +24,8 @@ nbproject
 .DS_Store
 
 # SSTeam
+dashboard.json
+.profile
 
 # SilverStripe
 # General
@@ -32,6 +34,7 @@ _ss_environment.php
 silverstripe-cache
 assets
 vendor
+resources
 
 # Modules
 
@@ -44,7 +47,7 @@ docsviewer
 documentconverter
 externallinks
 framework
-fulltextsearch
+fulltextsearch*
 gridfieldextensions
 html5
 hybridsessions
@@ -95,11 +98,11 @@ sentry
 docsviewer
 betterbuttons
 postgresql
-themes/**/node_modules
+node_modules
 campaign-admin
 asset-admin
 versioned
 silverstripe-admin
 silverstripe-assets
 graphql
-.gitattributes
+
