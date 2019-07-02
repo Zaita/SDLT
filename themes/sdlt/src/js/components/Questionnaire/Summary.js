@@ -14,6 +14,7 @@ type Props = {
   submission: Submission | null,
   handlePDFDownloadButtonClick: () => void,
   handleSubmitButtonClick: () => void,
+  handleAssignToMeButtonClick: () => void,
   handleApproveButtonClick: () => void,
   handleDenyButtonClick: () => void,
   handleEditButtonClick: () => void,
@@ -39,6 +40,7 @@ class Summary extends Component<Props> {
     handleApproveButtonClick: () => {},
     handleDenyButtonClick: () => {},
     handleEditButtonClick: () => {},
+    handleAssignToMeButtonClick: () => {},
     viewAs: "others",
     token: "",
   };
@@ -118,6 +120,7 @@ class Summary extends Component<Props> {
       handleSubmitButtonClick,
       handlePDFDownloadButtonClick,
       handleApproveButtonClick,
+      handleAssignToMeButtonClick,
       handleDenyButtonClick,
       handleEditButtonClick
     } = {...this.props};
@@ -186,6 +189,12 @@ class Summary extends Component<Props> {
 
     // Display buttons for approvers
     if (viewAs === "approver" || viewAs === "businessOwnerApprover") {
+      const assignToMeButton = (
+        <LightButton title="Assign to Me"
+                    classes={["button"]}
+                    onClick={handleAssignToMeButtonClick}
+        />
+      );
       const approveButton = (
         <DarkButton title="APPROVE"
                     classes={["button"]}
@@ -204,6 +213,18 @@ class Summary extends Component<Props> {
           <div className="buttons">
             <div>
               {downloadPDFButton}
+            </div>
+            <div/>
+          </div>
+        );
+      }
+
+      if (submission.status === "assign_to_security_architect") {
+        return (
+          <div className="buttons">
+            <div>
+              {downloadPDFButton}
+              {assignToMeButton}
             </div>
             <div/>
           </div>
@@ -249,9 +270,14 @@ class Summary extends Component<Props> {
     let securityArchitectApprovalStatus = prettifyStatus(approvalStatus.securityArchitect);
     let cisoApprovalStatus = prettifyStatus(approvalStatus.chiefInformationSecurityOfficer);
 
-    if (securityArchitectApprovalStatus !== "Pending") {
+    if (securityArchitectApprovalStatus == "Approved") {
       securityArchitectApprovalStatus = securityArchitectApprover.FirstName + " " +
         securityArchitectApprover.Surname + " - " + securityArchitectApprovalStatus;
+    }
+
+    if (submission.status === "waiting_for_security_architect_approval") {
+      securityArchitectApprovalStatus = "Being Reviewed by " + securityArchitectApprover.FirstName + " " +
+        securityArchitectApprover.Surname;
     }
 
     if (cisoApprovalStatus !== "Pending") {
