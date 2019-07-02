@@ -241,6 +241,19 @@ export function submitQuestionnaireForApproval(submissionID: string): ThunkActio
   };
 }
 
+export function assignToSecurityArchitectQuestionnaireSubmission(submissionID: string): ThunkAction {
+  return async (dispatch, getState) => {
+    try {
+      const csrfToken = await CSRFTokenService.getCSRFToken();
+      const {uuid} = await QuestionnaireDataService.assignQuestionnaireSubmissionToSecurityArchitect({submissionID, csrfToken});
+      dispatch(loadQuestionnaireSubmissionState(uuid));
+    } catch(error) {
+      // TODO: errors
+      alert(error);
+    }
+  }
+}
+
 export function approveQuestionnaireSubmission(submissionID: string): ThunkAction {
   return async (dispatch, getState) => {
     try {

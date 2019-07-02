@@ -68,7 +68,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SubmitterEmail'=> 'Varchar(255)',
         'QuestionnaireData' => 'Text',
         'AnswerData' => 'Text',
-        'QuestionnaireStatus' => 'Enum(array("in_progress", "submitted", "waiting_for_security_architect_approval","waiting_for_approval", "approved", "denied"))',
+        'QuestionnaireStatus' => 'Enum(array("in_progress", "submitted", "assign_to_security_architect", "waiting_for_security_architect_approval","waiting_for_approval", "approved", "denied"))',
         'UUID' => 'Varchar(36)',
         'IsStartLinkEmailSent' => 'Boolean',
         'IsEmailSentToSecurityArchitect' => 'Boolean',
@@ -169,10 +169,19 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ]
         );
 
+        // memeber list for SA group
+        $group = Group::get()->filter('code', UserGroupConstant::GROUP_CODE_SA)->first();
+
+        $saMemberList = [];
+
+        if ($group) {
+            $saMemberList = $group->Members();
+        }
+
         $fields->addFieldsToTab(
             'Root.SecurityArchitectDetails',
             [
-                $fields->dataFieldByName('SecurityArchitectApproverID'),
+                $fields->dataFieldByName('SecurityArchitectApproverID')->setSource($saMemberList),
                 $fields->dataFieldByName('SecurityArchitectApprovalStatus'),
                 $fields->dataFieldByName('SecurityArchitectApproverIPAddress'),
                 $fields->dataFieldByName('SecurityArchitectApproverMachineName'),
@@ -181,10 +190,18 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ]
         );
 
+        // memeber list for CISO group
+        $group = Group::get()->filter('code', UserGroupConstant::GROUP_CODE_CISO)->first();
+
+        $cisoMemberList = [];
+
+        if ($group) {
+            $cisoMemberList = $group->Members();
+        }
         $fields->addFieldsToTab(
             'Root.CisoDetails',
             [
-                $fields->dataFieldByName('CisoApproverID'),
+                $fields->dataFieldByName('CisoApproverID')->setSource($cisoMemberList),
                 $fields->dataFieldByName('CisoApprovalStatus'),
                 $fields->dataFieldByName('CisoApproverIPAddress'),
                 $fields->dataFieldByName('CisoApproverMachineName'),
@@ -438,6 +455,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $this->updateQuestionnaireSubmission($scaffolder);
         $this->updateQuestionnaireStatusToSubmitted($scaffolder);
         $this->updateQuestionnaireStatusToInProgress($scaffolder);
+        $this->updateQuestionnaireStatusToAssignToSecurityArchitect($scaffolder);
         $this->updateQuestionnaireStatusToWaitingForSecurityArchitectApproval($scaffolder);
 
         // Approve/Deny for Business Owner
@@ -800,10 +818,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      *
      * @return void
      */
-    public function updateQuestionnaireStatusToWaitingForSecurityArchitectApproval(SchemaScaffolder $scaffolder)
+    public function updateQuestionnaireStatusToAssignToSecurityArchitect(SchemaScaffolder $scaffolder)
     {
         $scaffolder
-            ->mutation('updateQuestionnaireStatusToWaitingForSecurityArchitectApproval', QuestionnaireSubmission::class)
+            ->mutation('updateQuestionnaireStatusToAssignToSecurityArchitect', QuestionnaireSubmission::class)
             ->addArgs([
                 'ID' => 'ID!',
             ])
@@ -828,7 +846,11 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     $questionnaireSubmission->doesQuestionnairBelongToCurrentUser();
 
-                    $questionnaireSubmission->QuestionnaireStatus = 'waiting_for_security_architect_approval';
+                    $questionnaireSubmission->QuestionnaireStatus = 'assign_to_security_architect';
+
+                    if ($questionnaireSubmission->SecurityArchitectApprovalStatus == 'denied') {
+                        $questionnaireSubmission->QuestionnaireStatus = 'waiting_for_security_architect_approval';
+                    }
 
                     if (!$questionnaireSubmission->IsEmailSentToSecurityArchitect) {
                         $members = $questionnaireSubmission->getApprovalMembersListByGroup(UserGroupConstant::GROUP_CODE_SA);
@@ -847,6 +869,49 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                             date('Y-m-d H:i:s', time() + 90)
                         );
                     }
+
+                    $questionnaireSubmission->write();
+
+                    return $questionnaireSubmission;
+                }
+            })
+            ->end();
+    }
+
+    /**
+     * @param SchemaScaffolder $scaffolder SchemaScaffolder
+     *
+     * @return void
+     */
+    public function updateQuestionnaireStatusToWaitingForSecurityArchitectApproval(SchemaScaffolder $scaffolder)
+    {
+        $scaffolder
+            ->mutation('updateQuestionnaireStatusToWaitingForSecurityArchitectApproval', QuestionnaireSubmission::class)
+            ->addArgs([
+                'ID' => 'ID!',
+            ])
+            ->setResolver(new class implements ResolverInterface {
+
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
+                 * @throws Exception
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    $member = QuestionnaireValidation::is_user_logged_in();
+
+                    $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
+
+                    $questionnaireSubmission->QuestionnaireStatus = 'waiting_for_security_architect_approval';
+
+                    $questionnaireSubmission->updateSecurityArchitectDetail($member, 'pending');
 
                     $questionnaireSubmission->write();
 
@@ -1363,6 +1428,22 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         }
 
         if ($this->SecurityArchitectApprovalStatus == 'pending') {
+            if ($this->QuestionnaireStatus == 'waiting_for_security_architect_approval') {
+                if ((int)$member->ID === (int)$this->SecurityArchitectApproverID) {
+                    return [
+                        "hasAccess" => true,
+                        "message" => 'Yes, current user has access to approve and denied.',
+                        'group' => $group
+                    ];
+                } else {
+                    return [
+                        "hasAccess" => false,
+                        "message" => 'Sorry, questionnaire already assigned to other member of Security Architect group.',
+                        'group' => $group
+                    ];
+                }
+            }
+
             return [
                 "hasAccess" => true,
                 "message" => 'Yes, current user has access to approve and denied.',
@@ -1463,7 +1544,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         }
 
         // check access details for security architect
-        if ($this->QuestionnaireStatus == 'waiting_for_security_architect_approval') {
+        if (in_array($this->QuestionnaireStatus, ['assign_to_security_architect', 'waiting_for_security_architect_approval'])) {
             $accessdetails = $this->getSecurityArchitectAccessDetail($member);
             return $accessdetails;
         }
