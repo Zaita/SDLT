@@ -39,6 +39,7 @@ use SilverStripe\Core\Convert;
 use Ramsey\Uuid\Uuid;
 use NZTA\SDLT\Validation\QuestionnaireValidation;
 use SilverStripe\Forms\LiteralField;
+use SilverStripe\Forms\FormAction;
 
 /**
  * Class Questionnaire
@@ -202,6 +203,21 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         );
 
         return $fields;
+    }
+
+    /**
+     * CMS Actions
+     * @return FieldList
+     */
+    public function getCMSActions()
+    {
+        $actions = parent::getCMSActions();
+
+        $resendEmailAction = FormAction::create('resendEmail', 'Resend Email');
+
+        $actions->push($resendEmailAction);
+
+        return $actions;
     }
 
     /**
@@ -1409,7 +1425,11 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     public static function is_business_owner_email_field($inputAnswerFields, $questionsData, $questionId)
     {
         foreach ($inputAnswerFields as $inputAnswerField) {
-            $inputfieldDetails = QuestionnaireValidation::get_field_details($questionsData, $questionId, $inputAnswerField->id);
+            $inputfieldDetails = QuestionnaireValidation::get_field_details(
+                $questionsData,
+                $questionId,
+                $inputAnswerField->id
+            );
 
             if ($inputfieldDetails->InputType == 'email' && $inputfieldDetails->IsBusinessOwner) {
                 return $inputAnswerField->data;
@@ -1431,7 +1451,11 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     public static function is_product_name_field($inputAnswerFields, $questionsData, $questionId)
     {
         foreach ($inputAnswerFields as $inputAnswerField) {
-            $inputfieldDetails = QuestionnaireValidation::get_field_details($questionsData, $questionId, $inputAnswerField->id);
+            $inputfieldDetails = QuestionnaireValidation::get_field_details(
+                $questionsData,
+                $questionId,
+                $inputAnswerField->id
+            );
 
             if ($inputfieldDetails->InputType == 'text' && $inputfieldDetails->IsProductName) {
                 return $inputAnswerField->data;
@@ -1473,6 +1497,17 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     public function canView($member = null)
     {
         return (Security::getCurrentUser() !== null);
+    }
+
+      /**
+     * Allow logged-in user to delete the object
+     *
+     * @param Member|null $member member
+     * @return bool
+     */
+    public function canDelete($member = null)
+    {
+        return false;
     }
 
     /**

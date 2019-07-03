@@ -19,6 +19,7 @@ use Symbiote\QueuedJobs\Services\QueuedJobService;
 use Symbiote\QueuedJobs\Services\QueuedJob;
 use SilverStripe\Security\Member;
 use NZTA\SDLT\Model\QuestionnaireEmail;
+use NZTA\SDLT\Email\SendApprovalLinkEmail;
 
 /**
  * A QueuedJob is specifically designed to be invoked from an onAfterWrite() process
@@ -63,73 +64,8 @@ class SendApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJob
      */
     public function process()
     {
-        // send email to stack holder (CISO and Security Architect group)
-        foreach ($this->members as $member) {
-            $this->sendEmail($member->FirstName, $member->Email, false);
-        }
-
-        if ($this->businessOwnerEmail != '') {
-            $this->sendEmail('', $this->businessOwnerEmail, true);
-        }
+        new SendApprovalLinkEmail($this->questionnaireSubmission, $this->members, $this->businessOwnerEmail);
 
         $this->isComplete = true;
-    }
-
-    /**
-     * @param string  $name            name
-     * @param string  $toEmail         to Email
-     * @param boolean $isBusinessOwner is BusinessOwner
-     *
-     * @return null
-     */
-    public function sendEmail($name = '', $toEmail = '', $isBusinessOwner = false)
-    {
-        $emailDetails = QuestionnaireEmail::get()->first();
-
-        $sub = $this->replaceVariable($emailDetails->ApprovalLinkEmailSubject, $isBusinessOwner);
-        $from = $emailDetails->FromEmailAddress;
-
-        $email = Email::create()
-            ->setHTMLTemplate('Email\\EmailTemplate')
-            ->setData([
-                'Name' => $name,
-                'Body' => $this->replaceVariable($emailDetails->ApprovalLinkEmailBody, $isBusinessOwner),
-                'EmailSignature' => $emailDetails->EmailSignature
-
-            ])
-            ->setFrom($from)
-            ->setTo($toEmail)
-            ->setSubject($sub);
-
-        $email->send();
-    }
-
-    /**
-     * @param string  $string          string
-     * @param boolean $isBusinessOwner true/false
-     * @return string
-     */
-    public function replaceVariable($string = '', $isBusinessOwner = false)
-    {
-        $questionnaireName = $this->questionnaireSubmission->Questionnaire()->Name;
-        $SubmitterName = $this->questionnaireSubmission->SubmitterName;
-        $SubmitterEmail = $this->questionnaireSubmission->SubmitterEmail;
-        $productName = $this->questionnaireSubmission->ProductName;
-
-        $link = $this->questionnaireSubmission->getSummaryPageLink();
-
-        if ($isBusinessOwner) {
-            $link = $this->questionnaireSubmission->getApprovalPageLink();
-        }
-
-        $approvalLink = '<a href="' . $link . '">this link</a>';
-
-        $string = str_replace('{$questionnaireName}', $questionnaireName, $string);
-        $string = str_replace('{$approvalLink}', $approvalLink, $string);
-        $string = str_replace('{$submitterName}', $SubmitterName, $string);
-        $string = str_replace('{$submitterEmail}', $SubmitterEmail, $string);
-        $string = str_replace('{$productName}', $productName, $string);
-
-        return $string;
     }
 }
