@@ -109,7 +109,6 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider
      */
     public function getIntro($introTitle = 'Instruction', $bgColor = "FFFFCE")
     {
-
         return sprintf(
             "{panel:title=(on) %s|bgColor=#%s}%s{panel}\t\n*%s*\n",
             $introTitle,

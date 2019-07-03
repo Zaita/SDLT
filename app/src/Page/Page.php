@@ -21,6 +21,5 @@ namespace {
      */
     class Page extends SiteTree
     {
-
     }
 }

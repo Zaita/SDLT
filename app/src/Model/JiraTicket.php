@@ -80,8 +80,7 @@ class JiraTicket extends DataObject implements ScaffoldingProvider
                 'ComponentID' => 'ID!',
                 'JiraKey' => 'String!',
             ])
-            ->setResolver(new class implements OperationResolver
-            {
+            ->setResolver(new class implements OperationResolver {
                 /**
                  * Invoked by the Executor class to resolve this mutation / query
                  * @param mixed       $object  object

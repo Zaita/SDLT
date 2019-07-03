@@ -414,17 +414,17 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'QuestionnaireID' => 'ID!'
             ])
             ->setResolver(new class implements ResolverInterface {
-              /**
-               * Invoked by the Executor class to resolve this mutation / query
-               * @see Executor
-               *
-               * @param mixed       $object  object
-               * @param array       $args    args
-               * @param mixed       $context context
-               * @param ResolveInfo $info    info
-               * @throws Exception
-               * @return mixed
-               */
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
+                 * @throws Exception
+                 * @return mixed
+                 */
                 public function resolve($object, array $args, $context, ResolveInfo $info)
                 {
                     QuestionnaireValidation::is_user_logged_in();
@@ -511,7 +511,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                  */
                 public function resolve($object, array $args, $context, ResolveInfo $info)
                 {
-
                     QuestionnaireValidation::is_user_logged_in();
 
                     $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);

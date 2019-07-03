@@ -269,8 +269,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'TaskID' => 'String!',
                 'QuestionnaireSubmissionID' => 'String!'
             ])
-            ->setResolver(new class implements ResolverInterface
-            {
+            ->setResolver(new class implements ResolverInterface {
                 /**
                  * Invoked by the Executor class to resolve this mutation / query
                  * @see Executor
@@ -406,8 +405,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'AnswerData' => 'String',
                 'SecureToken' => 'String',
             ])
-            ->setResolver(new class implements ResolverInterface
-            {
+            ->setResolver(new class implements ResolverInterface {
                 /**
                  * Invoked by the Executor class to resolve this mutation / query
                  * @see Executor
@@ -505,8 +503,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'Result' => 'String',
                 'SecureToken' => 'String'
             ])
-            ->setResolver(new class implements ResolverInterface
-            {
+            ->setResolver(new class implements ResolverInterface {
                 /**
                  * Invoked by the Executor class to resolve this mutation / query
                  * @see Executor
@@ -567,8 +564,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'UUID' => 'String!',
                 'SecureToken' => 'String',
             ])
-            ->setResolver(new class implements ResolverInterface
-            {
+            ->setResolver(new class implements ResolverInterface {
                 /**
                  * Invoked by the Executor class to resolve this mutation / query
                  * @see Executor
@@ -621,8 +617,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             ->addArg('UUID', 'String!')
             ->addArg('SecureToken', 'String')
             ->setUsePagination(false)
-            ->setResolver(new class implements ResolverInterface
-            {
+            ->setResolver(new class implements ResolverInterface {
 
                 /**
                  * Invoked by the Executor class to resolve this mutation / query
@@ -891,8 +886,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'ComponentIDs' => 'String!',
                 'JiraKey' => 'String!'
             ])
-            ->setResolver(new class implements ResolverInterface
-            {
+            ->setResolver(new class implements ResolverInterface {
                 /**
                  * Invoked by the Executor class to resolve this mutation / query
                  * @see Executor
@@ -934,16 +928,16 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     $submission->write();
 
                     foreach ($components as $component) {
-                            $jiraTicket = JiraTicket::create();
-                            $jiraTicket->JiraKey = Convert::raw2sql($args['JiraKey']);
-                            $link = JIRA::create()->addTask(
+                        $jiraTicket = JiraTicket::create();
+                        $jiraTicket->JiraKey = Convert::raw2sql($args['JiraKey']);
+                        $link = JIRA::create()->addTask(
                                 $jiraTicket->JiraKey,
                                 $component->Name,
                                 $component->getJIRABody()
                             );
-                            $jiraTicket->TicketLink = $link;
-                            $jiraTicket->write();
-                            $submission->JiraTickets()->add($jiraTicket);
+                        $jiraTicket->TicketLink = $link;
+                        $jiraTicket->write();
+                        $submission->JiraTickets()->add($jiraTicket);
                     }
 
                     return $submission;
