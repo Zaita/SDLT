@@ -3,7 +3,8 @@ use NZTA\SDLT\Model\TaskSubmission;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Control\Director;
 
-class TaskSubmissionTest extends SapphireTest {
+class TaskSubmissionTest extends SapphireTest
+{
     public function testTaskSubmissionLink()
     {
         $ts = TaskSubmission::create();
@@ -18,6 +19,5 @@ class TaskSubmissionTest extends SapphireTest {
         $this->assertEquals('#/task/submission/'.$uuid, $link);
         $this->assertEquals($absURL.'vendor/#/task/submission/'.$uuid.'?token='.$token, $anonLink);
         $this->assertEquals($absURL.'Security/login/?BackURL='.rawurlencode('#/task/submission/'.$uuid), $secureLink);
-
     }
 }

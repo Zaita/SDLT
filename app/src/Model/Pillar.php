@@ -105,7 +105,7 @@ class Pillar extends DataObject implements ScaffoldingProvider
 
         return $fields;
     }
-      /**
+    /**
      * @param SchemaScaffolder $scaffolder Scaffolder
      * @return SchemaScaffolder
      */
