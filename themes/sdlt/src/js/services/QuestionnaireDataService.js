@@ -89,7 +89,8 @@ query {
     }
     SubmitterName,
     SubmitterEmail,
-    QuestionnaireStatus
+    QuestionnaireStatus,
+    BusinessOwnerApproverName,
     Questionnaire {
       ID
       Name
@@ -106,6 +107,14 @@ query {
       TaskName
       TaskType
       Status
+    }
+    CisoApprover {
+      FirstName
+      Surname
+    }
+    SecurityArchitectApprover {
+      FirstName
+      Surname
     }
   }
   readSiteConfig {
@@ -146,10 +155,19 @@ query {
           businessOwner: _.toString(_.get(submissionJSON, "BusinessOwnerApprovalStatus", "")),
           securityArchitect: _.toString(_.get(submissionJSON, "SecurityArchitectApprovalStatus", "")),
         },
+        securityArchitectApprover: {
+          FirstName: _.toString(_.get(submissionJSON, "SecurityArchitectApprover.FirstName", "")),
+          Surname: _.toString(_.get(submissionJSON, "SecurityArchitectApprover.Surname", "")),
+        },
+        cisoApprover: {
+          FirstName: _.toString(_.get(submissionJSON, "CisoApprover.FirstName", "")),
+          Surname: _.toString(_.get(submissionJSON, "CisoApprover.Surname", "")),
+        },
         questions: QuestionParser.parseQuestionsFromJSON({
           schemaJSON: _.toString(_.get(submissionJSON, "QuestionnaireData", "")),
           answersJSON: _.toString(_.get(submissionJSON, "AnswerData", "")),
         }),
+        businessOwnerApproverName: _.toString(_.get(submissionJSON, "BusinessOwnerApproverName", "")),
         taskSubmissions: _
           .toArray(_.get(submissionJSON, "TaskSubmissions", []))
           .map((item) => {
