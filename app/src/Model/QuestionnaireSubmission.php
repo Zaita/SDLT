@@ -527,6 +527,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     $model->write();
 
+                    $model->createTasks($questionnaire);
+
                     return $model;
                 }
             })
@@ -1579,6 +1581,26 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             return $this->BusinessOwnerName;
         } else {
             return $this->BusinessOwnerEmailAddress;
+        }
+    }
+
+    /**
+     * create questionnaire level task
+     *
+     * @param DataObject $questionnaire questionnaire
+     *
+     * @return void
+     */
+    public function createTasks($questionnaire)
+    {
+        $tasks = $questionnaire->Tasks();
+
+        foreach ($tasks as $task) {
+            $taskSubmission = TaskSubmission::create_task_submission(
+                $task->ID,
+                $this->ID,
+                $this->User->ID
+            );
         }
     }
 }
