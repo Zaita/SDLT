@@ -45,6 +45,7 @@ export type Submission = {
   submissionID: string,
   submissionUUID: string,
   submissionToken: string,
+  businessOwnerApproverName: string,
   submitter: User,
   questions: Array<Question>,
   status: string, //"in_progress" | "waiting_for_approval" | "approved" | "rejected" | "expired"
@@ -52,6 +53,14 @@ export type Submission = {
     chiefInformationSecurityOfficer: string,
     businessOwner: string,
     securityArchitect: string
+  },
+  cisoApprover: {
+    FirstName: string,
+    Surname: string,
+  },
+  securityArchitectApprover: {
+    FirstName: string,
+    Surname: string,
   },
   taskSubmissions: Array<TaskSubmissionDisplay>
 };

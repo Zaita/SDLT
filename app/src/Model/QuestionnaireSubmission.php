@@ -82,6 +82,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'BusinessOwnerStatusUpdateDate' => 'Varchar(255)',
         'BusinessOwnerIPAddress' => 'Varchar(255)',
         'BusinessOwnerEmailAddress' => 'Varchar(255)',
+        'BusinessOwnerName' => 'Varchar(255)',
         'SecurityArchitectApprovalStatus' => 'Enum(array("not_applicable", "pending", "approved", "denied"))',
         'SecurityArchitectApproverIPAddress' => 'Varchar(255)',
         'SecurityArchitectApproverMachineName' => 'Varchar(255)',
@@ -191,6 +192,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ]
         );
 
+        $isBusinessOwnerName = $fields->dataFieldByName('BusinessOwnerName');
         $fields->addFieldsToTab(
             'Root.BusinessOwnerDetails',
             [
@@ -201,6 +203,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 $fields->dataFieldByName('BusinessOwnerStatusUpdateDate')
             ]
         );
+
+        if (isset($isBusinessOwnerName)) {
+            $fields->addFieldsToTab('Root.BusinessOwnerDetails', $isBusinessOwnerName);
+        }
 
         return $fields;
     }
@@ -334,7 +340,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'IsSubmitLinkEmailSent',
                 'ProductName',
                 'QuestionnaireName',
-                'Created'
+                'Created',
+                'BusinessOwnerApproverName'
             ]);
 
         $submissionScaffolder
@@ -404,7 +411,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     if ($isBusinessOwnerSummaryPage && empty($secureToken)) {
                         throw new Exception('Sorry, please enter token value as well.');
                     }
-
 
                     // Filter data by UUID
                     // The questionnaire can be read by other users
@@ -606,11 +612,19 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     } while (false);
 
                     if ($jsonDecodeAnswerData->answerType == "input") {
+                        $jsonAnswerDataArr = [];
+
+                        if (isset($jsonDecodeAnswerData->inputs)) {
+                            $jsonAnswerDataArr = $jsonDecodeAnswerData->inputs;
+                        }
+
                         // check if input field is business owner email field
-                        $businessOwnerEmail = QuestionnaireSubmission::is_business_owner_email_field(
-                            isset($jsonDecodeAnswerData->inputs) ? $jsonDecodeAnswerData->inputs : [],
+                        $businessOwnerEmail = QuestionnaireSubmission::is_field_type_exist(
+                            $jsonAnswerDataArr,
                             $questionnaireSubmission->QuestionnaireData,
-                            $args['QuestionID']
+                            $args['QuestionID'],
+                            'email',
+                            'IsBusinessOwner'
                         );
 
                         // if it is business owner email field, then add product owner email address
@@ -618,15 +632,31 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                             $questionnaireSubmission->BusinessOwnerEmailAddress = $businessOwnerEmail;
                         }
 
-                        $isProductName = QuestionnaireSubmission::is_product_name_field(
-                            isset($jsonDecodeAnswerData->inputs) ? $jsonDecodeAnswerData->inputs : [],
+                        $isProductName = QuestionnaireSubmission::is_field_type_exist(
+                            $jsonAnswerDataArr,
                             $questionnaireSubmission->QuestionnaireData,
-                            $args['QuestionID']
+                            $args['QuestionID'],
+                            'text',
+                            'IsProductName'
                         );
 
                         // if it is product name text field, then add product name
                         if (is_string($isProductName)) {
                             $questionnaireSubmission->ProductName = $isProductName;
+                        }
+
+                        //BusinessOwnerName
+                        $isBusinessOwnerName = QuestionnaireSubmission::is_field_type_exist(
+                            $jsonAnswerDataArr,
+                            $questionnaireSubmission->QuestionnaireData,
+                            $args['QuestionID'],
+                            'text',
+                            'IsBusinessOwnerName'
+                        );
+
+                        // if it is Business owner name text field, then add Business owner name
+                        if (is_string($isBusinessOwnerName)) {
+                            $questionnaireSubmission->BusinessOwnerName = $isBusinessOwnerName;
                         }
                     }
 
@@ -1060,6 +1090,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             $inputFields['PlaceHolder'] = $answerInputField->PlaceHolder;
             $inputFields['IsBusinessOwner'] = $answerInputField->IsBusinessOwner;
             $inputFields['IsProductName'] = $answerInputField->IsProductName;
+            $inputFields['IsBusinessOwnerName'] = $answerInputField->IsBusinessOwnerName;
             $finalInputFields[] = $inputFields;
         }
 
@@ -1449,15 +1480,17 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * Check if field type is business owner
+     * Check if field type is business owner, product name or business owner name
      *
      * @param array  $inputAnswerFields inputfields
      * @param string $questionsData     questions
      * @param int    $questionId        question id
+     * @param string $fieldType         Field Type
+     * @param string $fieldName         Field Name
      * @throws Exception
      * @return mixed
      */
-    public static function is_business_owner_email_field($inputAnswerFields, $questionsData, $questionId)
+    public static function is_field_type_exist($inputAnswerFields, $questionsData, $questionId, $fieldType, $fieldName)
     {
         foreach ($inputAnswerFields as $inputAnswerField) {
             $inputfieldDetails = QuestionnaireValidation::get_field_details(
@@ -1466,33 +1499,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 $inputAnswerField->id
             );
 
-            if ($inputfieldDetails->InputType == 'email' && $inputfieldDetails->IsBusinessOwner) {
-                return $inputAnswerField->data;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Check if field type is product name
-     *
-     * @param array  $inputAnswerFields inputfields
-     * @param string $questionsData     questions
-     * @param int    $questionId        question id
-     * @throws Exception
-     * @return mixed
-     */
-    public static function is_product_name_field($inputAnswerFields, $questionsData, $questionId)
-    {
-        foreach ($inputAnswerFields as $inputAnswerField) {
-            $inputfieldDetails = QuestionnaireValidation::get_field_details(
-                $questionsData,
-                $questionId,
-                $inputAnswerField->id
-            );
-
-            if ($inputfieldDetails->InputType == 'text' && $inputfieldDetails->IsProductName) {
+            if ($inputfieldDetails->InputType == $fieldType && $inputfieldDetails->$fieldName) {
                 return $inputAnswerField->data;
             }
         }
@@ -1562,5 +1569,17 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         }
 
         return $members;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBusinessOwnerApproverName()
+    {
+        if (!empty($this->BusinessOwnerName)) {
+            return $this->BusinessOwnerName;
+        } else {
+            return $this->BusinessOwnerEmailAddress;
+        }
     }
 }
