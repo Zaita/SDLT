@@ -185,7 +185,7 @@ class Summary extends Component<Props> {
     }
 
     // Display buttons for approvers
-    if (viewAs === "approver") {
+    if (viewAs === "approver" || viewAs === "businessOwnerApprover") {
       const approveButton = (
         <DarkButton title="APPROVE"
                     classes={["button"]}
@@ -243,24 +243,42 @@ class Summary extends Component<Props> {
     }
 
     const approvalStatus = submission.approvalStatus;
+    const securityArchitectApprover = submission.securityArchitectApprover;
+    const cisoApprover = submission.cisoApprover;
 
+    let securityArchitectApprovalStatus = prettifyStatus(approvalStatus.securityArchitect);
+    let cisoApprovalStatus = prettifyStatus(approvalStatus.chiefInformationSecurityOfficer);
+
+    if (securityArchitectApprovalStatus !== "Pending") {
+      securityArchitectApprovalStatus = securityArchitectApprover.FirstName + " " +
+        securityArchitectApprover.Surname + " - " + securityArchitectApprovalStatus;
+    }
+
+    if (cisoApprovalStatus !== "Pending") {
+      cisoApprovalStatus = cisoApprover.FirstName + " " + cisoApprover.Surname + " - " + cisoApprovalStatus;
+    }
+
+    let businessOwnerApprovalStatus = prettifyStatus(approvalStatus.businessOwner)
+    if (businessOwnerApprovalStatus !== "Pending") {
+        businessOwnerApprovalStatus = submission.businessOwnerApproverName + " - " + businessOwnerApprovalStatus;
+    }
     return (
       <div className="approvals">
         <h3>Approvals</h3>
         <div>
           <b>Security Architect</b>
           &nbsp;-&nbsp;
-          {prettifyStatus(approvalStatus.securityArchitect)}
+          {securityArchitectApprovalStatus}
         </div>
         <div>
           <b>Chief Information Security Officer</b>
           &nbsp;-&nbsp;
-          {prettifyStatus(approvalStatus.chiefInformationSecurityOfficer)}
+          {cisoApprovalStatus}
         </div>
         <div>
           <b>Business Owner</b>
           &nbsp;-&nbsp;
-          {prettifyStatus(approvalStatus.businessOwner)}
+          {businessOwnerApprovalStatus}
         </div>
       </div>
     );
