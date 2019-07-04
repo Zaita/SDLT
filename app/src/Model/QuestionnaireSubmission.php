@@ -1592,16 +1592,16 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      *
      * @return void
      */
-   public function createTasks($questionnaire)
-   {
-       $tasks = $questionnaire->Tasks();
+    public function createTasks($questionnaire)
+    {
+        $tasks = $questionnaire->Tasks();
 
-       foreach ($tasks as $task) {
-           $taskSubmission = TaskSubmission::create_task_submission(
-               $task->ID,
-               $this->ID,
-               $this->User->ID
-           );
-       }
-    }   
+        foreach ($tasks as $task) {
+            $taskSubmission = TaskSubmission::create_task_submission(
+                $task->ID,
+                $this->ID,
+                $this->User->ID
+            );
+        }
+    }
 }
