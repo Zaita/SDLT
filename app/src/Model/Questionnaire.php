@@ -66,6 +66,13 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     ];
 
     /**
+     * @var array
+     */
+    private static $many_many = [
+        'Tasks' => Task::class,
+    ];
+
+    /**
      * CMS Fields
      * @return FieldList
      */

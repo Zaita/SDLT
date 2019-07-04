@@ -67,6 +67,13 @@ class Task extends DataObject implements ScaffoldingProvider
     ];
 
     /**
+     * @var array
+     */
+    private static $belongs_many_many = [
+        'Questionnaires' => Questionnaire::class
+    ];
+
+    /**
      * CMS Fields
      * @return FieldList
      */

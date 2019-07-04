@@ -338,28 +338,15 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'SubmitterID' => $submitterID
             ])
             ->first();
-        if ($existingTaskSubmission && $existingTaskSubmission->exists()) {
-            $existingTaskSubmission->Status = TaskSubmission::STATUS_INVALID;
-            $existingTaskSubmission->write();
-        }
 
-        // Turn "invalid" task submission into "progress" if applicable rather than create new ones
-        /* @var $invalidTaskSubmission TaskSubmission|null */
-        $invalidTaskSubmission = TaskSubmission::get()
-            ->filter([
-                'Status' => TaskSubmission::STATUS_INVALID,
-                'TaskID' => $taskID,
-                'QuestionnaireSubmissionID' => $questionnaireSubmissionID,
-                'SubmitterID' => $submitterID
-            ])
-            ->first();
-        if ($invalidTaskSubmission && $invalidTaskSubmission->exists()) {
-            // Only turn "invalid" task submissions back if the structure is not changed
+        if ($existingTaskSubmission && $existingTaskSubmission->exists()) {
             if (json_encode($task->getQuestionsData()) == $invalidTaskSubmission->QuestionnaireData) {
-                $invalidTaskSubmission->Status = TaskSubmission::STATUS_IN_PROGRESS;
-                $invalidTaskSubmission->write();
-                return $invalidTaskSubmission;
+                // Only turn "in progress" task submissions back if the structure is not changed
+                $existingTaskSubmission->Status = TaskSubmission::STATUS_IN_PROGRESS;
+            } else {
+                $existingTaskSubmission->Status = TaskSubmission::STATUS_INVALID;
             }
+            $existingTaskSubmission->write();
         }
 
         // Create new task submission
