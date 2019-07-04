@@ -97,15 +97,22 @@ class SummaryForBusinessOwnerContainer extends Component<Props, State> {
   }
 
   async loadData() {
-    const data = await QuestionnaireForBusinessOwnerDataService.fetchSubmissionData({
-      uuid: this.props.uuid,
-      secureToken: this.props.token,
-    });
 
-    this.setState({
-      siteTitle: data.siteTitle,
-      submission: data.submission,
-    });
+    try {
+      const data = await QuestionnaireForBusinessOwnerDataService.fetchSubmissionData({
+        uuid: this.props.uuid,
+        secureToken: this.props.token,
+        isBusinessOwnerSummaryPage: '1'
+      });
+      this.setState({
+        siteTitle: data.siteTitle,
+        submission: data.submission,
+      });
+    } catch (error) {
+      // TODO: maybe dispatch a global error action
+      alert(error);
+    }
+
   }
 }
 

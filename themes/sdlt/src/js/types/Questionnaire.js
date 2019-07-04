@@ -44,6 +44,7 @@ export type Submission = {
   questionnaireTitle: string,
   submissionID: string,
   submissionUUID: string,
+  submissionToken: string,
   submitter: User,
   questions: Array<Question>,
   status: string, //"in_progress" | "waiting_for_approval" | "approved" | "rejected" | "expired"

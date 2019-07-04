@@ -15,11 +15,11 @@ type QuestionnaireSubmissionState = {
 
 export default class QuestionnaireForBusinessOwnerDataService {
 
-  static async fetchSubmissionData(argument: { uuid: string, secureToken: string }): Promise<QuestionnaireSubmissionState> {
-    const {uuid, secureToken} = {...argument};
+  static async fetchSubmissionData(argument: { uuid: string, secureToken: string, isBusinessOwnerSummaryPage: string }): Promise<QuestionnaireSubmissionState> {
+    const {uuid, secureToken, isBusinessOwnerSummaryPage} = {...argument};
     const query = `
 query {
-  readQuestionnaireSubmission(UUID: "${uuid}", SecureToken: "${secureToken}") {
+  readQuestionnaireSubmission(UUID: "${uuid}", SecureToken: "${secureToken}", IsBusinessOwnerSummaryPage: "${isBusinessOwnerSummaryPage}") {
     ID
     UUID
     User {
@@ -51,9 +51,8 @@ query {
 }`;
     const json = await GraphQLRequestHelper.request({query});
 
-    const memberData = _.get(json, "data.readCurrentMember.0", {});
     const submissionJSON = _.get(json, "data.readQuestionnaireSubmission.0", {});
-    if (!memberData || !submissionJSON) {
+    if (!submissionJSON) {
       throw DEFAULT_NETWORK_ERROR;
     }
 
