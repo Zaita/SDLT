@@ -13,12 +13,15 @@ import {
   editQuestionnaireSubmission,
   loadQuestionnaireSubmissionState,
   submitQuestionnaireForApproval,
+  approveQuestionnaireSubmissionFromBusinessOwner,
+  denyQuestionnaireSubmissionFromBusinessOwner
 } from "../../actions/questionnaire";
 import Summary from "./Summary";
 import PDFUtil from "../../utils/PDFUtil";
 import ReactModal from "react-modal";
 import DarkButton from "../Button/DarkButton";
 import LightButton from "../Button/LightButton";
+import CSRFTokenService from "../../services/CSRFTokenService";
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -34,10 +37,16 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
     dispatchSubmitForApprovalAction(submissionID: string) {
       dispatch(submitQuestionnaireForApproval(submissionID));
     },
+    dispatchBusinessOwnerApproveSubmissionAction(submissionID: string) {
+      dispatch(approveQuestionnaireSubmissionFromBusinessOwner(submissionID));
+    },
     dispatchApproveSubmissionAction(submissionID: string) {
       dispatch(approveQuestionnaireSubmission(submissionID));
     },
     dispatchDenySubmissionAction(submissionID: string) {
+      dispatch(denyQuestionnaireSubmissionFromBusinessOwner(submissionID));
+    },
+    dispatchBusinessOwnerDenySubmissionAction(submissionID: string) {
       dispatch(denyQuestionnaireSubmission(submissionID));
     },
     dispatchEditSubmissionAction(submissionID: string) {
@@ -57,6 +66,8 @@ type reduxProps = {
   dispatchApproveSubmissionAction: (submissionID: string) => void,
   dispatchDenySubmissionAction: (submissionID: string) => void,
   dispatchEditSubmissionAction: (submissionID: string) => void,
+  approveQuestionnaireSubmissionFromBusinessOwner: (submissionID: string) => void,
+  denyQuestionnaireSubmissionFromBusinessOwner: (submissionID: string) => void,
 };
 
 type Props = ownProps & reduxProps;
@@ -80,7 +91,7 @@ class SummaryContainer extends Component<Props, State> {
   }
 
   render() {
-    const {title, user, submission, isCurrentUserApprover} = {...this.props.submissionState};
+    const {title, user, submission, isCurrentUserApprover, isCurrentUserABusinessOwnerApprover} = {...this.props.submissionState};
 
     if (!user || !submission) {
       return null;
@@ -99,6 +110,12 @@ class SummaryContainer extends Component<Props, State> {
       // Check if the current user is an approver
       if (isCurrentUserApprover) {
         viewAs = "approver";
+        break;
+      }
+
+      // Check if the current user is an approver
+      if (isCurrentUserABusinessOwnerApprover) {
+        viewAs = "businessOwnerApprover";
         break;
       }
     } while (false);
@@ -159,13 +176,19 @@ class SummaryContainer extends Component<Props, State> {
   }
 
   handleApproveButtonClick() {
-    const {user, submission} = {...this.props.submissionState};
+    const {user, submission, isCurrentUserApprover, isCurrentUserABusinessOwnerApprover} = {...this.props.submissionState};
 
     if (!user || !submission) {
       return;
     }
 
-    this.props.dispatchApproveSubmissionAction(submission.submissionID);
+    if (isCurrentUserApprover) {
+      this.props.dispatchApproveSubmissionAction(submission.submissionID);
+    }
+
+    if (isCurrentUserABusinessOwnerApprover) {
+      this.props.dispatchBusinessOwnerApproveSubmissionAction(submission.submissionID);
+    }
   }
 
   handleDenyButtonClick() {
@@ -175,7 +198,13 @@ class SummaryContainer extends Component<Props, State> {
       return;
     }
 
-    this.props.dispatchDenySubmissionAction(submission.submissionID);
+    if (isCurrentUserApprover) {
+      this.props.dispatchDenySubmissionAction(submission.submissionID);
+    }
+
+    if (isCurrentUserABusinessOwnerApprover) {
+      this.props.dispatchBusinessOwnerDenySubmissionAction(submission.submissionID);
+    }
   }
 
   handleEditButtonClick() {

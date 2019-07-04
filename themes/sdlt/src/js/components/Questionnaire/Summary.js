@@ -185,7 +185,7 @@ class Summary extends Component<Props> {
     }
 
     // Display buttons for approvers
-    if (viewAs === "approver") {
+    if (viewAs === "approver" || viewAs === "businessOwnerApprover") {
       const approveButton = (
         <DarkButton title="APPROVE"
                     classes={["button"]}
