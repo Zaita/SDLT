@@ -15,11 +15,11 @@ type QuestionnaireSubmissionState = {
 
 export default class QuestionnaireForBusinessOwnerDataService {
 
-  static async fetchSubmissionData(argument: { uuid: string, secureToken: string }): Promise<QuestionnaireSubmissionState> {
-    const {uuid, secureToken} = {...argument};
+  static async fetchSubmissionData(argument: { uuid: string, secureToken: string, isBusinessOwnerSummaryPage: string }): Promise<QuestionnaireSubmissionState> {
+    const {uuid, secureToken, isBusinessOwnerSummaryPage} = {...argument};
     const query = `
 query {
-  readQuestionnaireSubmission(UUID: "${uuid}", SecureToken: "${secureToken}") {
+  readQuestionnaireSubmission(UUID: "${uuid}", SecureToken: "${secureToken}", IsBusinessOwnerSummaryPage: "${isBusinessOwnerSummaryPage}") {
     ID
     UUID
     User {
@@ -27,7 +27,8 @@ query {
     }
     SubmitterName,
     SubmitterEmail,
-    QuestionnaireStatus
+    QuestionnaireStatus,
+    BusinessOwnerApproverName,
     Questionnaire {
       ID
       Name
@@ -38,6 +39,14 @@ query {
     BusinessOwnerApprovalStatus
     SecurityArchitectApprovalStatus
     IsCurrentUserAnApprover
+    CisoApprover {
+      FirstName
+      Surname
+    }
+    SecurityArchitectApprover {
+      FirstName
+      Surname
+    }
     TaskSubmissions {
       UUID
       TaskName
@@ -51,9 +60,8 @@ query {
 }`;
     const json = await GraphQLRequestHelper.request({query});
 
-    const memberData = _.get(json, "data.readCurrentMember.0", {});
     const submissionJSON = _.get(json, "data.readQuestionnaireSubmission.0", {});
-    if (!memberData || !submissionJSON) {
+    if (!submissionJSON) {
       throw DEFAULT_NETWORK_ERROR;
     }
 
@@ -72,6 +80,7 @@ query {
           isCISO: false
         },
         status: _.toString(_.get(submissionJSON, "QuestionnaireStatus", "")).toLowerCase().replace("-", "_"),
+        businessOwnerApproverName: _.toString(_.get(submissionJSON, "BusinessOwnerApproverName", "")),
         approvalStatus: {
           chiefInformationSecurityOfficer: _.toString(_.get(submissionJSON, "CisoApprovalStatus", "")),
           businessOwner: _.toString(_.get(submissionJSON, "BusinessOwnerApprovalStatus", "")),
@@ -81,6 +90,14 @@ query {
           schemaJSON: _.toString(_.get(submissionJSON, "QuestionnaireData", "")),
           answersJSON: _.toString(_.get(submissionJSON, "AnswerData", "")),
         }),
+        securityArchitectApprover: {
+          FirstName: _.toString(_.get(submissionJSON, "SecurityArchitectApprover.FirstName", "")),
+          Surname: _.toString(_.get(submissionJSON, "SecurityArchitectApprover.Surname", "")),
+        },
+        cisoApprover: {
+          FirstName: _.toString(_.get(submissionJSON, "CisoApprover.FirstName", "")),
+          Surname: _.toString(_.get(submissionJSON, "CisoApprover.Surname", "")),
+        },
         taskSubmissions: _
           .toArray(_.get(submissionJSON, "TaskSubmissions", []))
           .map((item) => {

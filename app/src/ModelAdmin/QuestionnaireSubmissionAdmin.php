@@ -23,6 +23,8 @@ use SilverStripe\Forms\GridField\GridFieldAddNewButton;
 use SilverStripe\Forms\GridField\GridFieldEditButton;
 use SilverStripe\Forms\GridField\GridFieldViewButton;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
+use SilverStripe\Forms\GridField\GridFieldDetailForm;
+use SilverStripe\Forms\GridField\GridFieldDeleteAction;
 
 /**
  * Class QuestionnaireSubmissionAdmin
@@ -61,11 +63,15 @@ class QuestionnaireSubmissionAdmin extends ModelAdmin
 
         /* @var GridField $gridField */
         $gridField = $form->Fields()->fieldByName($gridFieldName);
+
         $config = GridFieldConfig_RelationEditor::create();
+
         $config->removeComponentsByType(GridFieldAddNewButton::class);
-        //$config->removeComponentsByType(GridFieldEditButton::class);
+        $config->removeComponentsByType(GridFieldDeleteAction::class);
         $config->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
-        $config->AddComponents(new GridFieldViewButton());
+        $config->getComponentByType(GridFieldDetailForm::class)
+            ->setItemRequestClass(QuestionnaireSubmissionDetailForm_ItemRequest::class);
+
         $gridField->setConfig($config);
 
         return $form;

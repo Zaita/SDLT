@@ -39,6 +39,7 @@ use SilverStripe\Core\Convert;
 use Ramsey\Uuid\Uuid;
 use NZTA\SDLT\Validation\QuestionnaireValidation;
 use SilverStripe\Forms\LiteralField;
+use SilverStripe\Forms\FormAction;
 
 /**
  * Class Questionnaire
@@ -81,6 +82,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'BusinessOwnerStatusUpdateDate' => 'Varchar(255)',
         'BusinessOwnerIPAddress' => 'Varchar(255)',
         'BusinessOwnerEmailAddress' => 'Varchar(255)',
+        'BusinessOwnerName' => 'Varchar(255)',
         'SecurityArchitectApprovalStatus' => 'Enum(array("not_applicable", "pending", "approved", "denied"))',
         'SecurityArchitectApproverIPAddress' => 'Varchar(255)',
         'SecurityArchitectApproverMachineName' => 'Varchar(255)',
@@ -190,6 +192,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ]
         );
 
+        $isBusinessOwnerName = $fields->dataFieldByName('BusinessOwnerName');
         $fields->addFieldsToTab(
             'Root.BusinessOwnerDetails',
             [
@@ -201,7 +204,26 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ]
         );
 
+        if (isset($isBusinessOwnerName)) {
+            $fields->addFieldsToTab('Root.BusinessOwnerDetails', $isBusinessOwnerName);
+        }
+
         return $fields;
+    }
+
+    /**
+     * CMS Actions
+     * @return FieldList
+     */
+    public function getCMSActions()
+    {
+        $actions = parent::getCMSActions();
+
+        $resendEmailAction = FormAction::create('resendEmail', 'Resend Email');
+
+        $actions->push($resendEmailAction);
+
+        return $actions;
     }
 
     /**
@@ -254,6 +276,29 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
+     * get is current user is business and has access to approve and deny
+     *
+     * @return boolean
+     */
+    public function getIsCurrentUserABusinessOwnerApprover()
+    {
+        $member = Security::getCurrentUser();
+
+        if (!$member) {
+            return false;
+        }
+
+        // check access details for business owner
+        if ($this->QuestionnaireStatus == 'waiting_for_approval' &&
+            $this->BusinessOwnerApprovalStatus == 'pending' &&
+            $member->Email == $this->BusinessOwnerEmailAddress) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * @param SchemaScaffolder $scaffolder Scaffolder
      * @return SchemaScaffolder
      */
@@ -265,6 +310,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ->addFields([
                 'ID',
                 'UUID',
+                'ApprovalLinkToken',
                 'SubmitterName',
                 'SubmitterEmail',
                 'QuestionnaireStatus',
@@ -289,11 +335,13 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'SecurityArchitectApproverMachineName',
                 'SecurityArchitectStatusUpdateDate',
                 'IsCurrentUserAnApprover',
+                'IsCurrentUserABusinessOwnerApprover',
                 'IsEmailSentToSecurityArchitect',
                 'IsSubmitLinkEmailSent',
                 'ProductName',
                 'QuestionnaireName',
-                'Created'
+                'Created',
+                'BusinessOwnerApproverName'
             ]);
 
         $submissionScaffolder
@@ -323,6 +371,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ->addArg('UUID', 'String')
             ->addArg('UserID', 'String')
             ->addArg('SecureToken', 'String')
+            ->addArg('IsBusinessOwnerSummaryPage', 'String')
             ->setUsePagination(false)
             ->setResolver(new class implements ResolverInterface {
 
@@ -343,6 +392,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $uuid = isset($args['UUID']) ? htmlentities(trim($args['UUID'])) : null;
                     $userID = isset($args['UserID']) ? htmlentities(trim($args['UserID'])) : null;
                     $secureToken = isset($args['SecureToken']) ? Convert::raw2sql(trim($args['SecureToken'])) : null;
+                    $isBusinessOwnerSummaryPage= isset($args['IsBusinessOwnerSummaryPage']) ? Convert::raw2sql(trim($args['IsBusinessOwnerSummaryPage'])) : '0';
 
                     // To continue the data fetching, user has to be logged-in or has secure token
                     if (!$member && !$secureToken) {
@@ -358,6 +408,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         throw new Exception('Sorry, wrong user Id.');
                     }
 
+                    if ($isBusinessOwnerSummaryPage && empty($secureToken)) {
+                        throw new Exception('Sorry, please enter token value as well.');
+                    }
 
                     // Filter data by UUID
                     // The questionnaire can be read by other users
@@ -372,7 +425,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     }
 
                     // If the user is not logged-in and the secure token is not valid, throw error
-                    if (!$member && !hash_equals($data->ApprovalLinkToken, $secureToken)) {
+                    if (!empty($secureToken) && !hash_equals($data->ApprovalLinkToken, $secureToken)) {
                         throw new Exception('Sorry, wrong security token.');
                     }
 
@@ -558,11 +611,19 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     } while (false);
 
                     if ($jsonDecodeAnswerData->answerType == "input") {
+                        $jsonAnswerDataArr = [];
+
+                        if (isset($jsonDecodeAnswerData->inputs)) {
+                            $jsonAnswerDataArr = $jsonDecodeAnswerData->inputs;
+                        }
+
                         // check if input field is business owner email field
-                        $businessOwnerEmail = QuestionnaireSubmission::is_business_owner_email_field(
-                            isset($jsonDecodeAnswerData->inputs) ? $jsonDecodeAnswerData->inputs : [],
+                        $businessOwnerEmail = QuestionnaireSubmission::is_field_type_exist(
+                            $jsonAnswerDataArr,
                             $questionnaireSubmission->QuestionnaireData,
-                            $args['QuestionID']
+                            $args['QuestionID'],
+                            'email',
+                            'IsBusinessOwner'
                         );
 
                         // if it is business owner email field, then add product owner email address
@@ -570,15 +631,31 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                             $questionnaireSubmission->BusinessOwnerEmailAddress = $businessOwnerEmail;
                         }
 
-                        $isProductName = QuestionnaireSubmission::is_product_name_field(
-                            isset($jsonDecodeAnswerData->inputs) ? $jsonDecodeAnswerData->inputs : [],
+                        $isProductName = QuestionnaireSubmission::is_field_type_exist(
+                            $jsonAnswerDataArr,
                             $questionnaireSubmission->QuestionnaireData,
-                            $args['QuestionID']
+                            $args['QuestionID'],
+                            'text',
+                            'IsProductName'
                         );
 
                         // if it is product name text field, then add product name
                         if (is_string($isProductName)) {
                             $questionnaireSubmission->ProductName = $isProductName;
+                        }
+
+                        //BusinessOwnerName
+                        $isBusinessOwnerName = QuestionnaireSubmission::is_field_type_exist(
+                            $jsonAnswerDataArr,
+                            $questionnaireSubmission->QuestionnaireData,
+                            $args['QuestionID'],
+                            'text',
+                            'IsBusinessOwnerName'
+                        );
+
+                        // if it is Business owner name text field, then add Business owner name
+                        if (is_string($isBusinessOwnerName)) {
+                            $questionnaireSubmission->BusinessOwnerName = $isBusinessOwnerName;
                         }
                     }
 
@@ -871,7 +948,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ->mutation('updateQuestionnaireStatusToApproved', QuestionnaireSubmission::class)
             ->addArgs([
                 'ID' => 'ID!',
-                'SecureToken' => 'String!'
+                'SecureToken' => 'String'
             ])
             ->setResolver(new class implements ResolverInterface {
                 /**
@@ -889,7 +966,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 {
                     $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
 
-                    if (!hash_equals($questionnaireSubmission->ApprovalLinkToken, Convert::raw2sql($args['SecureToken']))) {
+                    $secureToken = isset($args['SecureToken']) ? Convert::raw2sql($args['SecureToken']) : '';
+
+                    if (!empty($secureToken) && !hash_equals($questionnaireSubmission->ApprovalLinkToken, $secureToken)) {
                         throw new Exception('Wrong secure token');
                     }
 
@@ -914,7 +993,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ->mutation('updateQuestionnaireStatusToDenied', QuestionnaireSubmission::class)
             ->addArgs([
                 'ID' => 'ID!',
-                'SecureToken' => 'String!'
+                'SecureToken' => 'String'
             ])
             ->setResolver(new class implements ResolverInterface {
                 /**
@@ -932,7 +1011,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 {
                     $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
 
-                    if (!hash_equals($questionnaireSubmission->ApprovalLinkToken, Convert::raw2sql($args['SecureToken']))) {
+                    $secureToken = isset($args['SecureToken']) ? Convert::raw2sql($args['SecureToken']) : '';
+
+                    if (!empty($secureToken) && !hash_equals($questionnaireSubmission->ApprovalLinkToken, $secureToken)) {
                         throw new Exception('Wrong secure token');
                     }
 
@@ -1008,6 +1089,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             $inputFields['PlaceHolder'] = $answerInputField->PlaceHolder;
             $inputFields['IsBusinessOwner'] = $answerInputField->IsBusinessOwner;
             $inputFields['IsProductName'] = $answerInputField->IsProductName;
+            $inputFields['IsBusinessOwnerName'] = $answerInputField->IsBusinessOwnerName;
             $finalInputFields[] = $inputFields;
         }
 
@@ -1028,9 +1110,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             $actionFields['Label'] = $answerActionField->Label;
             $actionFields['ActionType'] = $answerActionField->ActionType;
             $actionFields['Message'] = $answerActionField->Message;
-            $actionFields['GotoID'] = $answerActionField->GotoID;
-            $actionFields['QuestionID'] = $answerActionField->QuestionID;
-            $actionFields['TaskID'] = $answerActionField->TaskID;
+            $actionFields['GotoID'] = $answerActionField->Goto()->ID;
+            $actionFields['QuestionID'] = $answerActionField->Question()->ID;
+            $actionFields['TaskID'] = $answerActionField->Task()->ID;
             $finalActionFields[] = $actionFields;
         }
 
@@ -1397,42 +1479,26 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * Check if field type is business owner
+     * Check if field type is business owner, product name or business owner name
      *
      * @param array  $inputAnswerFields inputfields
      * @param string $questionsData     questions
      * @param int    $questionId        question id
+     * @param string $fieldType         Field Type
+     * @param string $fieldName         Field Name
      * @throws Exception
      * @return mixed
      */
-    public static function is_business_owner_email_field($inputAnswerFields, $questionsData, $questionId)
+    public static function is_field_type_exist($inputAnswerFields, $questionsData, $questionId, $fieldType, $fieldName)
     {
         foreach ($inputAnswerFields as $inputAnswerField) {
-            $inputfieldDetails = QuestionnaireValidation::get_field_details($questionsData, $questionId, $inputAnswerField->id);
+            $inputfieldDetails = QuestionnaireValidation::get_field_details(
+                $questionsData,
+                $questionId,
+                $inputAnswerField->id
+            );
 
-            if ($inputfieldDetails->InputType == 'email' && $inputfieldDetails->IsBusinessOwner) {
-                return $inputAnswerField->data;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Check if field type is product name
-     *
-     * @param array  $inputAnswerFields inputfields
-     * @param string $questionsData     questions
-     * @param int    $questionId        question id
-     * @throws Exception
-     * @return mixed
-     */
-    public static function is_product_name_field($inputAnswerFields, $questionsData, $questionId)
-    {
-        foreach ($inputAnswerFields as $inputAnswerField) {
-            $inputfieldDetails = QuestionnaireValidation::get_field_details($questionsData, $questionId, $inputAnswerField->id);
-
-            if ($inputfieldDetails->InputType == 'text' && $inputfieldDetails->IsProductName) {
+            if ($inputfieldDetails->InputType == $fieldType && $inputfieldDetails->$fieldName) {
                 return $inputAnswerField->data;
             }
         }
@@ -1474,6 +1540,17 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         return (Security::getCurrentUser() !== null);
     }
 
+      /**
+     * Allow logged-in user to delete the object
+     *
+     * @param Member|null $member member
+     * @return bool
+     */
+    public function canDelete($member = null)
+    {
+        return false;
+    }
+
     /**
      * @param string $group group code
      * @throws Exception
@@ -1491,5 +1568,17 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         }
 
         return $members;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBusinessOwnerApproverName()
+    {
+        if (!empty($this->BusinessOwnerName)) {
+            return $this->BusinessOwnerName;
+        } else {
+            return $this->BusinessOwnerEmailAddress;
+        }
     }
 }

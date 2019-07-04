@@ -83,12 +83,14 @@ query {
   readQuestionnaireSubmission(UUID: "${submissionHash}") {
     ID
     UUID
+    ApprovalLinkToken
     User {
       ID
     }
     SubmitterName,
     SubmitterEmail,
-    QuestionnaireStatus
+    QuestionnaireStatus,
+    BusinessOwnerApproverName,
     Questionnaire {
       ID
       Name
@@ -99,11 +101,20 @@ query {
     BusinessOwnerApprovalStatus
     SecurityArchitectApprovalStatus
     IsCurrentUserAnApprover
+    IsCurrentUserABusinessOwnerApprover
     TaskSubmissions {
       UUID
       TaskName
       TaskType
       Status
+    }
+    CisoApprover {
+      FirstName
+      Surname
+    }
+    SecurityArchitectApprover {
+      FirstName
+      Surname
     }
   }
   readSiteConfig {
@@ -121,13 +132,16 @@ query {
     const data: QuestionnaireSubmissionState = {
       title: _.toString(_.get(submissionJSON, "Questionnaire.Name", "")),
       siteTitle: _.toString(_.get(json, "data.readSiteConfig.0.Title", "")),
+
       user: UserParser.parseUserFromJSON(memberData),
       isCurrentUserApprover: _.get(submissionJSON, "IsCurrentUserAnApprover", "false") === "true",
+      isCurrentUserABusinessOwnerApprover: _.get(submissionJSON, "IsCurrentUserABusinessOwnerApprover", "false") === "true",
       submission: {
         questionnaireID: _.toString(_.get(submissionJSON, "Questionnaire.ID", "")),
         questionnaireTitle: _.toString(_.get(submissionJSON, "Questionnaire.Name", "")),
         submissionID: _.toString(_.get(submissionJSON, "ID", "")),
         submissionUUID: _.toString(_.get(submissionJSON, "UUID", "")),
+        submissionToken: _.toString(_.get(submissionJSON, "ApprovalLinkToken", "")),
         submitter: {
           id: _.toString(_.get(submissionJSON, "User.ID")),
           name: _.toString(_.get(submissionJSON, "SubmitterName", "")),
@@ -141,10 +155,19 @@ query {
           businessOwner: _.toString(_.get(submissionJSON, "BusinessOwnerApprovalStatus", "")),
           securityArchitect: _.toString(_.get(submissionJSON, "SecurityArchitectApprovalStatus", "")),
         },
+        securityArchitectApprover: {
+          FirstName: _.toString(_.get(submissionJSON, "SecurityArchitectApprover.FirstName", "")),
+          Surname: _.toString(_.get(submissionJSON, "SecurityArchitectApprover.Surname", "")),
+        },
+        cisoApprover: {
+          FirstName: _.toString(_.get(submissionJSON, "CisoApprover.FirstName", "")),
+          Surname: _.toString(_.get(submissionJSON, "CisoApprover.Surname", "")),
+        },
         questions: QuestionParser.parseQuestionsFromJSON({
           schemaJSON: _.toString(_.get(submissionJSON, "QuestionnaireData", "")),
           answersJSON: _.toString(_.get(submissionJSON, "AnswerData", "")),
         }),
+        businessOwnerApproverName: _.toString(_.get(submissionJSON, "BusinessOwnerApproverName", "")),
         taskSubmissions: _
           .toArray(_.get(submissionJSON, "TaskSubmissions", []))
           .map((item) => {
