@@ -27,7 +27,8 @@ query {
     }
     SubmitterName,
     SubmitterEmail,
-    QuestionnaireStatus
+    QuestionnaireStatus,
+    BusinessOwnerApproverName,
     Questionnaire {
       ID
       Name
@@ -38,6 +39,14 @@ query {
     BusinessOwnerApprovalStatus
     SecurityArchitectApprovalStatus
     IsCurrentUserAnApprover
+    CisoApprover {
+      FirstName
+      Surname
+    }
+    SecurityArchitectApprover {
+      FirstName
+      Surname
+    }
     TaskSubmissions {
       UUID
       TaskName
@@ -71,6 +80,7 @@ query {
           isCISO: false
         },
         status: _.toString(_.get(submissionJSON, "QuestionnaireStatus", "")).toLowerCase().replace("-", "_"),
+        businessOwnerApproverName: _.toString(_.get(submissionJSON, "BusinessOwnerApproverName", "")),
         approvalStatus: {
           chiefInformationSecurityOfficer: _.toString(_.get(submissionJSON, "CisoApprovalStatus", "")),
           businessOwner: _.toString(_.get(submissionJSON, "BusinessOwnerApprovalStatus", "")),
@@ -80,6 +90,14 @@ query {
           schemaJSON: _.toString(_.get(submissionJSON, "QuestionnaireData", "")),
           answersJSON: _.toString(_.get(submissionJSON, "AnswerData", "")),
         }),
+        securityArchitectApprover: {
+          FirstName: _.toString(_.get(submissionJSON, "SecurityArchitectApprover.FirstName", "")),
+          Surname: _.toString(_.get(submissionJSON, "SecurityArchitectApprover.Surname", "")),
+        },
+        cisoApprover: {
+          FirstName: _.toString(_.get(submissionJSON, "CisoApprover.FirstName", "")),
+          Surname: _.toString(_.get(submissionJSON, "CisoApprover.Surname", "")),
+        },
         taskSubmissions: _
           .toArray(_.get(submissionJSON, "TaskSubmissions", []))
           .map((item) => {

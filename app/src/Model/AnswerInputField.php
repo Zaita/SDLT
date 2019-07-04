@@ -46,7 +46,8 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         'PlaceHolder' => 'Varchar(255)',
         'SortOrder' => 'Int',
         'IsBusinessOwner' => 'Boolean',
-        'IsProductName' => 'Boolean'
+        'IsProductName' => 'Boolean',
+        'IsBusinessOwnerName' => 'Boolean',
     ];
 
     /**
@@ -92,6 +93,10 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
             ->isEqualTo('email');
         $fields->dataFieldByName('IsProductName')
             ->setTitle('Does this field contain a product name?')
+            ->displayIf('InputType')
+            ->isEqualTo('text');
+        $fields->dataFieldByName('IsBusinessOwnerName')
+            ->setTitle('Does this field contain a Business Owner name?')
             ->displayIf('InputType')
             ->isEqualTo('text');
 
