@@ -14,7 +14,8 @@ import {
   loadQuestionnaireSubmissionState,
   submitQuestionnaireForApproval,
   approveQuestionnaireSubmissionFromBusinessOwner,
-  denyQuestionnaireSubmissionFromBusinessOwner
+  denyQuestionnaireSubmissionFromBusinessOwner,
+  assignToSecurityArchitectQuestionnaireSubmission,
 } from "../../actions/questionnaire";
 import Summary from "./Summary";
 import PDFUtil from "../../utils/PDFUtil";
@@ -43,14 +44,17 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
     dispatchApproveSubmissionAction(submissionID: string) {
       dispatch(approveQuestionnaireSubmission(submissionID));
     },
-    dispatchDenySubmissionAction(submissionID: string) {
+    dispatchBusinessOwnerDenySubmissionAction(submissionID: string) {
       dispatch(denyQuestionnaireSubmissionFromBusinessOwner(submissionID));
     },
-    dispatchBusinessOwnerDenySubmissionAction(submissionID: string) {
+    dispatchDenySubmissionAction(submissionID: string) {
       dispatch(denyQuestionnaireSubmission(submissionID));
     },
     dispatchEditSubmissionAction(submissionID: string) {
       dispatch(editQuestionnaireSubmission(submissionID));
+    },
+    dispatchAssignToMeAction(submissionID: string) {
+      dispatch(assignToSecurityArchitectQuestionnaireSubmission(submissionID));
     },
   };
 };
@@ -129,6 +133,7 @@ class SummaryContainer extends Component<Props, State> {
                  handleApproveButtonClick={this.handleApproveButtonClick.bind(this)}
                  handleDenyButtonClick={this.handleDenyButtonClick.bind(this)}
                  handleEditButtonClick={this.handleOpenModal.bind(this)}
+                 handleAssignToMeButtonClick={this.handleAssignToMeButtonClick.bind(this)}
                  viewAs={viewAs}
         />
         <Footer/>
@@ -192,7 +197,7 @@ class SummaryContainer extends Component<Props, State> {
   }
 
   handleDenyButtonClick() {
-    const {user, submission} = {...this.props.submissionState};
+    const {user, submission, isCurrentUserApprover, isCurrentUserABusinessOwnerApprover} = {...this.props.submissionState};
 
     if (!user || !submission) {
       return;
@@ -206,6 +211,17 @@ class SummaryContainer extends Component<Props, State> {
       this.props.dispatchBusinessOwnerDenySubmissionAction(submission.submissionID);
     }
   }
+
+  handleAssignToMeButtonClick() {
+    const {user, submission} = {...this.props.submissionState};
+
+    if (!user || !submission) {
+      return;
+    }
+
+    this.props.dispatchAssignToMeAction(submission.submissionID);
+  }
+
 
   handleEditButtonClick() {
     const {user, submission} = {...this.props.submissionState};
