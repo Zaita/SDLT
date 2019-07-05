@@ -270,6 +270,25 @@ mutation {
     const {submissionID, csrfToken} = {...argument};
     const query = `
 mutation {
+ updateQuestionnaireStatusToAssignToSecurityArchitect(ID: "${submissionID}") {
+   QuestionnaireStatus
+   UUID
+ }
+}`;
+    const json = await GraphQLRequestHelper.request({query, csrfToken});
+    const status = _.toString(
+      _.get(json, "data.updateQuestionnaireStatusToAssignToSecurityArchitect.QuestionnaireStatus", null));
+    const uuid = _.toString(_.get(json, "data.updateQuestionnaireStatusToAssignToSecurityArchitect.UUID", null));
+    if (!status || !uuid) {
+      throw DEFAULT_NETWORK_ERROR;
+    }
+    return {uuid};
+  }
+
+  static async assignQuestionnaireSubmissionToSecurityArchitect(argument: { submissionID: string, csrfToken: string }): Promise<{ uuid: string }> {
+    const {submissionID, csrfToken} = {...argument};
+    const query = `
+mutation {
  updateQuestionnaireStatusToWaitingForSecurityArchitectApproval(ID: "${submissionID}") {
    QuestionnaireStatus
    UUID
