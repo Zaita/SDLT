@@ -253,7 +253,7 @@ class QuestionnaireValidation
     /**
      * @throws GraphQLAuthFailure
      *
-     * @return void
+     * @return Dataobject $member
      */
     public static function is_user_logged_in()
     {
@@ -263,5 +263,7 @@ class QuestionnaireValidation
         if (!$member) {
             throw new GraphQLAuthFailure();
         }
+
+        return $member;
     }
 }
