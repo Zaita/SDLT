@@ -30,6 +30,7 @@ use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use SilverStripe\Forms\GridField\GridFieldPaginator;
 use NZTA\SDLT\Traits\SDLTModelPermissions;
+use NZTA\SDLT\Constant\UserGroupConstant;
 
 /**
  * Class Task
@@ -196,6 +197,68 @@ class Task extends DataObject implements ScaffoldingProvider
                 }
             })
             ->end();
+    }
+
+    /**
+     * Is this task classified as a "Standalone" task?
+     *
+     * @return boolean
+     */
+    public function isStandalone() : bool
+    {
+        return (bool) $this->DisplayOnHomePage;
+    }
+
+    /**
+     * Deal with pre-write processes.
+     *
+     * @return void
+     */
+    public function onBeforeWrite()
+    {
+        parent::onBeforeWrite();
+
+        $this->audit();
+    }
+
+    /**
+     * Encapsulates all model-specific auditing processes.
+     *
+     * @return void
+     */
+    protected function audit() : void
+    {
+        $user = Security::getCurrentUser();
+
+        // Auditing: CREATE, when:
+        // - User is present AND
+        // - User is in 'sdlt-users' group AND
+        // - Record is new
+        $doAudit = (
+            !$this->exists() &&
+            $user &&
+            $user->Groups()->find('Code', UserGroupConstant::GROUP_CODE_USER)
+        );
+
+        if ($doAudit) {
+            $msg = sprintf('%s was created', $this->Name);
+            $this->auditService->commit('Create', $msg, $this, $user->Email);
+        }
+
+        // Auditing: CREATE, when:
+        // - User is present AND
+        // - Record is new AND
+        // - Task is "Standalone" (DisplayOnHomePage has been set)
+        $doAudit = (
+            !$this->exists() &&
+            $user &&
+            $this->isStandalone()
+        );
+
+        if ($doAudit) {
+            $msg = sprintf('%s (Standalone Task) was created', $this->Name);
+            $this->auditService->commit('Create', $msg, $this, $user->Email);
+        }
     }
 
     /**

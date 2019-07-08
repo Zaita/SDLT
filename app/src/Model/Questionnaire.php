@@ -226,4 +226,51 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
 
         return $questionsData;
     }
+
+    /**
+     * Deal with pre-write processes.
+     *
+     * @return void
+     */
+    public function onBeforeWrite()
+    {
+        parent::onBeforeWrite();
+
+        $this->audit();
+    }
+
+    /**
+     * Encapsulates all model-specific auditing processes.
+     *
+     * @return void
+     */
+    protected function audit() : void
+    {
+        $user = Security::getCurrentUser();
+
+        // Auditing: CREATE, when:
+        // - User is present AND
+        // - Record is new
+        $doAudit = !$this->exists() && $user;
+
+        if ($doAudit) {
+            $msg = sprintf('%s was created', $this->Name);
+            $this->auditService->commit('Create', $msg, $this, $user->Email);
+        }
+
+        // Auditing: CHANGE, when:
+        // - User is present AND
+        // - User is an Administrator
+        // - Record exists
+        $doAudit = (
+            $this->exists() &&
+            $user &&
+            $user->Groups()->find('Code', UserGroupConstant::GROUP_CODE_ADMIN)
+        );
+
+        if ($doAudit) {
+            $msg = sprintf('%s was changed', $this->Name);
+            $this->auditService->commit('Change', $msg, $this, $user->Email);
+        }
+    }
 }
