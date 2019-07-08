@@ -21,6 +21,7 @@ use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 use SilverStripe\Forms\GridField\GridFieldPaginator;
+use NZTA\SDLT\Traits\SDLTModelPermissions;
 
 /**
  * Class Dashboard
@@ -33,6 +34,7 @@ use SilverStripe\Forms\GridField\GridFieldPaginator;
  */
 class Dashboard extends DataObject implements ScaffoldingProvider
 {
+    use SDLTModelPermissions;
     /**
      * @var string
      */
@@ -127,14 +129,4 @@ class Dashboard extends DataObject implements ScaffoldingProvider
         return $scaffolder;
     }
 
-    /**
-     * Allow logged-in user to access the model
-     *
-     * @param Member|null $member passed in by framework
-     * @return bool
-     */
-    public function canView($member = null)
-    {
-        return (Security::getCurrentUser() !== null);
-    }
 }

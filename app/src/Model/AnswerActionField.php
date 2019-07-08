@@ -22,7 +22,7 @@ use SilverStripe\Core\Convert;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
-
+use NZTA\SDLT\Traits\SDLTModelPermissions;
 /**
  * Class AnswerActionField
  *
@@ -43,6 +43,7 @@ use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
  */
 class AnswerActionField extends DataObject implements ScaffoldingProvider
 {
+    use SDLTModelPermissions;
     /**
      * @var string
      */
@@ -172,14 +173,5 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
         }
     }
 
-    /**
-     * Allow logged-in user to access the model
-     *
-     * @param Member|null $member member
-     * @return bool
-     */
-    public function canView($member = null)
-    {
-        return (Security::getCurrentUser() !== null);
-    }
+
 }

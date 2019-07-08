@@ -19,6 +19,7 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
+use NZTA\SDLT\Traits\SDLTModelPermissions;
 
 /**
  * Class AnswerInputField
@@ -30,6 +31,7 @@ use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
  */
 class AnswerInputField extends DataObject implements ScaffoldingProvider
 {
+    use SDLTModelPermissions;
     /**
      * @var string
      */
@@ -121,16 +123,5 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
             ]);
 
         return $scaffolder;
-    }
-
-    /**
-     * Allow logged-in user to access the model
-     *
-     * @param Member|null $member member
-     * @return bool
-     */
-    public function canView($member = null)
-    {
-        return (Security::getCurrentUser() !== null);
     }
 }
