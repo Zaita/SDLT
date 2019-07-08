@@ -38,6 +38,7 @@ use Ramsey\Uuid\Uuid;
 use NZTA\SDLT\Validation\QuestionnaireValidation;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\FormAction;
+use SilverStripe\Control\Controller;
 
 /**
  * Class Questionnaire
@@ -318,6 +319,30 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         }
 
         return false;
+    }
+
+    /**
+     * Uses {@link $this->getIsCurrentUserABusinessOwnerApprover()} to determine
+     * if a particular operation was performed by a Business Owner. If that check
+     * fails, we rely instead on information provided by both the data-model and
+     * the current HTTP request.
+     *
+     * @return boolean
+     */
+    public function isCurrentUserABusinessOwner()
+    {
+        $req = (Controller::curr() ? Controller::curr()->getRequest() : null);
+
+        if (!$isOwnerAndApprover = $this->getIsCurrentUserABusinessOwnerApprover()) {
+            return (
+                $this->UUID &&
+                $this->ApprovalLinkToken &&
+                $req &&
+                strstr($req->getURL(), 'businessOwnerApproval')
+            );
+        }
+
+        return $isOwnerAndApprover;
     }
 
     /**
@@ -1136,6 +1161,95 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
+     * Deal with pre-write processes.
+     *
+     * @return void
+     */
+    public function onBeforeWrite()
+    {
+        parent::onBeforeWrite();
+
+        $this->audit();
+    }
+
+    /**
+     * Encapsulates all model-specific auditing processes.
+     *
+     * @return void
+     */
+    protected function audit() : void
+    {
+        $user = Security::getCurrentUser();
+        $approvalDbFields = self::normalise_group_approval_fields(
+            $user,
+            $this->isCurrentUserABusinessOwner()
+        );
+
+        // Auditing: SUBMIT, when:
+        // - User is present AND
+        // - Submission is new
+        $doAudit = !$this->exists() && $user;
+
+        if ($doAudit) {
+            $msg = sprintf('UUID: %s was submitted', $this->UUID);
+            $this->auditService->commit('Submit', $msg, $this, $user->Email);
+        }
+
+        // Auditing: SUBMIT, when:
+        // - User is present AND
+        // - Submission exists AND
+        // - Status changes from anything to "pending"
+        $changed = $this->getChangedFields();
+        $doAudit = false;
+
+        foreach ($approvalDbFields as $approvalFieldName) {
+            if (
+                    $this->exists() &&
+                    $user &&
+                    isset($changed[$approvalFieldName]) &&
+                    $changed[$approvalFieldName]['before'] !== 'pending' &&
+                    $changed[$approvalFieldName]['after'] === 'pending') {
+                $doAudit = true;
+                break;
+            }
+        }
+
+        if ($doAudit) {
+            $msg = sprintf('UUID: %s had its status changed', $this->UUID);
+            $this->auditService->commit('Change', $msg, $this, $user->Email);
+        }
+
+        // Auditing: APPROVE, when:
+        // - User is present AND
+        // - Submission exists AND
+        // - User is in Security Architects or CISO group(s) OR is a "Business Owner"
+        // - Status is "approved"
+        $doAudit = false;
+
+        foreach ($approvalDbFields as $approvalFieldName) {
+            if (
+                    $this->exists() &&
+                    $this->$approvalFieldName === 'approved' && (
+                        $this->BusinessOwnerEmailAddress || (
+                            $user && $user->Groups()->filterAny(['Code' => [
+                                UserGroupConstant::GROUP_CODE_SA,
+                                UserGroupConstant::GROUP_CODE_CISO,
+                            ]])
+                        )
+                    )) {
+                $doAudit = true;
+                break;
+            }
+        }
+
+        if ($doAudit) {
+            $msg = sprintf('UUID: %s was approved', $this->UUID);
+            $user = $this->BusinessOwnerEmailAddress ?? $user->Email;
+            $this->auditService->commit('Approve', $msg, $this, $user);
+        }
+    }
+
+    /**
      * @param DataObject $questionnaire questionnaire
      *
      * @return string $finalData
@@ -1722,6 +1836,47 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 $this->User->ID
             );
         }
+    }
+
+    /**
+     * Return the appropriate approval DB field(s), based on the passed user's groups
+     * or status as a "Business Owner".
+     *
+     * @param  Member  $member          The user whose groups we want to normalise.
+     * @param  boolean $isBusinessOwner Set in userland code and flags a user as
+     *                                  being a Business Owner.
+     * @return array
+     */
+    public static function normalise_group_approval_fields(Member $member = null, bool $isBusinessOwner = false) : array
+    {
+        $fields = [];
+
+        if (!$member) {
+            if (!$isBusinessOwner) {
+                return [];
+            }
+        }
+
+        if ($isBusinessOwner) {
+            $fields[] = 'BusinessOwnerApprovalStatus';
+        }
+
+        $member->Groups()->each(function ($group) use (&$fields) : void {
+            $normalised = '';
+
+            // Convert the Groups.Code value
+            foreach (explode('-', $group->Code) as $part) {
+                if ($part !== 'sdlt') {
+                    $normalised .= ucfirst(strtolower($part));
+                }
+            }
+
+            $fields[] = sprintf('%sApprovalStatus', $normalised);
+        });
+
+        sort($fields);
+
+        return $fields;
     }
 
     /**

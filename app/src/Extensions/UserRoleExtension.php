@@ -74,3 +74,4 @@ class UserRoleExtension extends DataExtension
             ->exists();
     }
 }
+
