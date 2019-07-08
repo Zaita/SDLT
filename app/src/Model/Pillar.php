@@ -20,6 +20,7 @@ use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
+use NZTA\SDLT\Traits\SDLTModelPermissions;
 
 /**
  * Class Pillar
@@ -33,6 +34,7 @@ use SilverStripe\Security\Security;
  */
 class Pillar extends DataObject implements ScaffoldingProvider
 {
+    use SDLTModelPermissions;
     /**
      * @var string
      */
@@ -130,14 +132,4 @@ class Pillar extends DataObject implements ScaffoldingProvider
         return $scaffolder;
     }
 
-    /**
-     * Allow logged-in user to access the model
-     *
-     * @param Member|null $member member
-     * @return bool
-     */
-    public function canView($member = null)
-    {
-        return (Security::getCurrentUser() !== null);
-    }
 }

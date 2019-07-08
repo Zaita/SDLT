@@ -27,6 +27,8 @@ use SilverStripe\Forms\GridField\GridFieldSortableHeader;
 use SilverStripe\Forms\GridField\GridFieldFilterHeader;
 use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
+use NZTA\SDLT\Traits\SDLTModelPermissions;
+use SilverStripe\Security\Permission;
 
 /**
  * Class Questionnaire
@@ -38,6 +40,7 @@ use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
  */
 class Questionnaire extends DataObject implements ScaffoldingProvider
 {
+    use SDLTModelPermissions;
     /**
      * @var string
      */
@@ -134,17 +137,6 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * Allow logged-in user to access the model
-     *
-     * @param Member|null $member member
-     * @return bool
-     */
-    public function canView($member = null)
-    {
-        return (Security::getCurrentUser() !== null);
-    }
-
-    /**
      * Generate default security groups for the SDLT application
      *
      * @return void
@@ -188,6 +180,27 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
             $usersGroup->Title = 'NZTA-SDLT-Users';
             $usersGroup->Code = UserGroupConstant::GROUP_CODE_USER;
             $usersGroup->write();
+        }
+
+        $reportersGroup = Group::get()->find('Code', UserGroupConstant::GROUP_CODE_REPORTER);
+        if (!($reportersGroup && $reportersGroup->ID)) {
+            $reportersGroup = Group::create();
+            $reportersGroup->Title = 'SDLT Reporters';
+            $reportersGroup->Code = UserGroupConstant::GROUP_CODE_REPORTER;
+            $reportersGroup->write();
+
+            $reportersGroupPermissions = [
+                'CMS_ACCESS_NZTA\\SDLT\\ModelAdmin\\QuestionnaireSubmissionAdmin',
+                'CMS_ACCESS_NZTA\\SDLT\\ModelAdmin\\QuestionnaireAdmin',
+                'CMS_ACCESS_NZTA\\SDLT\\ModelAdmin\\SecurityComponentAdmin',
+                'CMS_ACCESS_NZTA\\SDLT\\ModelAdmin\\TaskSubmissionAdmin',
+            ];
+
+            foreach ($reportersGroupPermissions as $perm) {
+                $p = Permission::get()->filter(['Code' => $perm, 'GroupID' => $reportersGroup->ID])->first()
+                    ?: Permission::create()->update(['Code' => $perm, 'GroupID' => $reportersGroup->ID]);
+                $p->write();
+            }
         }
     }
 
