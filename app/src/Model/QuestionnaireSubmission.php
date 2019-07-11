@@ -1684,4 +1684,23 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             );
         }
     }
+
+    /**
+     * Determine if the current submission is for a {@link Questionnaire} whose
+     * {@link Pillar} has been set to override by a member of a group determined
+     * by the $groupCode param.
+     *
+     * @param  string  $groupCode The code of a group
+     * @return boolean
+     */
+    public function isApprovalOverriddenBy(string $groupCode) : bool
+    {
+        $pillar = $this->Questionnaire()->Pillar();
+
+        if ($pillar->exists()) {
+            return $pillar->isApprovalOverriddenBy($groupCode);
+        }
+
+        return false;
+    }
 }
