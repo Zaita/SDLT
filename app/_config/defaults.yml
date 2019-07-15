@@ -1,0 +1,13 @@
+---
+Name: sdlt-defaults
+---
+
+NZTA\SDLT\Model\Risk:
+  default_records:
+    - { Name: "Privacy Breach" }
+    - { Name: "Information Disclosure" }
+    - { Name: "Information Modification" }
+    - { Name: "Information Loss" }
+    - { Name: "Sustained Service Unavailable" }
+    - { Name: "Degraded Service Performance" }
+    - { Name: "Damage to, or loss of, Human life" }
