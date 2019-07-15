@@ -18,8 +18,14 @@ use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
-use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 use NZTA\SDLT\Traits\SDLTModelPermissions;
+use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\ORM\ValidationResult;
+use Symbiote\MultiValueField\ORM\FieldType\MultiValueField;
+use Symbiote\MultiValueField\Fields\KeyValueField;
+use Symbiote\MultiValueField\Fields\MultiValueListField;
+use UncleCheese\DisplayLogic\Forms\Wrapper;
 
 /**
  * Class AnswerInputField
@@ -42,7 +48,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
      */
     private static $db = [
         'Label' => 'Varchar(255)',
-        'InputType' => 'Enum(array("text", "email", "textarea", "date", "url"))',
+        'InputType' => 'Enum("text, email, textarea, date, url, multiple-choice: single selection, multiple-choice: multiple selection", "text")',
         'Required' => 'Boolean',
         'MinLength' => 'Int',
         'PlaceHolder' => 'Varchar(255)',
@@ -50,6 +56,9 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         'IsBusinessOwner' => 'Boolean',
         'IsProductName' => 'Boolean',
         'IsBusinessOwnerName' => 'Boolean',
+        'MultiChoiceAnswer' => MultiValueField::class,
+        'MultiChoiceSingleAnswerDefault' => 'Int',
+        'MultiChoiceMultipleAnswerDefault' => MultiValueField::class,
     ];
 
     /**
@@ -87,7 +96,54 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
     {
         $fields = parent::getCMSFields();
 
-        $fields->removeByName(['QuestionID', 'SortOrder']);
+        $fields->removeByName([
+            'QuestionID',
+            'SortOrder',
+            'MultiChoiceAnswer',
+            'MultiChoiceSingleAnswerDefault',
+            'MultiChoiceMultipleAnswerDefault',
+        ]);
+
+        // Manage multi-value selections
+        $fields->addFieldsToTab(
+            'Root.Main',
+            FieldList::create([
+                TextField::create(
+                    'MultiChoiceSingleAnswerDefault',
+                    'Default Selection'
+                )
+                    ->setAttribute('style', 'width: 200px;')
+                    ->setDescription(''
+                        . 'The default should be between 1 and the total number of'
+                        . ' available choices. Leave blank or set to zero, for'
+                        . ' no default selection.'
+                    )
+                    ->hideIf('InputType')
+                    ->startsWith('multiple-choice: multiple')
+                    ->end(),
+                Wrapper::create(MultiValueListField::create(
+                        'MultiChoiceMultipleAnswerDefault',
+                        'Default Selections',
+                        $this->dbObject('MultiChoiceAnswer')->getValues()
+                    )
+                        ->setDescription(''
+                            . 'These selections represent which of the related'
+                            . ' question\'s checkboxes are checked by default.'
+                        )
+                )
+                    ->hideUnless('InputType')
+                    ->startsWith('multiple-choice: multiple')
+                    ->end(),
+                KeyValueField::create(
+                    'MultiChoiceAnswer',
+                    'Multiple Choice Answers'
+                )
+                    ->setDescription(''
+                        . 'Each row represents a value and label for a single'
+                        . sprintf(' %s.', $this->multiSelectionFieldName())
+                    )
+            ])
+        );
 
         /** @noinspection PhpUndefinedMethodInspection */
         $fields->dataFieldByName('IsBusinessOwner')
@@ -101,6 +157,12 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
             ->setTitle('Does this field contain a Business Owner name?')
             ->displayIf('InputType')
             ->isEqualTo('text');
+        $fields->dataFieldByName('MinLength')
+            ->displayUnless('InputType')
+            ->startsWith('multiple-choice');
+        $fields->dataFieldByName('PlaceHolder')
+            ->displayUnless('InputType')
+            ->startsWith('multiple-choice');
 
         return $fields;
     }
@@ -112,16 +174,116 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
     public function provideGraphQLScaffolding(SchemaScaffolder $scaffolder)
     {
         // Provide entity type
-        $typeScaffolder = $scaffolder
+        $scaffolder
             ->type(AnswerInputField::class)
             ->addFields([
                 'ID',
                 'Label',
                 'InputType',
                 'Required',
-                'MinLength'
+                'MinLength',
+                'GQLMultiChoiceAnswer' => 'Contains json-encoded, serialized data, representing multiple-choice answers.',
+                'MultiChoiceSingleAnswerDefault' => 'An integer representing the default, single-selection, multiple-choice option.',
+                'GQLMultiChoiceMultipleAnswerDefault' => 'Contains json-encoded, serialized data, representing default multi-selections.',
             ]);
 
         return $scaffolder;
+    }
+
+    /**
+     * OverLoaded getter for the "MultiChoiceAnswer" field. See the following issue
+     * on GH for context for why this is needed: https://github.com/silverstripe/silverstripe-graphql/issues/234.
+     *
+     * @return string
+     */
+    public function GQLMultiChoiceAnswer()
+    {
+        return json_encode($this->dbObject('MultiChoiceAnswer')->getValue() ?: []);
+    }
+
+    /**
+     * OverLoaded getter for the "MultiChoiceMultipleAnswerDefault" field. See the following issue
+     * on GH for context for why this is needed: https://github.com/silverstripe/silverstripe-graphql/issues/234.
+     *
+     * @return string
+     */
+    public function GQLMultiChoiceMultipleAnswerDefault()
+    {
+        return json_encode($this->dbObject('MultiChoiceMultipleAnswerDefault')->getValue() ?: []);
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isMultipleChoice() : bool
+    {
+        return strstr($this->InputType, 'multiple-choice');
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isMultipleChoiceSingle() : bool
+    {
+        if (!$this->isMultipleChoice()) {
+            return false;
+        }
+
+        return $this->InputType === 'multiple-choice: single selection';
+    }
+
+    /**
+     * Simply returns the correct label fragment to use in CMS help-text,
+     *
+     * @return string
+     */
+    private function multiSelectionFieldName()
+    {
+        return $this->isMultipleChoiceSingle() ? 'radio button' : 'checkbox';
+    }
+
+    /**
+     * Allow logged-in user to access the model
+     *
+     * @param Member|null $member member
+     * @return bool
+     */
+    public function canView($member = null)
+    {
+        return (Security::getCurrentUser() !== null);
+    }
+
+    /**
+     * @return ValidationResult
+     */
+    public function validate()
+    {
+        $validationResult = parent::validate();
+
+        // Run validation result specific to the selected InputType.
+        return $this->validateInputType($validationResult);
+    }
+
+    /**
+     * Validation routine, specific to the selection made in the "InputType" field.
+     *
+     * @param  ValidationResult $validationResult The result passed in from validate().
+     * @return ValidationResult
+     */
+    protected function validateInputType(ValidationResult $validationResult)
+    {
+        if ($this->isMultipleChoiceSingle()) {
+            $validationField = 'MultiChoiceAnswer';
+            $validationFieldValue = $this->dbObject('MultiChoiceAnswer')->getValues();
+
+            if ($this->MultiChoiceSingleAnswerDefault > count($validationFieldValue)) {
+                $validationResult->addFieldError(
+                    $validationField,
+                    'The default choice cannot exceed the total number of available choices.'
+                );
+            }
+        }
+
+        return $validationResult;
     }
 }
