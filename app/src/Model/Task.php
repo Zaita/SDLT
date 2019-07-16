@@ -28,6 +28,7 @@ use SilverStripe\Security\Security;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use SilverStripe\Forms\GridField\GridFieldPaginator;
+use NZTA\SDLT\Traits\SDLTModelPermissions;
 
 /**
  * Class Task
@@ -42,6 +43,7 @@ use SilverStripe\Forms\GridField\GridFieldPaginator;
  */
 class Task extends DataObject implements ScaffoldingProvider
 {
+    use SDLTModelPermissions;
     /**
      * @var string
      */
@@ -99,17 +101,6 @@ class Task extends DataObject implements ScaffoldingProvider
         }
 
         return $fields;
-    }
-
-    /**
-     * Allow logged-in user to access the model
-     *
-     * @param Member|null $member The member
-     * @return bool
-     */
-    public function canView($member = null)
-    {
-        return (Security::getCurrentUser() !== null);
     }
 
     /**
