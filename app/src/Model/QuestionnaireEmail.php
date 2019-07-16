@@ -19,12 +19,14 @@ use SilverStripe\Security\Security;
 use SilverStripe\Forms\Textfield;
 use SilverStripe\Forms\HTMLEditor\HtmlEditorField;
 use SilverStripe\Forms\LiteralField;
+use NZTA\SDLT\Traits\SDLTModelPermissions;
 
 /**
  * Class QuestionnaireEmail
  */
 class QuestionnaireEmail extends DataObject
 {
+    use SDLTModelPermissions;
     /**
      * @var string
      */
@@ -175,27 +177,5 @@ class QuestionnaireEmail extends DataObject
         return $fields;
     }
 
-    /**
-     * Allow logged-in user to access the model
-     *
-     * @param Member|null $member member
-     * @return bool
-     */
-    public function canView($member = null)
-    {
-        return (Security::getCurrentUser() !== null);
-    }
 
-    /**
-     * Ensure that only a single home is able to be created in the CMS
-     *
-     * @param Member $member  default parameter for canCreate
-     * @param array  $context Additional context-specific data which might affect
-     *                        whether (or where) this object could be created
-     * @return boolean
-     */
-    public function canCreate($member = null, $context = [])
-    {
-        return (parent::canCreate($member) && QuestionnaireEmail::get()->Count() === 0);
-    }
 }

@@ -26,9 +26,7 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use SilverStripe\Security\Group;
-use SilverStripe\Security\SecurityToken;
 use SilverStripe\ORM\HasManyList;
-use SilverStripe\Control\Email\Email;
 use Symbiote\QueuedJobs\Services\QueuedJobService;
 use NZTA\SDLT\Job\SendStartLinkEmailJob;
 use NZTA\SDLT\Job\SendSummaryPageLinkEmailJob;
@@ -235,10 +233,12 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     public function getCMSActions()
     {
         $actions = parent::getCMSActions();
-
         $resendEmailAction = FormAction::create('resendEmail', 'Resend Email');
+        $member = Security::getCurrentUser();
 
-        $actions->push($resendEmailAction);
+        if ($member && !$member->getIsReporter()) {
+            $actions->push($resendEmailAction);
+        }
 
         return $actions;
     }
