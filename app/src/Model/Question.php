@@ -215,6 +215,7 @@ class Question extends DataObject implements ScaffoldingProvider
             $actionFieldData['QuestionID'] = $answerActionField->QuestionID;
             $actionFieldData['TaskID'] = $answerActionField->TaskID;
             $actionFieldData['Result'] = $answerActionField->Result;
+            $actionFieldData['IsApprovalForTaskRequired'] = $answerActionField->IsApprovalForTaskRequired;
             $actionFieldsData[] = $actionFieldData;
         }
 

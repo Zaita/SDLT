@@ -25,6 +25,9 @@ type Props = {
 };
 
 const prettifyStatus = (status: string) => {
+  if (!status) {
+    return;
+  }
   return status
     .split("_")
     .map((str) => {
@@ -103,10 +106,22 @@ class Summary extends Component<Props> {
       return null;
     }
 
+
     return (
       <div className="tasks">
         <h3>Tasks</h3>
-        {taskSubmissions.map(({uuid, taskName, taskType, status}) => {
+
+        {taskSubmissions.map(({uuid, taskName, taskType, status, approver}) => {
+          let taskNameAndStatus = taskName + ' (' + prettifyStatus(status) + ')';
+
+          if (status === "start") {
+            taskNameAndStatus = taskName + ' (Please complete me)';
+          }
+
+          if ((status === "approved" || status === "denied") && approver.name) {
+            taskNameAndStatus = taskName + ' (' + prettifyStatus(status) + ' by ' + approver.name + ')';
+          }
+
           const {token} = {...this.props};
           return (
             <div key={uuid}>
@@ -117,7 +132,7 @@ class Summary extends Component<Props> {
                 }
                 URLUtil.redirectToTaskSubmission(uuid, token);
               }}>
-                {taskName} ({prettifyStatus(status)})
+                {taskNameAndStatus}
               </button>
             </div>
           );
@@ -178,7 +193,7 @@ class Summary extends Component<Props> {
         );
       }
 
-      if (submission.status === "waiting_for_security_architect_approval") {
+      if (submission.status === "waiting_for_security_architect_approval" || submission.status === "assign_to_security_architect") {
         return (
           <div className="buttons">
             <div>

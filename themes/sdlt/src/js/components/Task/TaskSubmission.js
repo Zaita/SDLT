@@ -14,7 +14,8 @@ type Props = {
   taskSubmission: TaskSubmissionType,
   saveAnsweredQuestion: (answeredQuestion: Question) => void,
   moveToPreviousQuestion: (targetQuestion: Question) => void,
-  editAnswers: () => void,
+  handleApproveButtonClick: () => void,
+  handleDenyButtonClick: () => void,
   showBackButton: boolean,
   showEditButton: boolean,
   canUpdateAnswers: boolean
@@ -27,10 +28,13 @@ class TaskSubmission extends Component<Props> {
       taskSubmission,
       saveAnsweredQuestion,
       moveToPreviousQuestion,
+      handleApproveButtonClick,
+      handleDenyButtonClick,
       editAnswers,
       showBackButton,
       showEditButton,
-      canUpdateAnswers
+      canUpdateAnswers,
+      viewAs
     } = {...this.props};
 
     let body = (
@@ -67,6 +71,14 @@ class TaskSubmission extends Component<Props> {
       </div>
     ) : null;
 
+    const approveButton = (viewAs === "approver" && taskSubmission.status === "waiting_for_approval") ? (
+      <DarkButton title={"APPROVE"} onClick={handleApproveButtonClick} classes={["button"]}/>
+    ) : null;
+
+    const denyButton = (viewAs === "approver" && taskSubmission.status === "waiting_for_approval") ? (
+      <LightButton title={"DENY"} onClick={handleDenyButtonClick} classes={["button"]}/>
+    ) : null;
+
     return (
       <div className="TaskSubmission">
         {result}
@@ -75,6 +87,10 @@ class TaskSubmission extends Component<Props> {
         <div className="buttons">
           {editButton}
           {backButton}
+          <div>
+            {approveButton}
+            {denyButton}
+          </div>
         </div>
       </div>
     );
