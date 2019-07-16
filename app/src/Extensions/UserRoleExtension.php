@@ -14,9 +14,6 @@
 namespace NZTA\SDLT\Extension;
 
 use NZTA\SDLT\Constant\UserGroupConstant;
-use NZTA\SDLT\Model\QuestionnaireSubmission;
-use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\DataExtension;
 
 /**
@@ -48,6 +45,19 @@ class UserRoleExtension extends DataExtension
         return $this->owner
             ->Groups()
             ->filter('Code', UserGroupConstant::GROUP_CODE_CISO)
+            ->exists();
+    }
+
+    /**
+     * Check if the member is a Reporter.
+     *
+     * @return boolean
+     */
+    public function getIsReporter()
+    {
+        return $this->owner
+            ->Groups()
+            ->filter('Code', UserGroupConstant::GROUP_CODE_REPORTER)
             ->exists();
     }
 }
