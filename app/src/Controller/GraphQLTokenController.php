@@ -39,13 +39,6 @@ class GraphQLTokenController extends Controller
             return "Sorry, no token available.";
         }
 
-//        $member = Security::getCurrentUser();
-//
-//        // Check authentication
-//        if (!$member) {
-//            return "Please login.";
-//        }
-
         $this->getResponse()->setBody(
             json_encode([
                 'CSRFToken' => SecurityToken::inst()->getValue()
