@@ -17,20 +17,17 @@ use GraphQL\Type\Definition\ResolveInfo;
 use NZTA\SDLT\GraphQL\GraphQLAuthFailure;
 use SilverStripe\Core\Convert;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\GraphQL\OperationResolver;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\HasManyList;
-use SilverStripe\Security\Member;
 use SilverStripe\Security\Group;
 use SilverStripe\Security\Security;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use SilverStripe\Forms\GridField\GridFieldPaginator;
 use NZTA\SDLT\Traits\SDLTModelPermissions;
-use NZTA\SDLT\Constant\UserGroupConstant;
 
 /**
  * Class Task
@@ -231,24 +228,37 @@ class Task extends DataObject implements ScaffoldingProvider
         $user = Security::getCurrentUser();
 
         // Auditing: CREATE, when:
-        // - User is present AND
-        // - User is in 'sdlt-users' group AND
+        // - A user is present AND
+        // - User is in group that can access admin AND
         // - Record is new
         $doAudit = (
             !$this->exists() &&
-            $user &&
-            $user->Groups()->find('Code', UserGroupConstant::GROUP_CODE_USER)
+            $user && (
+                $user->getIsSA() ||
+                $user->getIsCISO() ||
+                $user->getIsAdmin()
+            )
         );
 
+        $userData = '';
+
+        if ($user) {
+            $groups = $user->Groups()->column('Title');
+            $userData = implode('. ', [
+                'Email: ' . $user->Email,
+                'Group(s): ' . ($groups ? implode(' : ', $groups) : 'N/A'),
+            ]);
+        }
+
         if ($doAudit) {
-            $msg = sprintf('%s was created', $this->Name);
-            $this->auditService->commit('Create', $msg, $this, $user->Email);
+            $msg = sprintf('"%s" was created', $this->Name);
+            $this->auditService->commit('Create', $msg, $this, $userData);
         }
 
         // Auditing: CREATE, when:
-        // - User is present AND
+        // - ANY user is present AND
         // - Record is new AND
-        // - Task is "Standalone" (DisplayOnHomePage has been set)
+        // - Task is "Standalone" (DisplayOnHomePage field has been set)
         $doAudit = (
             !$this->exists() &&
             $user &&
@@ -256,8 +266,8 @@ class Task extends DataObject implements ScaffoldingProvider
         );
 
         if ($doAudit) {
-            $msg = sprintf('%s (Standalone Task) was created', $this->Name);
-            $this->auditService->commit('Create', $msg, $this, $user->Email);
+            $msg = sprintf('"%s" (Standalone Task) was created', $this->Name);
+            $this->auditService->commit('Create', $msg, $this, $userData);
         }
     }
 
@@ -270,7 +280,7 @@ class Task extends DataObject implements ScaffoldingProvider
     {
         $result = parent::validate();
 
-        if($this->IsApprovalRequired && !$this->ApprovalGroup()->exists()) {
+        if ($this->IsApprovalRequired && !$this->ApprovalGroup()->exists()) {
             $result->addError('Please select Approval group.');
         }
 

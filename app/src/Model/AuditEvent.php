@@ -19,7 +19,6 @@ use SilverStripe\ORM\FieldType\DBText;
 use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\Security\Security;
 use NZTA\SDLT\Helper\ClassSpec;
-use NZTA\SDLT\Constant\UserGroupConstant;
 
 /**
  * A discrete audit event.
@@ -35,7 +34,7 @@ class AuditEvent extends DataObject
         'Event' => DBVarchar::class,
         'Model' => DBVarchar::class,
         'Extra' => DBText::Class,
-        'User'  => DBVarchar::class,
+        'UserData'  => DBVarchar::class,
     ];
 
     /**
@@ -44,8 +43,9 @@ class AuditEvent extends DataObject
     private static $summary_fields = [
         'Event',
         'Model' => 'Type',
-        'User'  => 'User',
+        'UserData'  => 'User Data',
         'Created' => 'Audit Date',
+        'Extra' => 'Extra Data',
     ];
 
     /**
@@ -67,18 +67,18 @@ class AuditEvent extends DataObject
     /**
      * Internal method to commit a single audit event.
      *
-     * @param  string     $event An a single event, declared as a service constant.
-     * @param  string     $extra Additional data to save alongside the event-name itself.
-     * @param  DataObject $model The model that invoked this commit.
-     * @param  string     $user  An identifier of the user that fired the event.
+     * @param  string     $event     An a single event, declared as a service constant.
+     * @param  string     $extra     Additional data to save alongside the event-name itself.
+     * @param  DataObject $model     The model that invoked this commit.
+     * @param  string     $userData  Info about the user that fired the event.
      * @return AuditEvent
      */
-    public function log(string $event, string $extra, DataObject $model, $user = '') : AuditEvent
+    public function log(string $event, string $extra, DataObject $model, $userData = '') : AuditEvent
     {
         $this->setField('Event', $event);
         $this->setField('Extra', $extra);
         $this->setField('Model', ClassSpec::short_name(get_class($model)));
-        $this->setField('User', $user ?: 'N/A');
+        $this->setField('UserData', $userData ?: 'N/A');
 
         return $this;
     }
@@ -98,8 +98,10 @@ class AuditEvent extends DataObject
      */
     public function canDelete($member = null)
     {
-        return Security::getCurrentUser()
-                ->Groups()
-                ->find('Code', UserGroupConstant::GROUP_CODE_ADMIN);
+        if (!$member) {
+            $member = Security::getCurrentUser();
+        }
+
+        return $member->getIsAdmin();
     }
 }
