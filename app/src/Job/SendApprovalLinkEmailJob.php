@@ -13,12 +13,8 @@
 
 namespace NZTA\SDLT\Job;
 
-use SilverStripe\Control\Email\Email;
 use Symbiote\QueuedJobs\Services\AbstractQueuedJob;
-use Symbiote\QueuedJobs\Services\QueuedJobService;
 use Symbiote\QueuedJobs\Services\QueuedJob;
-use SilverStripe\Security\Member;
-use NZTA\SDLT\Model\QuestionnaireEmail;
 use NZTA\SDLT\Email\SendApprovalLinkEmail;
 
 /**

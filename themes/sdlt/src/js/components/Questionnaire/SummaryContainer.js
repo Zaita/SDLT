@@ -41,14 +41,14 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
     dispatchBusinessOwnerApproveSubmissionAction(submissionID: string) {
       dispatch(approveQuestionnaireSubmissionFromBusinessOwner(submissionID));
     },
-    dispatchApproveSubmissionAction(submissionID: string) {
-      dispatch(approveQuestionnaireSubmission(submissionID));
-    },
     dispatchBusinessOwnerDenySubmissionAction(submissionID: string) {
       dispatch(denyQuestionnaireSubmissionFromBusinessOwner(submissionID));
     },
-    dispatchDenySubmissionAction(submissionID: string) {
-      dispatch(denyQuestionnaireSubmission(submissionID));
+    dispatchApproveSubmissionAction(submissionID: string, skipBoAndCisoApproval: boolean) {
+      dispatch(approveQuestionnaireSubmission(submissionID, skipBoAndCisoApproval));
+    },
+    dispatchDenySubmissionAction(submissionID: string, skipBoAndCisoApproval: boolean) {
+      dispatch(denyQuestionnaireSubmission(submissionID, skipBoAndCisoApproval));
     },
     dispatchEditSubmissionAction(submissionID: string) {
       dispatch(editQuestionnaireSubmission(submissionID));
@@ -101,6 +101,8 @@ class SummaryContainer extends Component<Props, State> {
       return null;
     }
 
+    console.log(user);
+
     // Decide what the permission of the current user
     let viewAs = "others";
 
@@ -135,6 +137,7 @@ class SummaryContainer extends Component<Props, State> {
                  handleEditButtonClick={this.handleOpenModal.bind(this)}
                  handleAssignToMeButtonClick={this.handleAssignToMeButtonClick.bind(this)}
                  viewAs={viewAs}
+                 user={user}
         />
         <Footer/>
         <ReactModal
@@ -180,7 +183,7 @@ class SummaryContainer extends Component<Props, State> {
     this.props.dispatchSubmitForApprovalAction(submission.submissionID);
   }
 
-  handleApproveButtonClick() {
+  handleApproveButtonClick(skipBoAndCisoApproval: boolean = false) {
     const {user, submission, isCurrentUserApprover, isCurrentUserABusinessOwnerApprover} = {...this.props.submissionState};
 
     if (!user || !submission) {
@@ -188,7 +191,7 @@ class SummaryContainer extends Component<Props, State> {
     }
 
     if (isCurrentUserApprover) {
-      this.props.dispatchApproveSubmissionAction(submission.submissionID);
+      this.props.dispatchApproveSubmissionAction(submission.submissionID, skipBoAndCisoApproval);
     }
 
     if (isCurrentUserABusinessOwnerApprover) {
@@ -196,7 +199,7 @@ class SummaryContainer extends Component<Props, State> {
     }
   }
 
-  handleDenyButtonClick() {
+  handleDenyButtonClick(skipBoAndCisoApproval: boolean = false) {
     const {user, submission, isCurrentUserApprover, isCurrentUserABusinessOwnerApprover} = {...this.props.submissionState};
 
     if (!user || !submission) {
@@ -204,7 +207,7 @@ class SummaryContainer extends Component<Props, State> {
     }
 
     if (isCurrentUserApprover) {
-      this.props.dispatchDenySubmissionAction(submission.submissionID);
+      this.props.dispatchDenySubmissionAction(submission.submissionID, skipBoAndCisoApproval);
     }
 
     if (isCurrentUserABusinessOwnerApprover) {
