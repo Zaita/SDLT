@@ -9,17 +9,19 @@ import editIcon from "../../../img/icons/edit.svg";
 import _ from "lodash";
 import URLUtil from "../../utils/URLUtil";
 import SubmissionDataUtil from "../../utils/SubmissionDataUtil";
+import type {User} from "../../types/User";
 
 type Props = {
   submission: Submission | null,
   handlePDFDownloadButtonClick: () => void,
   handleSubmitButtonClick: () => void,
   handleAssignToMeButtonClick: () => void,
-  handleApproveButtonClick: () => void,
-  handleDenyButtonClick: () => void,
+  handleApproveButtonClick: (skipBoAndCisoApproval: boolean) => void,
+  handleDenyButtonClick: (skipBoAndCisoApproval: boolean) => void,
   handleEditButtonClick: () => void,
   viewAs: "submitter" | "approver" | "others",
   token: string,
+  user: User | null
 };
 
 const prettifyStatus = (status: string) => {
@@ -43,10 +45,19 @@ class Summary extends Component<Props> {
     handleAssignToMeButtonClick: () => {},
     viewAs: "others",
     token: "",
+    user: null
   };
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      skipBoAndCisoApproval: false
+    };
+  }
+
   render() {
-    const {submission, viewAs} = {...this.props};
+    const {submission, viewAs, user} = {...this.props};
+    console.log(submission);
 
     if (!submission) {
       return null;
@@ -67,6 +78,7 @@ class Summary extends Component<Props> {
         {this.renderSubmitterInfo(submission)}
         {this.renderTasks(submission)}
         {this.renderApprovals(submission)}
+        {this.renderSkipCheckbox(submission, viewAs, user)}
         {this.renderButtons(submission)}
       </div>
     );
@@ -120,6 +132,7 @@ class Summary extends Component<Props> {
       handleSubmitButtonClick,
       handlePDFDownloadButtonClick,
       handleApproveButtonClick,
+      handleOptionalApproveButtonClick,
       handleAssignToMeButtonClick,
       handleDenyButtonClick,
       handleEditButtonClick
@@ -198,13 +211,13 @@ class Summary extends Component<Props> {
       const approveButton = (
         <DarkButton title="APPROVE"
                     classes={["button"]}
-                    onClick={handleApproveButtonClick}
+                    onClick={() => handleApproveButtonClick(this.state.skipBoAndCisoApproval)}
         />
       );
       const denyButton = (
         <LightButton title="DENY"
                      classes={["button"]}
-                     onClick={handleDenyButtonClick}
+                     onClick={() => handleDenyButtonClick(this.state.skipBoAndCisoApproval)}
         />
       );
 
@@ -268,7 +281,6 @@ class Summary extends Component<Props> {
     const cisoApprover = submission.cisoApprover;
 
     let securityArchitectApprovalStatus = prettifyStatus(approvalStatus.securityArchitect);
-    let cisoApprovalStatus = prettifyStatus(approvalStatus.chiefInformationSecurityOfficer);
 
     if (securityArchitectApprovalStatus == "Approved") {
       securityArchitectApprovalStatus = securityArchitectApprover.FirstName + " " +
@@ -280,13 +292,14 @@ class Summary extends Component<Props> {
         securityArchitectApprover.Surname;
     }
 
-    if (cisoApprovalStatus !== "Pending") {
+    let cisoApprovalStatus = prettifyStatus(approvalStatus.chiefInformationSecurityOfficer);
+    if (cisoApprovalStatus !== "Pending" && cisoApprovalStatus !== "Not Required") {
       cisoApprovalStatus = cisoApprover.FirstName + " " + cisoApprover.Surname + " - " + cisoApprovalStatus;
     }
 
     let businessOwnerApprovalStatus = prettifyStatus(approvalStatus.businessOwner)
-    if (businessOwnerApprovalStatus !== "Pending") {
-        businessOwnerApprovalStatus = submission.businessOwnerApproverName + " - " + businessOwnerApprovalStatus;
+    if (businessOwnerApprovalStatus !== "Pending" && businessOwnerApprovalStatus !== 'Not Required') {
+      businessOwnerApprovalStatus = submission.businessOwnerApproverName + " - " + businessOwnerApprovalStatus;
     }
     return (
       <div className="approvals">
@@ -308,6 +321,34 @@ class Summary extends Component<Props> {
         </div>
       </div>
     );
+  }
+
+  renderSkipCheckbox(submission: Submission, viewAs: string, user: User) {
+    if (!user.isSA || !submission.isApprovalOverrideBySecurityArchitect) {
+      return null;
+    }
+    if (viewAs === 'approver' && user.isSA &&
+      submission.status === "waiting_for_security_architect_approval") {
+        return (
+          <div className="approvals">
+            <h3>Skip Business Owner and CISO approval</h3>
+            <label>
+              <input
+              type="checkbox"
+              checked={this.state.skipBoAndCisoApproval}
+              onChange={event => {
+                this.setState({
+                  skipBoAndCisoApproval: event.target.checked
+                });
+              }} />
+              &nbsp; This deliverable does not modify the current risk rating for this
+              project. Business Owner and CISO approval is not required
+            </label>
+          </div>
+        );
+    }
+
+    return null;
   }
 }
 

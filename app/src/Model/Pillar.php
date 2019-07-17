@@ -38,6 +38,7 @@ use SilverStripe\Forms\FormField;
 class Pillar extends DataObject implements ScaffoldingProvider
 {
     use SDLTModelPermissions;
+
     /**
      * @var string
      */
@@ -147,47 +148,5 @@ class Pillar extends DataObject implements ScaffoldingProvider
             ->end();
 
         return $scaffolder;
-    }
-
-    /**
-     * Determine if this pillar has been set to override by a member of a group
-     * determined by the $groupCode param.
-     *
-     * @param  string  $groupCode The code of a group
-     * @return boolean
-     * @throws Exception
-     */
-    public function isApprovalOverriddenBy(string $groupCode) : bool
-    {
-        if (!Group::get()->filter(['Code' => $groupCode])->exists()) {
-            throw new \InvalidArgumentException("The group $groupCode was not found.");
-        }
-
-        $parts = '';
-        $code = str_replace('sdlt-', '', $groupCode);
-
-        foreach (explode('-', $code) as $part) {
-            $parts .= ucfirst(strtolower($part));
-        }
-
-        $approvalField = sprintf('ApprovalOverrideBy%s', str_replace('sdlt-', '', $parts));
-        $modelFields = array_keys($this->getSchema()->databaseFields(static::class, false));
-
-        if (!in_array($approvalField, $modelFields)) {
-            throw new \LogicException("The field $approvalField was not found.");
-        }
-
-        return $this->$approvalField;
-    }
-
-    /**
-     * Allow logged-in user to access the model
-     *
-     * @param Member|null $member member
-     * @return bool
-     */
-    public function canView($member = null)
-    {
-        return (Security::getCurrentUser() !== null);
     }
 }
