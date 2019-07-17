@@ -66,21 +66,26 @@ class AuditService
     const APPROVE = 'Approve';
 
     /**
+     * @var string
+     */
+    const DENY = 'Deny';
+
+    /**
      * Commit a single audit event.
      *
-     * @param  string     $event An a single event, declared as a service constant.
-     * @param  string     $extra Additional data to save alongside the event-name itself.
-     * @param  DataObject $model The model that invoked this commit.
-     * @param  string     $user  An identifier of the user that fired the event.
+     * @param  string     $event     An a single event, declared as a service constant.
+     * @param  string     $extra     Additional data to save alongside the event-name itself.
+     * @param  DataObject $model     The model that invoked this commit.
+     * @param  string     $userData  Arbitrary data about the user that fired the event.
      * @return void
      */
-    public function commit(string $event, string $extra, DataObject $model, $user = '') : void
+    public function commit(string $event, string $extra, DataObject $model, $userData = '') : void
     {
         $this->validateEvent($event);
         $event = self::normalise_event($event, $model);
 
         AuditEvent::create()
-                ->log($event, $extra, $model, $user)
+                ->log($event, $extra, $model, $userData)
                 ->write();
     }
 
@@ -96,7 +101,7 @@ class AuditService
         $legit = (new \ReflectionClass(__CLASS__))->getConstants();
 
         if (!in_array($event, $legit)) {
-            throw new ValidationException(sprintf('Audit event %s does not exist.', $event));
+            throw new ValidationException(sprintf('Audit event "%s" does not exist.', $event));
         }
     }
 

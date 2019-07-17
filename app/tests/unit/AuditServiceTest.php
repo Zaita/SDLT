@@ -54,7 +54,7 @@ class AuditServiceTest extends FunctionalTest
         $model->auditService->commit($event, $extra, $model, $user->Email);
 
         $this->assertEquals(1, AuditEvent::get()->count());
-        $this->assertEquals('anyone@test.app', AuditEvent::get()->first()->User);
+        $this->assertEquals('anyone@test.app', AuditEvent::get()->first()->UserData);
     }
 
     /**
@@ -75,7 +75,7 @@ class AuditServiceTest extends FunctionalTest
         ])->write();
 
         $this->assertEquals(1, AuditEvent::get()->count());
-        $this->assertEquals('anyone@test.app', AuditEvent::get()->first()->User);
+        $this->assertEquals('Email: anyone@test.app. Group(s): N/A', AuditEvent::get()->first()->UserData);
         $this->assertEquals('QUESTIONNAIRE.CREATE', AuditEvent::get()->first()->Event);
     }
 
@@ -97,40 +97,40 @@ class AuditServiceTest extends FunctionalTest
         ])->write();
 
         $this->assertEquals(1, AuditEvent::get()->count());
-        $this->assertEquals('anyone@test.app', AuditEvent::get()->first()->User);
+        $this->assertEquals('Email: anyone@test.app. Group(s): N/A', AuditEvent::get()->first()->UserData);
         $this->assertEquals('QUESTIONNAIRESUBMISSION.SUBMIT', AuditEvent::get()->first()->Event);
     }
 
     /**
      * Test logging scenario:
      * Event: Questionnaire Changed
-     * User:  Any
+     * User:  Security Architect
      */
-//    public function testChangeQuestionnaireSubmissionInAnyUserContext()
-//    {
-//        // Baseline
-//        $this->assertEquals(0, AuditEvent::get()->count());
-//
-//        $user = $this->objFromFixture(Member::class, 'some-user');
-//        $this->logInAs($user);
-//
-//        $questionnaireSubmission = QuestionnaireSubmission::create([
-//            'QuestionnaireStatus' => 'waiting_for_approval',
-//        ]);
-//        $questionnaireSubmission->write(); // Sets the initial "waiting_for_approval" state
-//        $questionnaireSubmission
-//            ->setField('QuestionnaireStatus', 'in_progress')
-//            ->write();  // Sets the subsequent "in_progress" state
-//
-//        // x2 audit log entries because:
-//        // 1). Basic write()
-//        // 2). The status change
-//        // Both of which results in a separate audit log entry being generated
-//        $this->assertEquals(2, AuditEvent::get()->count());
-//        $this->assertEquals('anyone@test.app', AuditEvent::get()->first()->User);
-//        $this->assertEquals('QUESTIONNAIRESUBMISSION.SUBMIT', AuditEvent::get()->toArray()[0]->Event);
-//        $this->assertEquals('QUESTIONNAIRESUBMISSION.CHANGE', AuditEvent::get()->toArray()[1]->Event);
-//    }
+    public function testChangeQuestionnaireSubmissionInSecurityArchitectUserContext()
+    {
+        // Baseline
+        $this->assertEquals(0, AuditEvent::get()->count());
+
+        $user = $this->objFromFixture(Member::class, 'security-architect-user');
+        $this->logInAs($user);
+
+        $questionnaireSubmission = QuestionnaireSubmission::create([
+            'SecurityArchitectApprovalStatus' => 'waiting_for_approval',
+        ]);
+        $questionnaireSubmission->write(); // Sets the initial "waiting_for_approval" state
+        $questionnaireSubmission
+            ->setField('SecurityArchitectApprovalStatus', 'in_progress')
+            ->write();  // Sets the subsequent "in_progress" state
+
+        // x2 audit log entries because:
+        // 1). Basic write()
+        // 2). The status change
+        // Both of which results in a separate audit log entry being generated
+        $this->assertEquals(2, AuditEvent::get()->count());
+        $this->assertEquals('Email: security-architect@test.app. Group(s): NZTA-SDLT-SecurityArchitect', AuditEvent::get()->first()->UserData);
+        $this->assertEquals('QUESTIONNAIRESUBMISSION.SUBMIT', AuditEvent::get()->toArray()[0]->Event);
+        $this->assertEquals('QUESTIONNAIRESUBMISSION.CHANGE', AuditEvent::get()->toArray()[1]->Event);
+    }
 
     /**
      * Test logging scenario:
@@ -158,7 +158,7 @@ class AuditServiceTest extends FunctionalTest
         // 2). The status change
         // Both of which results in a separate audit log entry being generated
         $this->assertEquals(2, AuditEvent::get()->count());
-        $this->assertEquals('admin@test.app', AuditEvent::get()->toArray()[1]->User);
+        $this->assertEquals('Email: admin@test.app. Group(s): Administrators', AuditEvent::get()->toArray()[1]->UserData);
         $this->assertEquals('QUESTIONNAIRE.CHANGE', AuditEvent::get()->toArray()[1]->Event);
     }
 
@@ -179,8 +179,30 @@ class AuditServiceTest extends FunctionalTest
             'Name' => 'TEST1',
         ])->write();
 
+        // SDLT Users cannot access admin UI, which is the only area a "Task" can be created
+        $this->assertEquals(0, AuditEvent::get()->count());
+    }
+
+    /**
+     * Test logging scenario:
+     * Event: Task Created
+     * User:  Security Architect
+     */
+    public function testCreateTaskInSecurityArchitectUserContext()
+    {
+        // Baseline
+        $this->assertEquals(0, AuditEvent::get()->count());
+
+        $user = $this->objFromFixture(Member::class, 'security-architect-user');
+        $this->logInAs($user);
+
+        Task::create([
+            'Name' => 'TEST1',
+        ])->write();
+
+        // An Non-SDLT Users, with access to the admin UI, should be able to create a "Task"
         $this->assertEquals(1, AuditEvent::get()->count());
-        $this->assertEquals('sdlt@test.app', AuditEvent::get()->toArray()[0]->User);
+        $this->assertEquals('Email: security-architect@test.app. Group(s): NZTA-SDLT-SecurityArchitect', AuditEvent::get()->toArray()[0]->UserData);
         $this->assertEquals('TASK.CREATE', AuditEvent::get()->toArray()[0]->Event);
     }
 
@@ -199,11 +221,11 @@ class AuditServiceTest extends FunctionalTest
 
         Task::create([
             'Name' => 'TEST1',
-            'DisplayOnHomePage' => 1,
+            'DisplayOnHomePage' => 1, // <-- denotes a "Standalone" task.
         ])->write();
 
         $this->assertEquals(1, AuditEvent::get()->count());
-        $this->assertEquals('anyone@test.app', AuditEvent::get()->toArray()[0]->User);
+        $this->assertEquals('Email: anyone@test.app. Group(s): N/A', AuditEvent::get()->toArray()[0]->UserData);
         $this->assertEquals('TASK.CREATE', AuditEvent::get()->toArray()[0]->Event);
         $this->assertContains('Standalone', AuditEvent::get()->toArray()[0]->Extra);
     }
@@ -223,7 +245,7 @@ class AuditServiceTest extends FunctionalTest
 
         Task::create([
             'Name' => 'TEST1',
-            'DisplayOnHomePage' => 0,
+            'DisplayOnHomePage' => 0, // <-- denotes a non-"Standalone" task.
         ])->write();
 
         $this->assertEquals(0, AuditEvent::get()->count());
@@ -244,13 +266,11 @@ class AuditServiceTest extends FunctionalTest
 
         Task::create([
             'Name' => 'TEST1',
-            'DisplayOnHomePage' => 0,
+            'DisplayOnHomePage' => 0, // <-- denotes a non-"Standalone" task.
         ])->write();
 
-        $this->assertEquals(1, AuditEvent::get()->count());
-        $this->assertEquals('sdlt@test.app', AuditEvent::get()->toArray()[0]->User);
-        $this->assertEquals('TASK.CREATE', AuditEvent::get()->toArray()[0]->Event);
-        $this->assertNotContains('Standalone', AuditEvent::get()->toArray()[0]->Extra);
+        // SDLT Users cannot access admin UI, which is the only area a "Task" can be created
+        $this->assertEquals(0, AuditEvent::get()->count());
     }
 
     /**
@@ -279,7 +299,7 @@ class AuditServiceTest extends FunctionalTest
         // 2). The status change
         // Both of which results in a separate audit log entry being generated
         $this->assertEquals(2, AuditEvent::get()->count());
-        $this->assertEquals('security-architect@test.app', AuditEvent::get()->toArray()[1]->User);
+        $this->assertEquals('Email: security-architect@test.app. Group(s): NZTA-SDLT-SecurityArchitect', AuditEvent::get()->toArray()[1]->UserData);
         $this->assertEquals('QUESTIONNAIRESUBMISSION.APPROVE', AuditEvent::get()->toArray()[1]->Event);
     }
 
@@ -309,7 +329,7 @@ class AuditServiceTest extends FunctionalTest
         // 2). The status change
         // Both of which results in a separate audit log entry being generated
         $this->assertEquals(2, AuditEvent::get()->count());
-        $this->assertEquals('csio@test.app', AuditEvent::get()->toArray()[1]->User);
+        $this->assertEquals('Email: csio@test.app. Group(s): NZTA-SDLT-CISO', AuditEvent::get()->toArray()[1]->UserData);
         $this->assertEquals('QUESTIONNAIRESUBMISSION.APPROVE', AuditEvent::get()->toArray()[1]->Event);
     }
 
@@ -320,7 +340,7 @@ class AuditServiceTest extends FunctionalTest
      */
     public function testApprovalQuestionnaireSubmissionInBusinessOwnerUserContext()
     {
-        $this->markTestSkipped('Revisit this. See QuestionnaireSubmissionTest::testIsCurrentUserABusinessOwner()');
+        $this->markTestSkipped('Revisit this when Business Owner has an account. See QuestionnaireSubmissionTest::testIsCurrentUserABusinessOwner()');
 
         // Baseline
         $this->assertEquals(0, AuditEvent::get()->count());
@@ -336,7 +356,122 @@ class AuditServiceTest extends FunctionalTest
             ->write(); // Transition to "approved"
 
         $this->assertEquals(1, AuditEvent::get()->count());
-        $this->assertEquals('business+owner@othertest.app', AuditEvent::get()->toArray()[0]->User);
+        $this->assertEquals('Email: business+owner@othertest.app, N/A', AuditEvent::get()->toArray()[0]->UserData);
         $this->assertEquals('QUESTIONNAIRESUBMISSION.APPROVE', AuditEvent::get()->toArray()[0]->Event);
+    }
+
+    /**
+     * Test logging scenario:
+     * Event: QuestionnaireSubmission Approved
+     * User:  CISO (But where a BusinessOwnerEmailAddress also exists).
+     */
+    public function testApprovalQuestionnaireSubmissionWithBusinessOwnerInCSIOUserContext()
+    {
+        // Baseline
+        $this->assertEquals(0, AuditEvent::get()->count());
+
+        $user = $this->objFromFixture(Member::class, 'csio-user');
+        $this->logInAs($user);
+
+        $questionnaireSubmission = QuestionnaireSubmission::create([
+            'QuestionnaireStatus' => 'waiting_for_approval',
+            'BusinessOwnerApprovalStatus' => 'pending',
+            'BusinessOwnerEmailAddress' => 'business+owner@othertest.app',
+        ]);
+        $questionnaireSubmission->write(); // Write the initial state
+        $questionnaireSubmission
+            ->setField('CisoApprovalStatus', 'approved')
+            ->write(); // Transition to "approved"
+
+        $this->assertEquals(2, AuditEvent::get()->count());
+        $this->assertEquals('Email: csio@test.app. Group(s): NZTA-SDLT-CISO', AuditEvent::get()->toArray()[1]->UserData);
+        $this->assertEquals('QUESTIONNAIRESUBMISSION.APPROVE', AuditEvent::get()->toArray()[1]->Event);
+    }
+
+    /**
+     * Test logging scenario:
+     * Event: QuestionnaireSubmission Denied
+     * User:  Security Architect
+     */
+    public function testDenialQuestionnaireSubmissionInSecurityArchitectUserContext()
+    {
+        // Baseline
+        $this->assertEquals(0, AuditEvent::get()->count());
+
+        $user = $this->objFromFixture(Member::class, 'security-architect-user');
+        $this->logInAs($user);
+
+        $questionnaireSubmission = QuestionnaireSubmission::create([
+            'SecurityArchitectApprovalStatus' => 'pending',
+        ]);
+        $questionnaireSubmission->write(); // Write the initial state
+        $questionnaireSubmission
+            ->setField('SecurityArchitectApprovalStatus', 'denied')
+            ->write(); // Transition to "denied"
+
+        // x2 audit log entries because:
+        // 1). Basic write()
+        // 2). The status change
+        // Both of which results in a separate audit log entry being generated
+        $this->assertEquals(2, AuditEvent::get()->count());
+        $this->assertEquals('Email: security-architect@test.app. Group(s): NZTA-SDLT-SecurityArchitect', AuditEvent::get()->toArray()[1]->UserData);
+        $this->assertEquals('QUESTIONNAIRESUBMISSION.DENY', AuditEvent::get()->toArray()[1]->Event);
+    }
+
+    /**
+     * Test logging scenario:
+     * Event: QuestionnaireSubmission Denied
+     * User:  CSIO
+     */
+    public function testDenialQuestionnaireSubmissionInCSIOUserContext()
+    {
+        // Baseline
+        $this->assertEquals(0, AuditEvent::get()->count());
+
+        $user = $this->objFromFixture(Member::class, 'csio-user');
+        $this->logInAs($user);
+
+        $questionnaireSubmission = QuestionnaireSubmission::create([
+            'CisoApprovalStatus' => 'pending',
+        ]);
+        $questionnaireSubmission->write(); // Write the initial state
+        $questionnaireSubmission
+            ->setField('CisoApprovalStatus', 'denied')
+            ->write(); // Transition to "denied"
+
+        // x2 audit log entries because:
+        // 1). Basic write()
+        // 2). The status change
+        // Both of which results in a separate audit log entry being generated
+        $this->assertEquals(2, AuditEvent::get()->count());
+        $this->assertEquals('Email: csio@test.app. Group(s): NZTA-SDLT-CISO', AuditEvent::get()->toArray()[1]->UserData);
+        $this->assertEquals('QUESTIONNAIRESUBMISSION.DENY', AuditEvent::get()->toArray()[1]->Event);
+    }
+
+    /**
+     * Test logging scenario:
+     * Event: QuestionnaireSubmission Denied
+     * User:  Business Owner
+     */
+    public function testDenialQuestionnaireSubmissionInBusinessOwnerUserContext()
+    {
+        $this->markTestSkipped('Revisit this when Business Owner has an account. See QuestionnaireSubmissionTest::testIsCurrentUserABusinessOwner()');
+
+        // Baseline
+        $this->assertEquals(0, AuditEvent::get()->count());
+
+        $questionnaireSubmission = QuestionnaireSubmission::create([
+            'QuestionnaireStatus' => 'waiting_for_approval',
+            'BusinessOwnerApprovalStatus' => 'pending',
+            'BusinessOwnerEmailAddress' => 'business+owner@othertest.app',
+        ]);
+        $questionnaireSubmission->write(); // Write the initial state
+        $questionnaireSubmission
+            ->setField('BusinessOwnerApprovalStatus', 'denied')
+            ->write(); // Transition to "denied"
+
+        $this->assertEquals(1, AuditEvent::get()->count());
+        $this->assertEquals('Email: business+owner@othertest.app. Group(s): N/A', AuditEvent::get()->toArray()[0]->UserData);
+        $this->assertEquals('QUESTIONNAIRESUBMISSION.DENY', AuditEvent::get()->toArray()[0]->Event);
     }
 }

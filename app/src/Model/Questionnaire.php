@@ -18,7 +18,6 @@ use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\HasManyList;
-use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 use SilverStripe\Forms\GridField\GridFieldPaginator;
@@ -247,6 +246,15 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     protected function audit() : void
     {
         $user = Security::getCurrentUser();
+        $userData = '';
+
+        if ($user) {
+            $groups = $user->Groups()->column('Title');
+            $userData = implode('. ', [
+                'Email: ' . $user->Email,
+                'Group(s): ' . ($groups ? implode(' : ', $groups) : 'N/A'),
+            ]);
+        }
 
         // Auditing: CREATE, when:
         // - User is present AND
@@ -254,8 +262,9 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
         $doAudit = !$this->exists() && $user;
 
         if ($doAudit) {
-            $msg = sprintf('%s was created', $this->Name);
-            $this->auditService->commit('Create', $msg, $this, $user->Email);
+            $msg = sprintf('"%s" was created', $this->Name);
+            $groups = $user->Groups()->column('Title');
+            $this->auditService->commit('Create', $msg, $this, $userData);
         }
 
         // Auditing: CHANGE, when:
@@ -265,12 +274,13 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
         $doAudit = (
             $this->exists() &&
             $user &&
-            $user->Groups()->find('Code', UserGroupConstant::GROUP_CODE_ADMIN)
+            $user->getIsAdmin()
         );
 
         if ($doAudit) {
-            $msg = sprintf('%s was changed', $this->Name);
-            $this->auditService->commit('Change', $msg, $this, $user->Email);
+            $msg = sprintf('"%s" was changed', $this->Name);
+            $groups = $user->Groups()->column('Title');
+            $this->auditService->commit('Change', $msg, $this, $userData);
         }
     }
 }

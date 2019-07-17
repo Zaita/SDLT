@@ -1185,14 +1185,24 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             $this->isCurrentUserABusinessOwner()
         );
 
+        $userData = '';
+
+        if ($user) {
+            $groups = $user->Groups()->column('Title');
+            $userData = implode('. ', [
+                'Email: ' . ($user->Email ?? $this->BusinessOwnerEmailAddress),
+                'Group(s): ' . ($groups ? implode(' : ', $groups) : 'N/A'),
+            ]);
+        }
+
         // Auditing: SUBMIT, when:
         // - User is present AND
         // - Submission is new
         $doAudit = !$this->exists() && $user;
 
         if ($doAudit) {
-            $msg = sprintf('UUID: %s was submitted', $this->UUID);
-            $this->auditService->commit('Submit', $msg, $this, $user->Email);
+            $msg = sprintf('"%s" was submitted. (UUID: %s)', $this->Questionnaire()->Name, $this->UUID);
+            $this->auditService->commit('Submit', $msg, $this, $userData);
         }
 
         // Auditing: SUBMIT, when:
@@ -1207,45 +1217,44 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $this->exists() &&
                     $user &&
                     isset($changed[$approvalFieldName]) &&
-                    $changed[$approvalFieldName]['before'] !== 'pending' &&
-                    $changed[$approvalFieldName]['after'] === 'pending') {
+                    $changed[$approvalFieldName]['before'] !== 'in_progress' &&
+                    $changed[$approvalFieldName]['after'] === 'in_progress') {
                 $doAudit = true;
                 break;
             }
         }
 
         if ($doAudit) {
-            $msg = sprintf('UUID: %s had its status changed', $this->UUID);
-            $this->auditService->commit('Change', $msg, $this, $user->Email);
+            $msg = sprintf('"%s" had its status changed. (UUID: %s)', $this->Questionnaire()->Name, $this->UUID);
+            $this->auditService->commit('Change', $msg, $this, $userData);
         }
 
-        // Auditing: APPROVE, when:
+        // Auditing: APPROVE|DENY, when:
         // - User is present AND
         // - Submission exists AND
         // - User is in Security Architects or CISO group(s) OR is a "Business Owner"
-        // - Status is "approved"
+        // - Status is "approved" or status is "denied"
         $doAudit = false;
 
         foreach ($approvalDbFields as $approvalFieldName) {
             if (
                     $this->exists() &&
-                    $this->$approvalFieldName === 'approved' && (
-                        $this->BusinessOwnerEmailAddress || (
-                            $user && $user->Groups()->filterAny(['Code' => [
-                                UserGroupConstant::GROUP_CODE_SA,
-                                UserGroupConstant::GROUP_CODE_CISO,
-                            ]])
-                        )
-                    )) {
+                    in_array($this->$approvalFieldName, ['approved', 'denied']) && (
+                        $this->isCurrentUserABusinessOwner() || (
+                            $user && (
+                                $user->getIsCISO() ||
+                                $user->getIsSA()
+                            )
+                    ))) {
                 $doAudit = true;
                 break;
             }
         }
 
         if ($doAudit) {
-            $msg = sprintf('UUID: %s was approved', $this->UUID);
-            $user = $this->BusinessOwnerEmailAddress ?? $user->Email;
-            $this->auditService->commit('Approve', $msg, $this, $user);
+            $msg = sprintf('"%s" was %s. (UUID: %s)', $this->Questionnaire()->Name, $this->$approvalFieldName, $this->UUID);
+            $status = ($this->$approvalFieldName === 'approved') ? 'Approve' : 'Deny';
+            $this->auditService->commit($status, $msg, $this, $userData);
         }
     }
 
