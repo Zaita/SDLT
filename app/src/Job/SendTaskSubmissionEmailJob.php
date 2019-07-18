@@ -74,14 +74,14 @@ class SendTaskSubmissionEmailJob extends AbstractQueuedJob implements QueuedJob
     public function sendEmail($name = '', $toEmail = '')
     {
         foreach ($this->taskSubmission->Task()->SubmissionEmails() as $emailDetails) {
-            $sub = $this->replaceVariable($emailDetails->EmailSubject);
+            $sub = $this->taskSubmission->replaceVariable($emailDetails->EmailSubject);
             $from = $emailDetails->FromEmailAddress;
 
             $email = Email::create()
                 ->setHTMLTemplate('Email\\EmailTemplate')
                 ->setData([
                     'Name' => $name,
-                    'Body' => $this->replaceVariable($emailDetails->EmailBody, $emailDetails->LinkPrefix),
+                    'Body' => $this->taskSubmission->replaceVariable($emailDetails->EmailBody, $emailDetails->LinkPrefix),
                     'EmailSignature' => $emailDetails->EmailSignature
                 ])
                 ->setFrom($from)
@@ -90,30 +90,5 @@ class SendTaskSubmissionEmailJob extends AbstractQueuedJob implements QueuedJob
 
             $email->send();
         }
-    }
-
-    /**
-     * @param string $string     string
-     * @param string $linkPrefix prefix before the link
-     * @return string
-     */
-    public function replaceVariable($string = '', $linkPrefix = '')
-    {
-        $taskName = $this->taskSubmission->Task()->Name;
-        $SubmitterName = $this->taskSubmission->Submitter()->Name;
-        $SubmitterEmail = $this->taskSubmission->Submitter()->SubmitterEmail;
-
-        if ($linkPrefix) {
-            $link = $this->taskSubmission->AnonymousAccessLink($linkPrefix);
-        } else {
-            $link = $this->taskSubmission->SecureLink();
-        }
-
-        $string = str_replace('{$taskName}', $taskName, $string);
-        $string = str_replace('{$taskLink}', $link, $string);
-        $string = str_replace('{$submitterName}', $SubmitterName, $string);
-        $string = str_replace('{$submitterEmail}', $SubmitterEmail, $string);
-
-        return $string;
     }
 }

@@ -78,14 +78,15 @@ class SendTaskApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJo
     public function sendEmail($name = '', $toEmail = '')
     {
         foreach ($this->taskSubmission->Task()->SubmissionEmails() as $emailDetails) {
-            $sub = $this->replaceVariable($emailDetails->ApprovalLinkEmailSubject);
+            $sub = $this->taskSubmission->replaceVariable($emailDetails->ApprovalLinkEmailSubject);
+
             $from = $emailDetails->FromEmailAddress;
 
             $email = Email::create()
                 ->setHTMLTemplate('Email\\EmailTemplate')
                 ->setData([
                     'Name' => $name,
-                    'Body' => $this->replaceVariable($emailDetails->ApprovalLinkEmailBody, $emailDetails->LinkPrefix),
+                    'Body' => $this->taskSubmission->replaceVariable($emailDetails->ApprovalLinkEmailBody, $emailDetails->LinkPrefix),
                     'EmailSignature' => $emailDetails->EmailSignature
                 ])
                 ->setFrom($from)
@@ -94,24 +95,5 @@ class SendTaskApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJo
 
             $email->send();
         }
-    }
-
-    /**
-     * @param string $string string
-     * @return string
-     */
-    public function replaceVariable($string = '')
-    {
-        $taskName = $this->taskSubmission->Task()->Name;
-        $submitterName = $this->taskSubmission->Submitter()->Name;
-        $submitterEmail = $this->taskSubmission->Submitter()->Email;
-        $link = $this->taskSubmission->SecureLink();
-
-        $string = str_replace('{$taskName}', $taskName, $string);
-        $string = str_replace('{$taskLink}', $link, $string);
-        $string = str_replace('{$submitterName}', $submitterName, $string);
-        $string = str_replace('{$submitterEmail}', $submitterEmail, $string);
-
-        return $string;
     }
 }

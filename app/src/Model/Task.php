@@ -109,6 +109,14 @@ class Task extends DataObject implements ScaffoldingProvider
             $fields->removeByName('Questions');
         }
 
+        $fields->addFieldsToTab(
+            'Root.Approval',
+            [
+                $fields->dataFieldByName('IsApprovalRequired'),
+                $fields->dataFieldByName('ApprovalGroupID'),
+            ]
+        );
+
         $fields->dataFieldByName('IsApprovalRequired')->setTitle('Always require approval');
 
         return $fields;
@@ -188,5 +196,21 @@ class Task extends DataObject implements ScaffoldingProvider
                 }
             })
             ->end();
+    }
+
+    /**
+     * validate the Approval Group based on the IsApprovalRequired flag
+     *
+     * @return ValidationResult
+     */
+    public function validate()
+    {
+        $result = parent::validate();
+
+        if($this->IsApprovalRequired && !$this->ApprovalGroup()->exists()) {
+            $result->addError('Please select Approval group.');
+        }
+
+        return $result;
     }
 }

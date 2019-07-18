@@ -183,5 +183,20 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
         }
     }
 
+    /**
+     * validate the Approval Group based on the IsApprovalForTaskRequired flag
+     *
+     * @return ValidationResult
+     */
+    public function validate()
+    {
+        $result = parent::validate();
 
+        if($this->IsApprovalForTaskRequired && $this->Question()->Task()->exists() &&
+            !$this->Question()->Task()->ApprovalGroup()->exists()) {
+            $result->addError('Please first select an approval group on the task level.');
+        }
+
+        return $result;
+    }
 }
