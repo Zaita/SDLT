@@ -193,7 +193,8 @@ class Summary extends Component<Props> {
         );
       }
 
-      if (submission.status === "waiting_for_security_architect_approval" || submission.status === "assign_to_security_architect") {
+      if (submission.status === "waiting_for_security_architect_approval" ||
+        submission.status === "awaiting_security_architect_review") {
         return (
           <div className="buttons">
             <div>
@@ -247,7 +248,7 @@ class Summary extends Component<Props> {
         );
       }
 
-      if (submission.status === "assign_to_security_architect") {
+      if (submission.status === "awaiting_security_architect_review") {
         return (
           <div className="buttons">
             <div>
