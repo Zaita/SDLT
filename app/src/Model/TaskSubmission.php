@@ -39,6 +39,7 @@ use NZTA\SDLT\Helper\JIRA;
 use NZTA\SDLT\Model\JiraTicket;
 use SilverStripe\Security\Group;
 use SilverStripe\Control\Controller;
+use SilverStripe\Control\Email\Email;
 
 /**
  * Class TaskSubmission
@@ -91,7 +92,6 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         'LockAnswersWhenComplete' => 'Boolean',
         'SubmitterIPAddress' => 'Varchar(255)',
         'CompletedAt' => 'Datetime',
-        'SendEmailAfterSubmission' => 'Boolean',
         'EmailRelativeLinkToTask' => 'Varchar(255)',
         'JiraKey' => 'Varchar(255)',
         'IsApprovalRequired' => 'Boolean',
@@ -389,7 +389,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         $taskSubmission->SubmitterID = $submitterID;
         $taskSubmission->ApprovalGroupID = $task->ApprovalGroup()->ID;
 
-        // // Structure of task questionnaire
+        // Structure of task questionnaire
         $taskSubmission->IsApprovalRequired = $task->IsApprovalRequired;
         $questionnaireData = $task->getQuestionsData();
         $taskSubmission->QuestionnaireData = json_encode($questionnaireData);
@@ -803,7 +803,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     if (!$submission) {
                         throw new Exception('No data available for Task Submission.');
                     }
-                    
+
                     if ($submission->Status != TaskSubmission::STATUS_WAITING_FOR_APPROVAL) {
                         throw new Exception('Task Submission is not ready for approval.');
                     }
@@ -1216,5 +1216,30 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         $group = Group::get()->filter('code', $this->ApprovalGroup()->Code)->first();
 
         return $group->Members();
+    }
+
+    /**
+     * @param string $string     string
+     * @param string $linkPrefix prefix before the link
+     * @return string
+     */
+    public function replaceVariable($string = '', $linkPrefix = '')
+    {
+        $taskName = $this->Task()->Name;
+        $SubmitterName = $this->Submitter()->Name;
+        $SubmitterEmail = $this->Submitter()->Email;
+
+        if ($linkPrefix) {
+            $link = $this->AnonymousAccessLink($linkPrefix);
+        } else {
+            $link = $this->SecureLink();
+        }
+
+        $string = str_replace('{$taskName}', $taskName, $string);
+        $string = str_replace('{$taskLink}', $link, $string);
+        $string = str_replace('{$submitterName}', $SubmitterName, $string);
+        $string = str_replace('{$submitterEmail}', $SubmitterEmail, $string);
+
+        return $string;
     }
 }
