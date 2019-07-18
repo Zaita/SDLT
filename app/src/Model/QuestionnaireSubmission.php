@@ -71,11 +71,11 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'IsStartLinkEmailSent' => 'Boolean',
         'IsEmailSentToSecurityArchitect' => 'Boolean',
         'IsSubmitLinkEmailSent' => 'Boolean',
-        'CisoApprovalStatus' => 'Enum(array("not_applicable", "pending", "approved", "denied"))',
+        'CisoApprovalStatus' => 'Enum(array("not_applicable", "pending", "approved", "denied", "not_required"))',
         'CisoApproverIPAddress' => 'Varchar(255)',
         'CisoApproverMachineName' => 'Varchar(255)',
         'CisoApprovalStatusUpdateDate' => 'Varchar(255)',
-        'BusinessOwnerApprovalStatus' => 'Enum(array("not_applicable", "pending", "approved", "denied"))',
+        'BusinessOwnerApprovalStatus' => 'Enum(array("not_applicable", "pending", "approved", "denied", "not_required"))',
         'BusinessOwnerMachineName' => 'Varchar(255)',
         'BusinessOwnerStatusUpdateDate' => 'Varchar(255)',
         'BusinessOwnerIPAddress' => 'Varchar(255)',
@@ -86,7 +86,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SecurityArchitectApproverMachineName' => 'Varchar(255)',
         'SecurityArchitectStatusUpdateDate' => 'Varchar(255)',
         'ApprovalLinkToken' => 'Varchar(64)',
-        'ProductName' => 'Text'
+        'ProductName' => 'Text',
+        'ApprovalOverrideBySecurityArchitect' => 'Boolean',
     ];
 
     /**
@@ -223,6 +224,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             $fields->addFieldsToTab('Root.BusinessOwnerDetails', $isBusinessOwnerName);
         }
 
+        $fields
+            ->dataFieldByName('ApprovalOverrideBySecurityArchitect')
+            ->setTitle('Allow BO and CISO approval skipping');
+
         return $fields;
     }
 
@@ -358,7 +363,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'ProductName',
                 'QuestionnaireName',
                 'Created',
-                'BusinessOwnerApproverName'
+                'BusinessOwnerApproverName',
+                'ApprovalOverrideBySecurityArchitect'
             ]);
 
         $submissionScaffolder
@@ -538,6 +544,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $model->IsEmailSentToSecurityArchitect = 0;
                     $uuid = Uuid::uuid4();
                     $model->UUID = (string) $uuid;
+                    $model->ApprovalOverrideBySecurityArchitect = $model->isApprovalOverriddenBy();
 
                     $model->ApprovalLinkToken = hash('sha3-256', random_bytes(64));
 
@@ -934,6 +941,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ->mutation('updateQuestionnaireOnApproveByGroupMember', QuestionnaireSubmission::class)
             ->addArgs([
                 'ID' => 'ID!',
+                'SkipBoAndCisoApproval' => 'Boolean',
             ])
             ->setResolver(new class implements ResolverInterface {
                 /**
@@ -951,9 +959,15 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 {
                     QuestionnaireValidation::is_user_logged_in();
 
+                    $skipBoAndCisoApproval = false;
+
+                    if (isset($args['SkipBoAndCisoApproval'])) {
+                        $skipBoAndCisoApproval = $args['SkipBoAndCisoApproval'];
+                    }
+
                     $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
 
-                    $questionnaireSubmission->updateQuestionnaireOnApproveAndDenyByGroup('approved');
+                    $questionnaireSubmission->updateQuestionnaireOnApproveAndDenyByGroup('approved', $skipBoAndCisoApproval);
 
                     return $questionnaireSubmission;
                 }
@@ -975,6 +989,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ->mutation('updateQuestionnaireOnDenyByGroupMember', QuestionnaireSubmission::class)
             ->addArgs([
                 'ID' => 'ID!',
+                'SkipBoAndCisoApproval' => 'Boolean',
             ])
             ->setResolver(new class implements ResolverInterface {
                 /**
@@ -994,7 +1009,13 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
 
-                    $questionnaireSubmission->updateQuestionnaireOnApproveAndDenyByGroup('denied');
+                    $skipBoAndCisoApproval = false;
+
+                    if (isset($args['SkipBoAndCisoApproval'])) {
+                        $skipBoAndCisoApproval = $args['SkipBoAndCisoApproval'];
+                    }
+
+                    $questionnaireSubmission->updateQuestionnaireOnApproveAndDenyByGroup('denied', $skipBoAndCisoApproval);
 
                     return $questionnaireSubmission;
                 }
@@ -1289,38 +1310,56 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * update quesionnaire approver details based on group and permission
      *
-     * @param string $status status approved/denied
+     * @param string  $status                status        approved/denied
+     * @param boolean $skipBoAndCisoApproval skip approval true/false
      * @throws Exception
      * @return Void
      */
-    public function updateQuestionnaireOnApproveAndDenyByGroup($status)
+    public function updateQuestionnaireOnApproveAndDenyByGroup($status, $skipBoAndCisoApproval = false)
     {
         $member = Security::getCurrentUser();
 
         $accessDetail = $this->doesCurrentUserHasAccessToApproveDeny($member);
 
-
         if (!$accessDetail['hasAccess'] || !$accessDetail['group']) {
             throw new Exception($accessDetail['message']);
         }
 
+        // update SA member details
         if ($accessDetail['group'] == UserGroupConstant::GROUP_CODE_SA) {
+
             // update Security-Architect member details
             $this->updateSecurityArchitectDetail($member, $status);
 
             if ($status == 'approved') {
-                $this->QuestionnaireStatus = 'waiting_for_approval';
+                // skipBoAndCisoApproval is not set then send email to CISO and BO
+                // else skip the CISO and BO approval and chane questionnaire status to approved
+                if (!$skipBoAndCisoApproval) {
+                    $this->QuestionnaireStatus = 'waiting_for_approval';
 
-                // get CISO group member list
-                $members = $this->getApprovalMembersListByGroup(UserGroupConstant::GROUP_CODE_CISO);
+                    // get CISO group member list
+                    $members = $this->getApprovalMembersListByGroup(UserGroupConstant::GROUP_CODE_CISO);
 
-                // send email to CISO group and Business owner
-                $qs = QueuedJobService::create();
+                    // send email to CISO group and Business owner
+                    $qs = QueuedJobService::create();
 
-                $qs->queueJob(
-                    new SendApprovalLinkEmailJob($this, $members, $this->BusinessOwnerEmailAddress),
-                    date('Y-m-d H:i:s', time() + 90)
-                );
+                    $qs->queueJob(
+                        new SendApprovalLinkEmailJob($this, $members, $this->BusinessOwnerEmailAddress),
+                        date('Y-m-d H:i:s', time() + 90)
+                    );
+                } else {
+                    $this->QuestionnaireStatus = $status;
+
+                    $this->CisoApprovalStatus = 'not_required';
+                    $this->BusinessOwnerApprovalStatus = 'not_required';
+
+                    // send approved email notification to the user (submitter)
+                    $queuedJobService = QueuedJobService::create();
+                    $queuedJobService->queueJob(
+                        new SendApprovedNotificationEmailJob($this),
+                        date('Y-m-d H:i:s', time() + 30)
+                    );
+                }
             } else {
                 // if denied- no email, internal communication between Submitter and security-architect
                 $this->QuestionnaireStatus = 'in_progress';
@@ -1336,7 +1375,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         }
 
         // update CISO member details
-        if ($accessDetail['group'] == UserGroupConstant::GROUP_CODE_CISO) {
+        else if ($accessDetail['group'] == UserGroupConstant::GROUP_CODE_CISO) {
             $this->updateCisoDetail($member, $status);
             $this->write();
         }
@@ -1683,5 +1722,22 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 $this->User->ID
             );
         }
+    }
+
+    /**
+     * Determine if the current submission is for a {@link Questionnaire} whose
+     * {@link Pillar} has been set to override by SecurityArchitect
+     *
+     * @return boolean
+     */
+    public function isApprovalOverriddenBy() : bool
+    {
+        $pillar = $this->Questionnaire()->Pillar();
+
+        if ($pillar->exists()) {
+            return $pillar->ApprovalOverrideBySecurityArchitect;
+        }
+
+        return false;
     }
 }

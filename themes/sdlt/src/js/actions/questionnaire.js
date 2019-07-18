@@ -254,11 +254,11 @@ export function assignToSecurityArchitectQuestionnaireSubmission(submissionID: s
   }
 }
 
-export function approveQuestionnaireSubmission(submissionID: string): ThunkAction {
+export function approveQuestionnaireSubmission(submissionID: string, skipBoAndCisoApproval: boolean): ThunkAction {
   return async (dispatch, getState) => {
     try {
       const csrfToken = await CSRFTokenService.getCSRFToken();
-      const {uuid} = await QuestionnaireDataService.approveQuestionnaireSubmission({submissionID, csrfToken});
+      const {uuid} = await QuestionnaireDataService.approveQuestionnaireSubmission({submissionID, csrfToken, skipBoAndCisoApproval});
       dispatch(loadQuestionnaireSubmissionState(uuid));
     } catch(error) {
       // TODO: errors
@@ -267,11 +267,11 @@ export function approveQuestionnaireSubmission(submissionID: string): ThunkActio
   }
 }
 
-export function denyQuestionnaireSubmission(submissionID: string): ThunkAction {
+export function denyQuestionnaireSubmission(submissionID: string, skipBoAndCisoApproval: boolean): ThunkAction {
   return async (dispatch, getState) => {
     try {
       const csrfToken = await CSRFTokenService.getCSRFToken();
-      const {uuid} = await QuestionnaireDataService.denyQuestionnaireSubmission({submissionID, csrfToken});
+      const {uuid} = await QuestionnaireDataService.denyQuestionnaireSubmission({submissionID, csrfToken, skipBoAndCisoApproval});
       dispatch(loadQuestionnaireSubmissionState(uuid));
     } catch(error) {
       // TODO: errors

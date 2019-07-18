@@ -16,11 +16,14 @@ namespace NZTA\SDLT\Model;
 use NZTA\SDLT\Model\Dashboard;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\CheckboxField;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\Security\Member;
+use SilverStripe\Security\Group;
 use SilverStripe\Security\Security;
 use NZTA\SDLT\Traits\SDLTModelPermissions;
+use SilverStripe\Forms\FormField;
 
 /**
  * Class Pillar
@@ -35,6 +38,7 @@ use NZTA\SDLT\Traits\SDLTModelPermissions;
 class Pillar extends DataObject implements ScaffoldingProvider
 {
     use SDLTModelPermissions;
+
     /**
      * @var string
      */
@@ -48,6 +52,10 @@ class Pillar extends DataObject implements ScaffoldingProvider
         'Disabled' => 'Boolean',
         'Type' => 'Varchar(255)',
         'SortOrder' => 'Int',
+        // Members of the "Administrators" group determine if a pillar's
+        // related questionnaire(s)' approval status, can be overridden by members
+        // of the "NZTA-SDLT-SecurityArchitect" group.
+        'ApprovalOverrideBySecurityArchitect' => 'Boolean',
     ];
 
     /**
@@ -92,18 +100,28 @@ class Pillar extends DataObject implements ScaffoldingProvider
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
+        $user = Security::getCurrentUser();
 
         $fields->removeByName('SortOrder');
-
-        $fields->addFieldToTab(
+        $fields->addFieldsToTab(
             'Root.Main',
-            DropdownField::create(
-                'Type',
-                'Pillar Type',
-                self::$pillar_type
-            )->setDescription('The selected value will be used to dispaly icon
-                in the front-end for the Pillar.')
+            [
+                DropdownField::create(
+                    'Type',
+                    'Pillar Type',
+                    self::$pillar_type
+                )->setDescription('The selected value will be used to dispaly icon
+                    in the front-end for the Pillar.'),
+                $overrideFieldSA = CheckboxField::create(
+                    'ApprovalOverrideBySecurityArchitect',
+                    'Allow BO and CISO approval skipping'
+                )->setDisabled(true)
+            ]
         );
+
+        if ($user && $user->getIsAdmin()) {
+            $overrideFieldSA->setDisabled(false);
+        }
 
         return $fields;
     }
@@ -131,5 +149,4 @@ class Pillar extends DataObject implements ScaffoldingProvider
 
         return $scaffolder;
     }
-
 }
