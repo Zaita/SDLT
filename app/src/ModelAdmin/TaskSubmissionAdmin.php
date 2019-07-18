@@ -63,6 +63,7 @@ class TaskSubmissionAdmin extends ModelAdmin
         $gridField = $form->Fields()->fieldByName($gridFieldName);
         $config = GridFieldConfig_RelationEditor::create();
         $config->removeComponentsByType(GridFieldAddNewButton::class);
+
         //$config->removeComponentsByType(GridFieldEditButton::class);
         $config->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
         $config->AddComponents(new GridFieldViewButton());

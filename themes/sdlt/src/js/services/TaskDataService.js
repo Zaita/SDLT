@@ -131,6 +131,8 @@ query {
       JiraKey
       TicketLink
     }
+    IsTaskApprovalRequired
+    IsCurrentUserAnApprover
   }
 }`;
 
@@ -157,7 +159,9 @@ query {
         answersJSON: toString(get(submissionJSONObject, "AnswerData", "")),
       }),
       selectedComponents: SecurityComponentParser.parseFromJSONOArray(get(submissionJSONObject, "SelectedComponents", [])),
-      jiraTickets: JiraTicketParser.parseFromJSONArray(get(submissionJSONObject, "JiraTickets", []))
+      jiraTickets: JiraTicketParser.parseFromJSONArray(get(submissionJSONObject, "JiraTickets", [])),
+      isCurrentUserAnApprover:  _.get(submissionJSONObject, "IsCurrentUserAnApprover", "false") === "true",
+      isTaskApprovalRequired: get(submissionJSONObject, "IsTaskApprovalRequired", false) === "true",
     };
 
     return data;
@@ -290,5 +294,41 @@ mutation {
       throw DEFAULT_NETWORK_ERROR;
     }
     return {uuid};
+  }
+
+  static async approveTaskSubmission(argument: { uuid: string, csrfToken: string }): Promise<{ uuid: string }> {
+    const {uuid, csrfToken} = {...argument};
+    const query = `
+mutation {
+ updateTaskStatusToApproved(UUID: "${uuid}") {
+   Status
+   UUID
+ }
+}`;
+    const json = await GraphQLRequestHelper.request({query, csrfToken});
+    const status = _.toString(
+      _.get(json, "data.updateTaskStatusToApproved.Status", null));
+    if (!status || !uuid) {
+      throw DEFAULT_NETWORK_ERROR;
+    }
+    return {status};
+  }
+
+  static async denyTaskSubmission(argument: { uuid: string, csrfToken: string }): Promise<{ uuid: string }> {
+    const {uuid, csrfToken} = {...argument};
+    const query = `
+mutation {
+ updateTaskStatusToDenied(UUID: "${uuid}") {
+   Status
+   UUID
+ }
+}`;
+    const json = await GraphQLRequestHelper.request({query, csrfToken});
+    const status = _.toString(
+      _.get(json, "data.updateTaskStatusToDenied.Status", null));
+    if (!status || !uuid) {
+      throw DEFAULT_NETWORK_ERROR;
+    }
+    return {status};
   }
 }

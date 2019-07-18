@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This file contains the "SendTaskSubmissionEmailJob" class.
+ * This file contains the "SendTaskApprovalLinkEmailJob" class.
  *
  * @category SilverStripe_Project
  * @package SDLT
@@ -18,19 +18,22 @@ use Symbiote\QueuedJobs\Services\AbstractQueuedJob;
 use Symbiote\QueuedJobs\Services\QueuedJobService;
 use Symbiote\QueuedJobs\Services\QueuedJob;
 use SilverStripe\Security\Member;
-use NZTA\SDLT\Model\QuestionnaireEmail;
+use NZTA\SDLT\Model\TaskSubmission;
+use NZTA\SDLT\Model\Task;
 
 /**
  * A QueuedJob is specifically designed to be invoked from an onAfterWrite() process
  */
-class SendTaskSubmissionEmailJob extends AbstractQueuedJob implements QueuedJob
+class SendTaskApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJob
 {
     /**
-     * @param TaskSubmission $taskSubmission taskSubmission
+     * @param TaskSubmission $submission task submission
+     * @param Member         $members    member
      */
-    public function __construct($taskSubmission = null)
+    public function __construct($submission = null, $members = [])
     {
-        $this->taskSubmission = $taskSubmission;
+        $this->taskSubmission = $submission;
+        $this->members = $members;
     }
 
     /**
@@ -39,7 +42,7 @@ class SendTaskSubmissionEmailJob extends AbstractQueuedJob implements QueuedJob
     public function getTitle()
     {
         return sprintf(
-            'Initialising task submission email for - %s (%d)',
+            'Initialising task approval link email for - %s (%d)',
             $this->taskSubmission->Task()->Name,
             $this->taskSubmission->ID
         );
@@ -59,8 +62,9 @@ class SendTaskSubmissionEmailJob extends AbstractQueuedJob implements QueuedJob
      */
     public function process()
     {
-        $member = $this->taskSubmission->Submitter();
-        $this->sendEmail($member->FirstName, $member->Email);
+        foreach ($this->members as $member) {
+            $this->sendEmail($member->FirstName, $member->Email);
+        }
 
         $this->isComplete = true;
     }
@@ -74,14 +78,15 @@ class SendTaskSubmissionEmailJob extends AbstractQueuedJob implements QueuedJob
     public function sendEmail($name = '', $toEmail = '')
     {
         foreach ($this->taskSubmission->Task()->SubmissionEmails() as $emailDetails) {
-            $sub = $this->taskSubmission->replaceVariable($emailDetails->EmailSubject);
+            $sub = $this->taskSubmission->replaceVariable($emailDetails->ApprovalLinkEmailSubject);
+
             $from = $emailDetails->FromEmailAddress;
 
             $email = Email::create()
                 ->setHTMLTemplate('Email\\EmailTemplate')
                 ->setData([
                     'Name' => $name,
-                    'Body' => $this->taskSubmission->replaceVariable($emailDetails->EmailBody, $emailDetails->LinkPrefix),
+                    'Body' => $this->taskSubmission->replaceVariable($emailDetails->ApprovalLinkEmailBody, $emailDetails->LinkPrefix),
                     'EmailSignature' => $emailDetails->EmailSignature
                 ])
                 ->setFrom($from)

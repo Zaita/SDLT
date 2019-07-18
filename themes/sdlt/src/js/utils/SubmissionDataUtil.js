@@ -69,7 +69,7 @@ export default class SubmissionDataUtil {
   static existsIncompleteTaskSubmission(taskSubmissions: Array<TaskSubmissionDisplay>): boolean {
     let exists = false;
     taskSubmissions.forEach((taskSubmission) => {
-      if (taskSubmission.status === "in_progress") {
+      if (taskSubmission.status === "in_progress" || taskSubmission.status === "start" || taskSubmission.status=== "waiting_for_approval" || taskSubmission.status=== "denied") {
         exists = true;
       }
     });

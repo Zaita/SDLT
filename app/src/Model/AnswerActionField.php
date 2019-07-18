@@ -57,7 +57,8 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
         'ActionType' => 'Enum(array("continue", "goto", "message", "finish"))',
         'Message' => 'HTMLText',
         'SortOrder' => 'Int',
-        'Result' => 'Varchar(255)'
+        'Result' => 'Varchar(255)',
+        'IsApprovalForTaskRequired' => 'Boolean',
     ];
 
     /**
@@ -116,9 +117,14 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
             ->setEmptyString('-- No task will be created --')
             ->setDescription('If the user choose this action, the associated task will be created');
 
-        $fields->dataFieldByName('Result')->setDescription('The result will be used only if Questionnaire type is a task.');
+        $fields
+            ->dataFieldByName('Result')
+            ->setDescription('The result will be used only if Questionnaire type is a task.');
 
-        $fields->addFieldToTab('Root.Main', DropdownField::create('GotoID', 'Go to', $questionList));
+        $fields->addFieldToTab(
+            'Root.Main',
+            DropdownField::create('GotoID', 'Go to', $questionList)
+        );
 
         /** @noinspection PhpUndefinedMethodInspection */
         $fields->dataFieldByName('GotoID')->displayIf('ActionType')->isEqualTo('goto');
@@ -128,6 +134,10 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
 
         /** @noinspection PhpUndefinedMethodInspection */
         $fields->dataFieldByName('Result')->displayIf('ActionType')->isEqualTo('finish');
+
+        if ($this->Question()->Questionnaire()->exists()) {
+            $fields->removeByName('IsApprovalForTaskRequired');
+        }
 
         return $fields;
     }
@@ -173,5 +183,20 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
         }
     }
 
+    /**
+     * validate the Approval Group based on the IsApprovalForTaskRequired flag
+     *
+     * @return ValidationResult
+     */
+    public function validate()
+    {
+        $result = parent::validate();
 
+        if($this->IsApprovalForTaskRequired && $this->Question()->Task()->exists() &&
+            !$this->Question()->Task()->ApprovalGroup()->exists()) {
+            $result->addError('Please first select an approval group on the task level.');
+        }
+
+        return $result;
+    }
 }

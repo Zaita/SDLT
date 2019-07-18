@@ -7,6 +7,7 @@ import type {Submission} from "../types/Questionnaire";
 import type {TaskSubmissionDisplay} from "../types/Task";
 import QuestionParser from "../utils/QuestionParser";
 import type {User} from "../types/User";
+import UserParser from "../utils/UserParser";
 
 type QuestionnaireSubmissionState = {
   siteTitle: string,
@@ -47,11 +48,17 @@ query {
       FirstName
       Surname
     }
+
     TaskSubmissions {
       UUID
       TaskName
       TaskType
       Status
+      TaskApprover {
+        ID
+        FirstName
+        Surname
+      }
     }
   }
   readSiteConfig {
@@ -106,6 +113,7 @@ query {
               taskName: _.toString(_.get(item, "TaskName", "")),
               taskType: _.toString(_.get(item, "TaskType", "")),
               status: _.toString(_.get(item, "Status", "")),
+              approver: UserParser.parseUserFromJSON(_.get(item, "TaskApprover")),
             };
             return taskSubmission;
           }),

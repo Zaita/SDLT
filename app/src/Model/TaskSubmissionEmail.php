@@ -40,6 +40,8 @@ class TaskSubmissionEmail extends DataObject
         'EmailBody' => 'HTMLText',
         'EmailSignature' => 'HTMLText',
         'LinkPrefix' => 'Varchar(32)',
+        'ApprovalLinkEmailSubject' => 'Text',
+        'ApprovalLinkEmailBody' => 'HTMLText',
     ];
 
     /**
@@ -47,10 +49,10 @@ class TaskSubmissionEmail extends DataObject
      * @var array
      */
     private static $summary_fields = [
-        'Label' => 'Label' ,
-        'FromEmailAddress' => 'From Email Address' ,
-        'EmailSubject' => 'Email Subject' ,
-        'LinkPrefix' => 'Link Prefix' ,
+        'Label' => 'Label',
+        'FromEmailAddress' => 'From Email Address',
+        'EmailSubject' => 'Email Subject',
+        'LinkPrefix' => 'Link Prefix',
     ];
 
     /**
@@ -72,8 +74,6 @@ class TaskSubmissionEmail extends DataObject
 
         $fields->removeByName(['OwnerID']);
 
-
-
         $fields->addFieldsToTab('Root.Main', [
             EmailField::create('FromEmailAddress'),
             TextField::create('EmailSubject'),
@@ -82,7 +82,12 @@ class TaskSubmissionEmail extends DataObject
                 ." the body of your email: {\$taskName}, {\$taskLink}, "
                 ." {\$submitterName}, and {\$submitterEmail}. They will be "
                 ." replaced with the actual value."),
-            HtmlEditorField::create('EmailSignature')
+            HtmlEditorField::create('EmailSignature'),
+            HtmlEditorField::create('ApprovalLinkEmailBody')
+                ->setDescription("You may use any of the following variables in"
+                ." the body of your email: {\$taskName}, {\$taskLink}, "
+                ." {\$submitterName}, and {\$submitterEmail}. They will be "
+                ." replaced with the actual value."),
         ]);
 
         return $fields;

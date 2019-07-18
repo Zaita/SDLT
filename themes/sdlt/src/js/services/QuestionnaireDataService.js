@@ -107,6 +107,11 @@ query {
       TaskName
       TaskType
       Status
+      TaskApprover {
+        ID
+        FirstName
+        Surname
+      }
     }
     CisoApprover {
       FirstName
@@ -177,6 +182,7 @@ query {
               taskName: _.toString(_.get(item, "TaskName", "")),
               taskType: _.toString(_.get(item, "TaskType", "")),
               status: _.toString(_.get(item, "Status", "")),
+              approver: UserParser.parseUserFromJSON(_.get(item, "TaskApprover")),
             };
             return taskSubmission;
           }),
