@@ -66,7 +66,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SubmitterEmail'=> 'Varchar(255)',
         'QuestionnaireData' => 'Text',
         'AnswerData' => 'Text',
-        'QuestionnaireStatus' => 'Enum(array("in_progress", "submitted", "assign_to_security_architect", "waiting_for_security_architect_approval","waiting_for_approval", "approved", "denied"))',
+        'QuestionnaireStatus' => 'Enum(array("in_progress", "submitted", "awaiting_security_architect_review", "waiting_for_security_architect_approval","waiting_for_approval", "approved", "denied"))',
         'UUID' => 'Varchar(36)',
         'IsStartLinkEmailSent' => 'Boolean',
         'IsEmailSentToSecurityArchitect' => 'Boolean',
@@ -852,7 +852,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     $questionnaireSubmission->doesQuestionnairBelongToCurrentUser();
 
-                    $questionnaireSubmission->QuestionnaireStatus = 'assign_to_security_architect';
+                    $questionnaireSubmission->QuestionnaireStatus = 'awaiting_security_architect_review';
 
                     if ($questionnaireSubmission->SecurityArchitectApprovalStatus == 'denied') {
                         $questionnaireSubmission->QuestionnaireStatus = 'waiting_for_security_architect_approval';
@@ -1582,7 +1582,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         }
 
         // check access details for security architect
-        if (in_array($this->QuestionnaireStatus, ['assign_to_security_architect', 'waiting_for_security_architect_approval'])) {
+        if (in_array($this->QuestionnaireStatus, ['awaiting_security_architect_review', 'waiting_for_security_architect_approval'])) {
             $accessdetails = $this->getSecurityArchitectAccessDetail($member);
             return $accessdetails;
         }
