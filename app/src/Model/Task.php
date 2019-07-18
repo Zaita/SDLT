@@ -24,6 +24,7 @@ use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\HasManyList;
 use SilverStripe\Security\Member;
+use SilverStripe\Security\Group;
 use SilverStripe\Security\Security;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
@@ -57,7 +58,15 @@ class Task extends DataObject implements ScaffoldingProvider
         'DisplayOnHomePage'=> 'Boolean',
         'KeyInformation' => 'HTMLText',
         'TaskType' => 'Enum(array("questionnaire", "selection"))',
-        'LockAnswersWhenComplete' => 'Boolean'
+        'LockAnswersWhenComplete' => 'Boolean',
+        'IsApprovalRequired' => 'Boolean',
+    ];
+
+    /**
+     * @var array
+     */
+    private static $has_one = [
+        'ApprovalGroup' => Group::class
     ];
 
     /**
@@ -99,6 +108,16 @@ class Task extends DataObject implements ScaffoldingProvider
         if ($this->TaskType === 'selection') {
             $fields->removeByName('Questions');
         }
+
+        $fields->addFieldsToTab(
+            'Root.Approval',
+            [
+                $fields->dataFieldByName('IsApprovalRequired'),
+                $fields->dataFieldByName('ApprovalGroupID'),
+            ]
+        );
+
+        $fields->dataFieldByName('IsApprovalRequired')->setTitle('Always require approval');
 
         return $fields;
     }
@@ -177,5 +196,21 @@ class Task extends DataObject implements ScaffoldingProvider
                 }
             })
             ->end();
+    }
+
+    /**
+     * validate the Approval Group based on the IsApprovalRequired flag
+     *
+     * @return ValidationResult
+     */
+    public function validate()
+    {
+        $result = parent::validate();
+
+        if($this->IsApprovalRequired && !$this->ApprovalGroup()->exists()) {
+            $result->addError('Please select Approval group.');
+        }
+
+        return $result;
     }
 }

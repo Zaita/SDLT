@@ -8,10 +8,11 @@ export default class UserParser {
 
   static parseUserFromJSON(userJSON: string | Object): User {
     const jsonObject = (typeof userJSON === "string" ? JSON.parse(userJSON) : userJSON);
+    const name = get(jsonObject, "FirstName") ? toString(get(jsonObject, "FirstName", "")) + ' ' + toString(get(jsonObject, "Surname", "")) : ""
 
     return {
       id: toString(get(jsonObject, "ID")),
-      name: `${get(jsonObject, "FirstName")} ${get(jsonObject, "Surname")}`,
+      name: name,
       email: get(jsonObject, "Email"),
       isSA: toString(get(jsonObject, "IsSA")) === "true",
       isCISO: toString(get(jsonObject, "IsCISO")) === "true",

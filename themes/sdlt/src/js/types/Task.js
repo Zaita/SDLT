@@ -32,5 +32,8 @@ export type TaskSubmission = {
   questionnaireSubmissionID: string,
   questionnaireSubmissionStatus: string,
   submitter: User,
-  lockWhenComplete: boolean
+  approver: User,
+  lockWhenComplete: boolean,
+  isTaskApprovalRequired: boolean,
+  isCurrentUserAnApprover: boolean
 };

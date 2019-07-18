@@ -33,9 +33,13 @@ use SilverStripe\Core\Convert;
 use SilverStripe\Control\Director;
 use Symbiote\QueuedJobs\Services\QueuedJobService;
 use NZTA\SDLT\Job\SendTaskSubmissionEmailJob;
+use NZTA\SDLT\Job\SendTaskApprovalLinkEmailJob;
 use SilverStripe\Forms\TextField;
 use NZTA\SDLT\Helper\JIRA;
 use NZTA\SDLT\Model\JiraTicket;
+use SilverStripe\Security\Group;
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\Email\Email;
 
 /**
  * Class TaskSubmission
@@ -62,9 +66,13 @@ use NZTA\SDLT\Model\JiraTicket;
  */
 class TaskSubmission extends DataObject implements ScaffoldingProvider
 {
+    const STATUS_START = 'start';
     const STATUS_IN_PROGRESS = 'in_progress';
     const STATUS_COMPLETE = 'complete';
     const STATUS_INVALID = 'invalid';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_DENIED = 'denied';
+    const STATUS_WAITING_FOR_APPROVAL = 'waiting_for_approval';
 
     /**
      * @var string
@@ -77,16 +85,17 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     private static $db = [
         'QuestionnaireData' => 'Text', // store in JSON format
         'AnswerData' => 'Text', // store in JSON format
-        'Status' => 'Enum(array("in_progress", "complete", "invalid"))',
+        'Status' => 'Enum(array("start", "in_progress", "complete", "waiting_for_approval", "approved", "denied", "invalid"))',
         'UUID' => 'Varchar(255)',
         'Result' => 'Varchar(255)',
         'SecureToken' => 'Varchar(64)',
         'LockAnswersWhenComplete' => 'Boolean',
         'SubmitterIPAddress' => 'Varchar(255)',
         'CompletedAt' => 'Datetime',
-        'SendEmailAfterSubmission' => 'Boolean',
         'EmailRelativeLinkToTask' => 'Varchar(255)',
-        'JiraKey' => 'Varchar(255)'
+        'JiraKey' => 'Varchar(255)',
+        'IsApprovalRequired' => 'Boolean',
+        'IsTaskApprovalLinkSent' => 'Boolean',
     ];
 
     /**
@@ -94,8 +103,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      */
     private static $has_one = [
         'Submitter' => Member::class,
+        'TaskApprover' => Member::class,
         'Task' => Task::class,
-        'QuestionnaireSubmission' => QuestionnaireSubmission::class
+        'QuestionnaireSubmission' => QuestionnaireSubmission::class,
+        'ApprovalGroup' => Group::class
     ];
 
     /**
@@ -139,6 +150,17 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     public function canView($member = null)
     {
         return (Security::getCurrentUser() !== null);
+    }
+
+    /**
+     * Don't allow to delete records
+     *
+     * @param Member|null $member member
+     * @return bool
+     */
+    public function canDelete($member = null)
+    {
+        return false;
     }
 
     /**
@@ -202,6 +224,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     .' the submission')
         ]);
 
+        $fields->dataFieldByName('IsApprovalRequired')->setTitle('Always require approval');
+
         return $fields;
     }
 
@@ -219,6 +243,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         $this->provideGraphQLScaffoldingForEditTaskSubmission($scaffolder);
         $this->provideGraphQLScaffoldingForUpdateTaskSubmissionWithSelectedComponents($scaffolder);
         $this->provideGraphQLScaffoldingForReadTaskSubmission($dataObjectScaffolder);
+        $this->provideGraphQLScaffoldingForUpdateTaskSubmissionStatusToApproved($scaffolder);
+        $this->provideGraphQLScaffoldingForUpdateTaskSubmissionStatusToDenied($scaffolder);
     }
 
     /**
@@ -237,11 +263,14 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'Status',
                 'Result',
                 'Submitter',
+                'TaskApprover',
                 'TaskName',
                 'TaskType',
                 'QuestionnaireSubmission',
                 'LockAnswersWhenComplete',
                 'JiraKey',
+                'IsTaskApprovalRequired',
+                'IsCurrentUserAnApprover'
             ]);
 
         $dataObjectScaffolder
@@ -343,7 +372,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
             if (json_encode($task->getQuestionsData()) == $existingTaskSubmission->QuestionnaireData) {
                 // Only turn "in progress" task submissions back if the structure is not changed
-                $existingTaskSubmission->Status = TaskSubmission::STATUS_IN_PROGRESS;
+                $existingTaskSubmission->Status = TaskSubmission::STATUS_START;
             }
 
             $existingTaskSubmission->write();
@@ -358,23 +387,25 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         $taskSubmission->TaskID = $taskID;
         $taskSubmission->QuestionnaireSubmissionID = $questionnaireSubmissionID;
         $taskSubmission->SubmitterID = $submitterID;
+        $taskSubmission->ApprovalGroupID = $task->ApprovalGroup()->ID;
 
         // Structure of task questionnaire
+        $taskSubmission->IsApprovalRequired = $task->IsApprovalRequired;
         $questionnaireData = $task->getQuestionsData();
         $taskSubmission->QuestionnaireData = json_encode($questionnaireData);
 
         // Initial status of the submission
-        $taskSubmission->Status = TaskSubmission::STATUS_IN_PROGRESS;
+        $taskSubmission->Status = TaskSubmission::STATUS_START;
         $taskSubmission->LockAnswersWhenComplete = $task->LockAnswersWhenComplete;
 
         $taskSubmission->write();
 
-        // after submit the questionnaire, please send a summary page link
+        // after create the task questionnaire, please send a start page link
         // to the submitter
-        $queuedJobService = QueuedJobService::create();
+        $qs = QueuedJobService::create();
 
-        $queuedJobService->queueJob(
-            new SendTaskSubmissionEmailJob($taskSubmission, [Security::getCurrentUser()]),
+        $qs->queueJob(
+            new SendTaskSubmissionEmailJob($taskSubmission),
             date('Y-m-d H:i:s', time() + 30)
         );
 
@@ -448,7 +479,6 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                         }
 
                         if ($questionAnswerData->answerType == "input") {
-                            //var_dump($questionAnswerData->answerType);
                             // validate input field data
                             QuestionnaireValidation::validate_answer_input_data($questionAnswerData->inputs, $submission->QuestionnaireData, $args['QuestionID']);
                         }
@@ -471,6 +501,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     $allAnswerData = json_decode($submission->AnswerData, true);
                     $allAnswerData[$args['QuestionID']] = $questionAnswerData;
                     $submission->AnswerData = json_encode($allAnswerData);
+                    $submission->Status = TaskSubmission::STATUS_IN_PROGRESS;
 
                     $submission->write();
 
@@ -523,6 +554,25 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     }
 
                     $submission->Status = TaskSubmission::STATUS_COMPLETE;
+
+                    if ($submission->IsTaskApprovalRequired) {
+                        $submission->Status = TaskSubmission::STATUS_WAITING_FOR_APPROVAL;
+
+                        if (!$submission->IsTaskApprovalLinkSent) {
+                            $members = $submission->approvalGroupMembers();
+                            $submission->IsTaskApprovalLinkSent = 1;
+
+                            // send approval link email to the approver group
+                            if ($members->exists()) {
+                                $qs = QueuedJobService::create();
+
+                                $qs->queueJob(
+                                    new SendTaskApprovalLinkEmailJob($submission, $members),
+                                    date('Y-m-d H:i:s', time() + 30)
+                                );
+                            }
+                        }
+                    }
 
                     if ($_SERVER['REMOTE_ADDR']) {
                         $submission->SubmitterIPAddress = Convert::raw2sql($_SERVER['REMOTE_ADDR']);
@@ -579,6 +629,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                         $member,
                         $secureToken
                     );
+
                     if (!$canEdit) {
                         throw new GraphQLAuthFailure();
                     }
@@ -649,6 +700,119 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     }
 
                     return $data;
+                }
+            })
+            ->end();
+    }
+
+    /**
+     * Change task submission status to approve
+     *
+     * @param SchemaScaffolder $scaffolder SchemaScaffolder
+     *
+     * @return void
+     */
+    public function provideGraphQLScaffoldingForUpdateTaskSubmissionStatusToApproved(SchemaScaffolder $scaffolder)
+    {
+        $scaffolder
+            ->mutation('updateTaskStatusToApproved', TaskSubmission::class)
+            ->addArg('UUID', 'String!')
+            ->setResolver(new class implements ResolverInterface {
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
+                 * @throws Exception
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    // Check authentication
+                    QuestionnaireValidation::is_user_logged_in();
+
+                    $member = Security::getCurrentUser();
+                    $uuid = Convert::raw2sql($args['UUID']);
+
+                    if (empty($args['UUID'])) {
+                        throw new Exception('Please enter a valid argument data.');
+                    }
+
+                    $submission = TaskSubmission::get_task_submission_by_uuid($uuid);
+
+                    if (!$submission) {
+                        throw new Exception('No data available for Task Submission.');
+                    }
+                    //throw new Exception(TaskSubmission::STATUS_WAITING_FOR_APPROVAL);
+
+                    if ($submission->Status != TaskSubmission::STATUS_WAITING_FOR_APPROVAL) {
+                        throw new Exception('Task Submission is not ready for approval.');
+                    }
+
+                    $submission->Status = TaskSubmission::STATUS_APPROVED;
+                    $submission->TaskApproverID = $member->ID;
+                    $submission->write();
+
+                    return $submission;
+                }
+            })
+            ->end();
+    }
+
+    /**
+     * Change task submission status to Deny
+     *
+     * @param SchemaScaffolder $scaffolder SchemaScaffolder
+     *
+     * @return void
+     */
+    public function provideGraphQLScaffoldingForUpdateTaskSubmissionStatusToDenied(SchemaScaffolder $scaffolder)
+    {
+        $scaffolder
+            ->mutation('updateTaskStatusToDenied', TaskSubmission::class)
+            ->addArg('UUID', 'String!')
+            ->setResolver(new class implements ResolverInterface {
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
+                 * @throws Exception
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    // Check authentication
+                    QuestionnaireValidation::is_user_logged_in();
+
+                    $member = Security::getCurrentUser();
+                    $uuid = Convert::raw2sql($args['UUID']);
+
+                    if (empty($args['UUID'])) {
+                        throw new Exception('Please enter a valid argument data.');
+                    }
+
+                    $submission = TaskSubmission::get_task_submission_by_uuid($uuid);
+
+                    if (!$submission) {
+                        throw new Exception('No data available for Task Submission.');
+                    }
+
+                    if ($submission->Status != TaskSubmission::STATUS_WAITING_FOR_APPROVAL) {
+                        throw new Exception('Task Submission is not ready for approval.');
+                    }
+
+                    $submission->Status = TaskSubmission::STATUS_DENIED;
+                    $submission->TaskApproverID = $member->ID;
+                    $submission->write();
+
+                    return $submission;
                 }
             })
             ->end();
@@ -753,6 +917,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         // A logged-in user will be judged by its role
         if ($member) {
             $isSubmitter = (int)$taskSubmission->SubmitterID === (int)$member->ID;
+
             $isSA = $member
                 ->Groups()
                 ->filter('Code', UserGroupConstant::GROUP_CODE_SA)
@@ -760,10 +925,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
             // Submitter can edit when answers are not locked
             if ($isSubmitter) {
-                if ($taskSubmission->Status === TaskSubmission::STATUS_IN_PROGRESS) {
+                if ($taskSubmission->Status === TaskSubmission::STATUS_IN_PROGRESS || $taskSubmission->Status === TaskSubmission::STATUS_START || $taskSubmission->Status === TaskSubmission::STATUS_DENIED) {
                     return true;
                 }
-                if ($taskSubmission->Status === TaskSubmission::STATUS_COMPLETE) {
+                if ($taskSubmission->Status === TaskSubmission::STATUS_COMPLETE || $taskSubmission->Status === TaskSubmission::STATUS_WAITING_FOR_APPROVAL) {
                     if (!$taskSubmission->LockAnswersWhenComplete) {
                         return true;
                     }
@@ -921,10 +1086,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                         $jiraTicket = JiraTicket::create();
                         $jiraTicket->JiraKey = Convert::raw2sql($args['JiraKey']);
                         $link = JIRA::create()->addTask(
-                                $jiraTicket->JiraKey,
-                                $component->Name,
-                                $component->getJIRABody()
-                            );
+                            $jiraTicket->JiraKey,
+                            $component->Name,
+                            $component->getJIRABody()
+                        );
                         $jiraTicket->TicketLink = $link;
                         $jiraTicket->write();
                         $submission->JiraTickets()->add($jiraTicket);
@@ -938,6 +1103,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
     /**
      * Event handler called after writing to the database.
+     *
      * @return void
      */
     public function onAfterWrite()
@@ -946,11 +1112,134 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
         $changed = $this->getChangedFields(['Status'], 1);
 
+        // if task submission status is chnaged from backend (admin panel)
+        // then updathe the QuestionnaireStatus to 'submitted'
         if (array_key_exists('Status', $changed) &&
-            $changed['Status']['before'] == 'complete' &&
+            in_array($changed['Status']['before'], ['complete', 'approved']) &&
             $changed['Status']['after'] == 'in_progress') {
             $this->QuestionnaireSubmission()->QuestionnaireStatus = 'submitted';
             $this->QuestionnaireSubmission()->write();
         }
+    }
+
+    /**
+     * Check if task approver is required
+     * first check this on task level and then on action answer level
+     *
+     * @return boolean
+     */
+    public function getIsTaskApprovalRequired()
+    {
+        if (!$this->ApprovalGroup()->exists()) {
+            return false;
+        }
+
+        if ($this->IsApprovalRequired) {
+            return true;
+        }
+
+        if ($this->QuestionnaireData && $this->AnswerData) {
+            $questionnaireDataObj = json_decode($this->QuestionnaireData);
+            $answerDataObj = json_decode($this->AnswerData);
+
+            $actionIdsforApproval = [];
+
+            foreach ($questionnaireDataObj as $obj) {
+                if ($obj->AnswerFieldType == 'action') {
+                    foreach ($obj->AnswerActionFields as $answerActionField) {
+                        if ($answerActionField->IsApprovalForTaskRequired) {
+                              $actionIdsforApproval[] = $answerActionField->ID;
+                        }
+                    }
+                }
+            }
+
+            if (empty($actionIdsforApproval)) {
+                return false;
+            }
+
+            foreach ($answerDataObj as $obj) {
+                if ($obj->answerType) {
+                    foreach ($obj->actions as $action) {
+                        if ($action->isChose && in_array($action->id, $actionIdsforApproval)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if current user has access to approve and denied
+     *
+     * @return boolean
+     */
+    public function getIsCurrentUserAnApprover()
+    {
+        $member = Security::getCurrentUser();
+
+        if (!$member) {
+            return false;
+        }
+
+        if (!$member->groups()->exists()) {
+            return false;
+        }
+
+        $groupIds = $member->groups()->column('ID');
+
+        if (in_array($this->ApprovalGroup()->ID, $groupIds)) {
+            return true;
+        }
+
+        return false;
+    }
+
+     /**
+      * Not able to access members directly using relationship ($this->ApprovalGroup()->Members()),
+      * getting the below error
+      * (Cannot serialize Symfony\Component\Cache\Simple\Php File Cache in graphql)
+      * that's why I need this function
+      *
+      * @throws Exception
+      * @return DataList
+      */
+    public function approvalGroupMembers()
+    {
+        if (!$this->ApprovalGroup()->exists()) {
+            throw new Exception('Sorry, no approval group exist.');
+        }
+
+        $group = Group::get()->filter('code', $this->ApprovalGroup()->Code)->first();
+
+        return $group->Members();
+    }
+
+    /**
+     * @param string $string     string
+     * @param string $linkPrefix prefix before the link
+     * @return string
+     */
+    public function replaceVariable($string = '', $linkPrefix = '')
+    {
+        $taskName = $this->Task()->Name;
+        $SubmitterName = $this->Submitter()->Name;
+        $SubmitterEmail = $this->Submitter()->Email;
+
+        if ($linkPrefix) {
+            $link = $this->AnonymousAccessLink($linkPrefix);
+        } else {
+            $link = $this->SecureLink();
+        }
+
+        $string = str_replace('{$taskName}', $taskName, $string);
+        $string = str_replace('{$taskLink}', $link, $string);
+        $string = str_replace('{$submitterName}', $SubmitterName, $string);
+        $string = str_replace('{$submitterEmail}', $SubmitterEmail, $string);
+
+        return $string;
     }
 }

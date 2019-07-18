@@ -329,3 +329,27 @@ async function batchUpdateTaskSubmissionData(taskSubmission: TaskSubmission, ind
     ErrorUtil.displayError(error.message);
   }
 }
+
+export function approveTaskSubmission(uuid: string): ThunkAction {
+  return async (dispatch, getState) => {
+    try {
+      const csrfToken = await CSRFTokenService.getCSRFToken();
+      const {status} = await TaskDataService.approveTaskSubmission({uuid, csrfToken});
+      await dispatch(loadTaskSubmission({uuid, secureToken: ''}));
+    } catch(error) {
+      ErrorUtil.displayError(error.message);
+    }
+  }
+}
+
+export function denyTaskSubmission(uuid: string): ThunkAction {
+  return async (dispatch, getState) => {
+    try {
+      const csrfToken = await CSRFTokenService.getCSRFToken();
+      const {status} = await TaskDataService.denyTaskSubmission({uuid, csrfToken});
+      await dispatch(loadTaskSubmission({uuid}));
+    } catch(error) {
+      ErrorUtil.displayError(error.message);
+    }
+  }
+}
