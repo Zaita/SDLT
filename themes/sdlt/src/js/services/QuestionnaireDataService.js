@@ -116,6 +116,7 @@ query {
       FirstName
       Surname
     }
+    ApprovalOverrideBySecurityArchitect
   }
   readSiteConfig {
     Title
@@ -132,11 +133,11 @@ query {
     const data: QuestionnaireSubmissionState = {
       title: _.toString(_.get(submissionJSON, "Questionnaire.Name", "")),
       siteTitle: _.toString(_.get(json, "data.readSiteConfig.0.Title", "")),
-
       user: UserParser.parseUserFromJSON(memberData),
       isCurrentUserApprover: _.get(submissionJSON, "IsCurrentUserAnApprover", "false") === "true",
       isCurrentUserABusinessOwnerApprover: _.get(submissionJSON, "IsCurrentUserABusinessOwnerApprover", "false") === "true",
       submission: {
+        isApprovalOverrideBySecurityArchitect: Boolean(_.get(submissionJSON, "ApprovalOverrideBySecurityArchitect", false)),
         questionnaireID: _.toString(_.get(submissionJSON, "Questionnaire.ID", "")),
         questionnaireTitle: _.toString(_.get(submissionJSON, "Questionnaire.Name", "")),
         submissionID: _.toString(_.get(submissionJSON, "ID", "")),
@@ -304,15 +305,16 @@ mutation {
     return {uuid};
   }
 
-  static async approveQuestionnaireSubmission(argument: { submissionID: string, csrfToken: string }): Promise<{ uuid: string }> {
-    const {submissionID, csrfToken} = {...argument};
+  static async approveQuestionnaireSubmission(argument: { submissionID: string, csrfToken: string, skipBoAndCisoApproval: boolean}): Promise<{ uuid: string }> {
+    const {submissionID, csrfToken, skipBoAndCisoApproval} = {...argument};
     const query = `
 mutation {
- updateQuestionnaireOnApproveByGroupMember(ID: "${submissionID}") {
+ updateQuestionnaireOnApproveByGroupMember(ID: "${submissionID}", SkipBoAndCisoApproval: ${skipBoAndCisoApproval}) {
    QuestionnaireStatus
    UUID
  }
 }`;
+
     const json = await GraphQLRequestHelper.request({query, csrfToken});
     const status = _.toString(
       _.get(json, "data.updateQuestionnaireOnApproveByGroupMember.QuestionnaireStatus", null));
@@ -323,11 +325,11 @@ mutation {
     return {uuid};
   }
 
-  static async denyQuestionnaireSubmission(argument: { submissionID: string, csrfToken: string }): Promise<{ uuid: string }> {
-    const {submissionID, csrfToken} = {...argument};
+  static async denyQuestionnaireSubmission(argument: { submissionID: string, csrfToken: string, skipBoAndCisoApproval: boolean}): Promise<{ uuid: string }> {
+    const {submissionID, csrfToken, skipBoAndCisoApproval} = {...argument};
     const query = `
 mutation {
- updateQuestionnaireOnDenyByGroupMember(ID: "${submissionID}") {
+ updateQuestionnaireOnDenyByGroupMember(ID: "${submissionID}", SkipBoAndCisoApproval: ${skipBoAndCisoApproval}) {
    QuestionnaireStatus
    UUID
  }

@@ -60,4 +60,17 @@ class UserRoleExtension extends DataExtension
             ->filter('Code', UserGroupConstant::GROUP_CODE_REPORTER)
             ->exists();
     }
+
+    /**
+     * Check if the member is a SilverStripe administrator
+     *
+     * @return boolean
+     */
+    public function getIsAdmin()
+    {
+        return $this->owner
+            ->Groups()
+            ->filter('Code', UserGroupConstant::GROUP_CODE_ADMIN)
+            ->exists();
+    }
 }
