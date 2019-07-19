@@ -17,14 +17,16 @@ use NZTA\SDLT\Model\Task;
 use NZTA\SDLT\Model\Questionnaire;
 use NZTA\SDLT\Model\QuestionnaireEmail;
 use NZTA\SDLT\Model\Dashboard;
+use NZTA\SDLT\Model\Risk;
 use SilverStripe\Admin\ModelAdmin;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;
-use SilverStripe\Forms\GridField\GridField;
-use SilverStripe\Forms\GridField\GridFieldConfig_RelationEditor;
+use SilverStripe\Forms\GridField\GridFieldImportButton;
+use SilverStripe\Forms\GridField\GridFieldExportButton;
+use SilverStripe\Forms\GridField\GridFieldPrintButton;
 
 /**
- * Class PillarAdmin
+ * Class QuestionnaireAdmin
  *
  * This class is used to manage Questionnaires and Tasks
  */
@@ -37,7 +39,8 @@ class QuestionnaireAdmin extends ModelAdmin
         Dashboard::class,
         Questionnaire::class,
         Task::class,
-        QuestionnaireEmail::class
+        QuestionnaireEmail::class,
+        Risk::class,
     ];
 
     /**
@@ -63,7 +66,17 @@ class QuestionnaireAdmin extends ModelAdmin
 
         /* @var GridField $gridField */
         $gridField = $form->Fields()->fieldByName($gridFieldName);
-        $config = GridFieldConfig_RelationEditor::create(250);
+        $config = $gridField->getConfig();
+        $config->removeComponent($config->getComponentByType(GridFieldPrintButton::class));
+
+        if (!$this->modelClass::config()->get('show_import_button')) {
+            $config->removeComponent($config->getComponentByType(GridFieldImportButton::class));
+        }
+
+        if (!$this->modelClass::config()->get('show_export_button')) {
+            $config->removeComponent($config->getComponentByType(GridFieldExportButton::class));
+        }
+
         $gridField->setConfig($config);
 
         return $form;
