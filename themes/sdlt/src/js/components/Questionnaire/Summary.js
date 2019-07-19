@@ -340,7 +340,7 @@ class Summary extends Component<Props> {
   }
 
   renderSkipCheckbox(submission: Submission, viewAs: string, user: User) {
-    if (!user.isSA || !submission.isApprovalOverrideBySecurityArchitect) {
+    if ((user && !user.isSA) || !submission.isApprovalOverrideBySecurityArchitect) {
       return null;
     }
     if (viewAs === 'approver' && user.isSA &&
