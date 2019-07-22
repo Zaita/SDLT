@@ -107,10 +107,10 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         // Manage multi-value selections
         $fields->addFieldsToTab(
             'Root.Main',
-            FieldList::create([
+            Wrapper::create(FieldList::create([
                 TextField::create(
                     'MultiChoiceSingleAnswerDefault',
-                    'Default Selection'
+                    'Radio Button Default Selection'
                 )
                     ->setAttribute('style', 'width: 200px;')
                     ->setDescription(''
@@ -121,14 +121,16 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
                     ->hideIf('InputType')
                     ->startsWith('multiple-choice: multiple')
                     ->end(),
-                Wrapper::create(MultiValueListField::create(
+                $checkbxDefaultField = Wrapper::create(MultiValueListField::create(
                         'MultiChoiceMultipleAnswerDefault',
-                        'Default Selections',
-                        $this->dbObject('MultiChoiceAnswer')->getValues()
+                        'Checkbox Default Selections',
+                        $this->dbObject('MultiChoiceAnswer')->getValues() ?: []
                     )
                         ->setDescription(''
                             . 'These selections represent which of the related'
                             . ' question\'s checkboxes are checked by default.'
+                            . ' Once this record is saved, defaults will be able to'
+                            . ' be selected.'
                         )
                 )
                     ->hideUnless('InputType')
@@ -142,8 +144,16 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
                         . 'Each row represents a value and label for a single'
                         . sprintf(' %s.', $this->multiSelectionFieldName())
                     )
-            ])
+            ]))
+                ->displayIf('InputType')
+                ->startsWith('multiple-choice:')
+                ->end()
         );
+
+        // Only show checkbox defaults, when records is saved.
+        if (!$this->exists()) {
+            $checkbxDefaultField->setDisabled(true);
+        }
 
         /** @noinspection PhpUndefinedMethodInspection */
         $fields->dataFieldByName('IsBusinessOwner')
