@@ -40,6 +40,7 @@ use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Control\Controller;
 use SilverStripe\Forms\TextField;
+use NZTA\SDLT\Traits\SDLTRiskSubmission;
 
 /**
  * Class Questionnaire
@@ -55,6 +56,8 @@ use SilverStripe\Forms\TextField;
  */
 class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 {
+    use SDLTRiskSubmission;
+
     /**
      * @var string
      */
@@ -424,7 +427,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'QuestionnaireName',
                 'Created',
                 'BusinessOwnerApproverName',
-                'ApprovalOverrideBySecurityArchitect'
+                'ApprovalOverrideBySecurityArchitect',
+                'GQRiskResult',
             ]);
 
         $submissionScaffolder
@@ -1381,6 +1385,27 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
+     * @param DataObject $question question
+     *
+     * @return array $finalActionFields
+     */
+    public function getAnswerActionFields($question)
+    {
+        $finalActionFields = [];
+
+        foreach ($question->AnswerActionFields() as $answerActionField) {
+            $actionFields['ID'] = $answerActionField->ID;
+            $actionFields['Label'] = $answerActionField->Label;
+            $actionFields['ActionType'] = $answerActionField->ActionType;
+            $actionFields['Message'] = $answerActionField->Message;
+            $actionFields['GotoID'] = $answerActionField->Goto()->ID;
+            $actionFields['QuestionID'] = $answerActionField->Question()->ID;
+            $actionFields['TaskID'] = $answerActionField->Task()->ID;
+            $finalActionFields[] = $actionFields;
+        }
+    }
+
+    /**
      * @return string $link link
      */
     public function getStartLink()
@@ -1960,5 +1985,36 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         }
 
         return false;
+    }
+
+    /**
+     * A graphql frontend for the getRiskResult() method.
+     *
+     * @return string
+     */
+    public function GQRiskResult() : string
+    {
+        return json_encode($this->getRiskResultData());
+    }
+
+    /**
+     * Wrap the related questionnaire's risk-data alongside those of all its
+     * related tasks.
+     *
+     * @return array
+     */
+    public function getRiskResultData() : array
+    {
+        // Deal with the related Questionnaire's Task-calcs, and append them
+        // to the output array
+        $allRiskResults = [
+            $this->getRiskResult('q'),
+        ];
+
+        foreach ($this->Questionnaire()->Tasks() as $task) {
+            $allRiskResults[] = $task->TaskSubmission()->getRiskResult('t');
+        }
+
+        return $allRiskResults;
     }
 }

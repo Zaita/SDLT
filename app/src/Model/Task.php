@@ -37,6 +37,9 @@ use NZTA\SDLT\Form\GridField\GridFieldCustomEditAction;
 use NZTA\SDLT\ModelAdmin\QuestionnaireAdmin;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\View\ArrayData;
+use NZTA\SDLT\Helper\Utils;
+use NZTA\SDLT\Traits\SDLTRiskCalc;
+use NZTA\SDLT\Model\TaskSubmission;
 
 /**
  * Class Task
@@ -52,6 +55,7 @@ use SilverStripe\View\ArrayData;
 class Task extends DataObject implements ScaffoldingProvider
 {
     use SDLTModelPermissions;
+    use SDLTRiskCalc;
 
     /**
      * @var string
@@ -65,9 +69,10 @@ class Task extends DataObject implements ScaffoldingProvider
         'Name' => 'Varchar(255)',
         'DisplayOnHomePage'=> 'Boolean',
         'KeyInformation' => 'HTMLText',
-        'TaskType' => 'Enum(array("questionnaire", "selection"))',
+        'TaskType' => 'Enum(array("questionnaire", "selection", "risk questionnaire"))',
         'LockAnswersWhenComplete' => 'Boolean',
         'IsApprovalRequired' => 'Boolean',
+        'RiskCalculation' => "Enum('NztaApproxRepresentation,Maximum')",
     ];
 
     /**
@@ -96,6 +101,13 @@ class Task extends DataObject implements ScaffoldingProvider
     /**
      * @var array
      */
+    private static $belongs_to = [
+        'TaskSubmission' => TaskSubmission::class,
+    ];
+
+    /**
+     * @var array
+     */
     private static $summary_fields = [
         'Name',
         'TaskType',
@@ -119,9 +131,17 @@ class Task extends DataObject implements ScaffoldingProvider
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
+        $typeField = $fields->dataFieldByName('TaskType');
+        $riskField = $fields->dataFieldByName('RiskCalculation');
+
+        $fields->removeByName([
+            'TaskType',
+            'RiskCalculation',
+        ]);
 
         // if task type is selection, then please hide Questions tab
         if ($this->TaskType === 'selection') {
+            // A "selection" type, has no Questions
             $fields->removeByName('Questions');
         } else {
             /* @var GridField $questions */
@@ -137,7 +157,33 @@ class Task extends DataObject implements ScaffoldingProvider
             }
         }
 
-        // create approval tab
+        if ($this->TaskType === 'risk questionnaire') {
+            // Restrict relations to risk-type Questionnaire records
+            $rqGrid = $fields->findOrMakeTab('Root.Questionnaires.Questionnaires');
+            $rqGrid->getConfig()->getComponentByType(GridFieldAddExistingAutocompleter::class)
+                ->setSearchList(Questionnaire::get()->each(function ($q) {
+                    return $q->isRiskType();
+                }))
+                ->setPlaceholderText('Find Risk Questionnaires by Name');
+        }
+
+        $fields->insertAfter('Name', $typeField
+            ->setEmptyString('-- Select One --')
+            ->setSource(Utils::pretty_source($this, 'TaskType'))
+        );
+
+        $fields->insertAfter('TaskType', $riskField
+            ->setEmptyString('-- Select One --')
+            ->setSource(Utils::pretty_source($this, 'RiskCalculation'))
+            ->setDescription(''
+                . 'Select the most appropriate formula with which to perform'
+                . ' risk calculations.'
+            )
+                ->displayIf('TaskType')
+                ->isEqualTo('risk questionnaire')
+                ->end()
+        );
+
         $fields->addFieldsToTab(
             'Root.TaskApproval',
             [
@@ -283,6 +329,14 @@ class Task extends DataObject implements ScaffoldingProvider
     }
 
     /**
+     * @return boolean
+     */
+    public function isRiskType() : bool
+    {
+        return $this->TaskType === 'risk questionnaire' && $this->RiskCalculation;
+    }
+
+    /**
      * Is this task classified as a "Standalone" task?
      *
      * @return boolean
@@ -384,6 +438,10 @@ class Task extends DataObject implements ScaffoldingProvider
 
         if ($this->IsApprovalRequired && !$this->ApprovalGroup()->exists()) {
             $result->addError('Please select Approval group.');
+        } else if (!$this->TaskType) {
+            $result->addError('Please select a task type.');
+        } else if ($this->TaskType === 'risk questionnaire' && !$this->RiskCalculation) {
+            $result->addError('Please select a risk-calculation.');
         }
 
         return $result;

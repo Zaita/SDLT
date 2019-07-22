@@ -38,8 +38,7 @@ use SilverStripe\Forms\TextField;
 use NZTA\SDLT\Helper\JIRA;
 use NZTA\SDLT\Model\JiraTicket;
 use SilverStripe\Security\Group;
-use SilverStripe\Control\Controller;
-use SilverStripe\Control\Email\Email;
+use NZTA\SDLT\Traits\SDLTRiskSubmission;
 
 /**
  * Class TaskSubmission
@@ -66,6 +65,8 @@ use SilverStripe\Control\Email\Email;
  */
 class TaskSubmission extends DataObject implements ScaffoldingProvider
 {
+    use SDLTRiskSubmission;
+    
     const STATUS_START = 'start';
     const STATUS_IN_PROGRESS = 'in_progress';
     const STATUS_COMPLETE = 'complete';
