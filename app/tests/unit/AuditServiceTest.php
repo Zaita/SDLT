@@ -135,6 +135,37 @@ class AuditServiceTest extends FunctionalTest
     /**
      * Test logging scenario:
      * Event: Questionnaire Changed
+     * User:  SDLT User
+     */
+    public function testChangeQuestionnaireSubmissionInSDLTUserContext()
+    {
+        // Baseline
+        $this->assertEquals(0, AuditEvent::get()->count());
+
+        $user = $this->objFromFixture(Member::class, 'sdlt-user');
+        $this->logInAs($user);
+
+        $questionnaireSubmission = QuestionnaireSubmission::create([
+            'QuestionnaireStatus' => 'waiting_for_approval',
+        ]);
+        $questionnaireSubmission->write(); // Sets the initial "waiting_for_approval" state
+        $questionnaireSubmission
+            ->setField('QuestionnaireStatus', 'in_progress')
+            ->write();  // Sets the subsequent "in_progress" state
+
+        // x2 audit log entries because:
+        // 1). Basic write()
+        // 2). The status change
+        // Both of which results in a separate audit log entry being generated
+        $this->assertEquals(2, AuditEvent::get()->count());
+        $this->assertEquals('Email: sdlt@test.app. Group(s): NZTA-SDLT-Users', AuditEvent::get()->first()->UserData);
+        $this->assertEquals('QUESTIONNAIRESUBMISSION.SUBMIT', AuditEvent::get()->toArray()[0]->Event);
+        $this->assertEquals('QUESTIONNAIRESUBMISSION.CHANGE', AuditEvent::get()->toArray()[1]->Event);
+    }
+
+    /**
+     * Test logging scenario:
+     * Event: Questionnaire Changed
      * User:  Admin
      */
     public function testChangeQuestionnaireInAdminUserContext()
