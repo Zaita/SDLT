@@ -26,6 +26,7 @@ use Symbiote\MultiValueField\ORM\FieldType\MultiValueField;
 use Symbiote\MultiValueField\Fields\KeyValueField;
 use Symbiote\MultiValueField\Fields\MultiValueListField;
 use UncleCheese\DisplayLogic\Forms\Wrapper;
+use Exception;
 
 /**
  * Class AnswerInputField
@@ -206,9 +207,22 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
      *
      * @return string
      */
-    public function GQLMultiChoiceAnswer()
+    public function getGQLMultiChoiceAnswer()
     {
-        return json_encode($this->dbObject('MultiChoiceAnswer')->getValue() ?: []);
+        $optionData = [];
+
+        if ($val = $this->dbObject('MultiChoiceAnswer')->getValue()) {
+
+            foreach ($val as $key => $value) {
+
+                $data['value'] = $key;
+                $data['label'] = $value;
+
+                $optionData[] = $data;
+          }
+        }
+
+        return json_encode($optionData);
     }
 
     /**
@@ -217,7 +231,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
      *
      * @return string
      */
-    public function GQLMultiChoiceMultipleAnswerDefault()
+    public function getGQLMultiChoiceMultipleAnswerDefault()
     {
         return json_encode($this->dbObject('MultiChoiceMultipleAnswerDefault')->getValue() ?: []);
     }
