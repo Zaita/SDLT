@@ -322,27 +322,24 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * Uses {@link $this->getIsCurrentUserABusinessOwnerApprover()} to determine
-     * if a particular operation was performed by a Business Owner. If that check
-     * fails, we rely instead on information provided by both the data-model and
-     * the current HTTP request.
+     * Determines if a particular operation was performed by a Business Owner.
+     * This check is reliant on information provided by both the data-model and
+     * the current GraphQL {@link HTTPRequest} object.
      *
      * @return boolean
      */
-    public function isCurrentUserABusinessOwner()
+    public function isBusinessOwnerContext()
     {
-        $req = (Controller::curr() ? Controller::curr()->getRequest() : null);
+        $req = Controller::curr() ? Controller::curr()->getRequest() : null;
 
-        if (!$isOwnerAndApprover = $this->getIsCurrentUserABusinessOwnerApprover()) {
-            return (
-                $this->UUID &&
-                $this->ApprovalLinkToken &&
+        return (
+            $this->UUID &&
+            $this->ApprovalLinkToken && (
                 $req &&
-                strstr($req->getURL(), 'businessOwnerApproval')
-            );
-        }
-
-        return $isOwnerAndApprover;
+                strstr($req->getHeader('referer'), 'businessOwnerApproval') &&
+                strstr($req->getBody(), $this->ApprovalLinkToken)
+            )
+        );
     }
 
     /**
@@ -1182,16 +1179,24 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $user = Security::getCurrentUser();
         $approvalDbFields = self::normalise_group_approval_fields(
             $user,
-            $this->isCurrentUserABusinessOwner()
+            $this->isBusinessOwnerContext()
         );
-
         $userData = '';
 
         if ($user) {
             $groups = $user->Groups()->column('Title');
             $userData = implode('. ', [
-                'Email: ' . ($user->Email ?? $this->BusinessOwnerEmailAddress),
+                'Email: ' . (($this->isBusinessOwnerContext() && $this->BusinessOwnerEmailAddress) ?
+                    $this->BusinessOwnerEmailAddress :
+                    $user->Email),
                 'Group(s): ' . ($groups ? implode(' : ', $groups) : 'N/A'),
+            ]);
+        } else {
+            $userData = implode('. ', [
+                'Email: ' . (($this->isBusinessOwnerContext() && $this->BusinessOwnerEmailAddress) ?
+                    $this->BusinessOwnerEmailAddress :
+                    'N/A'),
+                'Group(s): N/A',
             ]);
         }
 
@@ -1211,6 +1216,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         // - Status changes from anything to "pending"
         $changed = $this->getChangedFields();
         $doAudit = false;
+        $statusChange = [];
 
         foreach ($approvalDbFields as $approvalFieldName) {
             if (
@@ -1220,12 +1226,20 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $changed[$approvalFieldName]['before'] !== 'in_progress' &&
                     $changed[$approvalFieldName]['after'] === 'in_progress') {
                 $doAudit = true;
+                $statusChange['before'] = $changed[$approvalFieldName]['before'];
+                $statusChange['after'] = $changed[$approvalFieldName]['after'];
                 break;
             }
         }
 
         if ($doAudit) {
-            $msg = sprintf('"%s" had its status changed. (UUID: %s)', $this->Questionnaire()->Name, $this->UUID);
+            $msg = sprintf(
+                '"%s" had its status changed from "%s" to "%s". (UUID: %s)',
+                $this->Questionnaire()->Name,
+                $statusChange['before'],
+                $statusChange['after'],
+                $this->UUID
+            );
             $this->auditService->commit('Change', $msg, $this, $userData);
         }
 
@@ -1240,7 +1254,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             if (
                     $this->exists() &&
                     in_array($this->$approvalFieldName, ['approved', 'denied']) && (
-                        $this->isCurrentUserABusinessOwner() || (
+                        $this->isBusinessOwnerContext() || (
                             $user && (
                                 $user->getIsCISO() ||
                                 $user->getIsSA()
@@ -1858,12 +1872,14 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      */
     public static function normalise_group_approval_fields(Member $member = null, bool $isBusinessOwner = false) : array
     {
-        $fields = [];
+        $fields = ['QuestionnaireStatus'];
 
         if (!$member) {
             if (!$isBusinessOwner) {
-                return [];
+                return $fields;
             }
+
+            return $fields;
         }
 
         if ($isBusinessOwner) {

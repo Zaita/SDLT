@@ -24,23 +24,26 @@ class QuestionnaireSubmissionTest extends FunctionalTest
     {
         // Assert correct no totals
         $userHasNoGroups = $this->objFromFixture(Member::class, 'user-has-no-groups');
-        $this->assertCount(0, QuestionnaireSubmission::normalise_group_approval_fields($userHasNoGroups));
+        // Return is never zero. There's always at least a "QuestionnaireStatus" field present
+        $this->assertCount(1, QuestionnaireSubmission::normalise_group_approval_fields($userHasNoGroups));
 
         $userHasOneGroup = $this->objFromFixture(Member::class, 'user-has-one-group');
-        $this->assertCount(1, QuestionnaireSubmission::normalise_group_approval_fields($userHasOneGroup));
-        $this->assertEquals(['SecurityArchitectApprovalStatus',], QuestionnaireSubmission::normalise_group_approval_fields($userHasOneGroup));
+        $this->assertCount(2, QuestionnaireSubmission::normalise_group_approval_fields($userHasOneGroup));
+        $this->assertEquals(['QuestionnaireStatus','SecurityArchitectApprovalStatus',], QuestionnaireSubmission::normalise_group_approval_fields($userHasOneGroup));
 
         $userHasTwoGroups = $this->objFromFixture(Member::class, 'user-has-two-groups');
-        $this->assertCount(2, QuestionnaireSubmission::normalise_group_approval_fields($userHasTwoGroups));
+        $this->assertCount(3, QuestionnaireSubmission::normalise_group_approval_fields($userHasTwoGroups));
         $this->assertEquals([
             'CisoApprovalStatus',
+            'QuestionnaireStatus',
             'SecurityArchitectApprovalStatus',
         ], QuestionnaireSubmission::normalise_group_approval_fields($userHasTwoGroups));
 
-        $this->assertCount(3, QuestionnaireSubmission::normalise_group_approval_fields($userHasTwoGroups, true));
+        $this->assertCount(4, QuestionnaireSubmission::normalise_group_approval_fields($userHasTwoGroups, true));
         $this->assertEquals([
             'BusinessOwnerApprovalStatus',
             'CisoApprovalStatus',
+            'QuestionnaireStatus',
             'SecurityArchitectApprovalStatus',
         ], QuestionnaireSubmission::normalise_group_approval_fields($userHasTwoGroups, true));
     }
@@ -54,13 +57,13 @@ class QuestionnaireSubmissionTest extends FunctionalTest
      */
     public function testIsCurrentUserABusinessOwner()
     {
-        $this->assertFalse(QuestionnaireSubmission::create()->isCurrentUserABusinessOwner());
+        $this->assertFalse(QuestionnaireSubmission::create()->isBusinessOwnerContext());
         $this->assertFalse(QuestionnaireSubmission::create([
             'UUID' => 'Wibble'
-        ])->isCurrentUserABusinessOwner());
+        ])->isBusinessOwnerContext());
         $this->assertFalse(QuestionnaireSubmission::create([
             'UUID' => 'Wibble',
             'ApprovalLinkToken' => 'Wibble'
-        ])->isCurrentUserABusinessOwner());
+        ])->isBusinessOwnerContext());
     }
 }
