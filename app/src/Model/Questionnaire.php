@@ -209,7 +209,7 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     public function getQuestionsData()
     {
         $questions = $this->Questions();
-        $questionsData = [];
+        $finalData = [];
 
         foreach ($questions as $question) {
             /* @var $question Question */
@@ -220,10 +220,10 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
             $questionData['AnswerFieldType'] = $question->AnswerFieldType;
             $questionData['AnswerInputFields'] = $question->getAnswerInputFieldsData();
             $questionData['AnswerActionFields'] = $question->getAnswerActionFieldsData();
-            $questionsData[] = $questionData;
+            $finalData[] = $questionData;
         }
 
-        return $questionsData;
+        return $finalData;
     }
 
     /**
