@@ -17,7 +17,6 @@ use NZTA\SDLT\Constant\UserGroupConstant;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\HasManyList;
 use SilverStripe\Security\Security;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 use SilverStripe\Forms\GridField\GridFieldPaginator;
@@ -29,6 +28,9 @@ use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use NZTA\SDLT\Traits\SDLTModelPermissions;
 use SilverStripe\Security\Permission;
 use NZTA\SDLT\ModelAdmin\QuestionnaireAdmin;
+use NZTA\SDLT\Helper\Utils;
+use NZTA\SDLT\Traits\SDLTRiskCalc;
+
 /**
  * Class Questionnaire
  *
@@ -36,10 +38,28 @@ use NZTA\SDLT\ModelAdmin\QuestionnaireAdmin;
  * @property string KeyInformation
  *
  * @method HasManyList Questions
+ *
+ * This class represents multiple "kinds" of questionnaire.
+ *
+ * A Risk Questionnaire allows administrators to populate a submission's answers
+ * with with risks and based on the answers given, allocate a weighting that covers
+ * both the answer and the risk.
+ *
+ * Risks & Weights are only applicable to multi-choice answers where >=1 {@link Risk}
+ * is able to be associated with each multi-choice answer.
+ *
+ * Example:
+ *
+ * - An answer comprises the following multiple choices: "A","B","C"
+ * - One or more risks can be associated with "A", "B" and/or "C"
+ * - Once assigned a risk, an admin can then add a "Weighting" (Range 0-100) to
+ *   each answer+risk combination.
  */
 class Questionnaire extends DataObject implements ScaffoldingProvider
 {
     use SDLTModelPermissions;
+    use SDLTRiskCalc;
+
     /**
      * @var string
      */
@@ -51,6 +71,8 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     private static $db = [
         'Name' => 'Varchar(255)',
         'KeyInformation' => 'HTMLText',
+        'Type' => "Enum('Questionnaire,RiskQuestionnaire')",
+        'RiskCalculation' => "Enum('NztaApproxRepresentation,Maximum')",
     ];
 
     /**
@@ -75,20 +97,44 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     ];
 
     /**
-     * CMS Fields
+     * @var array
+     */
+    private static $summary_fields = [
+        'Name',
+        'Type',
+    ];
+
+    /**
+     * Legacy questionnaires will not have a "Type" field for display in e.g.
+     * $summary_fields.
+     *
+     * @return string
+     */
+    public function getType()
+    {
+        return $this->getField('Type') ?: 'Questionnaire';
+    }
+
+    /**
+     * CMS Fields.
+     *
      * @return FieldList
      */
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
-
-        $fields->removeByName('PillarID');
-
         $questions = $fields->dataFieldByName('Questions');
+
+        $typeField = $fields->dataFieldByName('Type');
+        $riskField = $fields->dataFieldByName('RiskCalculation');
+        $fields->removeByName([
+            'PillarID',
+            'Type',
+            'RiskCalculation'
+        ]);
 
         if ($questions) {
             $config = $questions->getConfig();
-
             $config->addComponent(
                 new GridFieldOrderableRows('SortOrder')
             );
@@ -101,6 +147,23 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
             $pageConfig = $config->getComponentByType(GridFieldPaginator::class);
             $pageConfig->setItemsPerPage(250);
         }
+
+        $fields->insertAfter('Name', $typeField
+            ->setEmptyString('-- Select One --')
+            ->setSource(Utils::pretty_source($this, 'Type'))
+        );
+
+        $fields->insertAfter('Type', $riskField
+            ->setEmptyString('-- Select One --')
+            ->setSource(Utils::pretty_source($this, 'RiskCalculation'))
+            ->setDescription(''
+                . 'Select the most appropriate formula with which to perform'
+                . ' risk calculations.'
+            )
+                ->displayIf('Type')
+                ->isEqualTo('RiskQuestionnaire')
+                ->end()
+        );
 
         return $fields;
     }
@@ -117,7 +180,9 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
             ->addFields([
                 'ID',
                 'Name',
-                'KeyInformation'
+                'KeyInformation',
+                'Type',
+                'RiskCalculation',
             ]);
 
         // Provide relations
@@ -133,6 +198,14 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
             ->end();
 
         return $scaffolder;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isRiskType() : bool
+    {
+        return $this->Type === 'RiskQuestionnaire' && $this->RiskCalculation;
     }
 
     /**
@@ -293,5 +366,23 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     {
         $admin = QuestionnaireAdmin::create();
         return $admin->Link('NZTA-SDLT-Model-Questionnaire/EditForm/field/NZTA-SDLT-Model-Questionnaire/item/' . $this->ID . '/' . $action);
+    }
+
+    /**
+     * @return ValidationResult
+     */
+    public function validate()
+    {
+        $result = parent::validate();
+
+        if (!$this->Name) {
+            $result->addError('Please add a questionnnaire name.');
+        } else if (!$this->Type) {
+            $result->addError('Please select a questionnnaire type.');
+        } else if ($this->Type === 'RiskQuestionnaire' && !$this->RiskCalculation) {
+            $result->addError('Please select a risk-calculation type.');
+        }
+
+        return $result;
     }
 }

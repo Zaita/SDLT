@@ -18,8 +18,7 @@ use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\HasManyList;
-use SilverStripe\Security\Member;
-use SilverStripe\Security\Security;
+use SilverStripe\ORM\ArrayList;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 use SilverStripe\Forms\GridField\GridFieldPaginator;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
@@ -213,7 +212,7 @@ class Question extends DataObject implements ScaffoldingProvider
             $inputFields['IsBusinessOwnerName'] = $answerInputField->IsBusinessOwnerName;
             $inputFields['MultiChoiceAnswer'] = $answerInputField->GQLMultiChoiceAnswer;
             $inputFields['MultiChoiceSingleAnswerDefault'] = $answerInputField->MultiChoiceSingleAnswerDefault;
-            $inputFields['MultiChoiceMultipleAnswerDefault'] = $answerInputField->GQLMultiChoiceMultipleAnswerDefault;
+            $inputFields['MultiChoiceMultipleAnswerDefault'] = $answerInputField->MultiChoiceMultipleAnswerDefault;
             $finalInputFields[] = $inputFields;
         }
 
@@ -249,7 +248,6 @@ class Question extends DataObject implements ScaffoldingProvider
 
         return $finalActionFields;
     }
-
 
     /**
      * Show all potential AnswerAction.Result values in the summary field
