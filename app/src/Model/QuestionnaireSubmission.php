@@ -1315,6 +1315,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             $inputFields['IsBusinessOwner'] = $answerInputField->IsBusinessOwner;
             $inputFields['IsProductName'] = $answerInputField->IsProductName;
             $inputFields['IsBusinessOwnerName'] = $answerInputField->IsBusinessOwnerName;
+            $inputFields['MultiChoiceAnswer'] = $answerInputField->MultiChoiceAnswer;
+            $inputFields['MultiChoiceSingleAnswerDefault'] = $answerInputField->MultiChoiceSingleAnswerDefault;
+            $inputFields['MultiChoiceMultipleAnswerDefault'] = $answerInputField->MultiChoiceMultipleAnswerDefault;
             $finalInputFields[] = $inputFields;
         }
 
