@@ -18,7 +18,6 @@ use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\HasManyList;
-use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 use SilverStripe\Forms\GridField\GridFieldPaginator;
@@ -225,5 +224,63 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
         }
 
         return $questionsData;
+    }
+
+    /**
+     * Deal with pre-write processes.
+     *
+     * @return void
+     */
+    public function onBeforeWrite()
+    {
+        parent::onBeforeWrite();
+
+        $this->audit();
+    }
+
+    /**
+     * Encapsulates all model-specific auditing processes.
+     *
+     * @return void
+     */
+    protected function audit() : void
+    {
+        $user = Security::getCurrentUser();
+        $userData = '';
+
+        if ($user) {
+            $groups = $user->Groups()->column('Title');
+            $userData = implode('. ', [
+                'Email: ' . $user->Email,
+                'Group(s): ' . ($groups ? implode(' : ', $groups) : 'N/A'),
+            ]);
+        }
+
+        // Auditing: CREATE, when:
+        // - User is present AND
+        // - Record is new
+        $doAudit = !$this->exists() && $user;
+
+        if ($doAudit) {
+            $msg = sprintf('"%s" was created', $this->Name);
+            $groups = $user->Groups()->column('Title');
+            $this->auditService->commit('Create', $msg, $this, $userData);
+        }
+
+        // Auditing: CHANGE, when:
+        // - User is present AND
+        // - User is an Administrator
+        // - Record exists
+        $doAudit = (
+            $this->exists() &&
+            $user &&
+            $user->getIsAdmin()
+        );
+
+        if ($doAudit) {
+            $msg = sprintf('"%s" was changed', $this->Name);
+            $groups = $user->Groups()->column('Title');
+            $this->auditService->commit('Change', $msg, $this, $userData);
+        }
     }
 }
