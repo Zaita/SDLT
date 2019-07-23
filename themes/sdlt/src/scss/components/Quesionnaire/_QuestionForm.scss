@@ -56,4 +56,11 @@
     .DarkButton, .LightButton {
         min-width: 84px;
     }
+
+    .radio {
+      position: relative;
+      width: auto;
+      margin: 0 10px 20px 0;
+      top: 3px;
+    }
 }
