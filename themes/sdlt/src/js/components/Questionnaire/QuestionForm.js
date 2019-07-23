@@ -94,10 +94,16 @@ class QuestionForm extends Component<Props> {
     const initialValues = {};
     inputs.forEach((input) => {
       initialValues[input.id] = input.data || "";
+
+      // set radio button default value
+      if (input.type == "radio" && !input.data && input.defaultRadioButtonValue) {
+          initialValues[input.id] = input.defaultRadioButtonValue;
+      }
     });
 
     return <Formik
       initialValues={initialValues}
+
       validate={values => {
         let errors = {};
         inputs.forEach((input: AnswerInput) => {
@@ -107,6 +113,10 @@ class QuestionForm extends Component<Props> {
           // Required
           if (required && !value) {
             errors[id] = `- Please enter a value for ${label}`;
+
+            if (type === "radio" || type === "checkbox") {
+                errors[id] = `- Please select an option for ${label}`;
+            }
             return;
           }
 
@@ -138,7 +148,7 @@ class QuestionForm extends Component<Props> {
         handleFormSubmit(formik, values);
       }}
     >
-      {({isSubmitting, errors, touched, setFieldValue}) => {
+      {({isSubmitting, errors, touched, setFieldValue, values}) => {
         const filteredErrors = [];
         _.keys(errors)
           .filter(key => {
@@ -153,7 +163,16 @@ class QuestionForm extends Component<Props> {
             <table>
               <tbody>
               {inputs.map((input) => {
-                const {id, type, label, placeholder} = {...input};
+                const {
+                  id,
+                  type,
+                  label,
+                  placeholder,
+                  options,
+                  defaultRadioButtonValue,
+                  defaultCheckboxValue
+                } = {...input};
+
                 const hasError = Boolean(_.get(filteredErrors, id, null));
                 const classes = [];
                 if (hasError) {
@@ -168,6 +187,32 @@ class QuestionForm extends Component<Props> {
                         <Field type={type} name={id} className={classes.join(" ")} placeholder={placeholder}/>
                         {hasError && <i className="fas fa-exclamation-circle text-danger ml-1"/>}
                       </td>
+                    </tr>
+                  );
+                }
+
+                if (type === "radio") {
+                  return (
+                    <tr key={id}>
+                        <td className="label"><label>{label}</label></td>
+                        <td>
+                          {options.length &&
+                            options.map((option, index) => {
+                              let checked = _.toString(option.value) === _.toString(values[id]);
+
+                              return (
+                                <div key={index}>
+                                  <span>
+                                    <Field type="radio" name={id} value={option.value} className={"radio"} checked={checked} />
+                                    <label>{option.label}</label>
+                                  </span>
+
+                                </div>
+                              );
+                            })
+                          }
+                        </td>
+                        {hasError && <i className="fas fa-exclamation-circle text-danger ml-1"/>}
                     </tr>
                   );
                 }
@@ -223,6 +268,7 @@ class QuestionForm extends Component<Props> {
                     </tr>
                   );
                 }
+
                 return null;
               })}
               <tr>

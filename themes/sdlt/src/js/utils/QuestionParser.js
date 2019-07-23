@@ -79,12 +79,19 @@ export default class QuestionParser {
         inputs = inputSchemas.map((inputSchema) => {
           // Schema of input
           let type = _.toString(_.get(inputSchema, "InputType", "")).toLowerCase();
-          const validTypes = ["text", "email", "textarea", "date", "url"];
+          if (type === "multiple-choice: single selection") {
+            type = "radio"
+          }
+          if (type === "multiple-choice: multi selection") {
+            type = "Checkbox"
+          }
+          const validTypes = ["text", "email", "textarea", "date", "url", "radio", "Checkbox"];
           if (!validTypes.includes(type)) {
             type = "text";
           }
 
           const inputID = _.toString(_.get(inputSchema, "ID", ""));
+
           const input: AnswerInput = {
             id: inputID,
             label: _.toString(_.get(inputSchema, "Label", "")),
@@ -92,6 +99,9 @@ export default class QuestionParser {
             required: Boolean(_.toInteger(_.get(inputSchema, "Required", false))),
             minLength: Number.parseInt(_.toString(_.get(inputSchema, "MinLength", 0))),
             placeholder: _.toString(_.get(inputSchema, "PlaceHolder", "")),
+            options: JSON.parse(_.get(inputSchema, "MultiChoiceAnswer", "")),
+            defaultRadioButtonValue : _.toString(_.get(inputSchema, "MultiChoiceSingleAnswerDefault", "")),
+            defaultCheckboxValue : JSON.parse(_.get(inputSchema, "MultiChoiceMultipleAnswerDefault", "")),
             data: null,
           };
 
