@@ -28,18 +28,19 @@ use NZTA\SDLT\Traits\SDLTModelPermissions;
 /**
  * Class Question
  *
- * @property string Title
- * @property string Question
- * @property string Description
- * @property string Type
- *
- * @property Questionnaire Questionnaire
- *
- * @method HasManyList AnswerInputFields()
- * @method HasManyList AnswerActionFields()
  */
 class Question extends DataObject implements ScaffoldingProvider
 {
+    /**
+     * @property string Title
+     * @property string Question
+     * @property string Description
+     * @property string Type
+     * @property Questionnaire Questionnaire
+     *
+     * @method HasManyList AnswerInputFields()
+     * @method HasManyList AnswerActionFields()
+     */
     use SDLTModelPermissions;
     /**
      * @var string
@@ -229,7 +230,11 @@ class Question extends DataObject implements ScaffoldingProvider
      */
     public function ShowActionResult()
     {
-        $results = $this->AnswerActionFields()->map('ID', 'Result')->toArray();
+        $results = $this->AnswerActionFields()
+            ->exclude('Result', null)
+            ->map('ID', 'Result')
+            ->toArray();
+
         return implode('; ', $results);
     }
 }
