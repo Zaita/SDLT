@@ -101,8 +101,6 @@ class SummaryContainer extends Component<Props, State> {
       return null;
     }
 
-    console.log(user);
-
     // Decide what the permission of the current user
     let viewAs = "others";
 
