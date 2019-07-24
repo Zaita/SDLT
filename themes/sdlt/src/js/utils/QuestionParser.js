@@ -82,10 +82,10 @@ export default class QuestionParser {
           if (type === "multiple-choice: single selection") {
             type = "radio"
           }
-          if (type === "multiple-choice: multi selection") {
-            type = "Checkbox"
+          if (type === "multiple-choice: multiple selection") {
+            type = "checkbox"
           }
-          const validTypes = ["text", "email", "textarea", "date", "url", "radio", "Checkbox"];
+          const validTypes = ["text", "email", "textarea", "date", "url", "radio", "checkbox"];
           if (!validTypes.includes(type)) {
             type = "text";
           }
@@ -101,7 +101,7 @@ export default class QuestionParser {
             placeholder: _.toString(_.get(inputSchema, "PlaceHolder", "")),
             options: JSON.parse(_.get(inputSchema, "MultiChoiceAnswer", "")),
             defaultRadioButtonValue : _.toString(_.get(inputSchema, "MultiChoiceSingleAnswerDefault", "")),
-            defaultCheckboxValue : JSON.parse(_.get(inputSchema, "MultiChoiceMultipleAnswerDefault", "")),
+            defaultCheckboxValue : _.get(inputSchema, "MultiChoiceMultipleAnswerDefault", ""),
             data: null,
           };
 
