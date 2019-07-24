@@ -60,7 +60,6 @@ class Summary extends Component<Props> {
 
   render() {
     const {submission, viewAs, user} = {...this.props};
-    console.log(submission);
 
     if (!submission) {
       return null;
