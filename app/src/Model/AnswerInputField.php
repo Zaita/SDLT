@@ -21,6 +21,7 @@ use SilverStripe\Security\Security;
 use NZTA\SDLT\Traits\SDLTModelPermissions;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\DropdownField;
 use SilverStripe\ORM\ValidationResult;
 use Symbiote\MultiValueField\ORM\FieldType\MultiValueField;
 use Symbiote\MultiValueField\Fields\KeyValueField;
@@ -58,7 +59,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         'IsProductName' => 'Boolean',
         'IsBusinessOwnerName' => 'Boolean',
         'MultiChoiceAnswer' => MultiValueField::class,
-        'MultiChoiceSingleAnswerDefault' => 'Int',
+        'MultiChoiceSingleAnswerDefault' => 'Varchar(50)',
         'MultiChoiceMultipleAnswerDefault' => MultiValueField::class,
     ];
 
@@ -109,16 +110,13 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         $fields->addFieldsToTab(
             'Root.Main',
             Wrapper::create(FieldList::create([
-                TextField::create(
+                DropdownField::create(
                     'MultiChoiceSingleAnswerDefault',
-                    'Radio Button Default Selection'
+                    'Radio Button Default Selection',
+                    $this->dbObject('MultiChoiceAnswer')->getValues() ?: []
                 )
                     ->setAttribute('style', 'width: 200px;')
-                    ->setDescription(''
-                        . 'The default should be between 1 and the total number of'
-                        . ' available choices. Leave blank or set to zero, for'
-                        . ' no default selection.'
-                    )
+                    ->setDescription('Please select the default value for radio button.')
                     ->hideIf('InputType')
                     ->startsWith('multiple-choice: multiple')
                     ->end(),
