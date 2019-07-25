@@ -107,56 +107,61 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
             'MultiChoiceMultipleAnswerDefault',
         ]);
 
-        $multipleChoiceAnswers = KeyValueField::create(
-            'MultiChoiceAnswer',
-            'Multiple Choice Answers'
-        )
-        ->setDescription(
-            'Each row represents a value (left) and label (right) for a single '
-            . sprintf(' %s.', $this->multiSelectionFieldName())
-            . ' The value can be a maximum of 255 characters.'
-            . ' Default selections can be specified below once values have been'
-            . ' added and the record has been saved.'
-        );
+        $multiChoiceAnswerValues = $this->dbObject('MultiChoiceAnswer')
+            ->getValues();
 
-        $fields->addFieldsToTab('Root.Main', $multipleChoiceAnswers);
-
-        if ($this->dbObject('MultiChoiceAnswer')->getValues())
-        {
-            // Manage multi-value selections
-            $fields->addFieldsToTab(
-                'Root.Main',
-                Wrapper::create(FieldList::create([
-                    DropdownField::create(
-                        'MultiChoiceSingleAnswerDefault',
-                        'Radio Button Default Selection',
-                        $this->dbObject('MultiChoiceAnswer')->getValues() ?: []
+        // Manage multi-value selections
+        $fields->addFieldsToTab(
+            'Root.Main',
+            Wrapper::create(FieldList::create([
+                DropdownField::create(
+                    'MultiChoiceSingleAnswerDefault',
+                    'Radio Button Default Selection',
+                    $multiChoiceAnswerValues ?: []
+                )
+                    ->setEmptyString('(none)')
+                    ->setDescription(''
+                        . "This selection represents which of the related "
+                        . "questions is selected by default. Once values have "
+                        . "been added, a default can be chosen."
                     )
-                        ->setEmptyString('(none)')
-                        ->setAttribute('style', 'width: 200px;')
-                        ->setDescription('Please select the default value for radio button.')
-                        ->hideIf('InputType')
-                        ->startsWith('multiple-choice: multiple')
-                        ->end(),
-                    $checkboxDefaultField = Wrapper::create(MultiValueListField::create(
-                        'MultiChoiceMultipleAnswerDefault',
-                        'Checkbox Default Selections',
-                        $this->dbObject('MultiChoiceAnswer')->getValues() ?: []
-                    )->setDisabled(!$this->exists())
-                    ->setDescription(
-                        'These selections represent which of the related'
-                        . ' question\'s checkboxes are checked by default.'
-                        . ' Once this record is saved, defaults will be able to'
-                        . ' be selected.'
-                    ))->hideUnless('InputType')
+                    ->setDisabled(!$multiChoiceAnswerValues)
+                    ->setAttribute('style', 'width: 200px;')
+                    ->hideIf('InputType')
                     ->startsWith('multiple-choice: multiple')
                     ->end(),
-                ]))->displayIf('InputType')
+                Wrapper::create(MultiValueListField::create(
+                    'MultiChoiceMultipleAnswerDefault',
+                    'Checkbox Default Selections',
+                    $multiChoiceAnswerValues ?: []
+                )
+                    ->setDisabled(!$multiChoiceAnswerValues)
+                    ->setDescription(''
+                        . 'These selections represent which of the related '
+                        . 'question\'s checkboxes are checked by default. '
+                        . 'Once values have been added, defaults can be chosen'
+                    )
+                )
+                    ->hideUnless('InputType')
+                    ->startsWith('multiple-choice: multiple')
+                    ->end(),
+                KeyValueField::create(
+                    'MultiChoiceAnswer',
+                    'Multiple Choice Answers'
+                )
+                ->setDescription(
+                    'Each row represents a value (left) and label (right) for a'
+                    . ' single '
+                    . sprintf(' %s.', $this->multiSelectionFieldName())
+                    . ' The value can be a maximum of 255 characters.'
+                    . ' Default selections can be specified below once values'
+                    . ' have been added and the record has been saved.'
+                )
+            ]))
+                ->displayIf('InputType')
                 ->startsWith('multiple-choice:')
                 ->end()
-            );
-
-        }
+        );
 
         /** @noinspection PhpUndefinedMethodInspection */
         $fields->dataFieldByName('IsBusinessOwner')
