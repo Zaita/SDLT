@@ -110,7 +110,8 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         $multipleChoiceAnswers = KeyValueField::create(
             'MultiChoiceAnswer',
             'Multiple Choice Answers'
-        )->setDescription(
+        )
+        ->setDescription(
             'Each row represents a value (left) and label (right) for a single '
             . sprintf(' %s.', $this->multiSelectionFieldName())
             . ' The value can be a maximum of 255 characters.'
@@ -141,7 +142,8 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
                         'MultiChoiceMultipleAnswerDefault',
                         'Checkbox Default Selections',
                         $this->dbObject('MultiChoiceAnswer')->getValues() ?: []
-                    )->setDescription(
+                    )->setDisabled(!$this->exists())
+                    ->setDescription(
                         'These selections represent which of the related'
                         . ' question\'s checkboxes are checked by default.'
                         . ' Once this record is saved, defaults will be able to'
@@ -153,11 +155,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
                 ->startsWith('multiple-choice:')
                 ->end()
             );
-        }
 
-        // Only show checkbox defaults, when records is saved.
-        if (!$this->exists()) {
-            $checkboxDefaultField->setDisabled(true);
         }
 
         /** @noinspection PhpUndefinedMethodInspection */
