@@ -25,6 +25,8 @@ use SilverStripe\Forms\GridField\GridFieldPaginator;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use NZTA\SDLT\Traits\SDLTModelPermissions;
 use SilverStripe\ORM\DB;
+use SilverStripe\ORM\ArrayList;
+use SilverStripe\View\ArrayData;
 
 /**
  * Class Question
@@ -155,7 +157,7 @@ class Question extends DataObject implements ScaffoldingProvider
     public function onBeforeWrite()
     {
         parent::onBeforeWrite();
-        
+
         if (!$this->ID) {
             $maxSortOrder = DB::query("SELECT MAX(\"SortOrder\") FROM \"Question\"")->value();
             $this->SortOrder = $maxSortOrder + 1;
@@ -259,5 +261,75 @@ class Question extends DataObject implements ScaffoldingProvider
             ->toArray();
 
         return implode('; ', $results);
+    }
+
+    /**
+     * get current object link in model admin
+     *
+     * @return string
+     */
+    public function getLink($action = 'edit')
+    {
+        if ($this->Questionnaire()->exists()) {
+            return $this->Questionnaire()->getLink('ItemEditForm/field/Questions/item/'. $this->ID . '/' . $action);
+        }
+        else {
+            return $this->Task()->getLink('ItemEditForm/field/Questions/item/'. $this->ID . '/' . $action);
+        }
+    }
+
+    /**
+     * getAssociateTaskList
+     *
+     * We must avoid making database queries as much as possible in this method
+     * This is due to an n+1 database query that takes a long time to process
+     * This method executes for every question in the Task::UsedOn tab
+     * @return ArrayList
+     */
+    public function getAssociateTaskList($taskID = '')
+    {
+        $taskList = ArrayList::create();
+
+        //no additional database queries here, we can just check the has_one ID
+        //is not 0 (exists() costs one query)
+        if (!$this->QuestionnaireID && !$this->TaskID) {
+            return $taskList;
+        }
+
+        //by the time we reach this query, we've reduced it to questions known
+        //to have answer action fields with a task associated.
+        $actions = $this->AnswerActionFields();
+
+        foreach ($actions as $action) {
+            if (!$action->TaskID) {
+                continue;
+            }
+
+            //avoid running a database query until we know there's a valid ID
+            if(!empty($taskID) && (int)$action->TaskID !== (int)$taskID) {
+                continue;
+            }
+            //since we have a valid ID and we know it's the task we want,
+            //execute the SQL query to obtain the task
+            $task = $action->Task();
+
+            // questionnaire and task name
+            // we need a database query here to get the questionnaire/task name
+            $name = $this->QuestionnaireID ?
+                $this->Questionnaire()->Name : $this->Task()->Name;
+
+            $usedOn = $this->QuestionnaireID ?
+                "Questionnaire's Question" : "Task's Question";
+
+            $data['Name'] = $name;
+            $data['Link'] = $this->Link;
+            $data['TaskID'] = $task->ID;
+            $data['Question'] = $this->Title;
+            $data['UsedOn'] = $usedOn;
+
+            $taskList->push(ArrayData::create($data));
+        }
+
+        return $taskList;
     }
 }
