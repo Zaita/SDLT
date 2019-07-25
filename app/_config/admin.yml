@@ -1,0 +1,7 @@
+---
+Name: sdlteadminconfig
+---
+
+SilverStripe\Admin\LeftAndMain:
+  extra_requirements_css:
+    - app/css/admin.css

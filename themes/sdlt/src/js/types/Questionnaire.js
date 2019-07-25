@@ -8,11 +8,14 @@ import type {TaskSubmissionDisplay} from "./Task";
 export type AnswerInput = {
   id: string,
   label: string,
-  type: string, //"text" | "email" | "textarea" | "date",
+  type: string, //"text" | "email" | "textarea" | "date" | "radio" | "checkbox",
   required: boolean,
   minLength: number,
   placeholder: string,
-  data: string | null
+  data: string | null,
+  options: Array<{'value': string, 'label': string}>,
+  defaultRadioButtonValue: string,
+  defaultCheckboxValue: Array<any>
 }
 
 export type AnswerAction = {

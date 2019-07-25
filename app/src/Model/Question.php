@@ -178,50 +178,58 @@ class Question extends DataObject implements ScaffoldingProvider
     }
 
     /**
+     * @param DataObject $question question
      *
-     * @return array
+     * @return array $finalInputFields
      */
     public function getAnswerInputFieldsData()
     {
-        $inputFieldsData = [];
+        $finalInputFields = [];
 
         foreach ($this->AnswerInputFields() as $answerInputField) {
-            $inputFieldData['ID'] = $answerInputField->ID;
-            $inputFieldData['Label'] = $answerInputField->Label;
-            $inputFieldData['InputType'] = $answerInputField->InputType;
-            $inputFieldData['Required'] = $answerInputField->Required;
-            $inputFieldData['MinLength'] = $answerInputField->MinLength;
-            $inputFieldData['PlaceHolder'] = $answerInputField->PlaceHolder;
-            $inputFieldData['IsProductOwner'] = $answerInputField->IsProductOwner;
-            $inputFieldsData[] = $inputFieldData;
+            $inputFields['ID'] = $answerInputField->ID;
+            $inputFields['Label'] = $answerInputField->Label;
+            $inputFields['InputType'] = $answerInputField->InputType;
+            $inputFields['Required'] = $answerInputField->Required;
+            $inputFields['MinLength'] = $answerInputField->MinLength;
+            $inputFields['PlaceHolder'] = $answerInputField->PlaceHolder;
+            $inputFields['IsBusinessOwner'] = $answerInputField->IsBusinessOwner;
+            $inputFields['IsProductName'] = $answerInputField->IsProductName;
+            $inputFields['IsBusinessOwnerName'] = $answerInputField->IsBusinessOwnerName;
+            $inputFields['MultiChoiceAnswer'] = $answerInputField->GQLMultiChoiceAnswer;
+            $inputFields['MultiChoiceSingleAnswerDefault'] = $answerInputField->MultiChoiceSingleAnswerDefault;
+            $inputFields['MultiChoiceMultipleAnswerDefault'] = $answerInputField->GQLMultiChoiceMultipleAnswerDefault;
+            $finalInputFields[] = $inputFields;
         }
 
-        return $inputFieldsData;
+        return $finalInputFields;
     }
 
     /**
+     * @param DataObject $question question
      *
-     * @return array
+     * @return array $finalActionFields
      */
     public function getAnswerActionFieldsData()
     {
-        $actionFieldsData = [];
+        $finalActionFields = [];
 
         foreach ($this->AnswerActionFields() as $answerActionField) {
-            $actionFieldData['ID'] = $answerActionField->ID;
-            $actionFieldData['Label'] = $answerActionField->Label;
-            $actionFieldData['ActionType'] = $answerActionField->ActionType;
-            $actionFieldData['Message'] = $answerActionField->Message;
-            $actionFieldData['GotoID'] = $answerActionField->GotoID;
-            $actionFieldData['QuestionID'] = $answerActionField->QuestionID;
-            $actionFieldData['TaskID'] = $answerActionField->TaskID;
+            $actionFields['ID'] = $answerActionField->ID;
+            $actionFields['Label'] = $answerActionField->Label;
+            $actionFields['ActionType'] = $answerActionField->ActionType;
+            $actionFields['Message'] = $answerActionField->Message;
+            $actionFields['GotoID'] = $answerActionField->Goto()->ID;
+            $actionFields['QuestionID'] = $answerActionField->Question()->ID;
+            $actionFields['TaskID'] = $answerActionField->Task()->ID;
             $actionFieldData['Result'] = $answerActionField->Result;
             $actionFieldData['IsApprovalForTaskRequired'] = $answerActionField->IsApprovalForTaskRequired;
-            $actionFieldsData[] = $actionFieldData;
+            $finalActionFields[] = $actionFields;
         }
 
-        return $actionFieldsData;
+        return $finalActionFields;
     }
+
 
     /**
      * Show all potential AnswerAction.Result values in the summary field
