@@ -107,35 +107,39 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
             'MultiChoiceMultipleAnswerDefault',
         ]);
 
+        $multiChoiceAnswerValues = $this->dbObject('MultiChoiceAnswer')
+            ->getValues();
+
         // Manage multi-value selections
         $fields->addFieldsToTab(
             'Root.Main',
             Wrapper::create(FieldList::create([
-                TextField::create(
+                DropdownField::create(
                     'MultiChoiceSingleAnswerDefault',
-                    'Radio Button Default Selection'
+                    'Radio Button Default Selection',
+                    $multiChoiceAnswerValues ?: []
                 )
-                    ->setAttribute('style', 'width: 200px;')
+                    ->setEmptyString('(none)')
                     ->setDescription(''
-                        . 'The default should be between 1 and the total number of'
-                        . ' available choices. Leave blank or set to zero, for'
-                        . ' no default selection.'
+                        . "This selection represents which of the related "
+                        . "questions is selected by default. Once values have "
+                        . "been added, a default can be chosen."
                     )
-                    ->setDisabled(!$this->exists())
+                    ->setDisabled(!$multiChoiceAnswerValues)
+                    ->setAttribute('style', 'width: 200px;')
                     ->hideIf('InputType')
                     ->startsWith('multiple-choice: multiple')
                     ->end(),
                 Wrapper::create(MultiValueListField::create(
                     'MultiChoiceMultipleAnswerDefault',
                     'Checkbox Default Selections',
-                    $this->dbObject('MultiChoiceAnswer')->getValues() ?: []
+                    $multiChoiceAnswerValues ?: []
                 )
-                    ->setDisabled(!$this->exists())
+                    ->setDisabled(!$multiChoiceAnswerValues)
                     ->setDescription(''
-                        . 'These selections represent which of the related'
-                        . ' question\'s checkboxes are checked by default.'
-                        . ' Once this record is saved, defaults will be able to'
-                        . ' be selected.'
+                        . 'These selections represent which of the related '
+                        . 'question\'s checkboxes are checked by default. '
+                        . 'Once values have been added, defaults can be chosen'
                     )
                 )
                     ->hideUnless('InputType')
@@ -145,10 +149,14 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
                     'MultiChoiceAnswer',
                     'Multiple Choice Answers'
                 )
-                    ->setDescription(''
-                        . 'Each row represents a value and label for a single'
-                        . sprintf(' %s.', $this->multiSelectionFieldName())
-                    )
+                ->setDescription(
+                    'Each row represents a value (left) and label (right) for a'
+                    . ' single '
+                    . sprintf(' %s.', $this->multiSelectionFieldName())
+                    . ' The value can be a maximum of 255 characters.'
+                    . ' Default selections can be specified below once values'
+                    . ' have been added and the record has been saved.'
+                )
             ]))
                 ->displayIf('InputType')
                 ->startsWith('multiple-choice:')
