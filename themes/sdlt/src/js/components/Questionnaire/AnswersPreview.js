@@ -57,14 +57,40 @@ class AnswersPreview extends Component<Props> {
     if (question.type === "input" && question.inputs && Array.isArray(question.inputs) && question.inputs.length > 0) {
       const renderInputData = (input: AnswerInput) => {
         let data: string = input.data || "";
-        // Format data
+
+        // Format date
         if (input.type === "date") {
           data = moment(data).format("DD-MM-YYYY");
         }
+
         // Format textarea
         if (input.type === "textarea") {
           data = "\n" + data;
         }
+
+        // Format radio button data: replace value with label
+        if (input.type === "radio" && data) {
+          const option = input.options.find((option => {
+            return option.value === data
+          }));
+          if (option) {
+            data = option.label;
+          }
+        }
+
+        // Format checkbox data: replace value with label
+        if (input.type === "checkbox" && data && data !== "[]") {
+          const selectedOptions = JSON.parse(data);
+
+          const dataArr = input.options.filter((option) => {
+            return selectedOptions.includes(option.value);
+          }).map((option) => {
+            return option.label;
+          })
+
+          data = JSON.stringify(dataArr);
+        }
+
         return data;
       };
 

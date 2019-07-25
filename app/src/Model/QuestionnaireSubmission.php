@@ -564,13 +564,15 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $model->UserID = $member->ID;
                     $model->IsStartLinkEmailSent = 0;
                     $model->IsEmailSentToSecurityArchitect = 0;
+
                     $uuid = Uuid::uuid4();
                     $model->UUID = (string) $uuid;
+
                     $model->ApprovalOverrideBySecurityArchitect = $model->isApprovalOverriddenBy();
 
                     $model->ApprovalLinkToken = hash('sha3-256', random_bytes(64));
 
-                    $model->QuestionnaireData = $model->getQuestionsData($questionnaire);
+                    $model->QuestionnaireData = json_encode($questionnaire->getQuestionsData());
 
                     $model->write();
 
@@ -1270,78 +1272,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             $status = ($this->$approvalFieldName === 'approved') ? 'Approve' : 'Deny';
             $this->auditService->commit($status, $msg, $this, $userData);
         }
-    }
-
-    /**
-     * @param DataObject $questionnaire questionnaire
-     *
-     * @return string $finalData
-     */
-    public function getQuestionsData($questionnaire)
-    {
-        $questions = $questionnaire->Questions();
-        $finalData = [];
-
-        foreach ($questions as $question) {
-            $data['ID'] = $question->ID;
-            $data['Title'] = $question->Title;
-            $data['Question'] = $question->Question;
-            $data['Description'] = $question->Description;
-            $data['AnswerFieldType'] = $question->AnswerFieldType;
-            $data['AnswerInputFields'] = $this->getAnswerInputFields($question);
-            $data['AnswerActionFields'] = $this->getAnswerActionFields($question);
-            $finalData[] = $data;
-        }
-
-        return json_encode($finalData, JSON_UNESCAPED_SLASHES);
-    }
-
-    /**
-     * @param DataObject $question question
-     *
-     * @return array $finalInputFields
-     */
-    public function getAnswerInputFields($question)
-    {
-        $finalInputFields = [];
-
-        foreach ($question->AnswerInputFields() as $answerInputField) {
-            $inputFields['ID'] = $answerInputField->ID;
-            $inputFields['Label'] = $answerInputField->Label;
-            $inputFields['InputType'] = $answerInputField->InputType;
-            $inputFields['Required'] = $answerInputField->Required;
-            $inputFields['MinLength'] = $answerInputField->MinLength;
-            $inputFields['PlaceHolder'] = $answerInputField->PlaceHolder;
-            $inputFields['IsBusinessOwner'] = $answerInputField->IsBusinessOwner;
-            $inputFields['IsProductName'] = $answerInputField->IsProductName;
-            $inputFields['IsBusinessOwnerName'] = $answerInputField->IsBusinessOwnerName;
-            $finalInputFields[] = $inputFields;
-        }
-
-        return $finalInputFields;
-    }
-
-    /**
-     * @param DataObject $question question
-     *
-     * @return array $finalActionFields
-     */
-    public function getAnswerActionFields($question)
-    {
-        $finalActionFields = [];
-
-        foreach ($question->AnswerActionFields() as $answerActionField) {
-            $actionFields['ID'] = $answerActionField->ID;
-            $actionFields['Label'] = $answerActionField->Label;
-            $actionFields['ActionType'] = $answerActionField->ActionType;
-            $actionFields['Message'] = $answerActionField->Message;
-            $actionFields['GotoID'] = $answerActionField->Goto()->ID;
-            $actionFields['QuestionID'] = $answerActionField->Question()->ID;
-            $actionFields['TaskID'] = $answerActionField->Task()->ID;
-            $finalActionFields[] = $actionFields;
-        }
-
-        return $finalActionFields;
     }
 
     /**
