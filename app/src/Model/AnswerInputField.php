@@ -59,7 +59,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         'IsProductName' => 'Boolean',
         'IsBusinessOwnerName' => 'Boolean',
         'MultiChoiceAnswer' => MultiValueField::class,
-        'MultiChoiceSingleAnswerDefault' => 'Varchar(50)',
+        'MultiChoiceSingleAnswerDefault' => 'Varchar(255)',
         'MultiChoiceMultipleAnswerDefault' => MultiValueField::class,
     ];
 
@@ -144,6 +144,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
                         . 'Each row represents a value (left) and label (right)'
                         . ' for a single '
                         . sprintf(' %s.', $this->multiSelectionFieldName())
+                        . '. The value can be a maximum of 255 characters.'
                     )
             ]))
                 ->displayIf('InputType')
