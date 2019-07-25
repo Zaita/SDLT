@@ -115,12 +115,13 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
                     'Radio Button Default Selection',
                     $this->dbObject('MultiChoiceAnswer')->getValues() ?: []
                 )
+                    ->setEmptyString('(none)')
                     ->setAttribute('style', 'width: 200px;')
                     ->setDescription('Please select the default value for radio button.')
                     ->hideIf('InputType')
                     ->startsWith('multiple-choice: multiple')
                     ->end(),
-                $checkbxDefaultField = Wrapper::create(MultiValueListField::create(
+                $checkboxDefaultField = Wrapper::create(MultiValueListField::create(
                         'MultiChoiceMultipleAnswerDefault',
                         'Checkbox Default Selections',
                         $this->dbObject('MultiChoiceAnswer')->getValues() ?: []
@@ -140,7 +141,8 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
                     'Multiple Choice Answers'
                 )
                     ->setDescription(''
-                        . 'Each row represents a value and label for a single'
+                        . 'Each row represents a value (left) and label (right)'
+                        . ' for a single '
                         . sprintf(' %s.', $this->multiSelectionFieldName())
                     )
             ]))
@@ -151,7 +153,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
 
         // Only show checkbox defaults, when records is saved.
         if (!$this->exists()) {
-            $checkbxDefaultField->setDisabled(true);
+            $checkboxDefaultField->setDisabled(true);
         }
 
         /** @noinspection PhpUndefinedMethodInspection */
