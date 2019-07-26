@@ -24,10 +24,10 @@ use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 use SilverStripe\Forms\GridField\GridFieldPaginator;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use NZTA\SDLT\Traits\SDLTModelPermissions;
+use SilverStripe\ORM\DB;
 
 /**
  * Class Question
- *
  */
 class Question extends DataObject implements ScaffoldingProvider
 {
@@ -145,6 +145,21 @@ class Question extends DataObject implements ScaffoldingProvider
         }
 
         return $fields;
+    }
+
+    /**
+     * Deal with pre-write processes.
+     *
+     * @return void
+     */
+    public function onBeforeWrite()
+    {
+        parent::onBeforeWrite();
+        
+        if (!$this->ID) {
+            $maxSortOrder = DB::query("SELECT MAX(\"SortOrder\") FROM \"Question\"")->value();
+            $this->SortOrder = $maxSortOrder + 1;
+        }
     }
 
     /**
