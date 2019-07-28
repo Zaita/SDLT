@@ -28,8 +28,6 @@ use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use NZTA\SDLT\Traits\SDLTModelPermissions;
 use SilverStripe\Security\Permission;
-use SilverStripe\ORM\ArrayList;
-use SilverStripe\View\ArrayData;
 use NZTA\SDLT\ModelAdmin\QuestionnaireAdmin;
 /**
  * Class Questionnaire
@@ -287,30 +285,26 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * @return ArrayList
+     * @param int $taskID Task ID
+     * @return Array
      */
     public function getAssociateTaskList($taskID = '')
     {
-        $taskList = ArrayList::create();
-
-        $tasks = $this->Tasks();
-
-        if (!$tasks->exists()) {
-            return $taskList;
-        }
+        $taskList = [];
 
         if (!empty($taskID)) {
-            $tasks = $tasks->filter('ID', $taskID);
-        }
+            $tasks = $this->Tasks()->filter('ID', $taskID);
 
-        // get questionnaire level task
-        foreach ($tasks as $task) {
-            $data['Name'] = $this->Name;
-            $data['Link'] = $this->Link;
-            $data['TaskID'] = $task->ID;
-            $data['Question'] = '';
-            $data['UsedOn'] = 'Questionnaire Level';
-            $taskList->push(ArrayData::create($data));
+            // get questionnaire level task
+            foreach ($tasks as $task) {
+                $data['Name'] = $this->Name;
+                $data['Link'] = $this->Link;
+                $data['TaskID'] = $task->ID;
+                $data['Question'] = '';
+                $data['UsedOn'] = 'Questionnaire Level';
+
+                $taskList[] = $data;
+            }
         }
 
         return $taskList;
