@@ -36,6 +36,7 @@ use SilverStripe\Forms\GridField\GridFieldDataColumns;
 use NZTA\SDLT\Form\GridField\GridFieldCustomEditAction;
 use NZTA\SDLT\ModelAdmin\QuestionnaireAdmin;
 use SilverStripe\Forms\LiteralField;
+use SilverStripe\View\ArrayData;
 
 /**
  * Class Task
@@ -384,16 +385,9 @@ class Task extends DataObject implements ScaffoldingProvider
         $questionnaires = Questionnaire::get();
 
         foreach($questionnaires as $questionnaire) {
-            //@todo: check if this impacts other Tasks
-            // $data = $questionnaire->getAssociateTaskList($this->ID);
-            // foreach ($data as $item) {
-            //     $finaldata->push($item);
-            // }
-
-            foreach($questionnaire->Tasks()->filter('ID', $this->ID) as $item) {
-                if($item->ID) {
-                    $finaldata->push($item);
-                }
+            $data = $questionnaire->getAssociateTaskList($this->ID);
+            foreach ($data as $item) {
+                $finaldata->push(ArrayData::create($item));
             }
         }
 
@@ -408,10 +402,9 @@ class Task extends DataObject implements ScaffoldingProvider
         foreach ($questions as $question) {
             $data = $question->getAssociateTaskList($this->ID);
             foreach ($data as $item) {
-                $finaldata->push($item);
+                $finaldata->push(ArrayData::create($item));
             }
         }
-
 
         return $finaldata;
     }

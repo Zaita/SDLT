@@ -25,8 +25,6 @@ use SilverStripe\Forms\GridField\GridFieldPaginator;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use NZTA\SDLT\Traits\SDLTModelPermissions;
 use SilverStripe\ORM\DB;
-use SilverStripe\ORM\ArrayList;
-use SilverStripe\View\ArrayData;
 
 /**
  * Class Question
@@ -284,11 +282,13 @@ class Question extends DataObject implements ScaffoldingProvider
      * We must avoid making database queries as much as possible in this method
      * This is due to an n+1 database query that takes a long time to process
      * This method executes for every question in the Task::UsedOn tab
-     * @return ArrayList
+     * @param int $taskID Task ID
+     *
+     * @return Array
      */
     public function getAssociateTaskList($taskID = '')
     {
-        $taskList = ArrayList::create();
+        $taskList = [];
 
         //no additional database queries here, we can just check the has_one ID
         //is not 0 (exists() costs one query)
@@ -327,7 +327,7 @@ class Question extends DataObject implements ScaffoldingProvider
             $data['Question'] = $this->Title;
             $data['UsedOn'] = $usedOn;
 
-            $taskList->push(ArrayData::create($data));
+            $taskList[] = $data;
         }
 
         return $taskList;
