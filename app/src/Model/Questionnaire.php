@@ -28,7 +28,7 @@ use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use NZTA\SDLT\Traits\SDLTModelPermissions;
 use SilverStripe\Security\Permission;
-
+use NZTA\SDLT\ModelAdmin\QuestionnaireAdmin;
 /**
  * Class Questionnaire
  *
@@ -282,5 +282,42 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
             $groups = $user->Groups()->column('Title');
             $this->auditService->commit('Change', $msg, $this, $userData);
         }
+    }
+
+    /**
+     * @param int $taskID Task ID
+     * @return Array
+     */
+    public function getAssociateTaskList($taskID = '')
+    {
+        $taskList = [];
+
+        if (!empty($taskID)) {
+            $tasks = $this->Tasks()->filter('ID', $taskID);
+
+            // get questionnaire level task
+            foreach ($tasks as $task) {
+                $data['Name'] = $this->Name;
+                $data['Link'] = $this->Link;
+                $data['TaskID'] = $task->ID;
+                $data['Question'] = '';
+                $data['UsedOn'] = 'Questionnaire Level';
+
+                $taskList[] = $data;
+            }
+        }
+
+        return $taskList;
+    }
+
+    /**
+     * get current object link in model admin
+     *
+     * @return string
+     */
+    public function getLink($action = 'edit')
+    {
+        $admin = QuestionnaireAdmin::create();
+        return $admin->Link('NZTA-SDLT-Model-Questionnaire/EditForm/field/NZTA-SDLT-Model-Questionnaire/item/' . $this->ID . '/' . $action);
     }
 }

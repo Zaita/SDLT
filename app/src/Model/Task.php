@@ -28,6 +28,15 @@ use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use SilverStripe\Forms\GridField\GridFieldPaginator;
 use NZTA\SDLT\Traits\SDLTModelPermissions;
+use SilverStripe\ORM\ArrayList;
+use SilverStripe\Forms\GridField\GridFieldConfig_Base;
+use SilverStripe\Forms\GridField\GridField_ActionMenu;
+use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Forms\GridField\GridFieldDataColumns;
+use NZTA\SDLT\Form\GridField\GridFieldCustomEditAction;
+use NZTA\SDLT\ModelAdmin\QuestionnaireAdmin;
+use SilverStripe\Forms\LiteralField;
+use SilverStripe\View\ArrayData;
 
 /**
  * Class Task
@@ -43,6 +52,7 @@ use NZTA\SDLT\Traits\SDLTModelPermissions;
 class Task extends DataObject implements ScaffoldingProvider
 {
     use SDLTModelPermissions;
+
     /**
      * @var string
      */
@@ -83,6 +93,25 @@ class Task extends DataObject implements ScaffoldingProvider
     ];
 
     /**
+     * @var array
+     */
+    private static $summary_fields = [
+        'Name',
+        'TaskType',
+        'DisplayOnHomePage.Nice' => 'Display On Home Page',
+        'LockAnswersWhenComplete.Nice' => 'Lock Answers When Complete',
+        'IsApprovalRequired.Nice' => 'Is Approval Required'
+    ];
+
+    /**
+     * @var array
+     */
+    private static $searchable_fields = [
+        'Name',
+        'TaskType'
+    ];
+
+    /**
      * CMS Fields
      * @return FieldList
      */
@@ -90,34 +119,90 @@ class Task extends DataObject implements ScaffoldingProvider
     {
         $fields = parent::getCMSFields();
 
-        /* @var GridField $questions */
-        $questions = $fields->dataFieldByName('Questions');
+        $fields->removeByName('Root.Questionnaires');
 
-        if ($questions) {
-            $config = $questions->getConfig();
-            $config->addComponent(
-                new GridFieldOrderableRows('SortOrder')
-            );
-            $config->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
-            $config->getComponentByType(GridFieldPaginator::class)
-                ->setItemsPerPage(250);
-        }
-
+        // if task type is selection, then please hide Questions tab
         if ($this->TaskType === 'selection') {
             $fields->removeByName('Questions');
+        } else {
+            /* @var GridField $questions */
+            $questions = $fields->dataFieldByName('Questions');
+
+            if ($questions) {
+                $config = $questions->getConfig();
+                $config
+                    ->addComponent(new GridFieldOrderableRows('SortOrder'))
+                    ->removeComponentsByType(GridFieldAddExistingAutocompleter::class)
+                    ->getComponentByType(GridFieldPaginator::class)
+                    ->setItemsPerPage(250);
+            }
         }
 
+        // create approval tab
         $fields->addFieldsToTab(
-            'Root.Approval',
+            'Root.TaskApproval',
             [
-                $fields->dataFieldByName('IsApprovalRequired'),
-                $fields->dataFieldByName('ApprovalGroupID'),
+                $fields
+                    ->dataFieldByName('IsApprovalRequired')
+                    ->setTitle('Always require approval'),
+                $fields
+                    ->dataFieldByName('ApprovalGroupID')
+                    ->setDescription('Please select the task approval group.'),
             ]
         );
 
-        $fields->dataFieldByName('IsApprovalRequired')->setTitle('Always require approval');
+        if ($this->getUsedOnData()->count()) {
+          $fields->addFieldToTab(
+              'Root.UsedOn',
+              $this->getUsedOnGridField()
+          );
+        } else {
+            $fields->addFieldToTab(
+                'Root.UsedOn',
+                LiteralField::create(
+                    "UsedOn",
+                    "<p class=\"alert alert-info\">Sorry, no data to display.</p>"
+                )
+            );
+        }
 
         return $fields;
+    }
+
+    /**
+     * Get used on grid field
+     *
+     * @return GridField
+     */
+    public function getUsedOnGridField()
+    {
+        // used on grid field
+        $config = GridFieldConfig_Base::create();
+
+        // add custom edit button
+        $config
+            ->addComponent(new GridField_ActionMenu())
+            ->addComponent(new GridFieldCustomEditAction());
+
+        // here we are using ArrayList to display the grid data
+        // that's why we have to set DisplayFields otherwise we will get error
+        // error :- the method 'summaryFields' does not exist on 'SilverStripe\View\ArrayData'
+        $dataColumns = $config->getComponentByType(GridFieldDataColumns::class);
+
+        $dataColumns->setDisplayFields(array(
+          'Name' => 'Questionnaire / Task Name',
+          'Question' => 'Question Title',
+          'UsedOn'=> 'Used On'
+        ));
+
+        $usedOnGridfield = GridField::create(
+            "UsedOn",
+            "Used On",
+            $this->getUsedOnData(),
+            $config
+        );
+
+        return $usedOnGridfield;
     }
 
     /**
@@ -285,5 +370,53 @@ class Task extends DataObject implements ScaffoldingProvider
         }
 
         return $result;
+    }
+
+    /**
+     * return Array List
+     *
+     * @return ValidationResult
+     */
+    public function getUsedOnData()
+    {
+        $finaldata = ArrayList::create();
+
+        // get questionnaire list
+        $questionnaires = Questionnaire::get();
+
+        foreach($questionnaires as $questionnaire) {
+            $data = $questionnaire->getAssociateTaskList($this->ID);
+            foreach ($data as $item) {
+                $finaldata->push(ArrayData::create($item));
+            }
+        }
+
+        // get question list
+        // only questions with AnswerFieldType = action have a task
+        // exclude questions where AnswerActionFields.TaskID = 0
+        // TaskID instead of Task.ID is used to avoid an additional DB join
+        $questions = Question::get()
+            ->filter('AnswerFieldType', 'action')
+            ->exclude('AnswerActionFields.TaskID', 0);
+
+        foreach ($questions as $question) {
+            $data = $question->getAssociateTaskList($this->ID);
+            foreach ($data as $item) {
+                $finaldata->push(ArrayData::create($item));
+            }
+        }
+
+        return $finaldata;
+    }
+
+    /**
+     * get current object link in model admin
+     *
+     * @return string
+     */
+    public function getLink($action = 'edit')
+    {
+        $admin = QuestionnaireAdmin::create();
+        return $admin->Link('NZTA-SDLT-Model-Task/EditForm/field/NZTA-SDLT-Model-Task/item/' . $this->ID . '/' . $action);
     }
 }
