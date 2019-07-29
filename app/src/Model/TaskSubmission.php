@@ -1146,7 +1146,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
             foreach ($questionnaireDataObj as $obj) {
                 if ($obj->AnswerFieldType == 'action') {
-                    foreach ($obj->AnswerActionFields as $answerActionField) {
+                    $fields = $obj->AnswerActionFields();
+                    foreach ($fields as $answerActionField) {
                         if ($answerActionField->IsApprovalForTaskRequired) {
                               $actionIdsforApproval[] = $answerActionField->ID;
                         }
