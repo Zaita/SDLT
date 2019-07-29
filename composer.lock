@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b7a12e57a3627fcadd64f6456183e368",
+    "content-hash": "44d7ebb9f5b20d008ae81528236a080c",
     "packages": [
         {
             "name": "asyncphp/doorman",
@@ -1259,6 +1259,59 @@
             "time": "2019-01-03T20:59:08+00:00"
         },
         {
+            "name": "phptek/sentry",
+            "version": "2.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/phptek/silverstripe-sentry.git",
+                "reference": "e0f3bbaf7a6269c298facb2b77bca1a340c8961a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/phptek/silverstripe-sentry/zipball/e0f3bbaf7a6269c298facb2b77bca1a340c8961a",
+                "reference": "e0f3bbaf7a6269c298facb2b77bca1a340c8961a",
+                "shasum": ""
+            },
+            "require": {
+                "monolog/monolog": "^1.24.0",
+                "php": ">=5.6|<=7.2",
+                "sentry/sentry": "^1.9",
+                "silverstripe/framework": "^4"
+            },
+            "replace": {
+                "silverstripe/sentry": "*"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^5.7"
+            },
+            "type": "silverstripe-vendormodule",
+            "extra": {
+                "installer-name": "sentry"
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Russell Michell",
+                    "homepage": "http://theruss.com/"
+                }
+            ],
+            "description": "Sentry.io integration for SilverStripe. Binds Sentry.io to SilverStripe's error & exception handling subsystem.",
+            "keywords": [
+                "error",
+                "exception",
+                "log",
+                "logging",
+                "logs",
+                "raven",
+                "sentry",
+                "silverstripe"
+            ],
+            "time": "2018-11-06T01:52:07+00:00"
+        },
+        {
             "name": "psr/cache",
             "version": "1.0.1",
             "source": {
@@ -1619,6 +1672,70 @@
                 "uuid"
             ],
             "time": "2018-07-19T23:38:55+00:00"
+        },
+        {
+            "name": "sentry/sentry",
+            "version": "1.10.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/getsentry/sentry-php.git",
+                "reference": "b2b8ffe1560b9fb0110b02993594a4b04a511959"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/getsentry/sentry-php/zipball/b2b8ffe1560b9fb0110b02993594a4b04a511959",
+                "reference": "b2b8ffe1560b9fb0110b02993594a4b04a511959",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "php": "^5.3|^7.0"
+            },
+            "conflict": {
+                "raven/raven": "*"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^1.8.0",
+                "monolog/monolog": "*",
+                "phpunit/phpunit": "^4.8.35 || ^5.7"
+            },
+            "suggest": {
+                "ext-hash": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "monolog/monolog": "Automatically capture Monolog events as breadcrumbs"
+            },
+            "bin": [
+                "bin/sentry"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.10.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Raven_": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "David Cramer",
+                    "email": "dcramer@gmail.com"
+                }
+            ],
+            "description": "A PHP client for Sentry (http://getsentry.com)",
+            "homepage": "http://getsentry.com",
+            "keywords": [
+                "log",
+                "logging"
+            ],
+            "time": "2018-11-09T12:27:19+00:00"
         },
         {
             "name": "silverstripe/admin",
