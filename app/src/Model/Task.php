@@ -119,8 +119,6 @@ class Task extends DataObject implements ScaffoldingProvider
     {
         $fields = parent::getCMSFields();
 
-        $fields->removeByName('Root.Questionnaires');
-
         // if task type is selection, then please hide Questions tab
         if ($this->TaskType === 'selection') {
             $fields->removeByName('Questions');
@@ -165,6 +163,8 @@ class Task extends DataObject implements ScaffoldingProvider
                 )
             );
         }
+
+        $fields->removeByName('Questionnaires');
 
         return $fields;
     }
