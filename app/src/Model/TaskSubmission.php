@@ -1156,7 +1156,17 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 if ($obj->AnswerFieldType == 'action') {
                     $fields = $obj->AnswerActionFields();
                     foreach ($fields as $answerActionField) {
-                        if ($answerActionField->IsApprovalForTaskRequired) {
+                        //skip if this AAF is falsey for any reason
+                        if (!$answerActionField) {
+                            continue;
+                        }
+
+                        $approvalForTaskRequired = false;
+                        if (isset($answerActionField->IsApprovalForTaskRequired)) {
+                            $approvalForTaskRequired = (bool) $answerActionField->IsApprovalForTaskRequired;
+                        }
+
+                        if ($approvalForTaskRequired) {
                               $actionIdsforApproval[] = $answerActionField->ID;
                         }
                     }
