@@ -226,6 +226,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
         $fields->dataFieldByName('IsApprovalRequired')->setTitle('Always require approval');
 
+        $fields->removeByName('QuestionnaireSubmissionID');
         return $fields;
     }
 
@@ -878,9 +879,16 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             }
 
             // SA and CISO can view it
-            $isSA = $member->Groups()->filter('Code', UserGroupConstant::GROUP_CODE_SA)->exists();
-            $isCISO = $member->Groups()->filter('Code', UserGroupConstant::GROUP_CODE_CISO)->exists();
+            $isSA = $member->getIsSA();
+            $isCISO = $member->getIsCISO();
             if ($isSA || $isCISO) {
+                return true;
+            }
+
+            // check for task approval group
+            $isTaskApprover = $member->Groups()->filter('Code', $taskSubmission->ApprovalGroup()->Code)->exists();
+
+            if($isTaskApprover) {
                 return true;
             }
         }
