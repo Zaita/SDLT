@@ -1154,8 +1154,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
             foreach ($questionnaireDataObj as $obj) {
                 if ($obj->AnswerFieldType == 'action') {
-                    $fields = $obj->AnswerActionFields();
-                    foreach ($fields as $answerActionField) {
+                    foreach ($obj->AnswerActionFields as $answerActionField) {
                         //skip if this AAF is falsey for any reason
                         if (!$answerActionField) {
                             continue;
