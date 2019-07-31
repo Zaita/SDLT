@@ -347,6 +347,20 @@ export function loadAwaitingApprovalList(): ThunkAction {
   };
 }
 
+export function loadMyProductList(): ThunkAction {
+  return async (dispatch: any, getState: () => RootState) => {
+    const user = getState().currentUserState.user;
+    if (!user) {
+      return;
+    }
+    const data = await QuestionnaireDataService.fetchQuestionnaireSubmissionList(user.id, 'my_product_list');
+    dispatch({
+      type: ActionType.QUESTIONNAIRE.FETCH_MY_PRODUCT_LIST,
+      payload: data
+    });
+  };
+}
+
 // Commons
 async function batchUpdateSubmissionData(rootState: RootState, indexesToUpdate: Array<number>) {
   const submission = rootState.questionnaireState.submissionState.submission;

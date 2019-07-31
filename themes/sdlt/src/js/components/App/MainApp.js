@@ -13,6 +13,7 @@ import ComponentSelectionStandaloneContainer from "../ComponentSelection/Compone
 import ComponentSelectionContainer from "../ComponentSelection/ComponentSelectionContainer";
 import MySubmissionList from "../QuestionnaireSubmissionList/MySubmissionList";
 import AwaitingApprovalList from "../QuestionnaireSubmissionList/AwaitingApprovalList";
+import MyProductList from "../QuestionnaireSubmissionList/MyProductList";
 
 class MainApp extends Component<*> {
 
@@ -108,6 +109,15 @@ class MainApp extends Component<*> {
                 return (
                   <div className="gray-bg">
                     <AwaitingApprovalList/>
+                  </div>
+                );
+              }}
+            </Route>
+            <Route path='/MyProducts'>
+              {({match}) => {
+                return (
+                  <div className="gray-bg">
+                    <MyProductList/>
                   </div>
                 );
               }}
