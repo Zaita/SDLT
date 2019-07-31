@@ -1,6 +1,6 @@
 // @flow
 import React, {Component} from "react";
-import Icon from "../../../img/icons/question-editing.svg";
+import Icon from "../../../img/icons/my-product.svg";
 
 class MyProductButton extends Component<Props> {
 
