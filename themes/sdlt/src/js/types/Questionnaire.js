@@ -90,7 +90,7 @@ export type SubmissionQuestionData = {
   actions?: Array<SubmissionActionData>
 };
 
-export type MyQuestionnaireItem = {
+export type QuestionnaireSubmissionListItem = {
   id: string,
   uuid: string,
   questionnaireName: string,
@@ -98,5 +98,7 @@ export type MyQuestionnaireItem = {
   productName: string,
   status: string,
   startLink: string,
-  summaryPageLink: string
+  summaryPageLink: string,
+  businessOwner: string,
+  submitterName: string,
 };

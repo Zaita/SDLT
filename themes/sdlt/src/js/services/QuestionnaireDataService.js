@@ -367,15 +367,21 @@ mutation {
     return {uuid};
   }
 
-  static async fetchUserSubmissionList(userID: string): Promise<Array<MyQuestionnaireItem>> {
+  // load data for Awaiting Approvals
+  static async fetchQuestionnaireSubmissionList(userID: string, pageType: string): Promise<Array<MyQuestionnaireItem>> {
     const query = `query {
-      readQuestionnaireSubmission(UserID: "${userID}") {
+      readQuestionnaireSubmission(UserID: "${userID}", PageType: "${pageType}") {
         ID
         UUID
         QuestionnaireStatus
         QuestionnaireName
         Created
         ProductName
+        BusinessOwnerApproverName
+        SubmitterName
+        SecurityArchitectApprover {
+          ID
+        }
       }
     }`;
 
@@ -395,6 +401,9 @@ mutation {
       obj['productName'] = _.get(item, 'ProductName', '');
       obj['questionnaireName'] = _.get(item, 'QuestionnaireName', '');
       obj['created'] = _.get(item, 'Created', '');
+      obj['businessOwner'] = _.get(item, 'BusinessOwnerApproverName', '');
+      obj['submitterName'] = _.get(item, 'SubmitterName', '');
+      obj['SecurityArchitectApproverID'] = _.get(item, 'SecurityArchitectApprover.ID', '');
       return obj;
     });
   }
