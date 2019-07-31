@@ -39,6 +39,7 @@ use NZTA\SDLT\Validation\QuestionnaireValidation;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Control\Controller;
+use SilverStripe\Forms\TextField;
 
 /**
  * Class Questionnaire
@@ -147,6 +148,29 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     ->setValue('Please click on
                         <a href="'. $this->getSummaryPageLink() .'">this link</a>
                         to download answers in the PDF.')
+            ]
+        );
+
+        $fields->addFieldsToTab(
+            'Root.Links',
+            [
+                TextField::create(
+                    'SecureLink',
+                    'Secure link'
+                )
+                    ->setValue($this->getSummaryPageLink())
+                    ->setReadonly(true)
+                    ->setDescription('This is the link emailed to authenticated'
+                        .' users of the application'),
+                TextField::create(
+                    'AnonymousLink',
+                    'Anonymous access link'
+                )
+                      ->setValue($this->getApprovalPageLink())
+                      ->setReadonly(true)
+                      ->setDescription('This is the link emailed to anonymous users'
+                        .' of the application. Anyone possessing the link can view'
+                        .' the submission')
             ]
         );
 
