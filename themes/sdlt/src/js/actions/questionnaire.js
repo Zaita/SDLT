@@ -325,9 +325,23 @@ export function loadMySubmissionList(): ThunkAction {
     if (!user) {
       return;
     }
-    const data = await QuestionnaireDataService.fetchUserSubmissionList(user.id);
+    const data = await QuestionnaireDataService.fetchQuestionnaireSubmissionList(user.id, 'my_submission_list');
     dispatch({
       type: ActionType.QUESTIONNAIRE.FETCH_MY_SUBMISSION_LIST,
+      payload: data
+    });
+  };
+}
+
+export function loadAwaitingApprovalList(): ThunkAction {
+  return async (dispatch: any, getState: () => RootState) => {
+    const user = getState().currentUserState.user;
+    if (!user) {
+      return;
+    }
+    const data = await QuestionnaireDataService.fetchQuestionnaireSubmissionList(user.id, 'awaiting_approval_list');
+    dispatch({
+      type: ActionType.QUESTIONNAIRE.FETCH_AWAITING_APPROVAL_LIST,
       payload: data
     });
   };

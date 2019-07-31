@@ -11,8 +11,8 @@ import TaskSubmissionContainer from "../Task/TaskSubmissionContainer";
 import TaskStandaloneContainer from "../Task/TaskStandaloneContainer";
 import ComponentSelectionStandaloneContainer from "../ComponentSelection/ComponentSelectionStandaloneContainer";
 import ComponentSelectionContainer from "../ComponentSelection/ComponentSelectionContainer";
-import MySubmissionList from "../MySubmission/MySubmissionList";
-
+import MySubmissionList from "../QuestionnaireSubmissionList/MySubmissionList";
+import AwaitingApprovalList from "../QuestionnaireSubmissionList/AwaitingApprovalList";
 
 class MainApp extends Component<*> {
 
@@ -99,6 +99,15 @@ class MainApp extends Component<*> {
                 return (
                   <div className="gray-bg">
                     <MySubmissionList/>
+                  </div>
+                );
+              }}
+            </Route>
+            <Route path='/AwaitingApprovals'>
+              {({match}) => {
+                return (
+                  <div className="gray-bg">
+                    <AwaitingApprovalList/>
                   </div>
                 );
               }}
