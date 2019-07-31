@@ -2,7 +2,6 @@
 import React, {Component} from "react";
 import Icon from "../../../img/icons/question-editing.svg";
 
-
 class MySubmissionButton extends Component<Props> {
 
   static defaultProps = {
@@ -13,7 +12,7 @@ class MySubmissionButton extends Component<Props> {
     const {classes} = {...this.props};
 
     return (
-      <button className={`LogoutButton ${classes.join(" ")}`}
+      <button className={`HeaderButton ${classes.join(" ")}`}
         onClick={() => {
           this.allSubmission();
         }}
@@ -25,7 +24,6 @@ class MySubmissionButton extends Component<Props> {
       </button>
     );
   }
-
 
   async allSubmission() {
     window.location.href = `#/MySubmissions`;

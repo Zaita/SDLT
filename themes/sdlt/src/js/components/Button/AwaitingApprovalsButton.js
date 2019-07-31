@@ -2,7 +2,6 @@
 import React, {Component} from "react";
 import Icon from "../../../img/icons/approval.svg";
 
-
 class AwaitingApprovalsButton extends Component<Props> {
 
   static defaultProps = {
@@ -13,7 +12,7 @@ class AwaitingApprovalsButton extends Component<Props> {
     const {classes} = {...this.props};
 
     return (
-      <button className={`LogoutButton ${classes.join(" ")}`}
+      <button className={`HeaderButton ${classes.join(" ")}`}
         onClick={() => {
           this.awaitingApprovals();
         }}
@@ -25,7 +24,6 @@ class AwaitingApprovalsButton extends Component<Props> {
       </button>
     );
   }
-
 
   async awaitingApprovals() {
     window.location.href = `#/AwaitingApprovals`;
