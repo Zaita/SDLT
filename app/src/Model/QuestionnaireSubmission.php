@@ -441,6 +441,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ->addArg('UserID', 'String')
             ->addArg('SecureToken', 'String')
             ->addArg('IsBusinessOwnerSummaryPage', 'String')
+            ->addArg('PageType', 'String')
             ->setUsePagination(false)
             ->setResolver(new class implements ResolverInterface {
 
@@ -462,6 +463,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $userID = isset($args['UserID']) ? htmlentities(trim($args['UserID'])) : null;
                     $secureToken = isset($args['SecureToken']) ? Convert::raw2sql(trim($args['SecureToken'])) : null;
                     $isBusinessOwnerSummaryPage= isset($args['IsBusinessOwnerSummaryPage']) ? Convert::raw2sql(trim($args['IsBusinessOwnerSummaryPage'])) : '0';
+                    $pageType= isset($args['PageType']) ? Convert::raw2sql(trim($args['PageType'])) : '';
 
                     // To continue the data fetching, user has to be logged-in or has secure token
                     if (!$member && !$secureToken) {
@@ -470,7 +472,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     // Check argument
                     if (!$uuid && !$userID) {
-                        throw new Exception('Sorry, wrong UUID or user Id.');
+                        throw new Exception('Sorry, there is no UUID or user Id.');
                     }
 
                     if (!empty($userID) && $member->ID != $userID) {
@@ -484,12 +486,59 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     // Filter data by UUID
                     // The questionnaire can be read by other users
                     /* @var $data QuestionnaireSubmission */
-                    $data = null;
+                    $data = [];
                     if ($uuid) {
                         $data = QuestionnaireSubmission::get()->filter(['UUID' => $uuid])->first();
                     }
 
-                    if ($userID) {
+                    if ($userID && $pageType == 'awaiting_approval_list') {
+
+                        if ($member->getIsSA() && $member->getIsCISO()) {
+                            $status = [
+                              'awaiting_security_architect_review',
+                              'waiting_for_security_architect_approval',
+                              'waiting_for_approval'
+                            ];
+
+                            $data = QuestionnaireSubmission::get()->filter([
+                                'QuestionnaireStatus' => $status
+                            ])->filterAny([
+                                'SecurityArchitectApprovalStatus' => "pending",
+                                'CisoApprovalStatus' => "pending"
+                            ]);
+
+                            // @todo : We might need below commented code for story:-
+                            // Do not allow  an SA or CISO who has already approved
+                            // a submission to also approve it as a business owner
+                            // https://redmine.catalyst.net.nz/issues/64290
+                            // all three approvals should come from distinct people
+                            // ->exclude([
+                            //     'QuestionnaireStatus' => 'waiting_for_approval',
+                            //     'SecurityArchitectApproverID' => $userID
+                            // ]);
+                        } else if ($member->getIsSA()) {
+                            $data = QuestionnaireSubmission::get()->filter([
+                                'QuestionnaireStatus' => ['awaiting_security_architect_review', 'waiting_for_security_architect_approval'],
+                                'SecurityArchitectApprovalStatus' => "pending"
+                            ]);
+                        } else if ($member->getIsCISO()) {
+                            $data = QuestionnaireSubmission::get()->filter([
+                                'QuestionnaireStatus' => 'waiting_for_approval',
+                                'CisoApprovalStatus' => "pending"
+                            ]);
+                        } else {
+                            // @todo : We might need to change this logic in future for Story:-
+                            // Change behaviour of Business Owner approval Token
+                            // https://redmine.catalyst.net.nz/issues/66788
+                            $data = QuestionnaireSubmission::get()->filter([
+                                'QuestionnaireStatus' => 'waiting_for_approval',
+                                'BusinessOwnerApprovalStatus' => "pending",
+                                'BusinessOwnerEmailAddress' =>$member->Email
+                            ]);
+                        }
+                    }
+
+                    if ($userID && $pageType == 'my_submission_list') {
                         $data = QuestionnaireSubmission::get()->filter(['UserID' => $userID]);
                     }
 
