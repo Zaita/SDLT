@@ -6,7 +6,10 @@ import type {TaskSubmissionState} from "./TaskSubmissionState";
 import type {SiteConfigState} from "./SiteConfigState";
 import type {CurrentUserState} from "./CurrentUserState";
 import type {ComponentSelectionState} from "./ComponentSelectionState";
-import type {MySubmissionListState} from "./MySubmissionListState";
+import type {
+  MySubmissionListState,
+  QuestionnaireSubmissionListState
+} from "./QuestionnaireSubmissionListState";
 
 export type RootState = {
   homeState: HomeState,
@@ -15,5 +18,6 @@ export type RootState = {
   siteConfigState: SiteConfigState,
   currentUserState: CurrentUserState,
   componentSelectionState: ComponentSelectionState,
-  mySubmissionListState: MySubmissionListState
+  mySubmissionListState: MySubmissionListState,
+  questionnaireSubmissionListState: QuestionnaireSubmissionListState
 }

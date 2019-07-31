@@ -8,7 +8,7 @@ import {taskSubmissionState} from "./taskSubmissionState";
 import {currentUserState} from "./currentUserState";
 import {siteConfigState} from "./siteConfigState";
 import {componentSelectionState} from "./componentSelectionState";
-import {mySubmissionListState} from "./mySubmissionListState"
+import {questionnaireSubmissionListState} from "./questionnaireSubmissionListState"
 
 export default combineReducers<RootState>({
   homeState,
@@ -17,5 +17,5 @@ export default combineReducers<RootState>({
   currentUserState,
   siteConfigState,
   componentSelectionState,
-  mySubmissionListState
+  questionnaireSubmissionListState
 });
