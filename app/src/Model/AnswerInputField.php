@@ -154,7 +154,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
                     . ' single '
                     . sprintf(' %s.', $this->multiSelectionFieldName())
                     . ' The value can be a maximum of 255 characters.'
-                    . ' Default selections can be specified below once values'
+                    . ' Default selections can be specified once values'
                     . ' have been added and the record has been saved.'
                 )
             ]))
