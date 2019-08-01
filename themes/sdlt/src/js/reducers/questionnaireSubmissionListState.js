@@ -3,7 +3,8 @@ import ActionType from "../actions/ActionType";
 
 const initalState: QuestionnaireSubmissionListState = {
   awaitingApprovalList: [],
-  mySubmissionList: []
+  mySubmissionList: [],
+  myProductList: [],
 }
 
 export function questionnaireSubmissionListState(state: QuestionnaireSubmissionListState = initalState, action: any): QuestionnaireSubmissionListState {
@@ -18,6 +19,13 @@ export function questionnaireSubmissionListState(state: QuestionnaireSubmissionL
     return {
       ...state,
       mySubmissionList: action.payload
+    };
+  }
+
+  if (action.type === ActionType.QUESTIONNAIRE.FETCH_MY_PRODUCT_LIST) {
+    return {
+      ...state,
+      myProductList: action.payload
     };
   }
 
