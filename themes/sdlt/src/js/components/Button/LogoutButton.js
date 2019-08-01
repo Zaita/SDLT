@@ -18,7 +18,7 @@ class LogoutButton extends Component<Props> {
     const {classes} = {...this.props};
 
     return (
-      <button className={`LogoutButton ${classes.join(" ")}`}
+      <button className={`HeaderButton ${classes.join(" ")}`}
         onClick={() => {
           this.logout();
         }}
@@ -30,7 +30,6 @@ class LogoutButton extends Component<Props> {
       </button>
     );
   }
-
 
   async logout() {
     const csrfToken = await CSRFTokenService.getCSRFToken();

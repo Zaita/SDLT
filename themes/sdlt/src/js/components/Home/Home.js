@@ -8,6 +8,7 @@ import type {HomeState} from "../../store/HomeState";
 import LogoutButton from "../Button/LogoutButton";
 import MySubmissionButton from "../Button/MySubmissionButton";
 import AwaitingApprovalsButton from "../Button/AwaitingApprovalsButton";
+import MyProductButton from "../Button/MyProductButton";
 import type {Task} from "../../types/Task";
 
 type Props = {
@@ -21,12 +22,12 @@ class Home extends Component<Props> {
 
     return (
       <div className="Home">
-        <LogoutButton classes={["clearfix","float-right", "mt-5", "mr-5"]}/>
+        <LogoutButton classes={["clearfix","float-right", "mt-5", "mr-4"]}/>
 
         <MySubmissionButton classes={["clearfix","float-right", "mt-5", "mr-1"]}/>
 
         <AwaitingApprovalsButton classes={["clearfix","float-right", "mt-5", "mr-1"]}/>
-
+        <MyProductButton classes={["clearfix","float-right", "mt-5", "mr-1"]}/>
         <div className="layout">
           <a href="/"><img src={LogoImage} className="logo"/></a>
           <h1>

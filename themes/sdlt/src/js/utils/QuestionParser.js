@@ -99,9 +99,9 @@ export default class QuestionParser {
             required: Boolean(_.toInteger(_.get(inputSchema, "Required", false))),
             minLength: Number.parseInt(_.toString(_.get(inputSchema, "MinLength", 0))),
             placeholder: _.toString(_.get(inputSchema, "PlaceHolder", "")),
-            options: JSON.parse(_.get(inputSchema, "MultiChoiceAnswer", "")),
-            defaultRadioButtonValue : _.toString(_.get(inputSchema, "MultiChoiceSingleAnswerDefault", "")),
-            defaultCheckboxValue : _.get(inputSchema, "MultiChoiceMultipleAnswerDefault", ""),
+            options: _.has(inputSchema, 'MultiChoiceAnswer') ? JSON.parse(_.get(inputSchema, "MultiChoiceAnswer", "")) : "",
+            defaultRadioButtonValue: _.has(inputSchema, 'MultiChoiceSingleAnswerDefault') ? _.toString(_.get(inputSchema, "MultiChoiceSingleAnswerDefault", "")) : "",
+            defaultCheckboxValue: _.has(inputSchema, 'MultiChoiceMultipleAnswerDefault') ? _.get(inputSchema, "MultiChoiceMultipleAnswerDefault", "") : "",
             data: null,
           };
 
@@ -119,6 +119,9 @@ export default class QuestionParser {
           return input;
         });
       }
+
+
+
 
       if (actionSchemas && Array.isArray(actionSchemas) && actionSchemas.length > 0) {
         actions = actionSchemas.map((actionSchema) => {

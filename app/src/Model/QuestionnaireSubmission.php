@@ -538,8 +538,16 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         }
                     }
 
+                    // data for my sumission list
                     if ($userID && $pageType == 'my_submission_list') {
                         $data = QuestionnaireSubmission::get()->filter(['UserID' => $userID]);
+                    }
+
+                    // data for my product list
+                    if ($userID && $pageType == 'my_product_list') {
+                        $data = QuestionnaireSubmission::get()->filter([
+                            'BusinessOwnerEmailAddress' => $member->Email
+                        ]);
                     }
 
                     // If the user is not logged-in and the secure token is not valid, throw error
