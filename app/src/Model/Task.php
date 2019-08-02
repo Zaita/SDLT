@@ -355,6 +355,22 @@ class Task extends DataObject implements ScaffoldingProvider
             $msg = sprintf('"%s" (Standalone Task) was created', $this->Name);
             $this->auditService->commit('Create', $msg, $this, $userData);
         }
+
+        // Auditing: CHANGE, when:
+        // - User is present AND
+        // - User is an Administrator
+        // - Record exists
+        $doAudit = (
+            $this->exists() &&
+            $user &&
+            $user->getIsAdmin()
+        );
+
+        if ($doAudit) {
+            $msg = sprintf('"%s" was changed', $this->Name);
+            $groups = $user->Groups()->column('Title');
+            $this->auditService->commit('Change', $msg, $this, $userData);
+        }
     }
 
     /**
