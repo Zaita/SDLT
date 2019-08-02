@@ -497,7 +497,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                             $status = [
                               'awaiting_security_architect_review',
                               'waiting_for_security_architect_approval',
-                              'waiting_for_approval'
+                              'waiting_for_approval',
+                              'approved',
+                              'pending'
                             ];
 
                             $data = QuestionnaireSubmission::get()->filter([
@@ -523,7 +525,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                             ]);
                         } else if ($member->getIsCISO()) {
                             $data = QuestionnaireSubmission::get()->filter([
-                                'QuestionnaireStatus' => 'waiting_for_approval',
+                                'QuestionnaireStatus' => ['waiting_for_approval', 'approved', 'pending'],
                                 'CisoApprovalStatus' => "pending"
                             ]);
                         } else {
