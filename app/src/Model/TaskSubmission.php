@@ -207,7 +207,6 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 ->setDescription(null);
         }
 
-
         $secureLink = $this->SecureLink();
         $anonLink = $this->AnonymousAccessLink();
         $fields->addFieldsToTab('Root.Links', [
@@ -225,6 +224,12 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         ]);
 
         $fields->dataFieldByName('IsApprovalRequired')->setTitle('Always require approval');
+
+        $taskApproverList = $this->ApprovalGroup()->Members()->map('ID', 'Name');
+        $fields->dataFieldByName('TaskApproverID')->setSource($taskApproverList);
+
+        $SubmitterList = Member::get()->map('ID', 'Name');
+        $fields->dataFieldByName('SubmitterID')->setSource($SubmitterList);
 
         $fields->removeByName('QuestionnaireSubmissionID');
         return $fields;
@@ -989,6 +994,71 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         if (!$this->SecureToken) {
             $this->SecureToken = hash('sha3-256', random_bytes(64));
         }
+
+        $this->audit();
+    }
+
+    /**
+     * Encapsulates all model-specific auditing processes.
+     *
+     * @return void
+     */
+    protected function audit() : void
+    {
+        $user = Security::getCurrentUser();
+
+        $userData = '';
+
+        if ($user) {
+            $groups = $user->Groups()->column('Title');
+            $userData = implode('. ', [
+                'Email: ' . $user->Email,
+                'Group(s): ' . ($groups ? implode(' : ', $groups) : 'N/A'),
+            ]);
+        }
+
+        // audit log: for a task submission
+        $doAudit = !$this->exists() && $user;
+        if ($doAudit) {
+            $msg = sprintf('"%s" was submitted. (UUID: %s)', $this->Task()->Name, $this->UUID);
+            $this->auditService->commit('Submit', $msg, $this, $userData);
+        }
+
+        // audit log: when task status changed back to in_progress
+        $doAudit = $this->exists() && $user;
+        $changed = $this->getChangedFields(['Status'], 1);
+
+        if ($doAudit && array_key_exists('Status', $changed) &&
+            $changed['Status']['before'] !== 'in_progress' &&
+            $changed['Status']['after'] == 'in_progress') {
+
+              $msg = sprintf(
+                  '"%s" had its status changed from "%s" to "%s". (UUID: %s)',
+                  $this->Task()->Name,
+                  $changed['Status']['before'],
+                  $changed['Status']['after'],
+                  $this->UUID
+              );
+
+              $this->auditService->commit('Change', $msg, $this, $userData);
+        }
+
+        // audit log: for task submission approval by approval group member
+        $hasAccess = $user && $user->Groups()->filter('Code', $this->ApprovalGroup()->Code)->exists();
+        $doAudit = $this->exists() && $hasAccess;
+        if ($doAudit && array_key_exists('Status', $changed) &&
+            in_array($changed['Status']['after'], ['approved', 'denied'])) {
+              $msg = sprintf(
+                  '"%s" was %s. (UUID: %s)',
+                  $this->Task()->Name,
+                  $changed['Status']['after'],
+                  $this->UUID
+              );
+
+              $status = ($changed['Status']['after'] === 'approved') ? 'Approve' : 'Deny';
+              $this->auditService->commit($status, $msg, $this, $userData);
+        }
+
     }
 
     /**
@@ -1006,6 +1076,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         if ($this->Task()->TaskType == 'selection') {
             return "#/component-selection/submission/{$this->UUID}";
         }
+
         return '#/task/submission/' . $this->UUID;
     }
 

@@ -54,6 +54,11 @@ class AuditEvent extends DataObject
     private static $table_name = 'AuditEvent';
 
     /**
+     * @var string
+     */
+    private static $default_sort = 'Created DESC';
+
+    /**
      * @return FieldList
      */
     public function getCMSFields()
