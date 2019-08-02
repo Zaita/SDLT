@@ -64,7 +64,6 @@ const list = (myProductList: QuestionnaireSubmissionListItem) => {
             <tr key="submission_table_header">
               <th className="text-center">Date Created</th>
               <th className="text-center">Product Name</th>
-              <th className="text-center">Business Owner</th>
               <th className="text-center">Submitter</th>
               <th className="text-center">Status</th>
               <th className="text-center">Actions</th>
@@ -81,9 +80,6 @@ const list = (myProductList: QuestionnaireSubmissionListItem) => {
                   </td>
                   <td>
                     {myProduct.productName}
-                  </td>
-                  <td>
-                    {myProduct.businessOwner}
                   </td>
                   <td>
                     {myProduct.submitterName}
