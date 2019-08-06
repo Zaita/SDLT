@@ -64,7 +64,8 @@ class TaskSubmission extends Component<Props> {
       <LightButton title={"EDIT ANSWERS"} onClick={editAnswers} iconImage={editIcon}/>
     ) : null;
 
-    const result = taskSubmission.result && taskSubmission.status === "complete" ? (
+    const resultStatus = ["complete", "waiting_for_approval", "approved", "denied"];
+    const result = taskSubmission.result && (resultStatus.indexOf(taskSubmission.status) > -1) ? (
       <div className="result">
         <h3>Result:</h3>
         <div>{taskSubmission.result}</div>
