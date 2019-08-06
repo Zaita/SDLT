@@ -354,6 +354,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     public static function create_task_submission($taskID, $questionnaireSubmissionID, $submitterID)
     {
         $task = Task::get_by_id($taskID);
+
         if (!$task || !$task->exists()) {
             throw new Exception('Task does not exist');
         }
@@ -584,6 +585,13 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     if (isset($args['Result'])) {
                         $submission->Result = trim($args['Result']);
                     }
+
+                    // create tasks for task submission
+                    Question::create_task_submissions_according_to_answers (
+                        $submission->QuestionnaireData,
+                        $submission->AnswerData,
+                        $submission->QuestionnaireSubmissionID
+                    );
 
                     $submission->write();
 

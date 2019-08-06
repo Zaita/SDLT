@@ -65,9 +65,8 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
      * @var array
      */
     private static $has_one = [
-        'Task' => Task::class,
-        'Goto' => Question::class,
-        'Question' => Question::class
+        'Goto' => Question::class, // if action type goto select
+        'Question' => Question::class // question has many actions
     ];
 
     /**
@@ -77,7 +76,14 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
         'Label',
         'ActionType',
         'ActionDescription',
-        'Task.Name' => 'Create Task'
+        'TaskNames' => 'Tasks'
+    ];
+
+    /**
+     * @var array
+     */
+    private static $many_many = [
+        'Tasks' => Task::class,
     ];
 
     /**
@@ -99,6 +105,7 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
     {
         $fields = parent::getCMSFields();
 
+        //remove has_one relationship field:QuestionID and SortOrder
         $fields->removeByName(['QuestionID', 'SortOrder']);
 
         //Questions are used on both Task and Questionnaire: we don't know which
@@ -111,19 +118,21 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
             $this->Question()->Questionnaire()->Questions()->map()->toArray();
 
         /* @var $taskField DropdownField */
-        $taskField = $fields->dataFieldByName('TaskID');
-        $taskField
-            ->setTitle('Create Task')
-            ->setEmptyString('-- No task will be created --')
-            ->setDescription('If the user choose this action, the associated task will be created');
+        // $taskField = $fields->dataFieldByName('TaskID');
+        // $taskField
+        //     ->setTitle('Create Task')
+        //     ->setEmptyString('-- No task will be created --')
+        //     ->setDescription('If the user choose this action, the associated task will be created');
 
         $fields
             ->dataFieldByName('Result')
             ->setDescription('The result will be used only if Questionnaire type is a task.');
 
-        $fields->addFieldToTab(
+        $fields->addFieldsToTab(
             'Root.Main',
-            DropdownField::create('GotoID', 'Go to', $questionList)
+            [
+                DropdownField::create('GotoID', 'Go to', $questionList),
+            ]
         );
 
         /** @noinspection PhpUndefinedMethodInspection */
@@ -156,7 +165,6 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
                 'Label',
                 'ActionType',
                 'Message',
-                'Task',
                 'Goto',
             ]);
 
@@ -198,5 +206,10 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
         }
 
         return $result;
+    }
+
+    public function getTaskNames()
+    {
+        return $this->Tasks() ? implode(", ", $this->Tasks()->column('Name')) : '';
     }
 }

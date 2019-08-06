@@ -164,6 +164,7 @@ export default class SubmissionDataUtil {
         // Mark complete if this is the last question
         returnPackage.complete = true;
       }
+
       return returnPackage;
     }
 
