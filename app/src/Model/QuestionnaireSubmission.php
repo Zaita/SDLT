@@ -90,6 +90,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'ApprovalLinkToken' => 'Varchar(64)',
         'ProductName' => 'Varchar(255)',
         'ApprovalOverrideBySecurityArchitect' => 'Boolean',
+        'QuestionnaireLevelTaskIDs' => 'Varchar(255)',
     ];
 
     /**
@@ -178,7 +179,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             'Root.QuestionnaireAnswerData',
             [
                 $fields->dataFieldByName('QuestionnaireData'),
-                $fields->dataFieldByName('AnswerData')
+                $fields->dataFieldByName('AnswerData'),
+                $fields->dataFieldByName('QuestionnaireLevelTaskIDs')
             ]
         );
 
@@ -643,10 +645,12 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $model->SecurityArchitectApprovalStatus = 'pending';
 
                     $model->QuestionnaireID = $questionnaire->ID;
-
                     $model->UserID = $member->ID;
                     $model->IsStartLinkEmailSent = 0;
                     $model->IsEmailSentToSecurityArchitect = 0;
+
+                    $model->QuestionnaireLevelTaskIDs = $questionnaire->tasks()->Count() ?
+                        json_encode($questionnaire->Tasks()->column('ID')): '';
 
                     $uuid = Uuid::uuid4();
                     $model->UUID = (string) $uuid;
@@ -658,8 +662,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $model->QuestionnaireData = json_encode($questionnaire->getQuestionsData());
 
                     $model->write();
-
-                    $model->createTasks($questionnaire);
 
                     return $model;
                 }
@@ -867,6 +869,13 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     }
 
                     $questionnaireSubmission->write();
+
+                    Question::create_task_submissions_according_to_answers(
+                        $questionnaireSubmission->QuestionnaireData,
+                        $questionnaireSubmission->AnswerData,
+                        $questionnaireSubmission->ID,
+                        $questionnaireSubmission->QuestionnaireLevelTaskIDs
+                    );
 
                     return $questionnaireSubmission;
                 }

@@ -285,32 +285,6 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * @param int $taskID Task ID
-     * @return Array
-     */
-    public function getAssociateTaskList($taskID = '')
-    {
-        $taskList = [];
-
-        if (!empty($taskID)) {
-            $tasks = $this->Tasks()->filter('ID', $taskID);
-
-            // get questionnaire level task
-            foreach ($tasks as $task) {
-                $data['Name'] = $this->Name;
-                $data['Link'] = $this->Link;
-                $data['TaskID'] = $task->ID;
-                $data['Question'] = '';
-                $data['UsedOn'] = 'Questionnaire Level';
-
-                $taskList[] = $data;
-            }
-        }
-
-        return $taskList;
-    }
-
-    /**
      * get current object link in model admin
      *
      * @return string

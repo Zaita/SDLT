@@ -89,7 +89,8 @@ class Task extends DataObject implements ScaffoldingProvider
      * @var array
      */
     private static $belongs_many_many = [
-        'Questionnaires' => Questionnaire::class
+        'Questionnaires' => Questionnaire::class,
+        'AnswerActionFields' => AnswerActionField::class
     ];
 
     /**
@@ -149,7 +150,7 @@ class Task extends DataObject implements ScaffoldingProvider
             ]
         );
 
-        if ($this->getUsedOnData()->count()) {
+        if ($this->getUsedOnData()->Count()) {
           $fields->addFieldToTab(
               'Root.UsedOn',
               $this->getUsedOnGridField()
@@ -164,7 +165,7 @@ class Task extends DataObject implements ScaffoldingProvider
             );
         }
 
-        $fields->removeByName('Questionnaires');
+        $fields->removeByName(['Questionnaires', 'AnswerActionFields']);
 
         return $fields;
     }
@@ -382,28 +383,33 @@ class Task extends DataObject implements ScaffoldingProvider
         $finaldata = ArrayList::create();
 
         // get questionnaire list
-        $questionnaires = Questionnaire::get();
+        $questionnaires = $this->Questionnaires();
+        foreach ($questionnaires as $questionnaire) {
+            $data['Name'] = $questionnaire->Name;
+            $data['Link'] = $questionnaire->getLink();
+            $data['Question'] = '';
+            $data['UsedOn'] = 'Questionnaire Level';
 
-        foreach($questionnaires as $questionnaire) {
-            $data = $questionnaire->getAssociateTaskList($this->ID);
-            foreach ($data as $item) {
-                $finaldata->push(ArrayData::create($item));
-            }
+            $finaldata->push(ArrayData::create($data));
         }
 
         // get question list
-        // only questions with AnswerFieldType = action have a task
-        // exclude questions where AnswerActionFields.TaskID = 0
-        // TaskID instead of Task.ID is used to avoid an additional DB join
-        $questions = Question::get()
-            ->filter('AnswerFieldType', 'action')
-            ->exclude('AnswerActionFields.TaskID', 0);
+        $actions = $this->AnswerActionFields();
+        foreach ($actions as $action) {
+            $question = $action->Question();
 
-        foreach ($questions as $question) {
-            $data = $question->getAssociateTaskList($this->ID);
-            foreach ($data as $item) {
-                $finaldata->push(ArrayData::create($item));
-            }
+            $name = $question->QuestionnaireID ?
+                $question->Questionnaire()->Name : $question->Task()->Name;
+
+            $usedOn = $question->QuestionnaireID ?
+                "Questionnaire's Question" : "Task's Question";
+
+            $data['Name'] = $name;
+            $data['Link'] = $question->getLink();
+            $data['Question'] = $usedOn;
+            $data['UsedOn'] = 'Questionnaire Level';
+
+            $finaldata->push(ArrayData::create($data));
         }
 
         return $finaldata;
