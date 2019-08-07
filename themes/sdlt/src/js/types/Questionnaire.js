@@ -66,7 +66,8 @@ export type Submission = {
     Surname: string,
   },
   taskSubmissions: Array<TaskSubmissionDisplay>,
-  isApprovalOverrideBySecurityArchitect: boolean
+  isApprovalOverrideBySecurityArchitect: boolean,
+  productName: string
 };
 
 // Submission Data

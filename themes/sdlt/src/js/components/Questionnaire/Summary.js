@@ -92,6 +92,7 @@ class Summary extends Component<Props> {
     return (
       <div className="request-info">
         <h3>Request Information</h3>
+        <div><b>Product Name:</b> {submission.productName} </div>
         <div><b>Submitted by:</b> {submitter.name}</div>
         <div><b>Email:</b> {submitter.email}</div>
         <div><b>Status:</b> {prettifyStatus(submission.status)}</div>
