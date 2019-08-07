@@ -37,7 +37,6 @@ use NZTA\SDLT\Traits\SDLTModelPermissions;
  * @property Question Goto
  * @property Question Question
  *
- * @method Task Task()
  * @method Question Goto()
  * @method Question Question()
  */
@@ -116,13 +115,6 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
             $this->Question()->Task()->Questions()->map()->toArray()
             +
             $this->Question()->Questionnaire()->Questions()->map()->toArray();
-
-        /* @var $taskField DropdownField */
-        // $taskField = $fields->dataFieldByName('TaskID');
-        // $taskField
-        //     ->setTitle('Create Task')
-        //     ->setEmptyString('-- No task will be created --')
-        //     ->setDescription('If the user choose this action, the associated task will be created');
 
         $fields
             ->dataFieldByName('Result')
