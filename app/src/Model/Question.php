@@ -236,7 +236,6 @@ class Question extends DataObject implements ScaffoldingProvider
             $actionFields['Message'] = $answerActionField->Message;
             $actionFields['GotoID'] = $answerActionField->Goto()->ID;
             $actionFields['QuestionID'] = $answerActionField->Question()->ID;
-            $actionFields['TaskID'] = $answerActionField->Task()->ID;
             $actionFields['TaskIDs'] = $answerActionField->Tasks()->count() ?
                 json_encode($answerActionField->Tasks()->column('ID')): '';
             $actionFields['Result'] = $answerActionField->Result;
@@ -302,6 +301,8 @@ class Question extends DataObject implements ScaffoldingProvider
         $answers = json_decode($answerData, true);
         $questions = json_decode($questionData, true);
 
+        $isOldSubmission = false; // it will be true for has one relationshiop for old submission
+
         // question level task
         foreach ($questions as $question) {
             $questionID = $question['ID'];
@@ -325,9 +326,16 @@ class Question extends DataObject implements ScaffoldingProvider
 
                     // if action is chose and action has task, then
                     // include the tasks id in the $taskList array
-                    if (strlen($action['TaskIDs']) && count($answerAction)) {
+                    // this is for many_many relationship
+                    if (array_key_exists('TaskIDs', $action) && strlen($action['TaskIDs']) && count($answerAction)) {
                         $taskIDs = json_decode($action['TaskIDs']);
                         $taskList = array_merge($taskList, $taskIDs);
+                    }
+
+                    // this for has_one relationship for old questionnaire submission
+                    if (array_key_exists('TaskID', $action) && $action['TaskID'] != 0 && count($answerAction)) {
+                        $taskList = array_merge((array)$taskList, (array)$action['TaskID']);
+                        $isOldSubmission = true;
                     }
                 }
             }
@@ -344,7 +352,8 @@ class Question extends DataObject implements ScaffoldingProvider
             $taskSubmission = TaskSubmission::create_task_submission(
                 $taskID,
                 $submissionID,
-                $member->ID
+                $member->ID,
+                $isOldSubmission
             );
         }
     }
