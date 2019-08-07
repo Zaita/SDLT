@@ -101,6 +101,7 @@ query {
     BusinessOwnerApprovalStatus
     SecurityArchitectApprovalStatus
     IsCurrentUserAnApprover
+    ProductName
     IsCurrentUserABusinessOwnerApprover
     TaskSubmissions {
       UUID
@@ -148,6 +149,7 @@ query {
         submissionID: _.toString(_.get(submissionJSON, "ID", "")),
         submissionUUID: _.toString(_.get(submissionJSON, "UUID", "")),
         submissionToken: _.toString(_.get(submissionJSON, "ApprovalLinkToken", "")),
+        productName: _.toString(_.get(submissionJSON, "ProductName", "")),
         submitter: {
           id: _.toString(_.get(submissionJSON, "User.ID")),
           name: _.toString(_.get(submissionJSON, "SubmitterName", "")),
