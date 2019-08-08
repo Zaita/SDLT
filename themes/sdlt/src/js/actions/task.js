@@ -157,7 +157,6 @@ export function saveAnsweredQuestionInTaskSubmission(
       }
     }
 
-
     if (complete) {
       await dispatch(completeTaskSubmission({bypassNetwork, secureToken, result}));
     }
@@ -205,15 +204,6 @@ export function completeTaskSubmission(args: {
     if (!bypassNetwork) {
       try {
         const csrfToken = await CSRFTokenService.getCSRFToken();
-
-        // Prevent anonymous user to create other task submissions according to the answers
-        if (!secureToken) {
-          await TaskDataService.createTaskSubmissionsAccordingToQuestions({
-            questions: getTaskSubmission().questions,
-            questionnaireSubmissionID: getTaskSubmission().questionnaireSubmissionID,
-            csrfToken
-          });
-        }
 
         const {uuid} = await TaskDataService.completeTaskSubmission({
           uuid: getTaskSubmission().uuid,

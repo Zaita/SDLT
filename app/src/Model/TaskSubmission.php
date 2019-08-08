@@ -348,12 +348,14 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      * @param string|int $taskID                    The task ID
      * @param string|int $questionnaireSubmissionID The questionnaire submission ID
      * @param int        $submitterID               The submitter ID
+     * @param boolean    $isOldSubmission           true for old submissio which has_one task
      * @return TaskSubmission
      * @throws Exception
      */
-    public static function create_task_submission($taskID, $questionnaireSubmissionID, $submitterID)
+    public static function create_task_submission($taskID, $questionnaireSubmissionID, $submitterID, $isOldSubmission)
     {
         $task = Task::get_by_id($taskID);
+
         if (!$task || !$task->exists()) {
             throw new Exception('Task does not exist');
         }
@@ -368,13 +370,12 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             ])
             ->first();
 
-        if ($existingTaskSubmission && $existingTaskSubmission->exists()) {
-            $existingTaskSubmission->Status = TaskSubmission::STATUS_INVALID;
-
-            if (json_encode($task->getQuestionsData()) == $existingTaskSubmission->QuestionnaireData) {
+        if ($existingTaskSubmission && ($isOldSubmission ||
+            json_encode($task->getQuestionsData()) == $existingTaskSubmission->QuestionnaireData)
+        ) {
                 // Only turn "in progress" task submissions back if the structure is not changed
+                // or if it old submission
                 $existingTaskSubmission->Status = TaskSubmission::STATUS_START;
-            }
 
             $existingTaskSubmission->write();
 
@@ -584,6 +585,13 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     if (isset($args['Result'])) {
                         $submission->Result = trim($args['Result']);
                     }
+
+                    // create tasks for task submission
+                    Question::create_task_submissions_according_to_answers (
+                        $submission->QuestionnaireData,
+                        $submission->AnswerData,
+                        $submission->QuestionnaireSubmissionID
+                    );
 
                     $submission->write();
 
