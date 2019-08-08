@@ -649,8 +649,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $model->IsStartLinkEmailSent = 0;
                     $model->IsEmailSentToSecurityArchitect = 0;
 
-                    $model->QuestionnaireLevelTaskIDs = $questionnaire->tasks()->Count() ?
-                        json_encode($questionnaire->Tasks()->column('ID')): '';
+                    $questionnaireLevelTaskIDs = $questionnaire->Tasks()->column('ID');
+                    $model->QuestionnaireLevelTaskIDs = $questionnaireLevelTaskIDs
+                        ? json_encode($questionnaireLevelTaskIDs)
+                        : '';
 
                     $uuid = Uuid::uuid4();
                     $model->UUID = (string) $uuid;
