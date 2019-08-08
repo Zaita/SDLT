@@ -50,47 +50,28 @@ trait SDLTRiskSubmission
             throw new \InvalidArgumentException(sprintf('"%s" is not a valid type.', $type));
         }
 
-        $riskData = $output = [];
-
         if (!$obj || !$obj->isRiskType()) {
             return [];
         }
 
+        $riskData = [];
+
         foreach ($obj->Questions() as $question) {
             foreach ($question->AnswerInputFields() as $answer) {
-                $riskData[$question->UUID][$answer->ID] = $answer->getRisks();
+                foreach ($answer->getRisks() as $risk) {
+                    $riskData[$risk->ID]['riskName'] = $risk->Name;
+                    $riskData[$risk->ID]['weights'][] = $risk->Weight;
+                }
             }
         }
 
         $formula = $obj->riskFactory();
 
-        // Do calcs
-        foreach ($riskData as $answerRiskMap) {
-            foreach ($answerRiskMap as $answerId => $answerRiskData) {
-                if (!$answerRiskData) {
-                    continue;
-                }
-
-                $riskWeights = [];
-                $riskData = [];
-
-                foreach ($answerRiskData as $risk) {
-                    $riskWeights[] = $risk->Weight;
-                    $riskData[] = [
-                        'Name' => $risk->Name,
-                        'Weight' => $risk->Weight,
-                    ];
-                }
-
-                $output[$answerId] = [
-                    'Risks' => $riskData,
-                    'Weights' => $riskWeights ?: 'N/A',
-                    'Score' => $riskWeights ? $formula->setWeightings($riskWeights)->calculate() : 'N/A',
-                    'Rating' => 'TBC',
-                ];
-            }
+        foreach ($riskData as $riskId => $data) {
+            $riskData[$riskId]['score'] = $formula->setWeightings($data['weights'])->calculate();
+            $riskData[$riskId]['rating'] = 'TBC';
         }
 
-        return $output;
+        return array_values($riskData);
     }
 }
