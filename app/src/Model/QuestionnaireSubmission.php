@@ -40,6 +40,7 @@ use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Control\Controller;
 use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\FormField;
 use NZTA\SDLT\Traits\SDLTRiskSubmission;
 
 /**
@@ -117,7 +118,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      * @var array
      */
     private static $summary_fields = [
-        'getQuestionnaireName' => 'Questionnaire Name',
+        'QuestionnaireName' => 'Questionnaire Name',
+        'QuestionnaireType' => 'Questionnaire Type',
         'ProductName',
         'SubmitterName',
         'SubmitterEmail',
@@ -284,6 +286,14 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     public function getQuestionnaireName()
     {
         return $this->Questionnaire()->Name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getQuestionnaireType()
+    {
+        return FormField::name_to_label($this->Questionnaire()->Type ?? 'Questionnaire');
     }
 
     /**
@@ -2012,7 +2022,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         ];
 
         foreach ($this->Questionnaire()->Tasks() as $task) {
-            $allRiskResults[] = $task->TaskSubmission()->getRiskResult('t');
+            if ($result = $task->TaskSubmission()->getRiskResult('t')) {
+                $allRiskResults[] = $result;
+            }
         }
 
         return $allRiskResults;

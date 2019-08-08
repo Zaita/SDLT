@@ -276,9 +276,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
 
         foreach ($this->AnswerSelections() as $selection) {
             foreach ($selection->Risks() as $risk) {
-                if (!isset($risks[$risk->ID])) {
-                    $risks[$risk->ID] = $risk;
-                }
+                $risks[] = $risk;
             }
         }
 
