@@ -136,6 +136,9 @@ query {
       throw DEFAULT_NETWORK_ERROR;
     }
 
+    // @todo : change with real value
+    const riskResults = [{riskName:"Information Disclosure", weights:"20, 30, 50, 60, 100", score:"160", rating:"Critical", color:"#0085ff"}, {riskName:"Loss of Asset Control", weights:"10, 10, 75", score:"75", rating:"Medium", color:"#8B0000"}];
+
     const data: QuestionnaireSubmissionState = {
       title: _.toString(_.get(submissionJSON, "Questionnaire.Name", "")),
       siteTitle: _.toString(_.get(json, "data.readSiteConfig.0.Title", "")),
@@ -188,6 +191,7 @@ query {
             };
             return taskSubmission;
           }),
+        riskResults: riskResults
       },
     };
 
