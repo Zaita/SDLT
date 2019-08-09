@@ -13,7 +13,8 @@
         "ramsey/uuid": "^3.8",
         "catalyst/silverstripe-active-directory": "1.0.1",
         "symbiote/silverstripe-multivaluefield": "^5.0",
-        "phptek/sentry": "^2.0"
+        "phptek/sentry": "^2.0",
+        "tractorcow/silverstripe-colorpicker": "^4.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^5.7",

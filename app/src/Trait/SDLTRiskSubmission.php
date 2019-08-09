@@ -12,7 +12,7 @@
  */
 
 namespace NZTA\SDLT\Traits;
-
+use NZTA\SDLT\Model\ImpactThreshold;
 use NZTA\SDLT\Model\AnswerInputField;
 
 trait SDLTRiskSubmission

@@ -18,6 +18,7 @@ use NZTA\SDLT\Model\Questionnaire;
 use NZTA\SDLT\Model\QuestionnaireEmail;
 use NZTA\SDLT\Model\Dashboard;
 use NZTA\SDLT\Model\Risk;
+use NZTA\SDLT\Model\ImpactThreshold;
 use SilverStripe\Admin\ModelAdmin;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;
@@ -41,6 +42,7 @@ class QuestionnaireAdmin extends ModelAdmin
         Task::class,
         QuestionnaireEmail::class,
         Risk::class,
+        ImpactThreshold::class,
     ];
 
     /**
