@@ -72,6 +72,9 @@ query {
       throw DEFAULT_NETWORK_ERROR;
     }
 
+    // @todo : change with real value
+    const riskResults = [{riskName:"Information Disclosure", weights:"20, 30, 50, 60, 100", score:"160", rating:"Critical", color:"#0085ff"}, {riskName:"Loss of Asset Control", weights:"10, 10, 75", score:"75", rating:"Medium", color:"#8B0000"}];
+
     const data: QuestionnaireSubmissionState = {
       siteTitle: _.toString(_.get(json, "data.readSiteConfig.0.Title", "")),
       submission: {
@@ -105,8 +108,7 @@ query {
           FirstName: _.toString(_.get(submissionJSON, "CisoApprover.FirstName", "")),
           Surname: _.toString(_.get(submissionJSON, "CisoApprover.Surname", "")),
         },
-        taskSubmissions: _
-          .toArray(_.get(submissionJSON, "TaskSubmissions", []))
+        taskSubmissions: _.toArray(_.get(submissionJSON, "TaskSubmissions", []))
           .map((item) => {
             const taskSubmission: TaskSubmissionDisplay = {
               uuid: _.toString(_.get(item, "UUID", "")),
@@ -117,6 +119,7 @@ query {
             };
             return taskSubmission;
           }),
+        riskResults: riskResults
       },
     };
 
