@@ -2017,13 +2017,11 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     {
         // Deal with the related Questionnaire's Task-calcs, and append them
         // to the output array
-        $allRiskResults = [
-            $this->getRiskResult('q'),
-        ];
+        $allRiskResults = $this->getRiskResult('q');
 
         foreach ($this->Questionnaire()->Tasks() as $task) {
             if ($result = $task->TaskSubmission()->getRiskResult('t')) {
-                $allRiskResults[] = $result;
+                $allRiskResults = array_merge($allRiskResults, $result);
             }
         }
 

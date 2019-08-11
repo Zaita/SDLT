@@ -60,6 +60,7 @@ trait SDLTRiskSubmission
             foreach ($question->AnswerInputFields() as $answer) {
                 foreach ($answer->getRisks() as $risk) {
                     $riskData[$risk->ID]['riskName'] = $risk->Name;
+                    $riskData[$risk->ID]['color'] = '#338aff'; // please replace this with actual color value
                     $riskData[$risk->ID]['weights'][] = $risk->Weight;
                 }
             }
