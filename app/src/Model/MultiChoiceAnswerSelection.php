@@ -32,7 +32,7 @@ use NZTA\SDLT\Model\AnswerInputField;
  * for each such answer that may appear as a checkbox or radio button, admins
  * can relate >=1 {@link Risk} record, and for each such combination, a weighting
  * value also. These are used to generate risk scores for Risk-Type Questionnaires,
- * Tasks and Pillars.app/src/Model/MultiChoiceAnswerSelection.php
+ * Tasks and Pillars.
  */
 class MultiChoiceAnswerSelection extends DataObject
 {

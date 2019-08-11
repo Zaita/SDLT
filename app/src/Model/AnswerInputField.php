@@ -224,7 +224,8 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
 
         if ($selections->exists()) {
             foreach ($selections as $selection) {
-                $data['value'] = $selection->Label;
+                $data['value'] = $selection->Label;         // "Value" == "Label" for default UI selections
+                $data['calc_value'] = $selection->Value;    // Actual value is required to fetch from QuestionnaireData JSON blob
                 $data['label'] = $selection->Label;
 
                 $optionData[] = $data;
