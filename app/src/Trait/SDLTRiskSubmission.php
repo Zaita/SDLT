@@ -13,6 +13,8 @@
 
 namespace NZTA\SDLT\Traits;
 
+use NZTA\SDLT\Model\AnswerInputField;
+
 trait SDLTRiskSubmission
 {
     /**
@@ -54,25 +56,41 @@ trait SDLTRiskSubmission
             return [];
         }
 
+        $formula = $obj->riskFactory();
+        $questionnaireData = json_decode($this->QuestionnaireData, true);
         $riskData = [];
+        $answerCandidates = [];
 
-        foreach ($obj->Questions() as $question) {
-            foreach ($question->AnswerInputFields() as $answer) {
-                foreach ($answer->getRisks() as $risk) {
+        foreach ($questionnaireData as $question) {
+            foreach ($question['AnswerInputFields'] as $answer) {
+                if (!$answer['MultiChoiceAnswer'] || !$selections = json_decode($answer['MultiChoiceAnswer'], true)) {
+                    continue;
+                }
+
+                $answerCandidates[$answer['ID']] = $selections;
+            }
+        }
+
+        $answerRecords = AnswerInputField::get()->filter(['ID' => array_keys($answerCandidates)]);
+
+        foreach ($answerRecords as $answerRecord) {
+            $selections = $answerCandidates[$answerRecord->ID];
+            $selectionRecords = $answerRecord->AnswerSelections()->filter(['Value' => array_column($selections, 'calc_value')]);
+
+            foreach ($selectionRecords as $selectionRecord) {
+                foreach ($selectionRecord->Risks() as $risk) {
                     $riskData[$risk->ID]['riskName'] = $risk->Name;
-                    $riskData[$risk->ID]['color'] = '#338aff'; // please replace this with actual color value
                     $riskData[$risk->ID]['weights'][] = $risk->Weight;
                 }
             }
         }
-
-        $formula = $obj->riskFactory();
 
         foreach ($riskData as $riskId => $data) {
             $riskData[$riskId]['score'] = $formula->setWeightings($data['weights'])->calculate();
             $riskData[$riskId]['rating'] = 'TBC';
         }
 
+        // Remove empty arrays
         return array_values($riskData);
     }
 }

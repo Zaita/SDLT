@@ -844,8 +844,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * updateQuestionnaireStatusToSubmitted - this api will call when user click
-     * on submit button, after completing the anwers user can update the answers
+     * updateQuestionnaireStatusToSubmitted. This endpoint is called when users
+     * click on a submit button. After completion, users can modify their answers.
      *
      * @param SchemaScaffolder $scaffolder SchemaScaffolder
      *
@@ -2017,14 +2017,24 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     {
         // Deal with the related Questionnaire's Task-calcs, and append them
         // to the output array
-        $allRiskResults = $this->getRiskResult('q');
+        $data = [];
+        $allRiskResults = [
+            $this->getRiskResult('q'),
+        ];
 
         foreach ($this->Questionnaire()->Tasks() as $task) {
             if ($result = $task->TaskSubmission()->getRiskResult('t')) {
-                $allRiskResults = array_merge($allRiskResults, $result);
+                $allRiskResults[] = $result;
             }
         }
 
-        return $allRiskResults;
+        // Flatten the array for a row-by-row display per risk.
+        foreach ($allRiskResults as $r) {
+            foreach ($r as $array) {
+                $data[] = $array;
+            }
+        }
+
+        return $data;
     }
 }
