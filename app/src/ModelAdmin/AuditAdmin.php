@@ -55,13 +55,16 @@ class AuditAdmin extends ModelAdmin
     {
         $form = parent::getEditForm($id = null, $fields = null);
 
+        $gridField = $form->Fields()->dataFieldByName($this->sanitiseClassName($this->modelClass));
         // Remove "Add Event" button.
-        $form->Fields()->dataFieldByName($this->sanitiseClassName($this->modelClass))
+        $gridField
                 ->getConfig()
                 ->removeComponentsByType([
                     GridFieldAddNewButton::class,
                     GridFieldPrintButton::class
                 ]);
+        // Ensure consistent sort order
+        $gridField->setList($gridField->getList()->sort('Created DESC'));
 
         return $form;
     }
