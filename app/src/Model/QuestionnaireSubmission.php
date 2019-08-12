@@ -1781,6 +1781,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 $inputAnswerField->id
             );
 
+            // check if $fieldname exists before accessing it
+            if (!isset($inputfieldDetails->$fieldName)) {
+                continue;
+            }
             if ($inputfieldDetails->InputType == $fieldType && $inputfieldDetails->$fieldName) {
                 return $inputAnswerField->data;
             }
