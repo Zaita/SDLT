@@ -13,6 +13,7 @@
 
 namespace NZTA\SDLT\Model;
 
+use Exception;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
@@ -24,6 +25,7 @@ use SilverStripe\Forms\GridField\GridFieldPaginator;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use NZTA\SDLT\Traits\SDLTModelPermissions;
 use SilverStripe\ORM\DB;
+use SilverStripe\Security\Security;
 
 /**
  * Class Question
