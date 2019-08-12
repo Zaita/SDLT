@@ -278,7 +278,7 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
         );
 
         if ($doAudit) {
-            $msg = sprintf('"%s" was changed', $this->Name);
+            $msg = sprintf('"%s" was modified', $this->Name);
             $groups = $user->Groups()->column('Title');
             $this->auditService->commit('Change', $msg, $this, $userData);
         }

@@ -356,6 +356,18 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      */
     public function isBusinessOwnerContext()
     {
+        $member = Security::getCurrentUser();
+
+        if ($member) {
+            $changed = $this->getChangedFields(['QuestionnaireStatus'], 1);
+            // check access details for business owner
+            if (array_key_exists('QuestionnaireStatus', $changed) && $changed['QuestionnaireStatus']['before'] === 'waiting_for_approval' &&
+                in_array($changed['QuestionnaireStatus']['after'], ['approved', 'denied']) &&
+                $member->Email == $this->BusinessOwnerEmailAddress) {
+                return true;
+            }
+        }
+
         $req = Controller::curr() ? Controller::curr()->getRequest() : null;
 
         return (
@@ -1332,7 +1344,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             $msg = sprintf(
                 '"%s" had its status changed from "%s" to "%s". (UUID: %s)',
                 $this->Questionnaire()->Name,
-                $statusChange['before'],
+                $statusChange['before'] ?: 'start' ,
                 $statusChange['after'],
                 $this->UUID
             );
@@ -1894,9 +1906,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      * Return the appropriate approval DB field(s), based on the passed user's groups
      * or status as a "Business Owner".
      *
-     * @param  Member  $member          The user whose groups we want to normalise.
-     * @param  boolean $isBusinessOwner Set in userland code and flags a user as
-     *                                  being a Business Owner.
+     * @param Member  $member          The user whose groups we want to normalise.
+     * @param boolean $isBusinessOwner Set in userland code and flags a user as
+     *                                 being a Business Owner.
      * @return array
      */
     public static function normalise_group_approval_fields(Member $member = null, bool $isBusinessOwner = false) : array
