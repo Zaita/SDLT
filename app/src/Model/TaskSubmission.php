@@ -1028,7 +1028,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         $doAudit = $this->exists() && $user;
         $changed = $this->getChangedFields(['Status'], 1);
 
-        if ($doAudit && array_key_exists('Status', $changed) &&
+        if ($doAudit && isset($changed['Status']) &&
             $changed['Status']['before'] !== 'in_progress' &&
             $changed['Status']['after'] == 'in_progress') {
 
@@ -1046,7 +1046,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         // audit log: for task submission approval by approval group member
         $hasAccess = $user && $user->Groups()->filter('Code', $this->ApprovalGroup()->Code)->exists();
         $doAudit = $this->exists() && $hasAccess;
-        if ($doAudit && array_key_exists('Status', $changed) &&
+        if ($doAudit && isset($changed['Status']) &&
             in_array($changed['Status']['after'], ['approved', 'denied'])) {
               $msg = sprintf(
                   '"%s" was %s. (UUID: %s)',
@@ -1058,7 +1058,6 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
               $status = ($changed['Status']['after'] === 'approved') ? 'Approve' : 'Deny';
               $this->auditService->commit($status, $msg, $this, $userData);
         }
-
     }
 
     /**
