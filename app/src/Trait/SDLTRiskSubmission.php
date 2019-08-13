@@ -71,19 +71,22 @@ trait SDLTRiskSubmission
             }
         }
 
-        $answerRecords = AnswerInputField::get()->filter(['ID' => array_keys($answerCandidates)]);
+        if ($answerCandidates) {
+            $answerRecords = AnswerInputField::get()->filter(['ID' => array_keys($answerCandidates)]);
 
-        foreach ($answerRecords as $answerRecord) {
-            $selections = $answerCandidates[$answerRecord->ID];
-            $selectionRecords = $answerRecord->AnswerSelections()->filter(['Value' => array_column($selections, 'calc_value')]);
+            foreach ($answerRecords as $answerRecord) {
+                $selections = $answerCandidates[$answerRecord->ID];
+                $selectionRecords = $answerRecord->AnswerSelections()->filter(['Value' => array_column($selections, 'calc_value')]);
 
-            foreach ($selectionRecords as $selectionRecord) {
-                if (!isset($selection['Risks'])) {
-                    continue;
-                }
-                foreach ($selectionRecord['Risks'] as $risk) {
-                    $riskData[$risk['ID']]['riskName'] = $risk['Name'];
-                    $riskData[$risk['ID']]['weights'][] = $risk['Weight'];
+                foreach ($selectionRecords as $selectionRecord) {
+                    if (!$selectionRecord->Risks()->count()) {
+                        continue;
+                    }
+
+                    foreach ($selectionRecord->Risks() as $risk) {
+                        $riskData[$risk->ID]['riskName'] = $risk->Name;
+                        $riskData[$risk->ID]['weights'][] = $risk->Weight;
+                    }
                 }
             }
         }
