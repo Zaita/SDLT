@@ -78,9 +78,12 @@ trait SDLTRiskSubmission
             $selectionRecords = $answerRecord->AnswerSelections()->filter(['Value' => array_column($selections, 'calc_value')]);
 
             foreach ($selectionRecords as $selectionRecord) {
-                foreach ($selectionRecord->Risks() as $risk) {
-                    $riskData[$risk->ID]['riskName'] = $risk->Name;
-                    $riskData[$risk->ID]['weights'][] = $risk->Weight;
+                if (!isset($selection['Risks'])) {
+                    continue;
+                }
+                foreach ($selectionRecord['Risks'] as $risk) {
+                    $riskData[$risk['ID']]['riskName'] = $risk['Name'];
+                    $riskData[$risk['ID']]['weights'][] = $risk['Weight'];
                 }
             }
         }
