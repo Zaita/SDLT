@@ -129,6 +129,7 @@ class TaskSubmissionContainer extends Component<Props> {
           handleDenyButtonClick={this.handleDenyButtonClick.bind(this)}
           showBackButton={!!taskSubmission.questionnaireSubmissionUUID}
           viewAs={viewAs}
+          siteTitle={siteTitle}
         />
         <Footer/>
       </div>
