@@ -228,6 +228,18 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
                 $data['calc_value'] = $selection->Value;    // Actual value is required to fetch from QuestionnaireData JSON blob
                 $data['label'] = $selection->Label;
 
+                //ensure the Risks key always exists as an array
+                $risks = $selection->Risks()->toNestedArray();
+                if ($risks) {
+                    //avoid un-needed fields from JSON response
+                    //reduces network payload and avoids info disclosure
+                    foreach ($risks as $idx => $risk) {
+                        unset($risk['ClassName'], $risk['LastEdited'], $risk['Created'], $risk['RecordClassName']);
+                        $risks[$idx] = $risk;
+                    }
+                }
+                $data['Risks'] = $risks ?: [];
+
                 $optionData[] = $data;
             }
         }
