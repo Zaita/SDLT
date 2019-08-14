@@ -14,12 +14,14 @@
 namespace NZTA\SDLT\Model;
 
 use SilverStripe\ORM\DataObject;
-use SilverStripe\Security\Member;
-use SilverStripe\Security\Security;
-use SilverStripe\Forms\Textfield;
+use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\HTMLEditor\HtmlEditorField;
 use SilverStripe\Forms\LiteralField;
+use SilverStripe\Forms\ToggleCompositeField;
+use SilverStripe\Forms\FormField;
+use SilverStripe\Forms\FieldList;
 use NZTA\SDLT\Traits\SDLTModelPermissions;
+use NZTA\SDLT\Constant\UserGroupConstant;
 
 /**
  * Class QuestionnaireEmail
@@ -41,8 +43,12 @@ class QuestionnaireEmail extends DataObject
         'StartLinkEmailBody' => 'HTMLText',
         'SummaryLinkEmailSubject' => 'Text',
         'SummaryLinkEmailBody' => 'HTMLText',
-        'ApprovalLinkEmailSubject' => 'Text',
-        'ApprovalLinkEmailBody' => 'HTMLText',
+        'SecurityArchitectApprovalLinkEmailSubject' => 'Text',
+        'SecurityArchitectApprovalLinkEmailBody' => 'HTMLText',
+        'BusinessOwnerApprovalLinkEmailSubject' => 'Text',
+        'BusinessOwnerApprovalLinkEmailBody' => 'HTMLText',
+        'CISOApprovalLinkEmailSubject' => 'Text',
+        'CISOApprovalLinkEmailBody' => 'HTMLText',
         'ApprovedNotificationEmailSubject' => 'Text',
         'ApprovedNotificationEmailBody' => 'HTMLText',
         'DeniedNotificationEmailSubject' => 'Text',
@@ -55,6 +61,18 @@ class QuestionnaireEmail extends DataObject
      */
     private static $summary_fields = [
         'FromEmailAddress'
+    ];
+
+    /**
+     * Of the total no. roles in the system, these are those that are applicable
+     * to sending emails.
+     *
+     * @var array
+     */
+    private static $approval_roles = [
+        'CISO',
+        'SecurityArchitect',
+        'BusinessOwner',
     ];
 
     /**
@@ -106,23 +124,8 @@ class QuestionnaireEmail extends DataObject
         );
 
         $fields->addFieldsToTab(
-            'Root.ApprovalLinkEmail',
-            [
-                TextField::create(
-                    'ApprovalLinkEmailSubject',
-                    'Approval Link Email Subject'
-                ),
-                HtmlEditorField::create(
-                    'ApprovalLinkEmailBody',
-                    'Approval Link Email Body'
-                ),
-                LiteralField::create(
-                    'ApprovalLinkEmailHelpText',
-                    'Please use variable {$questionnaireName} for questionnaire name, {$productName} for product name, {$approvalLink} for
-                        approval link, {$submitterName} for submitter name and {$submitterEmail} for submitter
-                        email in the email body and subject. {$approvalLink} will be replaced by "this link" label.'
-                )
-            ]
+            'Root.ApprovalLinkEmails',
+            $this->approvalLinkEmailFields($fields)
         );
 
         $fields->addFieldsToTab(
@@ -177,5 +180,60 @@ class QuestionnaireEmail extends DataObject
         return $fields;
     }
 
+    /**
+     * Simply returns an array of fields used for the "Approval Link Emails" CMS
+     * getCMSFields() tab.
+     *
+     * @param  FieldList $fields Incoming fields for getCMSFields().
+     * @return array
+     */
+    private function approvalLinkEmailFields(FieldList $fields) : array
+    {
+        $approvalLinkEmailFields = [];
+        $reflected = new \ReflectionClass(UserGroupConstant::class);
+        $roles = array_filter($reflected->getConstants(), function ($v, $k) {
+            return preg_match("#^ROLE_CODE#", $k);
+        }, ARRAY_FILTER_USE_BOTH);
+
+        foreach ($roles as $recipient) {
+            $fieldNameBase = "{$recipient}ApprovalLinkEmail";
+
+            if (!in_array($recipient, $this->config()->get('approval_roles'))) {
+                continue;
+            }
+
+            // Remove scaffolded fields
+            foreach (['Subject', 'Body'] as $scaffolded) {
+                $fields->removeByName("{$fieldNameBase}$scaffolded");
+            }
+
+            $approvalLinkEmailFields[] = ToggleCompositeField::create(
+                "{$recipient}Approval",
+                FormField::name_to_label("{$recipient} Approval Email"),
+                [
+                    TextField::create(
+                        "{$fieldNameBase}Subject",
+                        'Subject'
+                    ),
+                    HtmlEditorField::create(
+                        "{$fieldNameBase}Body",
+                        'Body'
+                    )
+                        ->setRows(10)
+                        ->setDescription(
+                            '<p class="message notice">You can use the following variable substitutions:<br/><br/>' .
+                            '<b>{$questionnaireName}</b> For questionnaire name<br/>' .
+                            '<b>{$productName}</b> For product name<br/>' .
+                            '<b>{$approvalLink}</b> For approval link<br/>' .
+                            '<b>{$submitterName}</b> For submitter name<br/>' .
+                            '<b>{$submitterEmail}</b> For submitter email in the email body and subject<br/>' .
+                            '<b>{$approvalLink}</b> Will be replaced by "this link" label.</p>'
+                        )
+                ]
+            );
+        }
+
+        return $approvalLinkEmailFields;
+    }
 
 }

@@ -1889,7 +1889,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @param string $group group code
      * @throws Exception
-     * @return DataObject
+     * @return ManyManyList
      */
     public function getApprovalMembersListByGroup($group)
     {
