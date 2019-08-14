@@ -9,6 +9,8 @@ import editIcon from "../../../img/icons/edit.svg";
 import LightButton from "../Button/LightButton";
 import URLUtil from "../../utils/URLUtil";
 import DarkButton from "../Button/DarkButton";
+import pdfIcon from "../../../img/icons/pdf.svg";
+import PDFUtil from "../../utils/PDFUtil";
 
 type Props = {
   taskSubmission: TaskSubmissionType,
@@ -64,6 +66,10 @@ class TaskSubmission extends Component<Props> {
       <LightButton title={"EDIT ANSWERS"} onClick={editAnswers} iconImage={editIcon}/>
     ) : null;
 
+    const pdfButton = (
+      <LightButton title={"Download PDF"} iconImage={pdfIcon} onClick={() => this.downloadPdf()}/>
+    );
+
     const resultStatus = ["complete", "waiting_for_approval", "approved", "denied"];
     const result = taskSubmission.result && (resultStatus.indexOf(taskSubmission.status) > -1) ? (
       <div className="result">
@@ -87,6 +93,7 @@ class TaskSubmission extends Component<Props> {
 
         <div className="buttons">
           {editButton}
+          {pdfButton}
           {backButton}
           <div>
             {approveButton}
@@ -96,6 +103,28 @@ class TaskSubmission extends Component<Props> {
       </div>
     );
   }
+
+
+  downloadPdf() {
+    const {
+      taskSubmission,
+      siteTitle,
+      currentUser
+    } = {...this.props};
+
+    if (!taskSubmission) {
+      return;
+    }
+
+    PDFUtil.generatePDF({
+      questions: taskSubmission.questions,
+      submitter: taskSubmission.submitter.email ? taskSubmission.submitter : currentUser,
+      questionnaireTitle: taskSubmission.taskName,
+      siteTitle: siteTitle,
+      result: taskSubmission.result,
+    });
+  }
 }
+
 
 export default TaskSubmission;

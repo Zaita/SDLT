@@ -8,6 +8,9 @@ import AnswersPreview from "../Questionnaire/AnswersPreview";
 import DarkButton from "../Button/DarkButton";
 import URLUtil from "../../utils/URLUtil";
 import Header from "../Header/Header";
+import LightButton from "../Button/LightButton";
+import pdfIcon from "../../../img/icons/pdf.svg";
+import PDFUtil from "../../utils/PDFUtil";
 
 type Props = {
   uuid: string,
@@ -56,6 +59,10 @@ export default class TaskSubmissionForBusinessOwner extends Component<Props, Sta
       />
     ) : null;
 
+    const pdfButton = (
+      <LightButton title={"Download PDF"} iconImage={pdfIcon} onClick={() => this.downloadPdf()}/>
+    );
+
     return (
       <div className="TaskSubmissionContainer">
         <Header title={taskSubmission.taskName} subtitle={siteTitle} showLogoutButton={false}/>
@@ -64,6 +71,7 @@ export default class TaskSubmissionForBusinessOwner extends Component<Props, Sta
           <AnswersPreview questions={taskSubmission.questions}/>
 
           <div className="buttons">
+            {pdfButton}
             {backButton}
           </div>
         </div>
@@ -76,5 +84,24 @@ export default class TaskSubmissionForBusinessOwner extends Component<Props, Sta
     const {uuid, token} = {...this.props};
     const data = await TaskForBusinessOwnerDataService.fetchTaskSubmissionData({uuid, token});
     this.setState(data);
+  }
+
+  downloadPdf() {
+    const {
+      taskSubmission,
+      siteTitle
+    } = {...this.state};
+
+    if (!taskSubmission) {
+      return;
+    }
+
+    PDFUtil.generatePDF({
+      questions: taskSubmission.questions,
+      submitter: taskSubmission.submitter,
+      questionnaireTitle: taskSubmission.taskName,
+      siteTitle: siteTitle,
+      result: taskSubmission.result,
+    });
   }
 }
