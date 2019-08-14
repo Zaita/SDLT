@@ -73,5 +73,28 @@ class UserRoleExtension extends DataExtension
             ->filter('Code', UserGroupConstant::GROUP_CODE_ADMIN)
             ->exists();
     }
+
+    /**
+     * Return the role-name for a given user. The returned string is in compound
+     * form, but you can use {@link FormField::name_to_label()} to prettify it.
+     *
+     * @return string
+     */
+    public function getRoleName() : string
+    {
+        switch ($this->getOwner()) {
+            case $this->getIsSA():
+                return UserGroupConstant::ROLE_CODE_SA;
+            case $this->getIsCISO():
+                return UserGroupConstant::ROLE_CODE_CISO;
+            case $this->getIsReporter():
+                return UserGroupConstant::ROLE_CODE_REPORTER;
+            case $this->getIsAdmin():
+                return UserGroupConstant::ROLE_CODE_ADMIN;
+            default:
+                return '';
+        }
+    }
+
 }
 

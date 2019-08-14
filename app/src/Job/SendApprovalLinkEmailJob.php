@@ -15,6 +15,8 @@ namespace NZTA\SDLT\Job;
 
 use Symbiote\QueuedJobs\Services\AbstractQueuedJob;
 use Symbiote\QueuedJobs\Services\QueuedJob;
+use SilverStripe\ORM\ManyManyList;
+use NZTA\SDLT\Model\QuestionnaireSubmission;
 use NZTA\SDLT\Email\SendApprovalLinkEmail;
 
 /**
@@ -23,11 +25,12 @@ use NZTA\SDLT\Email\SendApprovalLinkEmail;
 class SendApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJob
 {
     /**
-     * @param QuestionnaireSubmission $questionnaireSubmission questionnaireSubmission
-     * @param DataObject              $members                 members
-     * @param DataObject              $businessOwnerEmail      business Owner Email
+     * @param  QuestionnaireSubmission $questionnaireSubmission A questionnaireSubmission record.
+     * @param  ManyManyList            $members                 A list of {@link Member} records.
+     * @param  string                  $businessOwnerEmail      A business owner email address.
+     * @return void
      */
-    public function __construct($questionnaireSubmission = null, $members = [], $businessOwnerEmail = '')
+    public function __construct(QuestionnaireSubmission $questionnaireSubmission = null, $members = null, string $businessOwnerEmail = '')
     {
         $this->questionnaireSubmission = $questionnaireSubmission;
         $this->members = $members;
