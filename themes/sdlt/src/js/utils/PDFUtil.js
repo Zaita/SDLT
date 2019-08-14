@@ -38,7 +38,7 @@ async function getImageDataByURL(imageURL: string) {
 export default class PDFUtil {
 
   static async generatePDF(args: GeneratePDFArgument) {
-    const {questions, submitter, questionnaireTitle, siteTitle} = {...args};
+    const {questions, submitter, questionnaireTitle, siteTitle, result} = {...args};
 
     const defaultFontSize = 12;
     const content = [];
@@ -115,6 +115,18 @@ export default class PDFUtil {
       text: `Email: ${submitter.email}`,
       margin: [0, 0, 0, defaultFontSize * 2],
     });
+
+    if (result) {
+      content.push({
+        text: `Result:`,
+        style: "sectionHeading",
+        margin: [0, 0, 0, defaultFontSize],
+      });
+      content.push({
+        text: `${result}`,
+        margin: [0, 0, 0, defaultFontSize * 2],
+      });
+    }
 
     // Response heading
     content.push({
