@@ -19,6 +19,7 @@ use NZTA\SDLT\Model\QuestionnaireEmail;
 use NZTA\SDLT\Model\Dashboard;
 use NZTA\SDLT\Model\Risk;
 use NZTA\SDLT\Model\ImpactThreshold;
+use NZTA\SDLT\Traits\SDLTAdminCommon;
 use SilverStripe\Admin\ModelAdmin;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;
@@ -33,6 +34,8 @@ use SilverStripe\Forms\GridField\GridFieldPrintButton;
  */
 class QuestionnaireAdmin extends ModelAdmin
 {
+    use SDLTAdminCommon;
+
     /**
      * @var string[]
      */
