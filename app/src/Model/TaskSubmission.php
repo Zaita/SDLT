@@ -66,7 +66,7 @@ use NZTA\SDLT\Traits\SDLTRiskSubmission;
 class TaskSubmission extends DataObject implements ScaffoldingProvider
 {
     use SDLTRiskSubmission;
-    
+
     const STATUS_START = 'start';
     const STATUS_IN_PROGRESS = 'in_progress';
     const STATUS_COMPLETE = 'complete';
@@ -379,9 +379,9 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         if ($existingTaskSubmission && ($isOldSubmission ||
             json_encode($task->getQuestionsData()) == $existingTaskSubmission->QuestionnaireData)
         ) {
-                // Only turn "in progress" task submissions back if the structure is not changed
-                // or if it old submission
-                $existingTaskSubmission->Status = TaskSubmission::STATUS_START;
+            // Only turn "in progress" task submissions back if the structure is not changed
+            // or if it old submission
+            $existingTaskSubmission->Status = TaskSubmission::STATUS_START;
 
             $existingTaskSubmission->write();
 

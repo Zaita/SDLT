@@ -109,7 +109,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         ]);
 
         $multiChoiceAnswerValues = $this->AnswerSelections()
-            ->map('Label', 'Label')
+            ->map('Value', 'Label')
             ->toArray();
         $blocksField = $fields->dataFieldByName('AnswerSelections');
         $fields->removeByName('AnswerSelections'); // <-- Removes the scaffolded tab
@@ -117,7 +117,9 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         if ($this->exists()) {
             $config = $blocksField->getConfig();
             $config->removeComponent($config->getComponentByType(GridFieldAddExistingAutocompleter::class));
-            $fields->addFieldToTab('Root.Main', Wrapper::create($blocksField)
+            $fields->addFieldToTab(
+                'Root.Main',
+                Wrapper::create($blocksField)
                 ->hideUnless('InputType')
                 ->startsWith('multiple-choice')
                 ->end()
@@ -135,7 +137,8 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
                         $multiChoiceAnswerValues ?: []
                     )
                         ->setEmptyString('(none)')
-                        ->setDescription(''
+                        ->setDescription(
+                            ''
                             . 'This selection represents which of the related '
                             . 'question\'s radio buttons, is selected by default. Once values have '
                             . 'been added, a default can be chosen.'
@@ -151,7 +154,8 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
                         $multiChoiceAnswerValues ?: []
                     )
                         ->setDisabled(!$multiChoiceAnswerValues)
-                        ->setDescription(''
+                        ->setDescription(
+                            ''
                             . 'These selections represent which of the related '
                             . 'question\'s checkboxes are checked by default. '
                             . 'Once values have been added below, defaults can be chosen.'
@@ -224,8 +228,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
 
         if ($selections->exists()) {
             foreach ($selections as $selection) {
-                $data['value'] = $selection->Label;         // "Value" == "Label" for default UI selections
-                $data['calc_value'] = $selection->Value;    // Actual value is required to fetch from QuestionnaireData JSON blob
+                $data['value'] = $selection->Value;
                 $data['label'] = $selection->Label;
 
                 //ensure the Risks key always exists as an array
@@ -294,5 +297,72 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         }
 
         return $risks;
+    }
+
+    /**
+     * question has many input field and input field type can be MultiChoiceAnswer.
+     * If question has input field type MultiChoiceAnswer (radio/checkbox)
+     * then get all the risks of the selected options
+     *
+     * @param array $inputFields question has many input field
+     * @param array $answers     answer array of the input fields
+     *
+     * @return array
+     */
+    public static function get_risk_for_input_fields($inputFields, $answers) : array
+    {
+        $selectedOptionRisks = [];
+
+        // traverse question's input fields
+        foreach ($inputFields as $inputField) {
+
+            // if input type isn't MultiChoiceAnswer (radio/checkbox)
+            // then continue for next input field
+            if (!isset($inputField['MultiChoiceAnswer']) ||
+                !$options = json_decode($inputField['MultiChoiceAnswer'], true)
+            ) {
+                continue;
+            }
+
+            // if input type is MultiChoiceAnswer then collect input field id
+            $inputFieldID = $inputField['ID'];
+            $inputFieldAnswer = [];
+
+            // get the answer for the input field
+            // filter if input field id exists in $answers['inputs'] array
+            $inputFieldAnswer = array_filter($answers['inputs'], function ($e) use ($inputFieldID) {
+                return isset($e['id']) && $e['id'] == $inputFieldID;
+            });
+
+            // if there is no answer for the input field,
+            // then continue for next input field
+            if (empty($inputFieldAnswer)) {
+                continue;
+            }
+
+            // get answer array from $inputFieldAnswer
+            $answer = array_pop($inputFieldAnswer);
+            $selectedOption = $answer['data']; // string for radio
+
+            if ($inputField['InputType'] === 'multiple-choice: multiple selection') {
+                $selectedOption = json_decode($selectedOption); // array for checkbox
+            }
+
+            // traverse all the option of multi-choice input field type
+            foreach ($options as $option) {
+                if (!in_array($option['value'], (array)$selectedOption)) {
+                    continue;
+                }
+
+                // merge all the risks for the selected options
+                $selectedOptionRisks = isset($option['Risks']) ?
+                    array_merge(
+                        $selectedOptionRisks,
+                        array_values($option['Risks'])
+                    ): [];
+            }
+        }
+
+        return $selectedOptionRisks;
     }
 }
