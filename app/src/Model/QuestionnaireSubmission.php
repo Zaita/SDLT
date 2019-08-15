@@ -688,7 +688,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $model->ApprovalLinkToken = hash('sha3-256', random_bytes(64));
 
                     $model->QuestionnaireData = json_encode($questionnaire->getQuestionsData());
-
                     $model->write();
 
                     return $model;
@@ -2016,25 +2015,25 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     public function getRiskResultData() : array
     {
         // Deal with the related Questionnaire's Task-calcs, and append them
-        // to the output array
-        $data = [];
-        $allRiskResults = [
-            $this->getRiskResult('q'),
-        ];
+        $allRiskResults = [];
 
-        foreach ($this->Questionnaire()->Tasks() as $task) {
-            if ($result = $task->TaskSubmission()->getRiskResult('t')) {
-                $allRiskResults[] = $result;
+        // for questionnaire
+        if ($this->QuestionnaireStatus !== "in_progress") {
+            $allRiskResults = $this->getRiskResult('q');
+        }
+
+        // for task
+        $taskSubmissions = $this->TaskSubmissions()->filter([
+            'Status:not' => ["start", "in_progress", "invalid"]
+        ]);
+
+        foreach ($taskSubmissions as $taskSubmission) {
+            if ($result = $taskSubmission->getRiskResult('t')) {
+                $allRiskResults = array_merge($allRiskResults, $result);
             }
         }
 
-        // Flatten the array for a row-by-row display per risk.
-        foreach ($allRiskResults as $r) {
-            foreach ($r as $array) {
-                $data[] = $array;
-            }
-        }
-
-        return $data;
+        return $allRiskResults;
     }
+
 }

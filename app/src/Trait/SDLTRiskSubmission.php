@@ -44,59 +44,67 @@ trait SDLTRiskSubmission
      */
     public function getRiskResult(string $type) : array
     {
+        $riskData = [];
+
+        // q= QuestionnaireSubmission, t= TaskSubmission
         if ($type === 'q') {
             $obj = $this->Questionnaire();
-        } else if ($type === 't') {
+        } elseif ($type === 't') {
             $obj = $this->Task();
         } else {
             throw new \InvalidArgumentException(sprintf('"%s" is not a valid type.', $type));
         }
 
         if (!$obj || !$obj->isRiskType()) {
-            return [];
+            return $riskData;
         }
 
         $formula = $obj->riskFactory();
+
+        // get questions and answers from submission json
         $questionnaireData = json_decode($this->QuestionnaireData, true);
-        $riskData = [];
-        $answerCandidates = [];
+        $answerData = json_decode($this->AnswerData, true);
 
-        foreach ($questionnaireData as $question) {
-            foreach ($question['AnswerInputFields'] as $answer) {
-                if (!$answer['MultiChoiceAnswer'] || !$selections = json_decode($answer['MultiChoiceAnswer'], true)) {
-                    continue;
-                }
-
-                $answerCandidates[$answer['ID']] = $selections;
-            }
+        if (empty($questionnaireData) || empty($answerData)) {
+            return $riskData;
         }
 
-        if ($answerCandidates) {
-            $answerRecords = AnswerInputField::get()->filter(['ID' => array_keys($answerCandidates)]);
+        $selectedRiskData = [];
 
-            foreach ($answerRecords as $answerRecord) {
-                $selections = $answerCandidates[$answerRecord->ID];
-                $selectionRecords = $answerRecord->AnswerSelections()->filter(['Value' => array_column($selections, 'calc_value')]);
+        // traverse questions
+        foreach ($questionnaireData as $question) {
+            $questionID = $question['ID'];
+            $answers = [];
 
-                foreach ($selectionRecords as $selectionRecord) {
-                    if (!$selectionRecord->Risks()->count()) {
-                        continue;
-                    }
-
-                    foreach ($selectionRecord->Risks() as $risk) {
-                        $riskData[$risk->ID]['riskName'] = $risk->Name;
-                        $riskData[$risk->ID]['weights'][] = $risk->Weight;
-                    }
-                }
+            // get answers for all the input fields of the questions
+            if (!$answers = $answerData[$questionID]) {
+                continue;
             }
+
+            // if question type is input
+            $questionRisks = [];
+            if ($question['AnswerFieldType'] === 'input' && !empty($question['AnswerInputFields'])) {
+                $questionRisks = AnswerInputField::get_risk_for_input_fields(
+                    $question['AnswerInputFields'],
+                    $answers
+                );
+            }
+
+            $selectedRiskData = array_merge($selectedRiskData, $questionRisks);
+        }
+
+        // create array for unique $risk['ID']
+        foreach ($selectedRiskData as $risk) {
+            $riskData[$risk['ID']]['riskName'] = $risk['Name'];
+            $riskData[$risk['ID']]['weights'][] = $risk['Weight'];
         }
 
         foreach ($riskData as $riskId => $data) {
             $riskData[$riskId]['score'] = $formula->setWeightings($data['weights'])->calculate();
             $riskData[$riskId]['rating'] = 'TBC';
+            $riskData[$riskId]['weights'] = implode(', ', $data['weights']);
         }
 
-        // Remove empty arrays
         return array_values($riskData);
     }
 }
