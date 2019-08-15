@@ -160,6 +160,13 @@ class Summary extends Component<Props> {
                    onClick={handlePDFDownloadButtonClick}/>
     );
 
+    const viewAnswersButton = (
+      <LightButton title="VIEW ANSWERS"
+                   classes={["button"]}
+                   onClick={() => URLUtil.redirectToQuestionnaireReview(submission.submissionUUID)}
+      />
+    );
+
     // Display buttons for submitter
     if (viewAs === "submitter") {
       // Render edit answers button for submitter in all cases
@@ -264,6 +271,7 @@ class Summary extends Component<Props> {
         <div className="buttons">
           <div>
             {downloadPDFButton}
+            {viewAnswersButton}
           </div>
           <div>
             {approveButton}
