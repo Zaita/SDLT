@@ -154,7 +154,7 @@ class Summary extends Component<Props> {
     } = {...this.props};
 
     const downloadPDFButton = (
-      <LightButton title="DOWNLOAD PDF OF ANSWERS"
+      <LightButton title="DOWNLOAD PDF"
                    iconImage={pdfIcon}
                    classes={["button"]}
                    onClick={handlePDFDownloadButtonClick}/>
