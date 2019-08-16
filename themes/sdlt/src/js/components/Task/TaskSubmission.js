@@ -67,7 +67,7 @@ class TaskSubmission extends Component<Props> {
     ) : null;
 
     const pdfButton = (
-      <LightButton title={"Download PDF"} iconImage={pdfIcon} onClick={() => this.downloadPdf()}/>
+      <LightButton title={"DOWNLOAD PDF"} iconImage={pdfIcon} onClick={() => this.downloadPdf()}/>
     );
 
     const resultStatus = ["complete", "waiting_for_approval", "approved", "denied"];
