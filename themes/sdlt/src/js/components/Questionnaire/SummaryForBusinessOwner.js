@@ -46,7 +46,7 @@ class SummaryForBusinessOwnerContainer extends Component<Props, State> {
       let viewAs = (
         submission.approvalStatus.securityArchitect === "approved" &&
         submission.approvalStatus.businessOwner === "pending"
-      ) ? "approver" : "others";
+      ) ? "businessOwnerApprover" : "others";
 
       title = submission.questionnaireTitle;
       summary = (

@@ -143,6 +143,7 @@ class Summary extends Component<Props> {
 
   renderButtons(submission: Submission) {
     const {
+      user,
       viewAs,
       handleSubmitButtonClick,
       handlePDFDownloadButtonClick,
@@ -159,6 +160,14 @@ class Summary extends Component<Props> {
                    classes={["button"]}
                    onClick={handlePDFDownloadButtonClick}/>
     );
+
+    const viewAnswersButton = user ? (
+      <LightButton title="VIEW ANSWERS"
+                   classes={["button"]}
+                   onClick={() => URLUtil.redirectToQuestionnaireReview(submission.submissionUUID)}
+      />
+    ) : '';
+
 
     // Display buttons for submitter
     if (viewAs === "submitter") {
@@ -236,11 +245,12 @@ class Summary extends Component<Props> {
                      onClick={() => handleDenyButtonClick(this.state.skipBoAndCisoApproval)}
         />
       );
-
+      
       if (submission.status === "submitted") {
         return (
           <div className="buttons">
             <div>
+              {viewAnswersButton}
               {downloadPDFButton}
             </div>
             <div/>
@@ -252,6 +262,7 @@ class Summary extends Component<Props> {
         return (
           <div className="buttons">
             <div>
+              {viewAnswersButton}
               {downloadPDFButton}
               {assignToMeButton}
             </div>
@@ -263,6 +274,7 @@ class Summary extends Component<Props> {
       return (
         <div className="buttons">
           <div>
+            {viewAnswersButton}
             {downloadPDFButton}
           </div>
           <div>
@@ -277,6 +289,7 @@ class Summary extends Component<Props> {
     return (
       <div className="buttons">
         <div>
+          {viewAnswersButton}
           {downloadPDFButton}
         </div>
         <div/>
