@@ -23,6 +23,7 @@ class Review extends Component<Props> {
   render() {
     const {
       submission,
+      viewAs,
       handleSubmitButtonClick,
       handlePDFDownloadButtonClick,
       handleEditAnswerButtonClick,
@@ -33,7 +34,7 @@ class Review extends Component<Props> {
     }
 
     const alreadySubmittedAlert = (
-      <div class="alert alert-success text-center">
+      <div className="alert alert-success text-center">
         This questionnaire has already been submitted.
       </div>
     )
@@ -65,10 +66,10 @@ class Review extends Component<Props> {
 
     return (
       <div className="Review">
-        { submission.status !== "in_progress" && alreadySubmittedAlert}
+        {submission.status !== "in_progress" && alreadySubmittedAlert}
         <AnswersPreview questions={submission.questions}/>
-        { (submission.status === "in_progress" || submission.status === "submitted") && buttons}
-        { (submission.status !== "in_progress" && submission.status !== "submitted") && summaryButton}
+        {(viewAs === 'submitter' && (submission.status === "in_progress" || submission.status === "submitted")) && buttons}
+        {(viewAs !== 'submitter') && summaryButton}
       </div>
     );
   }

@@ -50,20 +50,50 @@ class ReviewContainer extends Component<Props> {
   }
 
   render() {
-    const {title, siteTitle, user, submission} = {...this.props.submissionState};
+    const {
+      title,
+      siteTitle,
+      user,
+      submission,
+      isCurrentUserApprover,
+      isCurrentUserABusinessOwnerApprover
+    } = {...this.props.submissionState};
 
     if (!user) {
       return null;
     }
 
+    let viewAs = "others";
+
+    do {
+      // Check if the current user is the submitter
+      if (user.id === submission.submitter.id) {
+        viewAs = "submitter";
+        break;
+      }
+
+      // Check if the current user is an approver
+      if (isCurrentUserApprover) {
+        viewAs = "approver";
+        break;
+      }
+
+      // Check if the current user is an approver
+      if (isCurrentUserABusinessOwnerApprover) {
+        viewAs = "businessOwnerApprover";
+        break;
+      }
+    } while (false);
+
     return (
       <div className="ReviewContainer">
         <Header title={title} subtitle="Review Responses" username={user.name}/>
         <Review siteTitle={siteTitle}
-                submission={submission}
-                handleSubmitButtonClick={this.handleSubmitButtonClick.bind(this)}
-                handlePDFDownloadButtonClick={this.handlePDFDownloadButtonClick.bind(this)}
-                handleEditAnswerButtonClick={this.handleEditAnswerButtonClick.bind(this)}/>
+          viewAs={viewAs}
+          submission={submission}
+          handleSubmitButtonClick={this.handleSubmitButtonClick.bind(this)}
+          handlePDFDownloadButtonClick={this.handlePDFDownloadButtonClick.bind(this)}
+          handleEditAnswerButtonClick={this.handleEditAnswerButtonClick.bind(this)}/>
         <Footer/>
       </div>
     );
