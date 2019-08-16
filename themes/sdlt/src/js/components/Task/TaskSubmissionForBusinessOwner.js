@@ -60,7 +60,7 @@ export default class TaskSubmissionForBusinessOwner extends Component<Props, Sta
     ) : null;
 
     const pdfButton = (
-      <LightButton title={"Download PDF"} iconImage={pdfIcon} onClick={() => this.downloadPdf()}/>
+      <LightButton title={"DOWNLOAD PDF"} iconImage={pdfIcon} onClick={() => this.downloadPdf()}/>
     );
 
     return (
