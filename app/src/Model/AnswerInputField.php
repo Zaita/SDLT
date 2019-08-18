@@ -18,29 +18,25 @@ use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
-use NZTA\SDLT\Traits\SDLTModelPermissions;
-use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\DropdownField;
-use SilverStripe\ORM\ValidationResult;
-use Symbiote\MultiValueField\ORM\FieldType\MultiValueField;
-use Symbiote\MultiValueField\Fields\KeyValueField;
-use Symbiote\MultiValueField\Fields\MultiValueListField;
+use SilverStripe\Forms\ListboxField;
+use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use UncleCheese\DisplayLogic\Forms\Wrapper;
-use Exception;
-use SilverStripe\Forms\LiteralField;
+use NZTA\SDLT\Traits\SDLTModelPermissions;
+use NZTA\SDLT\Model\MultiChoiceAnswerSelection;
 
 /**
  * Class AnswerInputField
  *
  * @property string Name
  * @property string Type
- *
  * @property Question Question
  */
 class AnswerInputField extends DataObject implements ScaffoldingProvider
 {
     use SDLTModelPermissions;
+
     /**
      * @var string
      */
@@ -59,9 +55,8 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         'IsBusinessOwner' => 'Boolean',
         'IsProductName' => 'Boolean',
         'IsBusinessOwnerName' => 'Boolean',
-        'MultiChoiceAnswer' => MultiValueField::class,
         'MultiChoiceSingleAnswerDefault' => 'Varchar(255)',
-        'MultiChoiceMultipleAnswerDefault' => MultiValueField::class,
+        'MultiChoiceMultipleAnswerDefault' => 'Varchar(255)',
     ];
 
     /**
@@ -74,6 +69,13 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
      */
     private static $has_one = [
         'Question' => Question::class
+    ];
+
+    /**
+     * @var array
+     */
+    private static $has_many = [
+        'AnswerSelections' => MultiChoiceAnswerSelection::class,
     ];
 
     /**
@@ -102,65 +104,66 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         $fields->removeByName([
             'QuestionID',
             'SortOrder',
-            'MultiChoiceAnswer',
             'MultiChoiceSingleAnswerDefault',
             'MultiChoiceMultipleAnswerDefault',
         ]);
 
-        $multiChoiceAnswerValues = $this->dbObject('MultiChoiceAnswer')
-            ->getValues();
+        $multiChoiceAnswerValues = $this->AnswerSelections()
+            ->map('Label', 'Label')
+            ->toArray();
+        $blocksField = $fields->dataFieldByName('AnswerSelections');
+        $fields->removeByName('AnswerSelections'); // <-- Removes the scaffolded tab
 
-        // Manage multi-value selections
-        $fields->addFieldsToTab(
-            'Root.Main',
-            Wrapper::create(FieldList::create([
-                DropdownField::create(
-                    'MultiChoiceSingleAnswerDefault',
-                    'Radio Button Default Selection',
-                    $multiChoiceAnswerValues ?: []
-                )
-                    ->setEmptyString('(none)')
-                    ->setDescription(''
-                        . "This selection represents which of the related "
-                        . "questions is selected by default. Once values have "
-                        . "been added, a default can be chosen."
-                    )
-                    ->setDisabled(!$multiChoiceAnswerValues)
-                    ->setAttribute('style', 'width: 200px;')
-                    ->hideIf('InputType')
-                    ->startsWith('multiple-choice: multiple')
-                    ->end(),
-                Wrapper::create(MultiValueListField::create(
-                    'MultiChoiceMultipleAnswerDefault',
-                    'Checkbox Default Selections',
-                    $multiChoiceAnswerValues ?: []
-                )
-                    ->setDisabled(!$multiChoiceAnswerValues)
-                    ->setDescription(''
-                        . 'These selections represent which of the related '
-                        . 'question\'s checkboxes are checked by default. '
-                        . 'Once values have been added, defaults can be chosen'
-                    )
-                )
-                    ->hideUnless('InputType')
-                    ->startsWith('multiple-choice: multiple')
-                    ->end(),
-                KeyValueField::create(
-                    'MultiChoiceAnswer',
-                    'Multiple Choice Answers'
-                )
-                ->setDescription(
-                    'Each row represents a value (left) and label (right) for a'
-                    . ' single '
-                    . sprintf(' %s.', $this->multiSelectionFieldName())
-                    . ' The value can be a maximum of 255 characters.'
-                    . ' Default selections can be specified once values'
-                    . ' have been added and the record has been saved.'
-                )
-            ]))
-                ->displayIf('InputType')
-                ->startsWith('multiple-choice:')
+        if ($this->exists()) {
+            $config = $blocksField->getConfig();
+            $config->removeComponent($config->getComponentByType(GridFieldAddExistingAutocompleter::class));
+            $fields->addFieldToTab('Root.Main', Wrapper::create($blocksField)
+                ->hideUnless('InputType')
+                ->startsWith('multiple-choice')
                 ->end()
+            );
+        }
+
+        // Multi-choice default selection fields
+        $fields->insertAfter(
+            'InputType',
+            Wrapper::create(
+                FieldList::create([
+                    DropdownField::create(
+                        'MultiChoiceSingleAnswerDefault',
+                        'Radio Button Default Selection',
+                        $multiChoiceAnswerValues ?: []
+                    )
+                        ->setEmptyString('(none)')
+                        ->setDescription(''
+                            . 'This selection represents which of the related '
+                            . 'question\'s radio buttons, is selected by default. Once values have '
+                            . 'been added, a default can be chosen.'
+                        )
+                        ->setDisabled(!$multiChoiceAnswerValues)
+                        ->setAttribute('style', 'width: 200px;')
+                        ->hideIf('InputType')
+                        ->startsWith('multiple-choice: multiple')
+                        ->end(),
+                    Wrapper::create(ListboxField::create(
+                        'MultiChoiceMultipleAnswerDefault',
+                        'Checkbox Default Selections',
+                        $multiChoiceAnswerValues ?: []
+                    )
+                        ->setDisabled(!$multiChoiceAnswerValues)
+                        ->setDescription(''
+                            . 'These selections represent which of the related '
+                            . 'question\'s checkboxes are checked by default. '
+                            . 'Once values have been added below, defaults can be chosen.'
+                        ))
+                            ->hideUnless('InputType')
+                            ->startsWith('multiple-choice: multiple')
+                            ->end()
+                    ])
+                )
+                    ->displayIf('InputType')
+                    ->startsWith('multiple-choice:')
+                    ->end()
         );
 
         /** @noinspection PhpUndefinedMethodInspection */
@@ -202,7 +205,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
                 'MinLength',
                 'GQLMultiChoiceAnswer' => 'Contains json-encoded, serialized data, representing multiple-choice answers.',
                 'MultiChoiceSingleAnswerDefault' => 'An integer representing the default, single-selection, multiple-choice option.',
-                'GQLMultiChoiceMultipleAnswerDefault' => 'Contains json-encoded, serialized data, representing default multi-selections.',
+                'MultiChoiceMultipleAnswerDefault' => 'Contains json-encoded, serialized data, representing default multi-selections.',
             ]);
 
         return $scaffolder;
@@ -212,35 +215,36 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
      * OverLoaded getter for the "MultiChoiceAnswer" field. See the following issue
      * on GH for context for why this is needed: https://github.com/silverstripe/silverstripe-graphql/issues/234.
      *
-     * @return string
+     * @return string A JSON-encoded string of field label/values.
      */
     public function getGQLMultiChoiceAnswer()
     {
+        $selections = $this->AnswerSelections();
         $optionData = [];
 
-        if ($val = $this->dbObject('MultiChoiceAnswer')->getValue()) {
+        if ($selections->exists()) {
+            foreach ($selections as $selection) {
+                $data['value'] = $selection->Label;         // "Value" == "Label" for default UI selections
+                $data['calc_value'] = $selection->Value;    // Actual value is required to fetch from QuestionnaireData JSON blob
+                $data['label'] = $selection->Label;
 
-            foreach ($val as $key => $value) {
-
-                $data['value'] = $key;
-                $data['label'] = $value;
+                //ensure the Risks key always exists as an array
+                $risks = $selection->Risks()->toNestedArray();
+                if ($risks) {
+                    //avoid un-needed fields from JSON response
+                    //reduces network payload and avoids info disclosure
+                    foreach ($risks as $idx => $risk) {
+                        unset($risk['ClassName'], $risk['LastEdited'], $risk['Created'], $risk['RecordClassName']);
+                        $risks[$idx] = $risk;
+                    }
+                }
+                $data['Risks'] = $risks ?: [];
 
                 $optionData[] = $data;
-          }
+            }
         }
 
         return json_encode($optionData);
-    }
-
-    /**
-     * OverLoaded getter for the "MultiChoiceMultipleAnswerDefault" field. See the following issue
-     * on GH for context for why this is needed: https://github.com/silverstripe/silverstripe-graphql/issues/234.
-     *
-     * @return string
-     */
-    public function getGQLMultiChoiceMultipleAnswerDefault()
-    {
-        return json_encode($this->dbObject('MultiChoiceMultipleAnswerDefault')->getValue() ?: []);
     }
 
     /**
@@ -264,16 +268,6 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * Simply returns the correct label fragment to use in CMS help-text,
-     *
-     * @return string
-     */
-    private function multiSelectionFieldName()
-    {
-        return $this->isMultipleChoiceSingle() ? 'radio button' : 'checkbox';
-    }
-
-    /**
      * Allow logged-in user to access the model
      *
      * @param Member|null $member member
@@ -285,36 +279,20 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * @return ValidationResult
-     */
-    public function validate()
-    {
-        $validationResult = parent::validate();
-
-        // Run validation result specific to the selected InputType.
-        return $this->validateInputType($validationResult);
-    }
-
-    /**
-     * Validation routine, specific to the selection made in the "InputType" field.
+     * Return all the {@link Risk} objects related to an answer.
      *
-     * @param  ValidationResult $validationResult The result passed in from validate().
-     * @return ValidationResult
+     * @return array
      */
-    protected function validateInputType(ValidationResult $validationResult)
+    public function getRisks() : array
     {
-        if ($this->isMultipleChoiceSingle()) {
-            $validationField = 'MultiChoiceAnswer';
-            $validationFieldValue = $this->dbObject('MultiChoiceAnswer')->getValues();
+        $risks = [];
 
-            if ($this->MultiChoiceSingleAnswerDefault > count($validationFieldValue)) {
-                $validationResult->addFieldError(
-                    $validationField,
-                    'The default choice cannot exceed the total number of available choices.'
-                );
+        foreach ($this->AnswerSelections() as $selection) {
+            foreach ($selection->Risks() as $risk) {
+                $risks[] = $risk;
             }
         }
 
-        return $validationResult;
+        return $risks;
     }
 }
