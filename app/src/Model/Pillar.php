@@ -19,11 +19,8 @@ use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
-use SilverStripe\Security\Member;
-use SilverStripe\Security\Group;
 use SilverStripe\Security\Security;
 use NZTA\SDLT\Traits\SDLTModelPermissions;
-use SilverStripe\Forms\FormField;
 
 /**
  * Class Pillar
@@ -91,7 +88,8 @@ class Pillar extends DataObject implements ScaffoldingProvider
         'proof_of_concept' => 'PROOF OF CONCEPT OR SOFTWARE TRIAL',
         'software_as_service' => 'SOFTWARE AS A SERVICE (SAAS)',
         'product_project_or_solution' => 'PRODUCT, PROJECT OR SOLUTION',
-        'feature_or_bug_fix' => 'FEATURE OR BUG FIX'
+        'feature_or_bug_fix' => 'FEATURE OR BUG FIX',
+        'risk_questionnaire' => 'RISK QUESTIONNAIRE',
     ];
 
     /**

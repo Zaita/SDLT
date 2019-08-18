@@ -207,6 +207,7 @@ class AuditServiceTest extends FunctionalTest
         $this->logInAs($user);
 
         Task::create([
+            'TaskType' => 'questionnaire',
             'Name' => 'TEST1',
         ])->write();
 
@@ -228,6 +229,7 @@ class AuditServiceTest extends FunctionalTest
         $this->logInAs($user);
 
         Task::create([
+            'TaskType' => 'questionnaire',
             'Name' => 'TEST1',
         ])->write();
 
@@ -252,6 +254,7 @@ class AuditServiceTest extends FunctionalTest
 
         Task::create([
             'Name' => 'TEST1',
+            'TaskType' => 'questionnaire',
             'DisplayOnHomePage' => 1, // <-- denotes a "Standalone" task.
         ])->write();
 
@@ -276,6 +279,7 @@ class AuditServiceTest extends FunctionalTest
 
         Task::create([
             'Name' => 'TEST1',
+            'TaskType' => 'questionnaire',
             'DisplayOnHomePage' => 0, // <-- denotes a non-"Standalone" task.
         ])->write();
 
@@ -297,6 +301,7 @@ class AuditServiceTest extends FunctionalTest
 
         Task::create([
             'Name' => 'TEST1',
+            'TaskType' => 'questionnaire',
             'DisplayOnHomePage' => 0, // <-- denotes a non-"Standalone" task.
         ])->write();
 

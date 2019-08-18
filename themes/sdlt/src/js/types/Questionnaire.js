@@ -68,6 +68,7 @@ export type Submission = {
   taskSubmissions: Array<TaskSubmissionDisplay>,
   isApprovalOverrideBySecurityArchitect: boolean,
   productName: string
+  riskResults: Array<RiskResult>,
 };
 
 // Submission Data
@@ -80,6 +81,14 @@ export type SubmissionInputData = {
 export type SubmissionActionData = {
   id: string,
   isChose: boolean
+};
+
+export type RiskResult = {
+  riskName: string,
+  weights: string,
+  score: string,
+  rating: string,
+  color: string
 };
 
 export type SubmissionQuestionData = {

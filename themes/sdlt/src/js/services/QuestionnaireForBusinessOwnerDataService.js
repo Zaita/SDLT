@@ -30,6 +30,7 @@ query {
     SubmitterEmail,
     QuestionnaireStatus,
     BusinessOwnerApproverName,
+    GQRiskResult,
     Questionnaire {
       ID
       Name
@@ -72,6 +73,8 @@ query {
       throw DEFAULT_NETWORK_ERROR;
     }
 
+    // @todo : change with real value
+
     const data: QuestionnaireSubmissionState = {
       siteTitle: _.toString(_.get(json, "data.readSiteConfig.0.Title", "")),
       submission: {
@@ -105,8 +108,7 @@ query {
           FirstName: _.toString(_.get(submissionJSON, "CisoApprover.FirstName", "")),
           Surname: _.toString(_.get(submissionJSON, "CisoApprover.Surname", "")),
         },
-        taskSubmissions: _
-          .toArray(_.get(submissionJSON, "TaskSubmissions", []))
+        taskSubmissions: _.toArray(_.get(submissionJSON, "TaskSubmissions", []))
           .map((item) => {
             const taskSubmission: TaskSubmissionDisplay = {
               uuid: _.toString(_.get(item, "UUID", "")),
@@ -117,6 +119,7 @@ query {
             };
             return taskSubmission;
           }),
+        riskResults: _.has(submissionJSON, 'GQRiskResult') ? JSON.parse(_.get(submissionJSON, "GQRiskResult", "")) : ""
       },
     };
 

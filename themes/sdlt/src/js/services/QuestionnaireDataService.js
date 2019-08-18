@@ -91,6 +91,7 @@ query {
     SubmitterEmail,
     QuestionnaireStatus,
     BusinessOwnerApproverName,
+    GQRiskResult,
     Questionnaire {
       ID
       Name
@@ -188,6 +189,7 @@ query {
             };
             return taskSubmission;
           }),
+        riskResults: _.has(submissionJSON, 'GQRiskResult') ? JSON.parse(_.get(submissionJSON, "GQRiskResult", "")) : ""
       },
     };
 

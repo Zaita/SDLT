@@ -15,6 +15,7 @@ namespace NZTA\SDLT\Model;
 
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Security;
+use NZTA\SDLT\Model\MultiChoiceAnswerSelection;
 
 /**
  * A "Risk" can be associated with a "Risk Questionnaire" and is used to calculate
@@ -28,6 +29,13 @@ class Risk extends DataObject
     private static $db = [
         'Name' => 'Varchar(255)',
         'Description' => 'Text',
+    ];
+
+    /**
+     * @var array
+     */
+    private static $belongs_many_many = [
+        'AnswerSelections' => MultiChoiceAnswerSelection::class,
     ];
 
     /**
@@ -77,5 +85,19 @@ class Risk extends DataObject
     public function canView($member = null)
     {
         return (Security::getCurrentUser() !== null);
+    }
+
+    /**
+     * @return ValidationResult
+     */
+    public function validate()
+    {
+        $result = parent::validate();
+
+        if (strlen($this->Weight) && $this->Weight < 0) {
+            $result->addError('Weight values should be >= 0.');
+        }
+
+        return $result;
     }
 }

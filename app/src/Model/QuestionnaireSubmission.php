@@ -40,6 +40,8 @@ use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Control\Controller;
 use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\FormField;
+use NZTA\SDLT\Traits\SDLTRiskSubmission;
 
 /**
  * Class Questionnaire
@@ -55,6 +57,8 @@ use SilverStripe\Forms\TextField;
  */
 class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 {
+    use SDLTRiskSubmission;
+
     /**
      * @var string
      */
@@ -114,7 +118,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      * @var array
      */
     private static $summary_fields = [
-        'getQuestionnaireName' => 'Questionnaire Name',
+        'QuestionnaireName' => 'Questionnaire Name',
+        'QuestionnaireType' => 'Questionnaire Type',
         'ProductName',
         'SubmitterName',
         'SubmitterEmail',
@@ -286,6 +291,14 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @return string
      */
+    public function getQuestionnaireType()
+    {
+        return FormField::name_to_label($this->Questionnaire()->Type ?? 'Questionnaire');
+    }
+
+    /**
+     * @return string
+     */
     public function getPrettifyQuestionnaireStatus()
     {
         $mapping = [
@@ -424,7 +437,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'QuestionnaireName',
                 'Created',
                 'BusinessOwnerApproverName',
-                'ApprovalOverrideBySecurityArchitect'
+                'ApprovalOverrideBySecurityArchitect',
+                'GQRiskResult',
             ]);
 
         $submissionScaffolder
@@ -830,8 +844,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * updateQuestionnaireStatusToSubmitted - this api will call when user click
-     * on submit button, after completing the anwers user can update the answers
+     * updateQuestionnaireStatusToSubmitted. This endpoint is called when users
+     * click on a submit button. After completion, users can modify their answers.
      *
      * @param SchemaScaffolder $scaffolder SchemaScaffolder
      *
@@ -1377,6 +1391,27 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             $msg = sprintf('"%s" was %s. (UUID: %s)', $this->Questionnaire()->Name, $this->$approvalFieldName, $this->UUID);
             $status = ($this->$approvalFieldName === 'approved') ? 'Approve' : 'Deny';
             $this->auditService->commit($status, $msg, $this, $userData);
+        }
+    }
+
+    /**
+     * @param DataObject $question question
+     *
+     * @return array $finalActionFields
+     */
+    public function getAnswerActionFields($question)
+    {
+        $finalActionFields = [];
+
+        foreach ($question->AnswerActionFields() as $answerActionField) {
+            $actionFields['ID'] = $answerActionField->ID;
+            $actionFields['Label'] = $answerActionField->Label;
+            $actionFields['ActionType'] = $answerActionField->ActionType;
+            $actionFields['Message'] = $answerActionField->Message;
+            $actionFields['GotoID'] = $answerActionField->Goto()->ID;
+            $actionFields['QuestionID'] = $answerActionField->Question()->ID;
+            $actionFields['TaskID'] = $answerActionField->Task()->ID;
+            $finalActionFields[] = $actionFields;
         }
     }
 
@@ -1960,5 +1995,46 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         }
 
         return false;
+    }
+
+    /**
+     * A graphql frontend for the getRiskResult() method.
+     *
+     * @return string
+     */
+    public function GQRiskResult() : string
+    {
+        return json_encode($this->getRiskResultData());
+    }
+
+    /**
+     * Wrap the related questionnaire's risk-data alongside those of all its
+     * related tasks.
+     *
+     * @return array
+     */
+    public function getRiskResultData() : array
+    {
+        // Deal with the related Questionnaire's Task-calcs, and append them
+        // to the output array
+        $data = [];
+        $allRiskResults = [
+            $this->getRiskResult('q'),
+        ];
+
+        foreach ($this->Questionnaire()->Tasks() as $task) {
+            if ($result = $task->TaskSubmission()->getRiskResult('t')) {
+                $allRiskResults[] = $result;
+            }
+        }
+
+        // Flatten the array for a row-by-row display per risk.
+        foreach ($allRiskResults as $r) {
+            foreach ($r as $array) {
+                $data[] = $array;
+            }
+        }
+
+        return $data;
     }
 }
