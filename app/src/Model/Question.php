@@ -208,6 +208,7 @@ class Question extends DataObject implements ScaffoldingProvider
             $inputFields['InputType'] = $answerInputField->InputType;
             $inputFields['Required'] = $answerInputField->Required;
             $inputFields['MinLength'] = $answerInputField->MinLength;
+            $inputFields['MaxLength'] = $answerInputField->MaxLength;
             $inputFields['PlaceHolder'] = $answerInputField->PlaceHolder;
             $inputFields['IsBusinessOwner'] = $answerInputField->IsBusinessOwner;
             $inputFields['IsProductName'] = $answerInputField->IsProductName;
