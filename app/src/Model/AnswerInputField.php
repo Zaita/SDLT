@@ -21,6 +21,7 @@ use SilverStripe\Security\Security;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\ListboxField;
+use SilverStripe\Forms\NumericField;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use UncleCheese\DisplayLogic\Forms\Wrapper;
 use NZTA\SDLT\Traits\SDLTModelPermissions;
@@ -38,6 +39,11 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
     use SDLTModelPermissions;
 
     /**
+     * @var int
+     */
+    const MAX_URL_LENGTH = 4096;
+
+    /**
      * @var string
      */
     private static $table_name = 'AnswerInputField';
@@ -50,6 +56,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         'InputType' => 'Enum("text, email, textarea, date, url, multiple-choice: single selection, multiple-choice: multiple selection", "text")',
         'Required' => 'Boolean',
         'MinLength' => 'Int',
+        'MaxLength' => 'Int',
         'PlaceHolder' => 'Varchar(255)',
         'SortOrder' => 'Int',
         'IsBusinessOwner' => 'Boolean',
@@ -81,6 +88,13 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
     /**
      * @var array
      */
+    private static $defaults = [
+        'MaxLength' => self::MAX_URL_LENGTH,
+    ];
+
+    /**
+     * @var array
+     */
     private static $summary_fields = [
         'Label',
         'InputType'
@@ -106,6 +120,8 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
             'SortOrder',
             'MultiChoiceSingleAnswerDefault',
             'MultiChoiceMultipleAnswerDefault',
+            'MinLength',
+            'MaxLength',
         ]);
 
         $multiChoiceAnswerValues = $this->AnswerSelections()
@@ -170,6 +186,13 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
                     ->end()
         );
 
+        $fields->addFieldsToTab('Root.Main', FieldList::create([
+            NumericField::create('MinLength', 'Min Length'),
+            NumericField::create('MaxLength', 'Max Length')
+                ->setHTML5(true) // <-- Removes silly i18n thousands separator
+                ->setDisabled(true),
+        ]), 'PlaceHolder');
+
         /** @noinspection PhpUndefinedMethodInspection */
         $fields->dataFieldByName('IsBusinessOwner')
             ->displayIf('InputType')
@@ -183,6 +206,9 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
             ->displayIf('InputType')
             ->isEqualTo('text');
         $fields->dataFieldByName('MinLength')
+            ->displayUnless('InputType')
+            ->startsWith('multiple-choice');
+        $fields->dataFieldByName('MaxLength')
             ->displayUnless('InputType')
             ->startsWith('multiple-choice');
         $fields->dataFieldByName('PlaceHolder')
@@ -207,6 +233,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
                 'InputType',
                 'Required',
                 'MinLength',
+                'MaxLength',
                 'GQLMultiChoiceAnswer' => 'Contains json-encoded, serialized data, representing multiple-choice answers.',
                 'MultiChoiceSingleAnswerDefault' => 'An integer representing the default, single-selection, multiple-choice option.',
                 'MultiChoiceMultipleAnswerDefault' => 'Contains json-encoded, serialized data, representing default multi-selections.',
