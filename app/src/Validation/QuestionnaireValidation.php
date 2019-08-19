@@ -15,7 +15,6 @@ namespace NZTA\SDLT\Validation;
 
 use Exception;
 use NZTA\SDLT\GraphQL\GraphQLAuthFailure;
-use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 
 /**
@@ -61,8 +60,8 @@ class QuestionnaireValidation
     }
 
     /**
-     * @param string     $data              answer data
-     * @param DataObject $inputfieldDetails inputfieldsDetails
+     * @param  string     $data              Answer data
+     * @param  DataObject $inputfieldDetails Inputfield Details
      * @throws Exception
      * @return void
      */
@@ -87,6 +86,18 @@ class QuestionnaireValidation
                     sprintf(
                         'Please enter a value with at least %d characters for %s.',
                         $inputfieldDetails->MinLength,
+                        $inputfieldDetails->Label
+                    )
+                );
+            }
+
+            // validate field for maximum length
+            if ($inputfieldDetails->MaxLength > 0 &&
+                strlen($data) > $inputfieldDetails->MaxLength) {
+                throw new Exception(
+                    sprintf(
+                        'Please enter a value with at most %d characters for %s.',
+                        $inputfieldDetails->MaxLength,
                         $inputfieldDetails->Label
                     )
                 );

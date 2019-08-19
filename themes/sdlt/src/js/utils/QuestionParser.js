@@ -98,6 +98,7 @@ export default class QuestionParser {
             type: type,
             required: Boolean(_.toInteger(_.get(inputSchema, "Required", false))),
             minLength: Number.parseInt(_.toString(_.get(inputSchema, "MinLength", 0))),
+            maxLength: Number.parseInt(_.toString(_.get(inputSchema, "MaxLength", 0))),
             placeholder: _.toString(_.get(inputSchema, "PlaceHolder", "")),
             options: _.has(inputSchema, 'MultiChoiceAnswer') ? JSON.parse(_.get(inputSchema, "MultiChoiceAnswer", "")) : "",
             defaultRadioButtonValue: _.has(inputSchema, 'MultiChoiceSingleAnswerDefault') ? _.toString(_.get(inputSchema, "MultiChoiceSingleAnswerDefault", "")) : "",
