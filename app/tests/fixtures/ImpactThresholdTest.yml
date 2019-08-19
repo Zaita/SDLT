@@ -1,0 +1,21 @@
+NZTA\SDLT\Model\ImpactThreshold:
+  insignificant:
+    Name: 'Insignificant'
+    Value: 10
+    Colour: 'FFFFFF'
+    Operator: '<='
+  moderate:
+    Name: 'Moderate'
+    Value: 50
+    Colour: 'CCCCCC'
+    Operator: '>'
+  severe:
+    Name: 'Severe'
+    Value: 100
+    Colour: 'FFCC00'
+    Operator: '>'
+  severe:
+    Name: 'Severe'
+    Value: 200
+    Colour: 'FFCC00'
+    Operator: '>'
