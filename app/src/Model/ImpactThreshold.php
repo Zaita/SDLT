@@ -86,14 +86,14 @@ class ImpactThreshold extends DataObject
             '<=' => 'LessThanOrEqual',
             '>' => 'GreaterThan'
         ] as $op => $filter) {
+            $where = sprintf("Operator = '%s' AND %s %s Value", $op, $operand, $op);
+            $sort = sprintf('ABS(Value - %s)', $operand);
+            $matches = self::get()
+                    ->where($where)
+                    ->sort($sort);
 
-            $match = self::get()->filter([
-                'Operator' => $op,
-                "Value:$filter" => $operand
-            ]);
-
-            if ($match && $match->exists()) {
-                return $match->first();
+            if ($matches && $matches->count()) {
+                return $matches->first();
             }
         }
 
