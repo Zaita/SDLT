@@ -175,7 +175,8 @@ class QuestionForm extends Component<Props> {
                   placeholder,
                   options,
                   defaultRadioButtonValue,
-                  defaultCheckboxValue
+                  defaultCheckboxValue,
+                  maxLength
                 } = {...input};
 
                 const hasError = Boolean(_.get(filteredErrors, id, null));
@@ -189,7 +190,7 @@ class QuestionForm extends Component<Props> {
                     <tr key={id}>
                       <td className="label"><label>{label}</label></td>
                       <td>
-                        <Field type={type} name={id} className={classes.join(" ")} placeholder={placeholder}/>
+                        <Field type={type} name={id} className={classes.join(" ")} placeholder={placeholder} maxlength={maxLength > 0 ? maxLength : 4096}/>
                         {hasError && <i className="fas fa-exclamation-circle text-danger ml-1"/>}
                       </td>
                     </tr>
