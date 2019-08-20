@@ -10,7 +10,7 @@ import _ from "lodash";
 import URLUtil from "../../utils/URLUtil";
 import SubmissionDataUtil from "../../utils/SubmissionDataUtil";
 import type {User} from "../../types/User";
-import type {RiskResult} from "../../types/Questionnaire";
+import RiskResultContainer from "../Common/RiskResultContainer";
 
 type Props = {
   submission: Submission | null,
@@ -80,60 +80,12 @@ class Summary extends Component<Props> {
         {this.renderSubmitterInfo(submission)}
         {this.renderTasks(submission)}
         {this.renderApprovals(submission)}
-        {this.renderRiskResults(submission)}
+        <RiskResultContainer riskResults={submission.riskResults}/>
         {this.renderSkipCheckbox(submission, viewAs, user)}
         {this.renderButtons(submission)}
       </div>
     );
   }
-
-  renderRiskResults(submission: Submission) {
-    const riskResults = submission.riskResults;
-
-    if (riskResults.length === 0) {
-      return null;
-    }
-
-    return (
-      <div className="tasks">
-        <h3>Risks</h3>
-
-        <div className="table-responsive">
-          <table className="table">
-            <thead className="thead-light">
-              <tr key="risk_table_header">
-                <th>Risk Name</th>
-                <th>Weights</th>
-                <th>Score</th>
-                <th>Rating</th>
-              </tr>
-            </thead>
-            <tbody>
-              {riskResults.map((riskResult, index): RiskResult => {
-                return (
-                  <tr key={index+1} style={{backgroundColor:'#' +riskResult.colour}}>
-                    <td>
-                      {riskResult.riskName}
-                    </td>
-                    <td>
-                      {riskResult.weights}
-                    </td>
-                    <td>
-                      {riskResult.score}
-                    </td>
-                    <td>
-                      {riskResult.rating}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  }
-
   renderSubmitterInfo(submission: Submission) {
     const submitter = submission.submitter;
 

@@ -2007,30 +2007,17 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * Wrap the related questionnaire's risk-data alongside those of all its
-     * related tasks.
+     * Wrap the related questionnaire's risk-data
      *
      * @return array
      */
     public function getRiskResultData() : array
     {
-        // Deal with the related Questionnaire's Task-calcs, and append them
         $allRiskResults = [];
 
         // for questionnaire
         if ($this->QuestionnaireStatus !== "in_progress") {
             $allRiskResults = $this->getRiskResult('q');
-        }
-
-        // for task
-        $taskSubmissions = $this->TaskSubmissions()->filter([
-            'Status:not' => ["start", "in_progress", "invalid"]
-        ]);
-
-        foreach ($taskSubmissions as $taskSubmission) {
-            if ($result = $taskSubmission->getRiskResult('t')) {
-                $allRiskResults = array_merge($allRiskResults, $result);
-            }
         }
 
         return $allRiskResults;
