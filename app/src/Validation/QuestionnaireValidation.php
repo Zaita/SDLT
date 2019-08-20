@@ -32,7 +32,11 @@ class QuestionnaireValidation
     public static function validate_answer_input_data($inputAnswerfields, $questionsData, $questionID)
     {
         foreach ($inputAnswerfields as $inputAnswerfield) {
-            $inputfieldDetails = QuestionnaireValidation::get_field_details($questionsData, $questionID, $inputAnswerfield->id);
+            $inputfieldDetails = QuestionnaireValidation::get_field_details(
+                $questionsData,
+                $questionID,
+                $inputAnswerfield->id
+            );
 
             if (!$inputfieldDetails) {
                 throw new Exception(
@@ -92,7 +96,8 @@ class QuestionnaireValidation
             }
 
             // validate field for maximum length
-            if ($inputfieldDetails->MaxLength > 0 &&
+            if (isset($inputfieldDetails->MaxLength) &&
+                $inputfieldDetails->MaxLength > 0 &&
                 strlen($data) > $inputfieldDetails->MaxLength) {
                 throw new Exception(
                     sprintf(
@@ -187,7 +192,11 @@ class QuestionnaireValidation
     public static function validate_answer_action_data($actionFields, $questionsData, $questionID)
     {
         foreach ($actionFields as $actionField) {
-            $actionFieldDetails = QuestionnaireValidation::get_field_details($questionsData, $questionID, $actionField->id);
+            $actionFieldDetails = QuestionnaireValidation::get_field_details(
+                $questionsData,
+                $questionID,
+                $actionField->id
+            );
 
             if (!$actionFieldDetails) {
                 throw new Exception(
