@@ -56,6 +56,15 @@ class Risk extends DataObject
     ];
 
     /**
+     * Used by {@link QuestionnaireAdmin} and others.
+     *
+     * @var array
+     */
+    private static $extra_export_fields = [
+        'Description',
+    ];
+
+    /**
      * @var string
      */
     private static $table_name = 'Risk';
