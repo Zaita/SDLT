@@ -13,6 +13,7 @@
 
 namespace NZTA\SDLT\Traits;
 
+use NZTA\SDLT\Model\ImpactThreshold;
 use NZTA\SDLT\Model\AnswerInputField;
 
 trait SDLTRiskSubmission
@@ -99,10 +100,18 @@ trait SDLTRiskSubmission
             $riskData[$risk['ID']]['weights'][] = $risk['Weight'];
         }
 
+        $default = new class {
+            public $Name = 'Unknown';
+            public $Colour = 'ffffff';
+        };
+
         foreach ($riskData as $riskId => $data) {
-            $riskData[$riskId]['score'] = $formula->setWeightings($data['weights'])->calculate();
-            $riskData[$riskId]['rating'] = 'TBC';
+            $score = $formula->setWeightings($data['weights'])->calculate();
+            $impact = ImpactThreshold::match($score);
+            $riskData[$riskId]['score'] = $score;
+            $riskData[$riskId]['rating'] = $impact ? $impact->Name : $default->Name;;
             $riskData[$riskId]['weights'] = implode(', ', $data['weights']);
+            $riskData[$riskId]['colour'] = $impact ? $impact->Colour : $default->Colour;
         }
 
         return array_values($riskData);
