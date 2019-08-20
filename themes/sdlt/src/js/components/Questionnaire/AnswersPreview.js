@@ -88,7 +88,7 @@ class AnswersPreview extends Component<Props> {
             return option.label;
           })
 
-          data = JSON.stringify(dataArr);
+          data = dataArr.join(', ');
         }
 
         return data;

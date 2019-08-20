@@ -31,7 +31,7 @@ class RiskResultContainer extends Component<Props> {
             <tbody>
               {riskResults.map((riskResult, index): RiskResult => {
                 return (
-                  <tr key={index+1} style={{backgroundColor:riskResult.color}}>
+                  <tr key={index+1} style={{backgroundColor:'#' + riskResult.colour}}>
                     <td>
                       {riskResult.riskName}
                     </td>
