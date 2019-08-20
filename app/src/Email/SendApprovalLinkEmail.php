@@ -14,11 +14,8 @@
 namespace NZTA\SDLT\Email;
 
 use SilverStripe\Control\Email\Email;
-use Symbiote\QueuedJobs\Services\AbstractQueuedJob;
-use Symbiote\QueuedJobs\Services\QueuedJobService;
-use Symbiote\QueuedJobs\Services\QueuedJob;
-use SilverStripe\Security\Member;
 use NZTA\SDLT\Model\QuestionnaireEmail;
+use NZTA\SDLT\Constant\UserGroupConstant;
 
 /**
  * Send Approval Link Email
@@ -46,42 +43,48 @@ class SendApprovalLinkEmail
         // send email to CISO or Security Architect group
         if ($this->members) {
             foreach ($this->members as $member) {
-                $this->sendEmail($member->FirstName, $member->Email, false);
+                if (!$memberRole = $member->getRoleName()) {
+                    continue;
+                }
+
+                $this->sendEmail($member->FirstName, $member->Email, false, $memberRole);
             }
         }
 
         if ($this->businessOwnerEmail != '') {
-            $this->sendEmail('Business Owner', $this->businessOwnerEmail, true);
+            $this->sendEmail('Business Owner', $this->businessOwnerEmail, true, UserGroupConstant::ROLE_CODE_BO);
         }
 
         $this->isComplete = true;
     }
 
     /**
-     * @param string  $name            name
-     * @param string  $toEmail         to Email
-     * @param boolean $isBusinessOwner is BusinessOwner
-     *
+     * @param string  $name            Name
+     * @param string  $toEmail         The "To" Email address
+     * @param boolean $isBusinessOwner Is current "user" a "BusinessOwner" type?
+     * @param string  $memberRole      Member type. This will use the correct email
+     *                                 template fields.
      * @return null
      */
-    public function sendEmail($name = '', $toEmail = '', $isBusinessOwner = false)
+    public function sendEmail($name = '', $toEmail = '', $isBusinessOwner = false, $memberRole)
     {
         $emailDetails = QuestionnaireEmail::get()->first();
-
-        $sub = $this->replaceVariable($emailDetails->ApprovalLinkEmailSubject, $isBusinessOwner);
+        $subjField = "{$memberRole}ApprovalLinkEmailSubject";
+        $bodyField = "{$memberRole}ApprovalLinkEmailBody";
+        $subject = $this->replaceVariable($emailDetails->$subjField, $isBusinessOwner);
+        $body = $this->replaceVariable($emailDetails->$bodyField, $isBusinessOwner);
         $from = $emailDetails->FromEmailAddress;
-
         $email = Email::create()
             ->setHTMLTemplate('Email\\EmailTemplate')
             ->setData([
                 'Name' => $name,
-                'Body' => $this->replaceVariable($emailDetails->ApprovalLinkEmailBody, $isBusinessOwner),
+                'Body' => $body,
                 'EmailSignature' => $emailDetails->EmailSignature
 
             ])
             ->setFrom($from)
             ->setTo($toEmail)
-            ->setSubject($sub);
+            ->setSubject($subject);
 
         $email->send();
     }
