@@ -59,6 +59,7 @@ query {
       JiraKey
       TicketLink
     }
+    RiskResultData
   }
 }`;
     const responseJSONObject = await GraphQLRequestHelper.request({query});
@@ -85,7 +86,8 @@ query {
           answersJSON: _.toString(_.get(submissionJSONObject, "AnswerData", "")),
         }),
         selectedComponents: SecurityComponentParser.parseFromJSONOArray(get(submissionJSONObject, "SelectedComponents", [])),
-        jiraTickets: JiraTicketParser.parseFromJSONArray(get(submissionJSONObject, "JiraTickets", []))
+        jiraTickets: JiraTicketParser.parseFromJSONArray(get(submissionJSONObject, "JiraTickets", [])),
+        riskResults: _.has(submissionJSONObject, 'RiskResultData') ? JSON.parse(_.get(submissionJSONObject, "RiskResultData", "")) : ""
       },
     };
 
