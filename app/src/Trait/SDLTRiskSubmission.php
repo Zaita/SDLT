@@ -112,6 +112,7 @@ trait SDLTRiskSubmission
             $riskData[$riskId]['rating'] = $impact ? $impact->Name : $default->Name;;
             $riskData[$riskId]['weights'] = implode(', ', $data['weights']);
             $riskData[$riskId]['colour'] = $impact ? $impact->Colour : $default->Colour;
+            $riskData[$riskId]['riskID'] = $riskId;
         }
 
         return array_values($riskData);
