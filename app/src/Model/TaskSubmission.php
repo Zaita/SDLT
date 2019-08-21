@@ -97,6 +97,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         'JiraKey' => 'Varchar(255)',
         'IsApprovalRequired' => 'Boolean',
         'IsTaskApprovalLinkSent' => 'Boolean',
+        'RiskResultData' => 'Text'
     ];
 
     /**
@@ -208,31 +209,67 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 ->setDescription(null);
         }
 
+        // link tab
         $secureLink = $this->SecureLink();
         $anonLink = $this->AnonymousAccessLink();
-        $fields->addFieldsToTab('Root.Links', [
-            TextField::create(microtime(), 'Secure link')
-                ->setValue($secureLink)
-                ->setReadonly(true)
-                ->setDescription('This is the link emailed to authenticated'
-                    .' users of the application'),
-            TextField::create(microtime(), 'Anonymous access link')
-                ->setValue($anonLink)
-                ->setReadonly(true)
-                ->setDescription('This is the link emailed to anonymous users'
-                    .' of the application. Anyone possessing the link can view'
-                    .' the submission')
-        ]);
-
-        $fields->dataFieldByName('IsApprovalRequired')->setTitle('Always require approval');
-
-        $taskApproverList = $this->ApprovalGroup()->Members()->map('ID', 'Name');
-        $fields->dataFieldByName('TaskApproverID')->setSource($taskApproverList);
-
+        $fields->addFieldsToTab(
+            'Root.Links',
+            [
+              TextField::create(microtime(), 'Secure link')
+                  ->setValue($secureLink)
+                  ->setReadonly(true)
+                  ->setDescription('This is the link emailed to authenticated'
+                      .' users of the application'),
+              TextField::create(microtime(), 'Anonymous access link')
+                  ->setValue($anonLink)
+                  ->setReadonly(true)
+                  ->setDescription('This is the link emailed to anonymous users'
+                      .' of the application. Anyone possessing the link can view'
+                      .' the submission')
+            ]
+        );
         $SubmitterList = Member::get()->map('ID', 'Name');
-        $fields->dataFieldByName('SubmitterID')->setSource($SubmitterList);
+        $taskApproverList = $this->ApprovalGroup()->Members()->map('ID', 'Name');
+
+        $fields->addFieldsToTab(
+            'Root.TaskSubmissionData',
+            [
+                $fields->dataFieldByName('QuestionnaireData'),
+                $fields->dataFieldByName('AnswerData'),
+                $fields->dataFieldByName('RiskResultData'),
+                $fields->dataFieldByName('Result'),
+            ]
+        );
+
+        $fields->addFieldsToTab(
+            'Root.TaskSubmitter',
+            [
+                $fields->dataFieldByName('SubmitterID')->setSource($SubmitterList),
+                $fields->dataFieldByName('SubmitterIPAddress'),
+            ]
+        );
+
+        $fields->addFieldsToTab(
+            'Root.TaskApproval',
+            [
+                $fields->dataFieldByName('IsApprovalRequired'),
+                $fields->dataFieldByName('TaskApproverID')->setSource($taskApproverList),
+                $fields->dataFieldByName('ApprovalGroupID'),
+                $fields->dataFieldByName('IsTaskApprovalLinkSent '),
+            ]
+        );
+
+        $fields->insertBefore(
+            $fields->dataFieldByName('TaskID'),
+            'Status'
+        );
+
+        if (!$this->Task()->isRiskType()) {
+            $fields->removeByName('RiskResultData');
+        }
 
         $fields->removeByName('QuestionnaireSubmissionID');
+
         return $fields;
     }
 
@@ -277,7 +314,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'LockAnswersWhenComplete',
                 'JiraKey',
                 'IsTaskApprovalRequired',
-                'IsCurrentUserAnApprover'
+                'IsCurrentUserAnApprover',
+                'RiskResultData',
             ]);
 
         $dataObjectScaffolder
@@ -562,6 +600,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     }
 
                     $submission->Status = TaskSubmission::STATUS_COMPLETE;
+                    $submission->RiskResultData = $submission->getRiskResultBasedOnAnswer();
 
                     if ($submission->IsTaskApprovalRequired) {
                         $submission->Status = TaskSubmission::STATUS_WAITING_FOR_APPROVAL;
@@ -1338,5 +1377,20 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         $string = str_replace('{$submitterEmail}', $SubmitterEmail, $string);
 
         return $string;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRiskResultBasedOnAnswer()
+    {
+        // Deal with the related Questionnaire's Task-calcs, and append them
+        $allRiskResults = [];
+
+        if (!in_array($this->Status, ["start", "in_progress", "invalid"])) {
+            $allRiskResults = $this->getRiskResult('t');
+        }
+
+        return json_encode($allRiskResults);
     }
 }

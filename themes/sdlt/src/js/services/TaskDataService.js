@@ -62,6 +62,7 @@ query {
     }
     IsTaskApprovalRequired
     IsCurrentUserAnApprover
+    RiskResultData
   }
 }`;
 
@@ -91,6 +92,7 @@ query {
       jiraTickets: JiraTicketParser.parseFromJSONArray(get(submissionJSONObject, "JiraTickets", [])),
       isCurrentUserAnApprover:  _.get(submissionJSONObject, "IsCurrentUserAnApprover", "false") === "true",
       isTaskApprovalRequired: get(submissionJSONObject, "IsTaskApprovalRequired", false) === "true",
+      riskResults: _.has(submissionJSONObject, 'RiskResultData') ? JSON.parse(_.get(submissionJSONObject, "RiskResultData", "")) : ""
     };
 
     return data;

@@ -11,6 +11,7 @@ import Header from "../Header/Header";
 import LightButton from "../Button/LightButton";
 import pdfIcon from "../../../img/icons/pdf.svg";
 import PDFUtil from "../../utils/PDFUtil";
+import RiskResultContainer from "../Common/RiskResultContainer";
 
 type Props = {
   uuid: string,
@@ -43,11 +44,17 @@ export default class TaskSubmissionForBusinessOwner extends Component<Props, Sta
 
     if (!taskSubmission) {return null;}
 
-    const result = taskSubmission.result && taskSubmission.status === "complete" ? (
+    const resultStatus = ["complete", "waiting_for_approval", "approved", "denied"];
+
+    const result = taskSubmission.result && (resultStatus.indexOf(taskSubmission.status) > -1) ? (
       <div className="result">
         <h3>Result:</h3>
         <div>{taskSubmission.result}</div>
       </div>
+    ) : null;
+
+    const riskResult = taskSubmission.riskResults && (resultStatus.indexOf(taskSubmission.status) > -1) ? (
+      <RiskResultContainer riskResults={taskSubmission.riskResults}/>
     ) : null;
 
     const backButton = taskSubmission.questionnaireSubmissionUUID ? (
@@ -69,7 +76,7 @@ export default class TaskSubmissionForBusinessOwner extends Component<Props, Sta
         <div className="TaskSubmission">
           {result}
           <AnswersPreview questions={taskSubmission.questions}/>
-
+          {riskResult}
           <div className="buttons">
             {pdfButton}
             {backButton}

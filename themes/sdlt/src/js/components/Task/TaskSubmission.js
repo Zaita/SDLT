@@ -11,6 +11,7 @@ import URLUtil from "../../utils/URLUtil";
 import DarkButton from "../Button/DarkButton";
 import pdfIcon from "../../../img/icons/pdf.svg";
 import PDFUtil from "../../utils/PDFUtil";
+import RiskResultContainer from "../Common/RiskResultContainer";
 
 type Props = {
   taskSubmission: TaskSubmissionType,
@@ -24,7 +25,6 @@ type Props = {
 };
 
 class TaskSubmission extends Component<Props> {
-
   render() {
     const {
       taskSubmission,
@@ -71,11 +71,16 @@ class TaskSubmission extends Component<Props> {
     );
 
     const resultStatus = ["complete", "waiting_for_approval", "approved", "denied"];
+
     const result = taskSubmission.result && (resultStatus.indexOf(taskSubmission.status) > -1) ? (
       <div className="result">
         <h3>Result:</h3>
         <div>{taskSubmission.result}</div>
       </div>
+    ) : null;
+
+    const riskResult = taskSubmission.riskResults && (resultStatus.indexOf(taskSubmission.status) > -1) ? (
+      <RiskResultContainer riskResults={taskSubmission.riskResults}/>
     ) : null;
 
     const approveButton = (viewAs === "approver" && taskSubmission.status === "waiting_for_approval") ? (
@@ -90,7 +95,7 @@ class TaskSubmission extends Component<Props> {
       <div className="TaskSubmission">
         {result}
         {body}
-
+        {riskResult}
         <div className="buttons">
           {editButton}
           {pdfButton}
@@ -125,6 +130,5 @@ class TaskSubmission extends Component<Props> {
     });
   }
 }
-
 
 export default TaskSubmission;
