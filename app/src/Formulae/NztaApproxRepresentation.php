@@ -76,7 +76,10 @@ class NztaApproxRepresentation extends RiskFormula
             return 0;
         }
 
-        return number_format($sum / count($weights), self::PRECISION);
+        $count = count($weights);
+        return ($count > 0)
+                ? number_format($sum / $count, self::PRECISION)
+                : 0;
     }
 
     /**
@@ -124,7 +127,9 @@ class NztaApproxRepresentation extends RiskFormula
      */
     public function highest()
     {
-        return max($this->weightings);
+        return count($this->weightings)
+            ? max($this->weightings)
+            : 0;
     }
 
     /**
