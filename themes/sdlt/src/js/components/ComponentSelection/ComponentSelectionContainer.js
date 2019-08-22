@@ -100,6 +100,7 @@ class ComponentSelectionContainer extends Component<Props> {
 
     let body = null;
     switch (taskSubmission.status) {
+      case "start":
       case "in_progress":
         body = (
           <ComponentSelection
