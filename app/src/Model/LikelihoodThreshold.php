@@ -17,6 +17,7 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\ValidationResult;
 use NZTA\SDLT\Model\Task;
+use NZTA\SDLT\Model\RiskRating;
 
 /**
  * Class LikelihoodThreshold. Represents an admin-managed record for calculation
@@ -29,6 +30,13 @@ class LikelihoodThreshold extends DataObject
      */
     private static $has_one = [
         'Task' => Task::class,
+    ];
+
+    /**
+     * @var array
+     */
+    private static $belongs_to = [
+        'RiskRating' => RiskRating::class,
     ];
 
     /**
