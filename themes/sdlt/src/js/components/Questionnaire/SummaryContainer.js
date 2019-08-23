@@ -23,6 +23,7 @@ import ReactModal from "react-modal";
 import DarkButton from "../Button/DarkButton";
 import LightButton from "../Button/LightButton";
 import CSRFTokenService from "../../services/CSRFTokenService";
+import RiskResultContainer from "../Common/RiskResultContainer";
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -163,11 +164,17 @@ class SummaryContainer extends Component<Props, State> {
       return;
     }
 
+    let riskResults;
+    if(submission && submission.riskResults) {
+      riskResults = submission.riskResults;
+    }
+
     PDFUtil.generatePDF({
       questions: submission.questions,
       submitter: submission.submitter,
       questionnaireTitle: submission.questionnaireTitle,
       siteTitle,
+      riskResults: riskResults ? riskResults : [],
     });
   }
 
