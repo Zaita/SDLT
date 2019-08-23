@@ -38,7 +38,7 @@ async function getImageDataByURL(imageURL: string) {
 export default class PDFUtil {
 
   static async generatePDF(args: GeneratePDFArgument) {
-    const {questions, submitter, questionnaireTitle, siteTitle, result} = {...args};
+    const {questions, submitter, questionnaireTitle, siteTitle, result, riskResults} = {...args};
 
     const defaultFontSize = 12;
     const content = [];
@@ -195,7 +195,7 @@ export default class PDFUtil {
               return option.label;
             })
 
-            data = JSON.stringify(dataArr);
+            data = dataArr.join(', ');
           }
 
           return data;
@@ -233,6 +233,42 @@ export default class PDFUtil {
 
     // Footer
     const footerImageData = await getImageDataByURL(footerImage);
+
+    if(typeof riskResults === 'object' && riskResults.length > 0) {
+      let results = [
+        [
+          { text: 'Risk Name', bold: true, alignment: 'center' },
+          { text: 'Weights', bold: true, alignment: 'center' },
+          { text: 'Score', bold: true, alignment: 'center' },
+          { text: 'Rating', bold: true, alignment: 'center' },
+        ]
+      ];
+      riskResults.forEach(function(result, i){
+        let resultObj = { text: result.rating, alignment: 'center', color: '#'+result.colour, bold: true };
+
+        if (result.rating == 'Unknown') {
+          resultObj = { text: 'Unknown', alignment: 'center', color: '#000000', bold: true };
+        }
+
+
+        results.push([
+          { text: result.riskName },
+          result.weights,
+          result.score,
+          resultObj
+        ])
+      })
+      content.push({
+        table: {
+          headerRows: 1,
+          //actual rendered width of footer and header images
+          widths: [237, 75, 75, 75],
+          body: results
+        },
+        width: 500,
+        margin: [0, 0, 0, defaultFontSize]
+      });
+    }
 
     content.push({
       image: footerImageData,
