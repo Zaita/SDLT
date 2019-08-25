@@ -19,6 +19,8 @@ class NztaApproxRepresentationTest extends SapphireTest
         $this->assertEquals(1, $formula->median());
         $formula = NztaApproxRepresentation::create()->setWeightings([1,2,3]);
         $this->assertEquals(1.5, $formula->median());
+        $formula = NztaApproxRepresentation::create()->setWeightings([]);
+        $this->assertEquals(0, $formula->median());
         $formula = NztaApproxRepresentation::create()->setWeightings([0]);
         $this->assertEquals(0, $formula->median());
         $formula = NztaApproxRepresentation::create()->setWeightings([0,0]);
@@ -45,6 +47,10 @@ class NztaApproxRepresentationTest extends SapphireTest
         $this->assertEquals(0, $formula->mean());
         $formula = NztaApproxRepresentation::create()->setWeightings([0,0,0]);
         $this->assertEquals(0, $formula->mean());
+        $formula = NztaApproxRepresentation::create()->setWeightings([20, 20, 25, 50, 75]);
+        $this->assertEquals(28.75, $formula->mean());
+        $formula = NztaApproxRepresentation::create()->setWeightings([]);
+        $this->assertEquals(0, $formula->mean());
     }
 
     public function testHighest()
@@ -57,6 +63,10 @@ class NztaApproxRepresentationTest extends SapphireTest
         $this->assertEquals(2, $formula->highest());
         $formula = NztaApproxRepresentation::create()->setWeightings([0,0,0]);
         $this->assertEquals(0, $formula->highest());
+        $formula = NztaApproxRepresentation::create()->setWeightings([20, 20, 25, 50, 75]);
+        $this->assertEquals(75, $formula->highest());
+        $formula = NztaApproxRepresentation::create()->setWeightings([]);
+        $this->assertEquals(0, $formula->highest());
     }
 
     public function testCalculate()
@@ -66,6 +76,10 @@ class NztaApproxRepresentationTest extends SapphireTest
         $formula = NztaApproxRepresentation::create()->setWeightings([1,2]);
         $this->assertEquals(3.25, $formula->calculate());
         $formula = NztaApproxRepresentation::create()->setWeightings([0,1,2]);
-        $this->assertEquals(2.38, $formula->calculate());
+        $this->assertEquals(2.63, $formula->calculate());
+        $formula = NztaApproxRepresentation::create()->setWeightings([20, 20, 25, 50, 75]);
+        $this->assertEquals(107.81, $formula->calculate());
+        $formula = NztaApproxRepresentation::create()->setWeightings([]);
+        $this->assertEquals(0, $formula->calculate());
     }
 }
