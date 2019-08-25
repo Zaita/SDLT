@@ -29,8 +29,6 @@ class NztaApproxRepresentationTest extends SapphireTest
         $this->assertEquals(0, $formula->median());
         $formula = NztaApproxRepresentation::create()->setWeightings([20, 20, 25, 50, 75]);
         $this->assertEquals(22.5, $formula->median());
-        $formula = NztaApproxRepresentation::create()->setWeightings([]);
-        $this->assertEquals(0, $formula->median());
     }
 
     public function testMean()
