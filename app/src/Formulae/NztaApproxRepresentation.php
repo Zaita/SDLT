@@ -45,7 +45,7 @@ class NztaApproxRepresentation extends RiskFormula
     /**
      * @var int
      */
-    const FORMATTER = 2;
+    const PRECISION = 2;
 
     /**
      * Perform an implementation-specific calculation.
@@ -55,9 +55,9 @@ class NztaApproxRepresentation extends RiskFormula
     public function calculate()
     {
         return number_format($this->highest() + (
-            (self::MEAN_LHS_OPERAND * $this->mean() + self::MEDIAN_LHS_OPERAND * $this->median()) *
+            ((self::MEAN_LHS_OPERAND * $this->mean()) + (self::MEDIAN_LHS_OPERAND * $this->median())) *
             self::MULTIPLIER
-        ), self::FORMATTER);
+        ), self::PRECISION);
     }
 
     /**
@@ -69,17 +69,17 @@ class NztaApproxRepresentation extends RiskFormula
      */
     public function mean()
     {
-        sort($this->weightings);
-        // Remove highest weighting
-        array_pop($this->weightings);
-
-        $sum = array_sum($this->weightings);
+        $weights = self::normalise();
+        $sum = array_sum($weights);
 
         if ($sum === 0) {
             return 0;
         }
 
-        return $sum / count($this->weightings);
+        $count = count($weights);
+        return ($count > 0)
+                ? number_format($sum / $count, self::PRECISION)
+                : 0;
     }
 
     /**
@@ -98,32 +98,26 @@ class NztaApproxRepresentation extends RiskFormula
         sort($this->weightings);
         $origTotal = count($this->weightings);
 
+        if (!$origTotal) {
+            return 0;
+        }
+
         if ($origTotal === 1) {
             return end($this->weightings);
         }
 
-        // Remove highest weighting
-        array_pop($this->weightings);
-
-        $total = count($this->weightings);
-
-        if ($total === 1) {
-            return end($this->weightings);
-        }
-
+        $weights = self::normalise();
+        $total = count($weights);
         $middle = floor(($total - 1) / 2);
 
         if ($total % 2) {
-            return $this->weightings[$middle];
+            return $weights[$middle];
         }
 
-        $middle = $this->weightings[$middle] ?? 0;
+        $low = $weights[$middle];
+        $high = $weights[$middle + 1];
 
-        if ($middle === 0) {
-            return 0;
-        }
-
-        return ($middle + $middle + 1) / 2;
+        return number_format((($low + $high) / 2), self::PRECISION);
     }
 
     /**
@@ -133,6 +127,21 @@ class NztaApproxRepresentation extends RiskFormula
      */
     public function highest()
     {
-        return max($this->weightings);
+        return count($this->weightings)
+            ? max($this->weightings)
+            : 0;
+    }
+
+    /**
+     * @return array
+     */
+    private function normalise()
+    {
+        $weights = $this->weightings;
+        sort($weights);
+        // Remove highest weighting
+        array_pop($weights);
+
+        return $weights;
     }
 }
