@@ -3,6 +3,8 @@
 use SilverStripe\Dev\FunctionalTest;
 use SilverStripe\Security\Member;
 use NZTA\SDLT\Model\QuestionnaireSubmission;
+use SilverStripe\Control\Director;
+use SilverStripe\SiteConfig\SiteConfig;
 
 class QuestionnaireSubmissionTest extends FunctionalTest
 {
@@ -66,4 +68,118 @@ class QuestionnaireSubmissionTest extends FunctionalTest
             'ApprovalLinkToken' => 'Wibble'
         ])->isBusinessOwnerContext());
     }
+
+    public function testApprovalPageLink()
+    {
+        $submission = QuestionnaireSubmission::create([
+            'UUID' => '11111111-2222-3333-4444-555566667777',
+            'ApprovalLinkToken' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+        ]);
+        $link1 = $submission->getApprovalPageLink();
+
+        $this->assertEquals(
+            sprintf(
+                "%s%s%s?token=%s",
+                Director::absoluteBaseURL(),
+                'businessOwnerApproval/#/questionnaire/summary/',
+                $submission->UUID,
+                $submission->ApprovalLinkToken
+            ),
+            $link1
+        );
+        $siteConfig = SiteConfig::current_site_config();
+        $siteConfig->AlternateHostnameForEmail = 'https://example.co.nz';
+        $siteConfig->write();
+
+        $submission = QuestionnaireSubmission::create([
+            'UUID' => '88888888-2222-3333-4444-555566667777',
+            'ApprovalLinkToken' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+        ]);
+        $submission->write();
+        $link2 = $submission->getApprovalPageLink();
+
+        $this->assertEquals(
+            sprintf(
+                "%s%s%s?token=%s",
+                'https://example.co.nz/',
+                'businessOwnerApproval/#/questionnaire/summary/',
+                $submission->UUID,
+                $submission->ApprovalLinkToken
+            ),
+            $link2
+        );
+    }
+
+    public function testStartLink()
+    {
+        $submission = QuestionnaireSubmission::create([
+            'UUID' => '11111111-2222-3333-4444-555566667777',
+            'ApprovalLinkToken' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+        ]);
+        $link1 = $submission->getStartLink();
+
+        $this->assertEquals(
+            sprintf(
+                "%sSecurity/login?BackURL=%s",
+                Director::absoluteBaseURL(),
+                rawurlencode('/#/questionnaire/submission/' . $submission->UUID)
+            ),
+            $link1
+        );
+        $siteConfig = SiteConfig::current_site_config();
+        $siteConfig->AlternateHostnameForEmail = 'https://example.co.nz///////';
+        $siteConfig->write();
+
+        $submission = QuestionnaireSubmission::create([
+            'UUID' => '88888888-2222-3333-4444-555566667777'
+        ]);
+        $submission->write();
+        $link2 = $submission->getStartLink();
+
+        $this->assertEquals(
+            sprintf(
+                "%s/Security/login?BackURL=%s",
+                'https://example.co.nz',
+                rawurlencode('/#/questionnaire/submission/' . $submission->UUID)
+            ),
+            $link2
+        );
+    }
+
+    public function testSummaryPageLink()
+    {
+        $submission = QuestionnaireSubmission::create([
+            'UUID' => '11111111-2222-3333-4444-555566667777',
+            'ApprovalLinkToken' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+        ]);
+        $link1 = $submission->getSummaryPageLink();
+
+        $this->assertEquals(
+            sprintf(
+                "%sSecurity/login?BackURL=%s",
+                Director::absoluteBaseURL(),
+                rawurlencode('/#/questionnaire/summary/' . $submission->UUID)
+            ),
+            $link1
+        );
+        $siteConfig = SiteConfig::current_site_config();
+        $siteConfig->AlternateHostnameForEmail = 'https://example.co.nz/////////////////';
+        $siteConfig->write();
+
+        $submission = QuestionnaireSubmission::create([
+            'UUID' => '88888888-2222-3333-4444-555566667777'
+        ]);
+        $submission->write();
+        $link2 =$submission->getSummaryPageLink();
+
+        $this->assertEquals(
+            sprintf(
+                "%s/Security/login?BackURL=%s",
+                'https://example.co.nz',
+                rawurlencode('/#/questionnaire/summary/' . $submission->UUID)
+            ),
+            $link2
+        );
+    }
+
 }

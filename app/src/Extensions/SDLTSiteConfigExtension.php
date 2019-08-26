@@ -20,7 +20,9 @@ use SilverStripe\Assets\Image;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\AssetAdmin\Forms\UploadField;
 use SilverStripe\Forms\CheckboxField;
+use SilverStripe\Forms\EmailField;
 use SilverStripe\Forms\HTMLEditor\HtmlEditorField;
+use SilverStripe\Forms\TextField;
 use SilverStripe\SiteConfig\SiteConfig;
 
 /**
@@ -34,7 +36,8 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
     private static $db = [
         'AlertEnabled' => 'Boolean',
         'AlertMessage' => 'HTMLText',
-        'NoScriptAlertMessage' => 'HTMLText'
+        'NoScriptAlertMessage' => 'HTMLText',
+        'AlternateHostnameForEmail' => 'Varchar(255)',
     ];
 
     /**
@@ -66,6 +69,19 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
     public function updateCMSFields(FieldList $fields)
     {
         $fields->addFieldsToTab(
+            'Root.Main',
+            [
+                TextField::create(
+                    'AlternateHostnameForEmail',
+                    'Alternate hostname for email'
+                )->setDescription(
+                    'This setting is used to configure an alternate hostname for use in outgoing email messages. It is'
+                    . ' intended to be used in situations where the hostname of the server differs from the URL users'
+                    . ' use to log into the website, such as a proxy server or a web application firewall (WAF).'
+                )
+            ]
+        );
+        $fields->addFieldsToTab(
             'Root.Images',
             [
                 UploadField::create('Logo', 'Logo')
@@ -95,7 +111,7 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
     }
 
     /**
-     * @param SchemaScaffolder $scaffolder
+     * @param SchemaScaffolder $scaffolder generic comment
      * @return SchemaScaffolder
      */
     public function provideGraphQLScaffolding(SchemaScaffolder $scaffolder)
@@ -115,5 +131,23 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
             ->end();
 
         return $scaffolder;
+    }
+
+    /**
+     * onBeforeWrite
+     *
+     * @return void
+     */
+    public function onBeforeWrite()
+    {
+        if ($this->owner->AlternateHostnameForEmail) {
+            //strip whitespace characters from both sides of the URL
+            $this->owner->AlternateHostnameForEmail = trim($this->owner->AlternateHostnameForEmail);
+            //also strip / just in case it's there.
+            $this->owner->AlternateHostnameForEmail = rtrim($this->owner->AlternateHostnameForEmail, '/');
+
+            //we're now guaranteed to have a URL without a trailing slash so if we add one now it's consistently present
+            $this->owner->AlternateHostnameForEmail .= '/';
+        }
     }
 }
