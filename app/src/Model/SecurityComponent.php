@@ -22,6 +22,10 @@ use SilverStripe\Security\Security;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\LiteralField;
+use SilverStripe\Forms\NumericField;
+use SilverStripe\ORM\FieldType\DBInt;
+use SilverStripe\Forms\FieldGroup;
+use SilverStripe\Forms\GridField\GridFieldDetailForm;
 
 /**
  * Class SecurityComponent
@@ -50,6 +54,18 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider
      */
     private static $many_many = [
         'Controls' => SecurityControl::class,
+    ];
+
+    /**
+     * @var array
+     */
+    private static $many_many_extraFields = [
+        'Controls' => [
+            'Likelihood' => DBInt::class,
+            'Impact' => DBInt::class,
+            'LikelihoodPenalty' => DBInt::class,
+            'ImpactPenalty' => DBInt::class,
+        ]
     ];
 
     /**
@@ -136,7 +152,6 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
-
         $instructions = LiteralField::create(
             'JIRAControlsChecklistMessage',
             sprintf(
@@ -147,17 +162,40 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider
                 .' submitted to JIRA.'
             )
         );
-
         $name = TextField::create('Name')
             ->setDescription('This is the title of the component. It is'
             .' displayed on the component selection screen.');
-
         $description = TextareaField::create('Description')
             ->setDescription('This contains the instructions that appear inside'
             .' the panel at the top of the JIRA story.');
 
         $fields->addFieldsToTab('Root.Main', [$name, $description]);
         $fields->addFieldToTab('Root.Controls', $instructions);
+
+        // Deal with many-many-extrafields
+        $controlFields = singleton(SecurityControl::class)->getCMSFields();
+        $controlFields->addFieldsToTab(
+            'Root.Main',
+            FieldGroup::create('Control Weights', (function() {
+                $f = [];
+
+                foreach (array_keys($this->config()->get('many_many_extraFields')['Controls']) as $fieldName) {
+                    $f[] = NumericField::create(
+                        sprintf('ManyMany[%s]', $fieldName),
+                        NumericField::name_to_label($fieldName)
+                    )
+                        ->setAttribute('style', 'width: 100px;')
+                        ->setMaxLength(strstr($fieldName, 'Penalty') ? 3 : 2);
+                }
+
+                return $f;
+            })())
+        );
+
+        $fields->dataFieldByName('Controls')
+            ->getConfig()
+            ->getComponentByType(GridFieldDetailForm::class)
+            ->setFields($controlFields);
 
         return $fields;
     }
