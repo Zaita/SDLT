@@ -953,10 +953,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         }
 
         // Correct ApprovalLinkToken can view it
-        if ($taskSubmission->QuestionnaireSubmission()->exists() &&
-            $taskSubmission->QuestionnaireSubmission()->ApprovalLinkToken &&
-            @hash_equals($taskSubmission->QuestionnaireSubmission()->ApprovalLinkToken, $secureToken)
-        ) {
+        $qs = $taskSubmission->QuestionnaireSubmission();
+        if ($qs->exists() &&
+            $qs->ApprovalLinkToken &&
+            @hash_equals($qs->ApprovalLinkToken, $secureToken)) {
             return true;
         }
 

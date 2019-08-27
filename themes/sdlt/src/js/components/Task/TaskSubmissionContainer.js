@@ -32,10 +32,10 @@ const mapStateToProps = (state: RootState) => {
 
 const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
   return {
-    dispatchLoadDataAction(uuid: string) {
+    dispatchLoadDataAction(uuid: string, secureToken: string) {
       dispatch(loadCurrentUser());
       dispatch(loadSiteTitle());
-      dispatch(loadTaskSubmission({uuid}));
+      dispatch(loadTaskSubmission({uuid, secureToken}));
     },
     dispatchSaveAnsweredQuestionAction(answeredQuestion: Question) {
       dispatch(saveAnsweredQuestionInTaskSubmission({answeredQuestion}));
@@ -57,10 +57,11 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
 
 type Props = {
   uuid: string,
+  secureToken:string,
   taskSubmission?: TaskSubmissionType | null,
   siteTitle?: string,
   currentUser?: User | null,
-  dispatchLoadDataAction?: (uuid: string) => void,
+  dispatchLoadDataAction?: (uuid: string, secureToken: string) => void,
   dispatchApproveTaskSubmissionAction?: (uuid: string) => void,
   dispatchDenyTaskSubmissionAction?: (uuid: string) => void,
   dispatchSaveAnsweredQuestionAction?: (answeredQuestion: Question) => void,
@@ -71,8 +72,8 @@ type Props = {
 class TaskSubmissionContainer extends Component<Props> {
 
   componentDidMount() {
-    const {uuid, dispatchLoadDataAction} = {...this.props};
-    dispatchLoadDataAction(uuid);
+    const {uuid, dispatchLoadDataAction, secureToken} = {...this.props};
+    dispatchLoadDataAction(uuid, secureToken);
   }
 
   render() {
@@ -84,7 +85,8 @@ class TaskSubmissionContainer extends Component<Props> {
       dispatchMoveToPreviousQuestionAction,
       dispatchEditAnswersAction,
       dispatchApproveTaskSubmissionAction,
-      dispatchDenyTaskSubmissionAction
+      dispatchDenyTaskSubmissionAction,
+      secureToken
     } = {...this.props};
 
     if (!currentUser || !taskSubmission) {
@@ -130,6 +132,7 @@ class TaskSubmissionContainer extends Component<Props> {
           showBackButton={!!taskSubmission.questionnaireSubmissionUUID}
           viewAs={viewAs}
           siteTitle={siteTitle}
+          secureToken={secureToken}
         />
         <Footer/>
       </div>

@@ -69,7 +69,7 @@ query {
     };
   }
 
-  static async fetchSubmissionData(submissionHash: string): Promise<QuestionnaireSubmissionState> {
+  static async fetchSubmissionData(submissionHash: string, secureToken:string): Promise<QuestionnaireSubmissionState> {
     const query = `
 query {
   readCurrentMember {
@@ -80,7 +80,7 @@ query {
     IsSA
     IsCISO
   }
-  readQuestionnaireSubmission(UUID: "${submissionHash}") {
+  readQuestionnaireSubmission(UUID: "${submissionHash}", SecureToken: "${secureToken}") {
     ID
     UUID
     ApprovalLinkToken
@@ -410,5 +410,46 @@ mutation {
       obj['SecurityArchitectApproverID'] = _.get(item, 'SecurityArchitectApprover.ID', '');
       return obj;
     });
+  }
+
+  static async approveQuestionnaireSubmissionAsBusinessOwner(
+    argument: { submissionID: string, csrfToken: string, secureToken: string },
+  ): Promise<{ uuid: string }> {
+    const {submissionID, csrfToken, secureToken} = {...argument};
+    const query = `
+mutation {
+ updateQuestionnaireStatusToApproved(ID: "${submissionID}", SecureToken: "${secureToken}") {
+   QuestionnaireStatus
+   UUID
+ }
+}`;
+    const json = await GraphQLRequestHelper.request({query, csrfToken});
+    const status = _.toString(
+      _.get(json, "data.updateQuestionnaireStatusToApproved.QuestionnaireStatus", null));
+    const uuid = _.toString(_.get(json, "data.updateQuestionnaireStatusToApproved.UUID", null));
+    if (!status || !uuid) {
+      throw DEFAULT_NETWORK_ERROR;
+    }
+    return {uuid};
+  }
+
+  static async denyQuestionnaireSubmissionAsBusinessOwner(
+    argument: { submissionID: string, csrfToken: string, secureToken: string },
+  ): Promise<{ uuid: string }> {
+    const {submissionID, csrfToken, secureToken} = {...argument};
+    const query = `
+mutation {
+ updateQuestionnaireStatusToDenied(ID: "${submissionID}", SecureToken: "${secureToken}") {
+   QuestionnaireStatus
+   UUID
+ }
+}`;
+    const json = await GraphQLRequestHelper.request({query, csrfToken});
+    const status = _.toString(_.get(json, "data.updateQuestionnaireStatusToDenied.QuestionnaireStatus", null));
+    const uuid = _.toString(_.get(json, "data.updateQuestionnaireStatusToDenied.UUID", null));
+    if (!status || !uuid) {
+      throw DEFAULT_NETWORK_ERROR;
+    }
+    return {uuid};
   }
 }

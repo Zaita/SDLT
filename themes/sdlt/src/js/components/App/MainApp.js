@@ -14,6 +14,7 @@ import ComponentSelectionContainer from "../ComponentSelection/ComponentSelectio
 import MySubmissionList from "../QuestionnaireSubmissionList/MySubmissionList";
 import AwaitingApprovalList from "../QuestionnaireSubmissionList/AwaitingApprovalList";
 import MyProductList from "../QuestionnaireSubmissionList/MyProductList";
+import {parse} from "query-string";
 
 class MainApp extends Component<*> {
 
@@ -46,28 +47,43 @@ class MainApp extends Component<*> {
               }}
             </Route>
             <Route path='/questionnaire/review/:hash'>
-              {({match}) => {
-                return (
-                  <div className="gray-bg">
-                    <ReviewContainer submissionHash={match.params.hash}/>
+            {({match, location}) => {
+              let secureToken = '';
+              if (location.search) {
+                const queryString = parse(location.search);
+                secureToken = queryString.token;
+              }
+              return (
+                <div className="gray-bg">
+                    <ReviewContainer submissionHash={match.params.hash} secureToken={secureToken}/>
                   </div>
                 );
               }}
             </Route>
             <Route path='/questionnaire/summary/:hash'>
-              {({match}) => {
+              {({match, location}) => {
+                let secureToken = '';
+                if (location.search) {
+                  const queryString = parse(location.search);
+                  secureToken = queryString.token;
+                }
                 return (
                   <div className="gray-bg">
-                    <SummaryContainer submissionHash={match.params.hash}/>
+                    <SummaryContainer submissionHash={match.params.hash} secureToken={secureToken}/>
                   </div>
                 );
               }}
             </Route>
             <Route path='/task/submission/:uuid'>
-              {({match}) => {
+              {({match, location}) => {
+                let secureToken = '';
+                if (location.search) {
+                  const queryString = parse(location.search);
+                  secureToken = queryString.token;
+                }
                 return (
                   <div className="gray-bg">
-                    <TaskSubmissionContainer uuid={match.params.uuid}/>
+                    <TaskSubmissionContainer uuid={match.params.uuid} secureToken={secureToken}/>
                   </div>
                 );
               }}
@@ -87,10 +103,15 @@ class MainApp extends Component<*> {
               </div>
             </Route>
             <Route path='/component-selection/submission/:uuid'>
-              {({match}) => {
+              {({match, location}) => {
+                let secureToken = '';
+                if (location.search) {
+                  const queryString = parse(location.search);
+                  secureToken = queryString.token;
+                }
                 return (
                   <div className="gray-bg">
-                    <ComponentSelectionContainer uuid={match.params.uuid}/>
+                    <ComponentSelectionContainer uuid={match.params.uuid} secureToken={secureToken}/>
                   </div>
                 );
               }}
