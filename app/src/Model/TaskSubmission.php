@@ -39,6 +39,7 @@ use NZTA\SDLT\Helper\JIRA;
 use NZTA\SDLT\Model\JiraTicket;
 use SilverStripe\Security\Group;
 use NZTA\SDLT\Traits\SDLTRiskSubmission;
+use SilverStripe\SiteConfig\SiteConfig;
 
 /**
  * Class TaskSubmission
@@ -1129,7 +1130,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         $route = $this->Link();
         $secureLink = 'Security/login/?BackURL='.rawurlencode($route);
 
-        return Director::absoluteBaseURL() . $secureLink;
+        $hostname = $this->getHostname();
+        return $hostname . $secureLink;
     }
 
     /**
@@ -1150,7 +1152,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 $this->SecureToken
             );
 
-            return Director::absoluteBaseURL() . $anonLink;
+            $hostname = $this->getHostname();
+            return $hostname . $anonLink;
         }
     }
 
@@ -1392,5 +1395,21 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         }
 
         return json_encode($allRiskResults);
+    }
+
+    /**
+     * Get the current hostname or an alternate one from the SiteConfig
+     *
+     * @return string
+     */
+    public function getHostname() : string
+    {
+        $hostname = Director::absoluteBaseURL();
+        $config = SiteConfig::current_site_config();
+        if ($config->AlternateHostnameForEmail) {
+            $hostname = $config->AlternateHostnameForEmail;
+        }
+
+        return $hostname;
     }
 }
