@@ -60,14 +60,14 @@ class QuestionnaireSubmissionTest extends FunctionalTest
      */
     public function testIsCurrentUserABusinessOwner()
     {
-        $this->assertFalse(QuestionnaireSubmission::create()->isBusinessOwnerContext());
+        $this->assertFalse(QuestionnaireSubmission::create()->isBusinessOwner());
         $this->assertFalse(QuestionnaireSubmission::create([
             'UUID' => 'Wibble'
-        ])->isBusinessOwnerContext());
+        ])->isBusinessOwner());
         $this->assertFalse(QuestionnaireSubmission::create([
             'UUID' => 'Wibble',
             'ApprovalLinkToken' => 'Wibble'
-        ])->isBusinessOwnerContext());
+        ])->isBusinessOwner());
     }
 
     public function testApprovalPageLink()
@@ -85,13 +85,7 @@ class QuestionnaireSubmissionTest extends FunctionalTest
             $link1 = $submission->getApprovalPageLink();
 
             $this->assertEquals(
-                sprintf(
-                    "%s%s%s?token=%s",
-                    'https://foobar.com/',
-                    'businessOwnerApproval/#/questionnaire/summary/',
-                    $submission->UUID,
-                    $submission->ApprovalLinkToken
-                ),
+                'https://foobar.com/Security/login?BackURL=%23%2Fquestionnaire%2Fsummary%2F11111111-2222-3333-4444-555566667777%3Ftoken%3Dxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
                 $link1
             );
 
@@ -108,13 +102,7 @@ class QuestionnaireSubmissionTest extends FunctionalTest
             $link2 = $submission->getApprovalPageLink();
 
             $this->assertEquals(
-                sprintf(
-                    "%s%s%s?token=%s",
-                    'https://example.co.nz/',
-                    'businessOwnerApproval/#/questionnaire/summary/',
-                    $submission->UUID,
-                    $submission->ApprovalLinkToken
-                ),
+                'https://example.co.nz/Security/login?BackURL=%23%2Fquestionnaire%2Fsummary%2F88888888-2222-3333-4444-555566667777%3Ftoken%3Dxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
                 $link2
             );
         });

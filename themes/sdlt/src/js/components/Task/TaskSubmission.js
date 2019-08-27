@@ -21,7 +21,8 @@ type Props = {
   handleDenyButtonClick: () => void,
   showBackButton: boolean,
   showEditButton: boolean,
-  canUpdateAnswers: boolean
+  canUpdateAnswers: boolean,
+  secureToken: string
 };
 
 class TaskSubmission extends Component<Props> {
@@ -36,7 +37,8 @@ class TaskSubmission extends Component<Props> {
       showBackButton,
       showEditButton,
       canUpdateAnswers,
-      viewAs
+      viewAs,
+      secureToken
     } = {...this.props};
 
     let body = (
@@ -57,7 +59,7 @@ class TaskSubmission extends Component<Props> {
       <DarkButton
         title={"BACK TO QUESTIONNAIRE SUMMARY"}
         onClick={() => {
-          URLUtil.redirectToQuestionnaireSummary(taskSubmission.questionnaireSubmissionUUID);
+          URLUtil.redirectToQuestionnaireSummary(taskSubmission.questionnaireSubmissionUUID, secureToken);
         }}
       />
     ) : null;

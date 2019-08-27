@@ -376,24 +376,28 @@ class AuditServiceTest extends FunctionalTest
      */
     public function testApprovalQuestionnaireSubmissionInBusinessOwnerUserContext()
     {
-        $this->markTestSkipped('Revisit this when Business Owner has an account. See QuestionnaireSubmissionTest::testIsCurrentUserABusinessOwner()');
-
         // Baseline
         $this->assertEquals(0, AuditEvent::get()->count());
+
+        $user = $this->objFromFixture(Member::class, 'business-owner');
+        $this->logInAs($user);
 
         $questionnaireSubmission = QuestionnaireSubmission::create([
             'QuestionnaireStatus' => 'waiting_for_approval',
             'BusinessOwnerApprovalStatus' => 'pending',
-            'BusinessOwnerEmailAddress' => 'business+owner@othertest.app',
+            'BusinessOwnerEmailAddress' => 'business-owner@test.app',
         ]);
+
         $questionnaireSubmission->write(); // Write the initial state
+
         $questionnaireSubmission
+            ->setField('QuestionnaireStatus', 'approved')
             ->setField('BusinessOwnerApprovalStatus', 'approved')
             ->write(); // Transition to "approved"
 
-        $this->assertEquals(1, AuditEvent::get()->count());
-        $this->assertEquals('Email: business+owner@othertest.app, N/A', AuditEvent::get()->toArray()[0]->UserData);
-        $this->assertEquals('QUESTIONNAIRESUBMISSION.APPROVE', AuditEvent::get()->toArray()[0]->Event);
+        $this->assertEquals(2, AuditEvent::get()->count());
+        $this->assertEquals('Email: business-owner@test.app. Group(s): N/A', AuditEvent::get()->toArray()[1]->UserData);
+        $this->assertEquals('QUESTIONNAIRESUBMISSION.APPROVE', AuditEvent::get()->toArray()[1]->Event);
     }
 
     /**
@@ -468,6 +472,7 @@ class AuditServiceTest extends FunctionalTest
         $this->logInAs($user);
 
         $questionnaireSubmission = QuestionnaireSubmission::create([
+            'QuestionnaireStatus' => 'waiting_for_approval',
             'CisoApprovalStatus' => 'pending',
         ]);
         $questionnaireSubmission->write(); // Write the initial state
@@ -491,23 +496,26 @@ class AuditServiceTest extends FunctionalTest
      */
     public function testDenialQuestionnaireSubmissionInBusinessOwnerUserContext()
     {
-        $this->markTestSkipped('Revisit this when Business Owner has an account. See QuestionnaireSubmissionTest::testIsCurrentUserABusinessOwner()');
-
-        // Baseline
         $this->assertEquals(0, AuditEvent::get()->count());
+
+        $user = $this->objFromFixture(Member::class, 'business-owner');
+        $this->logInAs($user);
 
         $questionnaireSubmission = QuestionnaireSubmission::create([
             'QuestionnaireStatus' => 'waiting_for_approval',
             'BusinessOwnerApprovalStatus' => 'pending',
-            'BusinessOwnerEmailAddress' => 'business+owner@othertest.app',
+            'BusinessOwnerEmailAddress' => 'business-owner@test.app',
         ]);
-        $questionnaireSubmission->write(); // Write the initial state
-        $questionnaireSubmission
-            ->setField('BusinessOwnerApprovalStatus', 'denied')
-            ->write(); // Transition to "denied"
 
-        $this->assertEquals(1, AuditEvent::get()->count());
-        $this->assertEquals('Email: business+owner@othertest.app. Group(s): N/A', AuditEvent::get()->toArray()[0]->UserData);
-        $this->assertEquals('QUESTIONNAIRESUBMISSION.DENY', AuditEvent::get()->toArray()[0]->Event);
-    }
+        $questionnaireSubmission->write(); // Write the initial state
+
+        $questionnaireSubmission
+            ->setField('QuestionnaireStatus', 'denied')
+            ->setField('BusinessOwnerApprovalStatus', 'denied')
+            ->write(); // Transition to "approved"
+
+        $this->assertEquals(2, AuditEvent::get()->count());
+        $this->assertEquals('Email: business-owner@test.app. Group(s): N/A', AuditEvent::get()->toArray()[1]->UserData);
+        $this->assertEquals('QUESTIONNAIRESUBMISSION.DENY', AuditEvent::get()->toArray()[1]->Event);
+   }
 }

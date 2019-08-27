@@ -36,11 +36,11 @@ const mapStateToProps = (state: RootState) => {
 const mapDispatchToProps = (dispatch: Dispatch, props: OwnProps) => {
   return {
     dispatchLoadDataAction() {
-      const {uuid} = {...props};
+      const {uuid, secureToken} = {...props};
       dispatch(loadCurrentUser());
       dispatch(loadSiteTitle());
       dispatch(loadAvailableComponents());
-      dispatch(loadTaskSubmission({uuid}));
+      dispatch(loadTaskSubmission({uuid, secureToken}));
     },
     dispatchAddComponentAction(id: string) {
       dispatch(addSelectedComponent(id));
@@ -58,7 +58,8 @@ const mapDispatchToProps = (dispatch: Dispatch, props: OwnProps) => {
 };
 
 type OwnProps = {
-  uuid: string
+  uuid: string,
+  secureToken:string
 };
 
 type Props = OwnProps & {
@@ -84,6 +85,7 @@ class ComponentSelectionContainer extends Component<Props> {
   render() {
     const {
       siteTitle,
+      secureToken,
       currentUser,
       taskSubmission,
       availableComponents,
@@ -111,7 +113,7 @@ class ComponentSelectionContainer extends Component<Props> {
                 key="back"
                 title={"BACK TO QUESTIONNAIRE SUMMARY"}
                 onClick={() => {
-                  URLUtil.redirectToQuestionnaireSummary(taskSubmission.questionnaireSubmissionUUID);
+                  URLUtil.redirectToQuestionnaireSummary(taskSubmission.questionnaireSubmissionUUID, secureToken);
                 }}
               />
             )]}
@@ -140,7 +142,7 @@ class ComponentSelectionContainer extends Component<Props> {
               <DarkButton
                 title={"BACK TO QUESTIONNAIRE SUMMARY"}
                 onClick={() => {
-                  URLUtil.redirectToQuestionnaireSummary(taskSubmission.questionnaireSubmissionUUID);
+                  URLUtil.redirectToQuestionnaireSummary(taskSubmission.questionnaireSubmissionUUID, secureToken);
                 }}
               />
             </div>

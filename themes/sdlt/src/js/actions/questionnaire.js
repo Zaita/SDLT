@@ -18,8 +18,6 @@ import _ from "lodash";
 import SubmissionDataUtil from "../utils/SubmissionDataUtil";
 import URLUtil from "../utils/URLUtil";
 import TaskDataService from "../services/TaskDataService";
-import QuestionnaireForBusinessOwnerDataService from "../services/QuestionnaireForBusinessOwnerDataService";
-// Start
 
 export function loadQuestionnaireStartState(questionnaireID: string): ThunkAction {
   return async (dispatch) => {
@@ -62,11 +60,17 @@ export function createInProgressSubmission(questionnaireID: string): ThunkAction
   };
 }
 
-export function loadQuestionnaireSubmissionState(submissionHash: string): ThunkAction {
+// load questionanqire submissions
+// this is same for SA, User, BO, CISO and normal user
+export function loadQuestionnaireSubmissionState(submissionHash: string, secureToken: string): ThunkAction {
+  if(typeof(secureToken) == "undefined") {
+    secureToken = '';
+  }
+
   return async (dispatch) => {
     // TODO: maybe dispatch a global loading action
     try {
-      const data = await QuestionnaireDataService.fetchSubmissionData(submissionHash);
+      const data = await QuestionnaireDataService.fetchSubmissionData(submissionHash, secureToken);
       dispatch(loadQuestionnaireSubmissionStateFinished(data));
     } catch (error) {
       // TODO: maybe dispatch a global error action
@@ -83,7 +87,6 @@ export function loadQuestionnaireSubmissionStateFinished(payload: QuestionnaireS
 }
 
 // TODO: split big functions
-
 export function putDataInQuestionnaireAnswer(payload: Question): ThunkAction {
   return async (dispatch, getState) => {
 
@@ -197,6 +200,7 @@ export function moveToPreviousQuestion(targetQuestion: Question): ThunkAction {
   };
 }
 
+// As a User submit the questionnaire
 export function submitQuestionnaire(): ThunkAction {
   return async (dispatch, getState) => {
     try {
@@ -223,6 +227,7 @@ export function submitQuestionnaire(): ThunkAction {
   };
 }
 
+// As a user submit the  Questionnaire submission for approval
 export function submitQuestionnaireForApproval(submissionID: string): ThunkAction {
   return async (dispatch, getState) => {
     try {
@@ -236,6 +241,7 @@ export function submitQuestionnaireForApproval(submissionID: string): ThunkActio
   };
 }
 
+// Assign to SA
 export function assignToSecurityArchitectQuestionnaireSubmission(submissionID: string): ThunkAction {
   return async (dispatch, getState) => {
     try {
@@ -249,6 +255,7 @@ export function assignToSecurityArchitectQuestionnaireSubmission(submissionID: s
   }
 }
 
+// Approve the Questionnaire Submission as a SA / CISO
 export function approveQuestionnaireSubmission(submissionID: string, skipBoAndCisoApproval: boolean): ThunkAction {
   return async (dispatch, getState) => {
     try {
@@ -262,6 +269,7 @@ export function approveQuestionnaireSubmission(submissionID: string, skipBoAndCi
   }
 }
 
+// Deny the Questionnaire Submission as a SA / CISO
 export function denyQuestionnaireSubmission(submissionID: string, skipBoAndCisoApproval: boolean): ThunkAction {
   return async (dispatch, getState) => {
     try {
@@ -275,12 +283,13 @@ export function denyQuestionnaireSubmission(submissionID: string, skipBoAndCisoA
   }
 }
 
-export function approveQuestionnaireSubmissionFromBusinessOwner(submissionID: string): ThunkAction {
+// Approve the Questionnaire Submission as a BO
+export function approveQuestionnaireSubmissionAsBusinessOwner(submissionID: string, secureToken: string): ThunkAction {
   return async (dispatch, getState) => {
     try {
       const csrfToken = await CSRFTokenService.getCSRFToken();
-      const {uuid} = await QuestionnaireForBusinessOwnerDataService.approveQuestionnaireSubmission({submissionID, csrfToken, secureToken:''});
-      dispatch(loadQuestionnaireSubmissionState(uuid));
+      const {uuid} = await QuestionnaireDataService.approveQuestionnaireSubmissionAsBusinessOwner({submissionID, csrfToken, secureToken});
+      dispatch(loadQuestionnaireSubmissionState(uuid, secureToken));
     } catch(error) {
       // TODO: errors
       alert(error);
@@ -288,12 +297,13 @@ export function approveQuestionnaireSubmissionFromBusinessOwner(submissionID: st
   }
 }
 
-export function denyQuestionnaireSubmissionFromBusinessOwner(submissionID: string): ThunkAction {
+// Deny the Questionnaire Submission as a BO
+export function denyQuestionnaireSubmissionAsBusinessOwner(submissionID: string, secureToken: string): ThunkAction {
   return async (dispatch, getState) => {
     try {
       const csrfToken = await CSRFTokenService.getCSRFToken();
-      const {uuid} = await QuestionnaireForBusinessOwnerDataService.denyQuestionnaireSubmission({submissionID, csrfToken, secureToken:''});
-      dispatch(loadQuestionnaireSubmissionState(uuid));
+      const {uuid} = await QuestionnaireDataService.denyQuestionnaireSubmissionAsBusinessOwner({submissionID, csrfToken, secureToken});
+      dispatch(loadQuestionnaireSubmissionState(uuid, secureToken));
     } catch(error) {
       // TODO: errors
       alert(error);
@@ -301,6 +311,7 @@ export function denyQuestionnaireSubmissionFromBusinessOwner(submissionID: strin
   }
 }
 
+// Edit answers of the Questionnaire Submission as a User
 export function editQuestionnaireSubmission(submissionID: string): ThunkAction {
   return async (dispatch, getState) => {
     try {
@@ -314,6 +325,7 @@ export function editQuestionnaireSubmission(submissionID: string): ThunkAction {
   }
 }
 
+// load all the Questionnaire Submissions of the logged in user
 export function loadMySubmissionList(): ThunkAction {
   return async (dispatch: any, getState: () => RootState) => {
     const user = getState().currentUserState.user;
@@ -328,6 +340,8 @@ export function loadMySubmissionList(): ThunkAction {
   };
 }
 
+// Questionnaire Submissions list of pending approval list
+// for SA, CISO and Business owner
 export function loadAwaitingApprovalList(): ThunkAction {
   return async (dispatch: any, getState: () => RootState) => {
     const user = getState().currentUserState.user;
@@ -342,6 +356,7 @@ export function loadAwaitingApprovalList(): ThunkAction {
   };
 }
 
+// Questionnaire Submissions list for the business owner
 export function loadMyProductList(): ThunkAction {
   return async (dispatch: any, getState: () => RootState) => {
     const user = getState().currentUserState.user;

@@ -13,8 +13,8 @@ import {
   editQuestionnaireSubmission,
   loadQuestionnaireSubmissionState,
   submitQuestionnaireForApproval,
-  approveQuestionnaireSubmissionFromBusinessOwner,
-  denyQuestionnaireSubmissionFromBusinessOwner,
+  approveQuestionnaireSubmissionAsBusinessOwner,
+  denyQuestionnaireSubmissionAsBusinessOwner,
   assignToSecurityArchitectQuestionnaireSubmission,
 } from "../../actions/questionnaire";
 import Summary from "./Summary";
@@ -33,27 +33,36 @@ const mapStateToProps = (state: RootState) => {
 
 const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
   return {
-    dispatchLoadSubmissionAction(submissionHash: string) {
-      dispatch(loadQuestionnaireSubmissionState(submissionHash));
+    // load the Submission data on the summary screen
+    dispatchLoadSubmissionAction(submissionHash: string, secureToken: string) {
+      dispatch(loadQuestionnaireSubmissionState(submissionHash, secureToken));
     },
+
+    // as a BO approve/ deny the submission
+    dispatchBusinessOwnerApproveSubmissionAction(submissionID: string, secureToken: string) {
+      dispatch(approveQuestionnaireSubmissionAsBusinessOwner(submissionID, secureToken));
+    },
+    dispatchBusinessOwnerDenySubmissionAction(submissionID: string, secureToken: string) {
+      dispatch(denyQuestionnaireSubmissionAsBusinessOwner(submissionID, secureToken));
+    },
+
+    // user can edit answers and submit the questionnaire for approval
     dispatchSubmitForApprovalAction(submissionID: string) {
       dispatch(submitQuestionnaireForApproval(submissionID));
     },
-    dispatchBusinessOwnerApproveSubmissionAction(submissionID: string) {
-      dispatch(approveQuestionnaireSubmissionFromBusinessOwner(submissionID));
+    dispatchEditSubmissionAction(submissionID: string) {
+      dispatch(editQuestionnaireSubmission(submissionID));
     },
-    dispatchBusinessOwnerDenySubmissionAction(submissionID: string) {
-      dispatch(denyQuestionnaireSubmissionFromBusinessOwner(submissionID));
-    },
+
+    // as a SA and ciso approve/ deny the submission
     dispatchApproveSubmissionAction(submissionID: string, skipBoAndCisoApproval: boolean) {
       dispatch(approveQuestionnaireSubmission(submissionID, skipBoAndCisoApproval));
     },
     dispatchDenySubmissionAction(submissionID: string, skipBoAndCisoApproval: boolean) {
       dispatch(denyQuestionnaireSubmission(submissionID, skipBoAndCisoApproval));
     },
-    dispatchEditSubmissionAction(submissionID: string) {
-      dispatch(editQuestionnaireSubmission(submissionID));
-    },
+
+    // As a SA assign the submission to cureent logged in user
     dispatchAssignToMeAction(submissionID: string) {
       dispatch(assignToSecurityArchitectQuestionnaireSubmission(submissionID));
     },
@@ -61,12 +70,13 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
 };
 
 type ownProps = {
-  submissionHash: string
+  submissionHash: string,
+  secureToken: string
 };
 
 type reduxProps = {
   submissionState: QuestionnaireSubmissionState,
-  dispatchLoadSubmissionAction: (submissionHash: string) => void,
+  dispatchLoadSubmissionAction: (submissionHash: string, secureToken: string) => void,
   dispatchSubmitForApprovalAction: (submissionID: string) => void,
   dispatchApproveSubmissionAction: (submissionID: string) => void,
   dispatchDenySubmissionAction: (submissionID: string) => void,
@@ -91,12 +101,13 @@ class SummaryContainer extends Component<Props, State> {
   }
 
   componentDidMount() {
-    const {submissionHash, dispatchLoadSubmissionAction} = {...this.props};
-    dispatchLoadSubmissionAction(submissionHash);
+    const {submissionHash, dispatchLoadSubmissionAction, secureToken} = {...this.props};
+    dispatchLoadSubmissionAction(submissionHash, secureToken);
   }
 
   render() {
-    const {title, user, submission, isCurrentUserApprover, isCurrentUserABusinessOwnerApprover} = {...this.props.submissionState};
+    const {secureToken} = {...this.props};
+    const {location, title, user, submission, isCurrentUserApprover, isCurrentUserABusinessOwnerApprover} = {...this.props.submissionState};
 
     if (!user || !submission) {
       return null;
@@ -112,15 +123,15 @@ class SummaryContainer extends Component<Props, State> {
         break;
       }
 
-      // Check if the current user is an approver
-      if (isCurrentUserApprover) {
-        viewAs = "approver";
+      // Check if the current user is an businessOwner approver
+      if (isCurrentUserABusinessOwnerApprover) {
+        viewAs = "businessOwnerApprover";
         break;
       }
 
       // Check if the current user is an approver
-      if (isCurrentUserABusinessOwnerApprover) {
-        viewAs = "businessOwnerApprover";
+      if (isCurrentUserApprover) {
+        viewAs = "approver";
         break;
       }
     } while (false);
@@ -137,6 +148,7 @@ class SummaryContainer extends Component<Props, State> {
                  handleAssignToMeButtonClick={this.handleAssignToMeButtonClick.bind(this)}
                  viewAs={viewAs}
                  user={user}
+                 token={secureToken}
         />
         <Footer/>
         <ReactModal
@@ -189,34 +201,42 @@ class SummaryContainer extends Component<Props, State> {
   }
 
   handleApproveButtonClick(skipBoAndCisoApproval: boolean = false) {
-    const {user, submission, isCurrentUserApprover, isCurrentUserABusinessOwnerApprover} = {...this.props.submissionState};
+    const {secureToken} = {...this.props};
+    const {
+      user,
+      submission,
+      isCurrentUserApprover,
+      isCurrentUserABusinessOwnerApprover
+    } = {...this.props.submissionState};
 
     if (!user || !submission) {
       return;
     }
 
-    if (isCurrentUserApprover) {
-      this.props.dispatchApproveSubmissionAction(submission.submissionID, skipBoAndCisoApproval);
-    }
-
     if (isCurrentUserABusinessOwnerApprover) {
-      this.props.dispatchBusinessOwnerApproveSubmissionAction(submission.submissionID);
+      this.props.dispatchBusinessOwnerApproveSubmissionAction(submission.submissionID, secureToken);
+    } else if (isCurrentUserApprover) {
+      this.props.dispatchApproveSubmissionAction(submission.submissionID, skipBoAndCisoApproval);
     }
   }
 
   handleDenyButtonClick(skipBoAndCisoApproval: boolean = false) {
-    const {user, submission, isCurrentUserApprover, isCurrentUserABusinessOwnerApprover} = {...this.props.submissionState};
+    const {secureToken} = {...this.props};
+    const {
+      user,
+      submission,
+      isCurrentUserApprover,
+      isCurrentUserABusinessOwnerApprover
+    } = {...this.props.submissionState};
 
     if (!user || !submission) {
       return;
     }
 
-    if (isCurrentUserApprover) {
-      this.props.dispatchDenySubmissionAction(submission.submissionID, skipBoAndCisoApproval);
-    }
-
     if (isCurrentUserABusinessOwnerApprover) {
-      this.props.dispatchBusinessOwnerDenySubmissionAction(submission.submissionID);
+      this.props.dispatchBusinessOwnerDenySubmissionAction(submission.submissionID, secureToken);
+    } else if (isCurrentUserApprover) {
+      this.props.dispatchDenySubmissionAction(submission.submissionID, skipBoAndCisoApproval);
     }
   }
 

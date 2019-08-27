@@ -60,6 +60,18 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 {
     use SDLTRiskSubmission;
 
+    const STATUS_START = 'start';
+    const STATUS_IN_PROGRESS = 'in_progress';
+    const STATUS_NOT_REQUIRED = 'not_required';
+    const STATUS_PENDING = 'pending';
+    const STATUS_INVALID = 'invalid';
+    const STATUS_SUBMITTED = 'submitted';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_DENIED = 'denied';
+    const STATUS_AWAITING_SA_REVIEW = 'awaiting_security_architect_review';
+    const STATUS_WAITING_FOR_SA_APPROVAL = 'waiting_for_security_architect_approval';
+    const STATUS_WAITING_FOR_APPROVAL = 'waiting_for_approval';
+
     /**
      * @var string
      */
@@ -105,7 +117,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'User' => Member::class,
         'Questionnaire' => Questionnaire::class,
         'CisoApprover' => Member::class,
-        'SecurityArchitectApprover' => Member::class
+        'SecurityArchitectApprover' => Member::class,
+        'BusinessOwnerApprover' => Member::class
     ];
 
     /**
@@ -141,6 +154,200 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     private static $default_sort = ['ID' => 'DESC'];
 
     /**
+     * @return boolean
+     */
+    private function isInProgress() : bool
+    {
+        if ($this->QuestionnaireStatus === self::STATUS_IN_PROGRESS) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return boolean
+     */
+    private function isSubmitted() : bool
+    {
+        if ($this->QuestionnaireStatus === self::STATUS_SUBMITTED) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @return boolean
+     */
+    private function isAwaitingSecurityArchitectReview() : bool
+    {
+        if ($this->QuestionnaireStatus === self::STATUS_AWAITING_SA_REVIEW) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return boolean
+     */
+    private function isWaitingForSecurityArchitectApproval() : bool
+    {
+        if ($this->QuestionnaireStatus === self::STATUS_WAITING_FOR_SA_APPROVAL) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return boolean
+     */
+    private function isWaitingForApproval() : bool
+    {
+        if ($this->QuestionnaireStatus === self::STATUS_WAITING_FOR_APPROVAL) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return boolean
+     */
+    private function isApproved() : bool
+    {
+        if ($this->QuestionnaireStatus === self::STATUS_APPROVED) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return boolean
+     */
+    private function isDenied() : bool
+    {
+        if ($this->QuestionnaireStatus === self::STATUS_DENIED) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return boolean
+     */
+    private function isSAApprovalPending() : bool
+    {
+        if ($this->SecurityArchitectApprovalStatus === self::STATUS_PENDING) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function isApprovedBySA() : bool
+    {
+        if ($this->SecurityArchitectApprovalStatus === self::STATUS_APPROVED) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function isDeniedBySA() : bool
+    {
+        if ($this->SecurityArchitectApprovalStatus === self::STATUS_DENIED) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return boolean
+     */
+    private function isCisoApprovalPending() : bool
+    {
+        if ($this->CisoApprovalStatus === self::STATUS_PENDING) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return boolean
+     */
+    private function isApprovedByCiso() : bool
+    {
+        if ($this->CisoApprovalStatus === self::STATUS_APPROVED) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return boolean
+     */
+    private function isDeniedByCiso() : bool
+    {
+        if ($this->CisoApprovalStatus === self::STATUS_DENIED) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return boolean
+     */
+    private function isBOApprovalPending() : bool
+    {
+        if ($this->BusinessOwnerApprovalStatus === self::STATUS_PENDING) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return boolean
+     */
+    private function isApprovedByBO() : bool
+    {
+        if ($this->BusinessOwnerApprovalStatus === self::STATUS_APPROVED) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return boolean
+     */
+    private function isDeniedByBO() : bool
+    {
+        if ($this->BusinessOwnerApprovalStatus === self::STATUS_DENIED) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return boolean
+     */
+    private function isAssignedToCurrentSAUser() : bool
+    {
+        $member = Security::getCurrentUser();
+        return (int)$member->ID === (int)$this->SecurityArchitectApproverID;
+    }
+
+    /**
      * CMS Fields
      * @return FieldList
      */
@@ -171,7 +378,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         .' users of the application'),
                 TextField::create(
                     'AnonymousLink',
-                    'Anonymous access link'
+                    'Business Owner approval link'
                 )
                       ->setValue($this->getApprovalPageLink())
                       ->setReadonly(true)
@@ -246,6 +453,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             'Root.BusinessOwnerDetails',
             [
                 $fields->dataFieldByName('BusinessOwnerEmailAddress'),
+                $fields->dataFieldByName('BusinessOwnerApproverID'),
                 $fields->dataFieldByName('BusinessOwnerApprovalStatus'),
                 $fields->dataFieldByName('BusinessOwnerIPAddress'),
                 $fields->dataFieldByName('BusinessOwnerMachineName'),
@@ -312,86 +520,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         ];
 
         return isset($mapping[$this->QuestionnaireStatus]) ? $mapping[$this->QuestionnaireStatus] : $this->QuestionnaireStatus;
-    }
-
-    /**
-     * get is current user has access for approval or not
-     * and this value is only for CISO and Security-architect
-     * for business owner we will use token based url
-     *
-     * @return boolean
-     */
-    public function getIsCurrentUserAnApprover()
-    {
-        $member = Security::getCurrentUser();
-
-        if (!$member) {
-            return false;
-        }
-
-        $accessDetail = $this->doesCurrentUserHasAccessToApproveDeny($member);
-
-        if (!empty($accessDetail)) {
-            return $accessDetail['hasAccess'];
-        }
-
-        return false;
-    }
-
-    /**
-     * get is current user is business and has access to approve and deny
-     *
-     * @return boolean
-     */
-    public function getIsCurrentUserABusinessOwnerApprover()
-    {
-        $member = Security::getCurrentUser();
-
-        if (!$member) {
-            return false;
-        }
-
-        // check access details for business owner
-        if ($this->QuestionnaireStatus == 'waiting_for_approval' &&
-            $this->BusinessOwnerApprovalStatus == 'pending' &&
-            $member->Email == $this->BusinessOwnerEmailAddress) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Determines if a particular operation was performed by a Business Owner.
-     * This check is reliant on information provided by both the data-model and
-     * the current GraphQL {@link HTTPRequest} object.
-     *
-     * @return boolean
-     */
-    public function isBusinessOwnerContext()
-    {
-        $member = Security::getCurrentUser();
-
-        if ($member) {
-            $changed = $this->getChangedFields(['QuestionnaireStatus'], 1);
-            // check access details for business owner
-            if (array_key_exists('QuestionnaireStatus', $changed) && $changed['QuestionnaireStatus']['before'] === 'waiting_for_approval' &&
-                in_array($changed['QuestionnaireStatus']['after'], ['approved', 'denied']) &&
-                $member->Email == $this->BusinessOwnerEmailAddress) {
-                return true;
-            }
-        }
-
-        $req = Controller::curr() ? Controller::curr()->getRequest() : null;
-
-        return (
-            $this->UUID &&
-            $this->ApprovalLinkToken && (
-                $req &&
-                strstr($req->getHeader('referer'), 'businessOwnerApproval') &&
-                strstr($req->getBody(), $this->ApprovalLinkToken)
-            )
-        );
     }
 
     /**
@@ -469,7 +597,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ->addArg('UUID', 'String')
             ->addArg('UserID', 'String')
             ->addArg('SecureToken', 'String')
-            ->addArg('IsBusinessOwnerSummaryPage', 'String')
             ->addArg('PageType', 'String')
             ->setUsePagination(false)
             ->setResolver(new class implements ResolverInterface {
@@ -491,7 +618,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $uuid = isset($args['UUID']) ? htmlentities(trim($args['UUID'])) : null;
                     $userID = isset($args['UserID']) ? htmlentities(trim($args['UserID'])) : null;
                     $secureToken = isset($args['SecureToken']) ? Convert::raw2sql(trim($args['SecureToken'])) : null;
-                    $isBusinessOwnerSummaryPage= isset($args['IsBusinessOwnerSummaryPage']) ? Convert::raw2sql(trim($args['IsBusinessOwnerSummaryPage'])) : '0';
                     $pageType= isset($args['PageType']) ? Convert::raw2sql(trim($args['PageType'])) : '';
 
                     // To continue the data fetching, user has to be logged-in or has secure token
@@ -508,10 +634,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         throw new Exception('Sorry, wrong user Id.');
                     }
 
-                    if ($isBusinessOwnerSummaryPage && empty($secureToken)) {
-                        throw new Exception('Sorry, please enter token value as well.');
-                    }
-
                     // Filter data by UUID
                     // The questionnaire can be read by other users
                     /* @var $data QuestionnaireSubmission */
@@ -524,47 +646,45 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                         if ($member->getIsSA() && $member->getIsCISO()) {
                             $status = [
-                              'awaiting_security_architect_review',
-                              'waiting_for_security_architect_approval',
-                              'waiting_for_approval',
-                              'approved',
-                              'pending'
+                                QuestionnaireSubmission::STATUS_AWAITING_SA_REVIEW,
+                                QuestionnaireSubmission::  STATUS_WAITING_FOR_SA_APPROVAL,
+                                QuestionnaireSubmission::STATUS_WAITING_FOR_APPROVAL,
+                                QuestionnaireSubmission::STATUS_APPROVED,
+                                QuestionnaireSubmission::STATUS_DENIED
                             ];
 
                             $data = QuestionnaireSubmission::get()->filter([
                                 'QuestionnaireStatus' => $status
                             ])->filterAny([
-                                'SecurityArchitectApprovalStatus' => "pending",
-                                'CisoApprovalStatus' => "pending"
+                                'SecurityArchitectApprovalStatus' => QuestionnaireSubmission::STATUS_PENDING,
+                                'CisoApprovalStatus' => QuestionnaireSubmission::STATUS_PENDING
                             ]);
 
-                            // @todo : We might need below commented code for story:-
-                            // Do not allow  an SA or CISO who has already approved
-                            // a submission to also approve it as a business owner
-                            // https://redmine.catalyst.net.nz/issues/64290
-                            // all three approvals should come from distinct people
-                            // ->exclude([
-                            //     'QuestionnaireStatus' => 'waiting_for_approval',
-                            //     'SecurityArchitectApproverID' => $userID
-                            // ]);
                         } else if ($member->getIsSA()) {
                             $data = QuestionnaireSubmission::get()->filter([
-                                'QuestionnaireStatus' => ['awaiting_security_architect_review', 'waiting_for_security_architect_approval'],
-                                'SecurityArchitectApprovalStatus' => "pending"
+                                'QuestionnaireStatus' => [
+                                    QuestionnaireSubmission::STATUS_AWAITING_SA_REVIEW,
+                                    QuestionnaireSubmission::  STATUS_WAITING_FOR_SA_APPROVAL,
+                                ],
+                                'SecurityArchitectApprovalStatus' => QuestionnaireSubmission::STATUS_PENDING
                             ]);
                         } else if ($member->getIsCISO()) {
                             $data = QuestionnaireSubmission::get()->filter([
-                                'QuestionnaireStatus' => ['waiting_for_approval', 'approved', 'pending'],
-                                'CisoApprovalStatus' => "pending"
+                                'QuestionnaireStatus' => [
+                                  QuestionnaireSubmission::STATUS_WAITING_FOR_APPROVAL,
+                                  QuestionnaireSubmission::STATUS_APPROVED,
+                                  QuestionnaireSubmission::STATUS_DENIED
+                                ],
+                                'CisoApprovalStatus' => QuestionnaireSubmission::STATUS_PENDING
                             ]);
                         } else {
                             // @todo : We might need to change this logic in future for Story:-
                             // Change behaviour of Business Owner approval Token
                             // https://redmine.catalyst.net.nz/issues/66788
                             $data = QuestionnaireSubmission::get()->filter([
-                                'QuestionnaireStatus' => 'waiting_for_approval',
-                                'BusinessOwnerApprovalStatus' => "pending",
-                                'BusinessOwnerEmailAddress' =>$member->Email
+                                'QuestionnaireStatus' => QuestionnaireSubmission::STATUS_WAITING_FOR_APPROVAL,
+                                'BusinessOwnerApprovalStatus' => QuestionnaireSubmission::STATUS_PENDING,
+                                'BusinessOwnerEmailAddress' => $member->Email
                             ]);
                         }
                     }
@@ -660,34 +780,36 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     $model = QuestionnaireSubmission::create();
 
+                    // set submitter details
                     $model->SubmitterName = $member->FirstName;
                     $model->SubmitterEmail = $member->Email;
-                    $model->QuestionnaireStatus = 'in_progress';
+                    $model->UserID = $member->ID;
+
+                    $model->QuestionnaireStatus = QuestionnaireSubmission::STATUS_IN_PROGRESS;
+                    $model->QuestionnaireID = $questionnaire->ID;
 
                     // set approval status of BO, SA and CISO
-                    $model->CisoApprovalStatus = 'pending';
+                    $model->CisoApprovalStatus = QuestionnaireSubmission::STATUS_PENDING;
+                    $model->BusinessOwnerApprovalStatus = QuestionnaireSubmission::STATUS_PENDING;
+                    $model->SecurityArchitectApprovalStatus = QuestionnaireSubmission::STATUS_PENDING;
 
-                    $model->BusinessOwnerApprovalStatus = 'pending';
-
-                    $model->SecurityArchitectApprovalStatus = 'pending';
-
-                    $model->QuestionnaireID = $questionnaire->ID;
-                    $model->UserID = $member->ID;
+                    // set email and approval override flag
                     $model->IsStartLinkEmailSent = 0;
                     $model->IsEmailSentToSecurityArchitect = 0;
+                    $model->ApprovalOverrideBySecurityArchitect = $model->isApprovalOverriddenBy();
 
+                    // set questioonaire level task ids
                     $questionnaireLevelTaskIDs = $questionnaire->Tasks()->column('ID');
                     $model->QuestionnaireLevelTaskIDs = $questionnaireLevelTaskIDs
                         ? json_encode($questionnaireLevelTaskIDs)
                         : '';
 
+                    // set UUID and ApprovalLinkToken
                     $uuid = Uuid::uuid4();
                     $model->UUID = (string) $uuid;
-
-                    $model->ApprovalOverrideBySecurityArchitect = $model->isApprovalOverriddenBy();
-
                     $model->ApprovalLinkToken = hash('sha3-256', random_bytes(64));
 
+                    // set QuestionnaireData
                     $model->QuestionnaireData = json_encode($questionnaire->getQuestionsData());
                     $model->write();
 
@@ -807,20 +929,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         if (is_string($isProductName)) {
                             $questionnaireSubmission->ProductName = $isProductName;
                         }
-
-                        //BusinessOwnerName
-                        $isBusinessOwnerName = QuestionnaireSubmission::is_field_type_exist(
-                            $jsonAnswerDataArr,
-                            $questionnaireSubmission->QuestionnaireData,
-                            $args['QuestionID'],
-                            'text',
-                            'IsBusinessOwnerName'
-                        );
-
-                        // if it is Business owner name text field, then add Business owner name
-                        if (is_string($isBusinessOwnerName)) {
-                            $questionnaireSubmission->BusinessOwnerName = $isBusinessOwnerName;
-                        }
                     }
 
                     $answerDataArr = [];
@@ -879,7 +987,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     $questionnaireSubmission->doesQuestionnairBelongToCurrentUser();
 
-                    $questionnaireSubmission->QuestionnaireStatus = 'submitted';
+                    $questionnaireSubmission->QuestionnaireStatus = QuestionnaireSubmission::STATUS_SUBMITTED;
 
                     $questionnaireSubmission->write();
 
@@ -947,7 +1055,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     $questionnaireSubmission->doesQuestionnairBelongToCurrentUser();
 
-                    $questionnaireSubmission->QuestionnaireStatus = 'in_progress';
+                    $questionnaireSubmission->QuestionnaireStatus = QuestionnaireSubmission::STATUS_IN_PROGRESS;
 
                     $questionnaireSubmission->write();
 
@@ -996,10 +1104,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     $questionnaireSubmission->doesQuestionnairBelongToCurrentUser();
 
-                    $questionnaireSubmission->QuestionnaireStatus = 'awaiting_security_architect_review';
+                    $questionnaireSubmission->QuestionnaireStatus = QuestionnaireSubmission::STATUS_AWAITING_SA_REVIEW;
 
                     if ($questionnaireSubmission->SecurityArchitectApprovalStatus == 'denied') {
-                        $questionnaireSubmission->QuestionnaireStatus = 'waiting_for_security_architect_approval';
+                        $questionnaireSubmission->QuestionnaireStatus = QuestionnaireSubmission::STATUS_WAITING_FOR_SA_APPROVAL;
                     }
 
                     if (!$questionnaireSubmission->IsEmailSentToSecurityArchitect) {
@@ -1059,7 +1167,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
 
-                    $questionnaireSubmission->QuestionnaireStatus = 'waiting_for_security_architect_approval';
+                    $questionnaireSubmission->QuestionnaireStatus = QuestionnaireSubmission::STATUS_WAITING_FOR_SA_APPROVAL;
 
                     $questionnaireSubmission->updateSecurityArchitectDetail($member, 'pending');
 
@@ -1196,6 +1304,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                  */
                 public function resolve($object, array $args, $context, ResolveInfo $info)
                 {
+                    QuestionnaireValidation::is_user_logged_in();
+
                     $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
 
                     $secureToken = isset($args['SecureToken']) ? Convert::raw2sql($args['SecureToken']) : '';
@@ -1241,6 +1351,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                  */
                 public function resolve($object, array $args, $context, ResolveInfo $info)
                 {
+                    QuestionnaireValidation::is_user_logged_in();
+
                     $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
 
                     $secureToken = isset($args['SecureToken']) ? Convert::raw2sql($args['SecureToken']) : '';
@@ -1299,26 +1411,28 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     protected function audit() : void
     {
         $user = Security::getCurrentUser();
+
         $approvalDbFields = self::normalise_group_approval_fields(
             $user,
-            $this->isBusinessOwnerContext()
+            $this->isBusinessOwner()
         );
+
         $userData = '';
+        $email = 'N/A';
+        $groups = 'N/A';
 
         if ($user) {
             $groups = $user->Groups()->column('Title');
+
+            if ($this->isBusinessOwner() && !$this->BusinessOwnerApproverID) {
+                $email = $this->BusinessOwnerEmailAddress;
+            } else {
+                $email = $user->Email;
+            }
+
             $userData = implode('. ', [
-                'Email: ' . (($this->isBusinessOwnerContext() && $this->BusinessOwnerEmailAddress) ?
-                    $this->BusinessOwnerEmailAddress :
-                    $user->Email),
+                'Email: ' . $email,
                 'Group(s): ' . ($groups ? implode(' : ', $groups) : 'N/A'),
-            ]);
-        } else {
-            $userData = implode('. ', [
-                'Email: ' . (($this->isBusinessOwnerContext() && $this->BusinessOwnerEmailAddress) ?
-                    $this->BusinessOwnerEmailAddress :
-                    'N/A'),
-                'Group(s): N/A',
             ]);
         }
 
@@ -1345,8 +1459,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $this->exists() &&
                     $user &&
                     isset($changed[$approvalFieldName]) &&
-                    $changed[$approvalFieldName]['before'] !== 'in_progress' &&
-                    $changed[$approvalFieldName]['after'] === 'in_progress') {
+                    $changed[$approvalFieldName]['before'] !== self::STATUS_IN_PROGRESS &&
+                    $changed[$approvalFieldName]['after'] === self::STATUS_IN_PROGRESS) {
                 $doAudit = true;
                 $statusChange['before'] = $changed[$approvalFieldName]['before'];
                 $statusChange['after'] = $changed[$approvalFieldName]['after'];
@@ -1375,8 +1489,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         foreach ($approvalDbFields as $approvalFieldName) {
             if (
                     $this->exists() &&
-                    in_array($this->$approvalFieldName, ['approved', 'denied']) && (
-                        $this->isBusinessOwnerContext() || (
+                    in_array($this->$approvalFieldName, [self::STATUS_DENIED, self::STATUS_APPROVED]) && (
+                        $this->isBusinessOwner() || (
                             $user && (
                                 $user->getIsCISO() ||
                                 $user->getIsSA()
@@ -1389,12 +1503,13 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
         if ($doAudit) {
             $msg = sprintf('"%s" was %s. (UUID: %s)', $this->Questionnaire()->Name, $this->$approvalFieldName, $this->UUID);
-            $status = ($this->$approvalFieldName === 'approved') ? 'Approve' : 'Deny';
+            $status = ($this->$approvalFieldName === self::STATUS_APPROVED) ? 'Approve' : 'Deny';
             $this->auditService->commit($status, $msg, $this, $userData);
         }
     }
 
     /**
+<<<<<<< HEAD
      * @param DataObject $question question
      *
      * @return array $finalActionFields
@@ -1441,14 +1556,14 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     public function getApprovalPageLink()
     {
         $hostname = $this->getHostname();
-        $link = sprintf(
-            "%s%s%s?token=%s",
-            $hostname,
-            "businessOwnerApproval/#/questionnaire/summary/",
+        $backUrl = rawurlencode(sprintf(
+            "%s%s?token=%s",
+            "#/questionnaire/summary/",
             $this->UUID,
             $this->ApprovalLinkToken
-        );
-        return Convert::html2raw($link);
+        ));
+
+        return Convert::html2raw($hostname. 'Security/login?BackURL=' . $backUrl);
     }
 
     /**
@@ -1475,14 +1590,14 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     public function updateQuestionnaireOnApproveAndDenyByBusinessOwner($status = '')
     {
         // check access details for Business owner
-        if ($this->QuestionnaireStatus !== 'waiting_for_approval') {
+        if (!$this->isWaitingForApproval()) {
             return [
                     "hasAccess" => false,
                     "message" => 'Sorry, .',
                     "group" => 'business-owner'
             ];
         }
-        if ($this->BusinessOwnerApprovalStatus != "pending") {
+        if (!$this->isBOApprovalPending()) {
             return [
                 "hasAccess" => false,
                 "message" => 'Sorry, this is already approved and denied by the Business Owner.',
@@ -1490,12 +1605,14 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ];
         }
 
+        $member = Security::getCurrentUser();
+
         // update business owner details
-        $this->updateBusinessOwnerDetail($status);
+        $this->updateBusinessOwnerDetail($status, $member);
 
         // if approve by business owner then change questionnaire status to approved
         // else denied and send email notification to the questionnaire submitter
-        if ($status == 'approved') {
+        if ($status == self::STATUS_APPROVED) {
             $this->QuestionnaireStatus = $status;
 
             // send approved email notification to the user (submitter)
@@ -1546,7 +1663,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 // skipBoAndCisoApproval is not set then send email to CISO and BO
                 // else skip the CISO and BO approval and chane questionnaire status to approved
                 if (!$skipBoAndCisoApproval) {
-                    $this->QuestionnaireStatus = 'waiting_for_approval';
+                    $this->QuestionnaireStatus = self::STATUS_WAITING_FOR_APPROVAL;
 
                     // get CISO group member list
                     $members = $this->getApprovalMembersListByGroup(UserGroupConstant::GROUP_CODE_CISO);
@@ -1561,8 +1678,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 } else {
                     $this->QuestionnaireStatus = $status;
 
-                    $this->CisoApprovalStatus = 'not_required';
-                    $this->BusinessOwnerApprovalStatus = 'not_required';
+                    $this->CisoApprovalStatus = self::STATUS_NOT_REQUIRED;
+                    $this->BusinessOwnerApprovalStatus = self::STATUS_NOT_REQUIRED;
 
                     // send approved email notification to the user (submitter)
                     $queuedJobService = QueuedJobService::create();
@@ -1573,7 +1690,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 }
             } else {
                 // if denied- no email, internal communication between Submitter and security-architect
-                $this->QuestionnaireStatus = 'in_progress';
+                $this->QuestionnaireStatus = self::STATUS_IN_PROGRESS;
 
                 // Mark all related task submissions as "invalid"
                 $this->TaskSubmissions()->each(function (TaskSubmission $taskSubmission) {
@@ -1620,8 +1737,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     * @param string $status status
     * @return void
     */
-    public function updateBusinessOwnerDetail($status = null)
+    public function updateBusinessOwnerDetail($status = null, $member)
     {
+        $this->BusinessOwnerApprover = $member->ID;
         $this->BusinessOwnerApprovalStatus = $status;
         $this->BusinessOwnerStatusUpdateDate = date('Y-m-d H:i:s');
 
@@ -1653,162 +1771,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         if (gethostname()) {
             $this->CisoApproverMachineName = Convert::raw2sql(gethostname());
         }
-    }
-
-    /**
-    * get access details for Security Architect
-    *
-    * @param DataObject $member member
-    * @return array
-    */
-    public function getSecurityArchitectAccessDetail($member)
-    {
-        $group = UserGroupConstant::GROUP_CODE_SA;
-
-        // check member groups
-        $ismemberInGroup = $member->Groups()->filter('Code', $group)->first();
-
-        if (!$ismemberInGroup) {
-            return [
-                "hasAccess" => false,
-                "message" => 'Sorry, user is not belongs to Security Architect group.',
-                'group' => $group
-            ];
-        }
-
-        if ($this->SecurityArchitectApprovalStatus == 'pending') {
-            if ($this->QuestionnaireStatus == 'waiting_for_security_architect_approval') {
-                if ((int)$member->ID === (int)$this->SecurityArchitectApproverID) {
-                    return [
-                        "hasAccess" => true,
-                        "message" => 'Yes, current user has access to approve and denied.',
-                        'group' => $group
-                    ];
-                } else {
-                    return [
-                        "hasAccess" => false,
-                        "message" => 'Sorry, questionnaire already assigned to other member of Security Architect group.',
-                        'group' => $group
-                    ];
-                }
-            }
-
-            return [
-                "hasAccess" => true,
-                "message" => 'Yes, current user has access to approve and denied.',
-                'group' => $group
-            ];
-        }
-
-        if ($this->SecurityArchitectApprovalStatus == 'approved') {
-            return [
-                "hasAccess" => false,
-                "message" => 'Sorry, questionnaire already approved by Security Architect group member.',
-                'group' => $group
-            ];
-        }
-
-        if ($this->SecurityArchitectApprovalStatus == 'denied') {
-            if ((int)$member->ID === (int)$this->SecurityArchitectApproverID) {
-                return [
-                    "hasAccess" => true,
-                    "message" => 'Yes, log in member can approve and denied the questionnaire.',
-                    'group' => $group
-                ];
-            } else {
-                return [
-                    "hasAccess" => false,
-                    "message" => 'Sorry, questionnaire already assigned to other member of Security Architect group.',
-                    'group' => $group
-                ];
-            }
-        }
-
-        return [
-            "hasAccess" => false,
-            "message" => 'Sorry, there is some problem for Security Architect approval.',
-            'group' => $group
-        ];
-    }
-
-    /**
-    * get access details for CISO member
-    *
-    * @param DataObject $member member
-    * @return array
-    */
-    public function getCISOAccessDetail($member)
-    {
-        $group = UserGroupConstant::GROUP_CODE_CISO;
-
-        // check member groups
-        $ismemberInGroup = $member->Groups()->filter('Code', $group)->first();
-
-        if (!$ismemberInGroup) {
-            return [
-              "hasAccess" => false,
-              "message" => 'Sorry, user is not belongs to CISO group.',
-              'group' => $group
-            ];
-        }
-
-        if ($this->CisoApprovalStatus == 'pending') {
-            return [
-                "hasAccess" => true,
-                "message" => 'Yes, current user has access to approve and deny.',
-                'group' => $group
-            ];
-        }
-
-        if ($this->CisoApprovalStatus == 'approved' || $this->CisoApprovalStatus == 'denied') {
-            return [
-                "hasAccess" => false,
-                "message" => 'Sorry, questionnaire is already approved and denied by CISO group member.',
-                'group' => $group
-            ];
-        }
-
-        return [
-            "hasAccess" => false,
-            "message" => 'Sorry, there is some problem for CISO Group Approval.',
-            'group' => $group
-        ];
-    }
-
-    /**
-    * Check if current user has access to approve or deny (only for Security architect and CISO)
-    *
-    * @param DataObject $member member
-    * @return array
-    */
-    public function doesCurrentUserHasAccessToApproveDeny($member)
-    {
-        // check QuestionnaireStatus
-        if (in_array($this->QuestionnaireStatus, ['in_progress', 'submitted'])) {
-            return [
-                "hasAccess" => false,
-                "message" => 'Sorry, this is not ready for review. Please contact with the submitter.',
-                "group" => ''
-            ];
-        }
-
-        // check access details for security architect
-        if (in_array($this->QuestionnaireStatus, ['awaiting_security_architect_review', 'waiting_for_security_architect_approval'])) {
-            $accessdetails = $this->getSecurityArchitectAccessDetail($member);
-            return $accessdetails;
-        }
-
-        // check access details for CISO
-        if (in_array($this->QuestionnaireStatus, ['waiting_for_approval', 'denied', 'approved'])) {
-            return $this->getCISOAccessDetail($member);
-        }
-
-        return [
-            "hasAccess" => false,
-            "message" => 'Sorry, user is not belong to approval group or user
-                don\'t have access to approve and deny.',
-            'group' => ''
-        ];
     }
 
     /**
@@ -1915,6 +1877,11 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     {
         if (!empty($this->BusinessOwnerName)) {
             return $this->BusinessOwnerName;
+        } else if ($this->BusinessOwnerApproverID) {
+            return implode(' ', [
+                $this->BusinessOwnerApprover()->FirstName,
+                $this->BusinessOwnerApprover()->Surname
+            ]);
         } else {
             return $this->BusinessOwnerEmailAddress;
         }
@@ -2020,27 +1987,285 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $allRiskResults = [];
 
         // for questionnaire
-        if ($this->QuestionnaireStatus !== "in_progress") {
+        if ($this->QuestionnaireStatus !== self::STATUS_IN_PROGRESS) {
             $allRiskResults = $this->getRiskResult('q');
         }
 
         return $allRiskResults;
     }
-
     /**
      * Get the current hostname or an alternate one from the SiteConfig
      *
      * @return string
      */
-    public function getHostname() : string
-    {
-        $hostname = Director::absoluteBaseURL();
-        $config = SiteConfig::current_site_config();
-        if ($config->AlternateHostnameForEmail) {
-            $hostname = $config->AlternateHostnameForEmail;
-        }
+   public function getHostname() : string
+   {
+       $hostname = Director::absoluteBaseURL();
+       $config = SiteConfig::current_site_config();
+       if ($config->AlternateHostnameForEmail) {
+           $hostname = $config->AlternateHostnameForEmail;
+       }
 
-        return $hostname;
+       return $hostname;
+   }
+
+    /**
+     * @return boolean
+     */
+    public function isBusinessOwner() : bool
+    {
+        return ($this->isRequestFromBusinessOwner() ||
+            $this->isBusinessOwnerEmailAddress());
     }
 
+      /**
+     * @return boolean
+     */
+    public function isRequestFromBusinessOwner() : bool
+    {
+        $req = Controller::curr() ? Controller::curr()->getRequest() : null;
+
+        if (!$req) {
+            return false;
+        }
+
+        if (strstr($req->getBody(), $this->ApprovalLinkToken)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function isBusinessOwnerEmailAddress() : bool
+    {
+        $member = Security::getCurrentUser();
+
+        if (!$member) {
+            return false;
+        }
+
+        if ($member->Email === $this->BusinessOwnerEmailAddress) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * get is current user is business and has access to approve and deny
+     *
+     * @return boolean
+     */
+    public function getIsCurrentUserABusinessOwnerApprover()
+    {
+        // check access details for business owner
+        if ($this->isWaitingForApproval() &&
+            $this->isBusinessOwner() &&
+            $this->isBOApprovalPending()
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * get is current user has access for approval or not
+     * and this value is only for CISO and Security-architect
+     * for business owner we will use token based url
+     *
+     * @return boolean
+     */
+    public function getIsCurrentUserAnApprover()
+    {
+        $member = Security::getCurrentUser();
+
+        if (!$member) {
+            return false;
+        }
+
+        $accessDetail = $this->doesCurrentUserHasAccessToApproveDeny($member);
+
+        if (!empty($accessDetail)) {
+            return $accessDetail['hasAccess'];
+        }
+
+        return false;
+    }
+
+    /**
+    * Check if current user has access to approve or deny (only for Security architect and CISO)
+    *
+    * @param DataObject $member member
+    * @return array
+    */
+    public function doesCurrentUserHasAccessToApproveDeny($member)
+    {
+        // check QuestionnaireStatus
+        if ($this->isInProgress() || $this->isSubmitted()) {
+            return [
+                "hasAccess" => false,
+                "message" => 'Sorry, this is not ready for review. Please contact with the submitter.',
+                "group" => ''
+            ];
+        }
+
+        if ($this->isRequestFromBusinessOwner()) {
+            return [
+                "hasAccess" => false,
+                "message" => 'Sorry, request is belongs to business owner and not ready for  business owner approval.',
+                "group" => 'business-owner'
+            ];
+        }
+
+        if ($this->isBusinessOwner() && $this->isWaitingForApproval()) {
+            return [
+                "hasAccess" => true,
+                "message" => 'Please approve the questionnaire as business oWner',
+                "group" => 'business-owner'
+            ];
+        }
+
+        // check access details for security architect
+        if ($this->isAwaitingSecurityArchitectReview() ||
+            $this->isWaitingForSecurityArchitectApproval()) {
+            $accessdetails = $this->getSecurityArchitectAccessDetail($member);
+            return $accessdetails;
+        }
+
+        // check access details for CISO
+        if ($this->isWaitingForApproval() ||
+            $this->isApproved() ||
+            $this->isDenied()) {
+            return $this->getCISOAccessDetail($member);
+        }
+
+        return [
+            "hasAccess" => false,
+            "message" => 'Sorry, user is not belong to approval group or user
+                don\'t have access to approve and deny.',
+            'group' => ''
+        ];
+    }
+
+    /**
+    * get access details for Security Architect
+    *
+    * @param DataObject $member member
+    * @return array
+    */
+    public function getSecurityArchitectAccessDetail($member)
+    {
+        $group = UserGroupConstant::GROUP_CODE_SA;
+
+        if (!$member->getIsSA()) {
+            return [
+                "hasAccess" => false,
+                "message" => 'Sorry, user is not belongs to Security Architect group.',
+                "group" => $group
+            ];
+        }
+
+        // if approval from SA is pending
+        if ($this->isSAApprovalPending()){
+            if($this->isAwaitingSecurityArchitectReview()) {
+              return [
+                  "hasAccess" => true,
+                  "message" => 'Yes, current SA user has access to assign to themself.',
+                  "group" => $group
+              ];
+            }
+
+            if (($this->isWaitingForSecurityArchitectApproval()) && ($this->isAssignedToCurrentSAUser())) {
+              return [
+                  "hasAccess" => true,
+                  "message" => 'Yes, current SA user has access to approve and denied.',
+                  "group" => $group
+              ];
+            } else {
+                return [
+                    "hasAccess" => false,
+                    "message" => 'Sorry, questionnaire already assigned to other member of Security Architect group.',
+                    "group" => $group
+                ];
+            }
+        }
+
+        // if already approved by SA group member
+        if ($this->isApprovedBySA()) {
+            return [
+                "hasAccess" => false,
+                "message" => 'Sorry, questionnaire already approved by Security Architect group member.',
+                "group" => $group
+            ];
+        }
+
+        // if already denied by SA group member
+        if ($this->isDeniedBySA()) {
+            if ($this->isAssignedToCurrentSAUser()) {
+                return [
+                    "hasAccess" => true,
+                    "message" => 'Yes, log in member can approve and denied the questionnaire.',
+                    "group" => $group
+                ];
+            } else {
+                return [
+                    "hasAccess" => false,
+                    "message" => 'Sorry, questionnaire already assigned to other member of Security Architect group.',
+                    "group" => $group
+                ];
+            }
+        }
+
+        return [
+            "hasAccess" => false,
+            "message" => 'Sorry, there is some problem for Security Architect approval.',
+            "group" => $group
+        ];
+    }
+
+    /**
+    * get access details for CISO member
+    *
+    * @param DataObject $member member
+    * @return array
+    */
+    public function getCISOAccessDetail($member)
+    {
+        $group = UserGroupConstant::GROUP_CODE_CISO;
+
+        // if member is not belongs to ciso group
+        if (!$member->getIsCISO()) {
+            return [
+              "hasAccess" => false,
+              "message" => 'Sorry, user is not belongs to CISO group.',
+              "group" => $group
+            ];
+        }
+
+        // if approval is pending for CISO
+        if ($this->isCisoApprovalPending()) {
+            return [
+                "hasAccess" => true,
+                "message" => 'Yes, current user has access to approve and deny.',
+                "group" => $group
+            ];
+        }
+
+        // if already approved or denied by Ciso group member
+        if ($this->isApprovedByCiso() || $this->isDeniedByCiso()) {
+            return [
+                "hasAccess" => false,
+                "message" => 'Sorry, questionnaire is already approved and denied by CISO group member.',
+                "group" => $group
+            ];
+        }
+
+        // default acess details
+        return [
+            "hasAccess" => false,
+            "message" => 'Sorry, there is some problem for CISO Group Approval.',
+            "group" => $group
+        ];
+    }
 }
