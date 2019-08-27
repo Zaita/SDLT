@@ -143,8 +143,7 @@ class MultiChoiceAnswerSelection extends DataObject
             ]]);
             // No need for an edit button. The weight is the only editable field
             $config = GridFieldConfig_RelationEditor::create()
-                    ->addComponent($componentEditableFields, GridFieldEditButton::class)
-                    ->removeComponentsByType(GridFieldEditButton::class);
+                    ->addComponent($componentEditableFields, GridFieldEditButton::class);
 
             $fields->addFieldToTab('Root.Main', GridField::create(
                             'Risks',
