@@ -109,6 +109,7 @@ export default class TaskSubmissionForBusinessOwner extends Component<Props, Sta
       questionnaireTitle: taskSubmission.taskName,
       siteTitle: siteTitle,
       result: taskSubmission.result,
+      riskResults: taskSubmission.riskResults,
     });
   }
 }
