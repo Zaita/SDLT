@@ -150,7 +150,7 @@ class ComponentSelectionContainer extends Component<Props> {
 
     return (
       <div className="ComponentSelectionContainer">
-        <Header title="Component Selection" subtitle={siteTitle}/>
+        <Header title="Component Selection" subtitle={siteTitle} username={currentUser.name}/>
         {body}
         <Footer/>
       </div>
