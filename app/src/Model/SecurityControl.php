@@ -16,7 +16,7 @@ namespace NZTA\SDLT\Model;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\TextareaField;
-use SilverStripe\GraphQL\Controller;
+use SilverStripe\Control\Controller;
 
 /**
  * Class SecurityControl
@@ -81,7 +81,7 @@ class SecurityControl extends DataObject
 
         // Validate the ManyManyExtraFields:
         // Cannot rely on $this->$fieldName for validation. Framework seems to only
-        // validates _after_ saving
+        // validate _after_ saving.
         $postVars = Controller::curr()->getRequest()->postVar('ManyMany');
 
         foreach (array_keys(SecurityComponent::config()->get('many_many_extraFields')['Controls']) as $fieldName) {
