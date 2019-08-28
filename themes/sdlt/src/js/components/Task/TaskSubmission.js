@@ -127,6 +127,7 @@ class TaskSubmission extends Component<Props> {
       questionnaireTitle: taskSubmission.taskName,
       siteTitle: siteTitle,
       result: taskSubmission.result,
+      riskResults: taskSubmission.riskResults,
     });
   }
 }
