@@ -141,8 +141,8 @@ class Task extends DataObject implements ScaffoldingProvider
             'RiskCalculation',
         ]);
 
-        // if task type is selection, then please hide Questions tab
-        if ($this->TaskType === 'selection') {
+        // If TaskType doesn't require Questions, hide the "Questions" tab
+        if ($this->isSelectionType() || $this->isSRAType()) {
             // A "selection" type, has no Questions
             $fields->removeByName('Questions');
         } else {
@@ -375,6 +375,14 @@ class Task extends DataObject implements ScaffoldingProvider
     public function isSRAType() : bool
     {
         return $this->TaskType === 'security risk assessment';
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isSelectionType() : bool
+    {
+        return $this->TaskType === 'selection';
     }
 
     /**

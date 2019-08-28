@@ -37,14 +37,6 @@ class LikelihoodThreshold extends DataObject
     private static $table_name = 'LikelihoodThreshold';
 
     /**
-     * @var array
-     */
-    private static $operators = [
-        '<' => 'Value is less than (<)',
-        '>' => 'Value is greater than (>)',
-    ];
-
-    /**
      * @return FieldList
      */
     public function getCMSFields() : FieldList
