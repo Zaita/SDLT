@@ -42,6 +42,7 @@ use SilverStripe\Control\Controller;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\FormField;
 use NZTA\SDLT\Traits\SDLTRiskSubmission;
+use SilverStripe\SiteConfig\SiteConfig;
 
 /**
  * Class Questionnaire
@@ -1419,7 +1420,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      */
     public function getStartLink()
     {
-        $link = Convert::html2raw(Director::absoluteBaseURL(). 'Security/login?BackURL='.rawurlencode('/#/questionnaire/submission/' . $this->UUID));
+        $hostname = $this->getHostname();
+        $link = Convert::html2raw($hostname. 'Security/login?BackURL='.rawurlencode('/#/questionnaire/submission/' . $this->UUID));
         return $link;
     }
 
@@ -1428,7 +1430,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      */
     public function getSummaryPageLink()
     {
-        $link = Convert::html2raw(Director::absoluteBaseURL(). 'Security/login?BackURL='.rawurlencode('/#/questionnaire/summary/' . $this->UUID));
+        $hostname = $this->getHostname();
+        $link = Convert::html2raw($hostname. 'Security/login?BackURL='.rawurlencode('/#/questionnaire/summary/' . $this->UUID));
         return $link;
     }
 
@@ -1437,9 +1440,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      */
     public function getApprovalPageLink()
     {
+        $hostname = $this->getHostname();
         $link = sprintf(
             "%s%s%s?token=%s",
-            Director::absoluteBaseURL(),
+            $hostname,
             "businessOwnerApproval/#/questionnaire/summary/",
             $this->UUID,
             $this->ApprovalLinkToken
@@ -2021,6 +2025,22 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         }
 
         return $allRiskResults;
+    }
+
+    /**
+     * Get the current hostname or an alternate one from the SiteConfig
+     *
+     * @return string
+     */
+    public function getHostname() : string
+    {
+        $hostname = Director::absoluteBaseURL();
+        $config = SiteConfig::current_site_config();
+        if ($config->AlternateHostnameForEmail) {
+            $hostname = $config->AlternateHostnameForEmail;
+        }
+
+        return $hostname;
     }
 
 }
