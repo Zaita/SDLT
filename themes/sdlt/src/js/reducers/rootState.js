@@ -9,6 +9,7 @@ import {currentUserState} from "./currentUserState";
 import {siteConfigState} from "./siteConfigState";
 import {componentSelectionState} from "./componentSelectionState";
 import {questionnaireSubmissionListState} from "./questionnaireSubmissionListState"
+import {securityRiskAssessmentState} from "./securityRiskAssessmentState";
 
 export default combineReducers<RootState>({
   homeState,
@@ -17,5 +18,6 @@ export default combineReducers<RootState>({
   currentUserState,
   siteConfigState,
   componentSelectionState,
-  questionnaireSubmissionListState
+  questionnaireSubmissionListState,
+  securityRiskAssessmentState
 });

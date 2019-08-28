@@ -14,10 +14,10 @@ import ComponentSelectionContainer from "../ComponentSelection/ComponentSelectio
 import MySubmissionList from "../QuestionnaireSubmissionList/MySubmissionList";
 import AwaitingApprovalList from "../QuestionnaireSubmissionList/AwaitingApprovalList";
 import MyProductList from "../QuestionnaireSubmissionList/MyProductList";
+import SecurityRiskAssessmentContainer from "../SecurityRiskAssessment/SecurityRiskAssessmentContainer.js"
 import {parse} from "query-string";
 
 class MainApp extends Component<*> {
-
   render() {
     return (
       <div>
@@ -116,6 +116,22 @@ class MainApp extends Component<*> {
                 );
               }}
             </Route>
+
+            <Route path='/security-risk-assessment/submission/:uuid'>
+              {({match, location}) => {
+                let secureToken = '';
+                if (location.search) {
+                  const queryString = parse(location.search);
+                  secureToken = queryString.token;
+                }
+                return (
+                  <div className="gray-bg">
+                    <SecurityRiskAssessmentContainer uuid={match.params.uuid} secureToken={secureToken}/>
+                  </div>
+                );
+              }}
+            </Route>
+
             <Route path='/MySubmissions'>
               {({match}) => {
                 return (
