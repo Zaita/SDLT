@@ -3,10 +3,13 @@
 use SilverStripe\Dev\FunctionalTest;
 use SilverStripe\Security\Member;
 use NZTA\SDLT\Model\QuestionnaireSubmission;
+use SilverStripe\SiteConfig\SiteConfig;
 
 class QuestionnaireSubmissionTest extends FunctionalTest
 {
     /**
+     * Creates an isolated database, unique to this test-run.
+     *
      * @var boolean
      */
     protected $usesDatabase = true;
@@ -66,4 +69,141 @@ class QuestionnaireSubmissionTest extends FunctionalTest
             'ApprovalLinkToken' => 'Wibble'
         ])->isBusinessOwnerContext());
     }
+
+    public function testApprovalPageLink()
+    {
+        // Functionally "resets" the application's BASE_URL, to a known value, rather
+        // than relying on the fact that it will always be "https://localhost" or on
+        // whatever Director::absoluteBaseURL() gives us - and runs all the assertions
+        // in this "context".
+        $this->withBaseURL('https://foobar.com', function() {
+
+            $submission = QuestionnaireSubmission::create([
+                'UUID' => '11111111-2222-3333-4444-555566667777',
+                'ApprovalLinkToken' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+            ]);
+            $link1 = $submission->getApprovalPageLink();
+
+            $this->assertEquals(
+                sprintf(
+                    "%s%s%s?token=%s",
+                    'https://foobar.com/',
+                    'businessOwnerApproval/#/questionnaire/summary/',
+                    $submission->UUID,
+                    $submission->ApprovalLinkToken
+                ),
+                $link1
+            );
+
+            // Set the SiteConfig for the current test DB
+            $siteConfig = SiteConfig::current_site_config();
+            $siteConfig->AlternateHostnameForEmail = 'https://example.co.nz';
+            $siteConfig->write();
+
+            $submission = QuestionnaireSubmission::create([
+                'UUID' => '88888888-2222-3333-4444-555566667777',
+                'ApprovalLinkToken' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+            ]);
+            $submission->write();
+            $link2 = $submission->getApprovalPageLink();
+
+            $this->assertEquals(
+                sprintf(
+                    "%s%s%s?token=%s",
+                    'https://example.co.nz/',
+                    'businessOwnerApproval/#/questionnaire/summary/',
+                    $submission->UUID,
+                    $submission->ApprovalLinkToken
+                ),
+                $link2
+            );
+        });
+    }
+
+    public function testStartLink()
+    {
+        // Functionally "resets" the application's BASE_URL, to a known value, rather
+        // than relying on the fact that it will always be "https://localhost" or on
+        // whatever Director::absoluteBaseURL() gives us - and runs all the assertions
+        // in this "context".
+        $this->withBaseURL('https://foobarfoo.com', function() {
+            $submission = QuestionnaireSubmission::create([
+                'UUID' => '11111111-2222-3333-4444-555566667777',
+                'ApprovalLinkToken' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+            ]);
+            $link1 = $submission->getStartLink();
+
+            $this->assertEquals(
+                sprintf(
+                    "%sSecurity/login?BackURL=%s",
+                    'https://foobarfoo.com/',
+                    rawurlencode('/#/questionnaire/submission/' . $submission->UUID)
+                ),
+                $link1
+            );
+            // Set the SiteConfig for the current test DB
+            $siteConfig = SiteConfig::current_site_config();
+            $siteConfig->AlternateHostnameForEmail = 'https://example.co.nz///////';
+            $siteConfig->write();
+
+            $submission = QuestionnaireSubmission::create([
+                'UUID' => '88888888-2222-3333-4444-555566667777'
+            ]);
+            $submission->write();
+            $link2 = $submission->getStartLink();
+
+            $this->assertEquals(
+                sprintf(
+                    "%s/Security/login?BackURL=%s",
+                    'https://example.co.nz',
+                    rawurlencode('/#/questionnaire/submission/' . $submission->UUID)
+                ),
+                $link2
+            );
+        });
+    }
+
+    public function testSummaryPageLink()
+    {
+        // Functionally "resets" the application's BASE_URL, to a known value, rather
+        // than relying on the fact that it will always be "https://localhost" or on
+        // whatever Director::absoluteBaseURL() gives us - and runs all the assertions
+        // in this "context".
+        $this->withBaseURL('https://foobarfoobar.com', function() {
+            $submission = QuestionnaireSubmission::create([
+                'UUID' => '11111111-2222-3333-4444-555566667777',
+                'ApprovalLinkToken' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+            ]);
+            $link1 = $submission->getSummaryPageLink();
+
+            $this->assertEquals(
+                sprintf(
+                    "%sSecurity/login?BackURL=%s",
+                    'https://foobarfoobar.com/',
+                    rawurlencode('/#/questionnaire/summary/' . $submission->UUID)
+                ),
+                $link1
+            );
+            // Set the SiteConfig for the current test DB
+            $siteConfig = SiteConfig::current_site_config();
+            $siteConfig->AlternateHostnameForEmail = 'https://example.co.nz/////////////////';
+            $siteConfig->write();
+
+            $submission = QuestionnaireSubmission::create([
+                'UUID' => '88888888-2222-3333-4444-555566667777'
+            ]);
+            $submission->write();
+            $link2 =$submission->getSummaryPageLink();
+
+            $this->assertEquals(
+                sprintf(
+                    "%s/Security/login?BackURL=%s",
+                    'https://example.co.nz',
+                    rawurlencode('/#/questionnaire/summary/' . $submission->UUID)
+                ),
+                $link2
+            );
+        });
+    }
+
 }
