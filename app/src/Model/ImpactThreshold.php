@@ -27,35 +27,29 @@ class ImpactThreshold extends DataObject
     private static $table_name = 'ImpactThreshold';
 
     /**
-     * @var array
-     */
-    private static $operators = [
-        '<=' => 'Score is less than or equal to (<=)',
-        '>' => 'Score is greater than (>)',
-    ];
-
-    /**
      * If $operator and $operand match an impact-rating, return it.
      *
      * @param  mixed int|float  $operand  The RHS operand to compare against the
      *                                    "Value" field.
-     * @return mixed null|ImpactThreshold  An instance of {@link ImpactThreshold} if a match
-     *                          is found, or null otherwise.
+     * @return mixed null|ImpactThreshold  An instance of {@link ImpactThreshold}
+     *                                    if a match is found, or null otherwise.
+     * Note: This method is limited in scope.In the event of an operand set where
+     *       an operand is _both_ ">" and ">=" some value, then first "hit" is
+     *       returned. This is simply a case for the user to consider, when configuring
+     *       thresholds within the SDLT, using incremental or "stepped" thresholds.
      */
     public static function match($operand)
     {
-        foreach ([
-            '<=' => 'LessThanOrEqual',
-            '>' => 'GreaterThan'
-        ] as $op => $filter) {
+        foreach (array_keys(static::config()->get('operators')) as $op) {
             $where = sprintf("Operator = '%s' AND %s %s Value", $op, $operand, $op);
             $sort = sprintf('ABS(Value - %s)', $operand);
             $matches = self::get()
                     ->where($where)
                     ->sort($sort);
 
-            if ($matches && $matches->count()) {
-                return $matches->first();
+            // Conflict resolution: Always take the first match
+            if ($matches && $result = $matches->first()) {
+                return $result;
             }
         }
 

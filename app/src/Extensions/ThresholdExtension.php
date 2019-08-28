@@ -51,6 +51,16 @@ class ThresholdExtension extends DataExtension
     ];
 
     /**
+     * @var array
+     */
+    private static $operators = [
+        '<' => 'Score is less than (<)',
+        '>' => 'Score is greater than (>)',
+        '<=' => 'Score is less than or equal to (<=)',
+        '>=' => 'Score is greater than or equal to (>=)',
+    ];
+
+    /**
      * @return DBField
      */
     public function getSummaryColour()
