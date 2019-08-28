@@ -4,6 +4,8 @@ import toString from "lodash/toString";
 import get from "lodash/get";
 import type {Task} from "../types/Task";
 import QuestionParser from "./QuestionParser";
+import type {LikelihoodThreshold} from "../types/Task";
+import toArray from "lodash/toArray";
 
 export default class TaskParser {
 
@@ -30,5 +32,22 @@ export default class TaskParser {
     }
 
     return {id, name, type, questions};
+  }
+
+  static parseLikelihoodJSONObject(likelihoodJSON: string | Object): LikelihoodThreshold {
+    const jsonArray = (typeof likelihoodJSON === "string" ? JSON.parse(likelihoodJSON) : likelihoodJSON);
+
+    if (jsonArray) {
+      return toArray(jsonArray).map((jsonObject) => {
+        return {
+          name: toString(get(jsonObject, "Name")),
+          value: toString(get(jsonObject, "Value")),
+          operator: toString(get(jsonObject, "Operator")),
+          colour: toString(get(jsonObject, "Colour"))
+        }
+      });
+    }
+
+    return [];
   }
 }

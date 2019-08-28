@@ -130,6 +130,10 @@ class Summary extends Component<Props> {
                   URLUtil.redirectToComponentSelectionSubmission(uuid, token);
                   return;
                 }
+                if (taskType === "security risk assessment") {
+                  URLUtil.redirectToSecurityRiskAssessment(uuid, token);
+                  return;
+                }
                 URLUtil.redirectToTaskSubmission(uuid, token);
               }}>
                 {taskNameAndStatus}
