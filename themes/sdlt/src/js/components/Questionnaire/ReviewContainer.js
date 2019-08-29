@@ -31,7 +31,8 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
 };
 
 type ownProps = {
-  submissionHash: string
+  submissionHash: string,
+  secureToken: string
 };
 
 type reduxProps = {
@@ -50,6 +51,7 @@ class ReviewContainer extends Component<Props> {
   }
 
   render() {
+    const {secureToken} = {...this.props};
     const {
       title,
       siteTitle,
@@ -91,6 +93,7 @@ class ReviewContainer extends Component<Props> {
         <Review siteTitle={siteTitle}
           viewAs={viewAs}
           submission={submission}
+          secureToken={secureToken}
           handleSubmitButtonClick={this.handleSubmitButtonClick.bind(this)}
           handlePDFDownloadButtonClick={this.handlePDFDownloadButtonClick.bind(this)}
           handleEditAnswerButtonClick={this.handleEditAnswerButtonClick.bind(this)}/>

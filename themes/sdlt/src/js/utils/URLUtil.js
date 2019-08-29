@@ -6,13 +6,17 @@ export default class URLUtil {
     window.location.href = `/#/questionnaire/submission/${uuid}`;
   }
 
-  static redirectToQuestionnaireReview(uuid: string) {
+  static redirectToQuestionnaireReview(uuid: string, token: string = "") {
+    if (token) {
+      window.location.href = `/#/questionnaire/review/${uuid}?token=${token}`;
+      return;
+    }
     window.location.href = `/#/questionnaire/review/${uuid}`;
   }
 
   static redirectToQuestionnaireSummary(uuid: string, token: string = "") {
     if (token) {
-      window.location.href = `/businessOwnerApproval/#/questionnaire/summary/${uuid}?token=${token}`;
+      window.location.href = `/#/questionnaire/summary/${uuid}?token=${token}`;
       return;
     }
 
@@ -21,7 +25,7 @@ export default class URLUtil {
 
   static redirectToTaskSubmission(uuid: string, token: string = "") {
     if (token) {
-      window.location.href = `/businessOwnerApproval/#/task/submission/${uuid}?token=${token}`;
+      window.location.href = `/#/task/submission/${uuid}?token=${token}`;
       return;
     }
 
@@ -30,7 +34,7 @@ export default class URLUtil {
 
   static redirectToComponentSelectionSubmission(uuid: string, token: string = "") {
     if (token) {
-      window.location.href = `/businessOwnerApproval/#/component-selection/submission/${uuid}?token=${token}`;
+      window.location.href = `/#/component-selection/submission/${uuid}?token=${token}`;
       return;
     }
 
