@@ -156,7 +156,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @return boolean
      */
-    private function isInProgress() : bool
+    public function isInProgress() : bool
     {
         if ($this->QuestionnaireStatus === self::STATUS_IN_PROGRESS) {
             return true;
@@ -168,7 +168,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @return boolean
      */
-    private function isSubmitted() : bool
+    public function isSubmitted() : bool
     {
         if ($this->QuestionnaireStatus === self::STATUS_SUBMITTED) {
             return true;
@@ -179,7 +179,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @return boolean
      */
-    private function isAwaitingSecurityArchitectReview() : bool
+    public function isAwaitingSecurityArchitectReview() : bool
     {
         if ($this->QuestionnaireStatus === self::STATUS_AWAITING_SA_REVIEW) {
             return true;
@@ -191,7 +191,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @return boolean
      */
-    private function isWaitingForSecurityArchitectApproval() : bool
+    public function isWaitingForSecurityArchitectApproval() : bool
     {
         if ($this->QuestionnaireStatus === self::STATUS_WAITING_FOR_SA_APPROVAL) {
             return true;
@@ -203,7 +203,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @return boolean
      */
-    private function isWaitingForApproval() : bool
+    public function isWaitingForApproval() : bool
     {
         if ($this->QuestionnaireStatus === self::STATUS_WAITING_FOR_APPROVAL) {
             return true;
@@ -215,7 +215,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @return boolean
      */
-    private function isApproved() : bool
+    public function isApproved() : bool
     {
         if ($this->QuestionnaireStatus === self::STATUS_APPROVED) {
             return true;
@@ -227,7 +227,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @return boolean
      */
-    private function isDenied() : bool
+    public function isDenied() : bool
     {
         if ($this->QuestionnaireStatus === self::STATUS_DENIED) {
             return true;
@@ -239,7 +239,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @return boolean
      */
-    private function isSAApprovalPending() : bool
+    public function isSAApprovalPending() : bool
     {
         if ($this->SecurityArchitectApprovalStatus === self::STATUS_PENDING) {
             return true;
@@ -248,7 +248,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         return false;
     }
 
-    private function isApprovedBySA() : bool
+    public function isApprovedBySA() : bool
     {
         if ($this->SecurityArchitectApprovalStatus === self::STATUS_APPROVED) {
             return true;
@@ -257,7 +257,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         return false;
     }
 
-    private function isDeniedBySA() : bool
+    public function isDeniedBySA() : bool
     {
         if ($this->SecurityArchitectApprovalStatus === self::STATUS_DENIED) {
             return true;
@@ -269,7 +269,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @return boolean
      */
-    private function isCisoApprovalPending() : bool
+    public function isCisoApprovalPending() : bool
     {
         if ($this->CisoApprovalStatus === self::STATUS_PENDING) {
             return true;
@@ -281,7 +281,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @return boolean
      */
-    private function isApprovedByCiso() : bool
+    public function isApprovedByCiso() : bool
     {
         if ($this->CisoApprovalStatus === self::STATUS_APPROVED) {
             return true;
@@ -293,7 +293,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @return boolean
      */
-    private function isDeniedByCiso() : bool
+    public function isDeniedByCiso() : bool
     {
         if ($this->CisoApprovalStatus === self::STATUS_DENIED) {
             return true;
@@ -305,7 +305,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @return boolean
      */
-    private function isBOApprovalPending() : bool
+    public function isBOApprovalPending() : bool
     {
         if ($this->BusinessOwnerApprovalStatus === self::STATUS_PENDING) {
             return true;
@@ -317,7 +317,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @return boolean
      */
-    private function isApprovedByBO() : bool
+    public function isApprovedByBO() : bool
     {
         if ($this->BusinessOwnerApprovalStatus === self::STATUS_APPROVED) {
             return true;
@@ -329,7 +329,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @return boolean
      */
-    private function isDeniedByBO() : bool
+    public function isDeniedByBO() : bool
     {
         if ($this->BusinessOwnerApprovalStatus === self::STATUS_DENIED) {
             return true;
@@ -341,7 +341,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @return boolean
      */
-    private function isAssignedToCurrentSAUser() : bool
+    public function isAssignedToCurrentSAUser() : bool
     {
         $member = Security::getCurrentUser();
         return (int)$member->ID === (int)$this->SecurityArchitectApproverID;
