@@ -19,6 +19,10 @@ Member:
     FirstName: CS
     Surname: IO
     Email: 'csio@test.app'
+  business-owner:
+    FirstName: BO
+    Surname: BO
+    Email: 'business-owner@test.app'
 SilverStripe\Security\Group:
   adminGroup:
     Title: 'Administrators'

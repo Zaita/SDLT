@@ -145,6 +145,7 @@ class Summary extends Component<Props> {
     const {
       user,
       viewAs,
+      token,
       handleSubmitButtonClick,
       handlePDFDownloadButtonClick,
       handleApproveButtonClick,
@@ -164,7 +165,7 @@ class Summary extends Component<Props> {
     const viewAnswersButton = user ? (
       <LightButton title="VIEW ANSWERS"
                    classes={["button"]}
-                   onClick={() => URLUtil.redirectToQuestionnaireReview(submission.submissionUUID)}
+                   onClick={() => URLUtil.redirectToQuestionnaireReview(submission.submissionUUID, token)}
       />
     ) : '';
 

@@ -12,6 +12,7 @@ import URLUtil from "../../utils/URLUtil";
 
 type Props = {
   siteTitle: string,
+  secureToken: string,
   submission: Submission | null,
   handleSubmitButtonClick: () => void,
   handlePDFDownloadButtonClick: () => void,
@@ -24,6 +25,7 @@ class Review extends Component<Props> {
     const {
       submission,
       viewAs,
+      secureToken,
       handleSubmitButtonClick,
       handlePDFDownloadButtonClick,
       handleEditAnswerButtonClick,
@@ -60,7 +62,7 @@ class Review extends Component<Props> {
       <div className="buttons">
       <LightButton title="BACK TO SUMMARY"
                    classes={["button"]}
-                   onClick={() => URLUtil.redirectToQuestionnaireSummary(submission.submissionUUID)}/>
+                   onClick={() => URLUtil.redirectToQuestionnaireSummary(submission.submissionUUID, secureToken)}/>
       </div>
     );
 
