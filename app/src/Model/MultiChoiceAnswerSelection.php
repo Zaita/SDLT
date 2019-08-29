@@ -132,7 +132,8 @@ class MultiChoiceAnswerSelection extends DataObject
         $fields->dataFieldByName('Label')
                 ->setDescription('This is the label for a single checkbox or radio selection.');
         $fields->dataFieldByName('Value')
-                ->setDescription('This is the value for a single checkbox or radio selection.');
+                ->setDescription('This is the value for a single checkbox or radio selection and
+                    please enter a unique value for the current checkbox or radio field.');
 
         if ($this->isRiskType()) {
             // Allow inline-editing for the "Weight" value
@@ -157,4 +158,24 @@ class MultiChoiceAnswerSelection extends DataObject
         return $fields;
     }
 
+    /**
+     * @return ValidationResult
+     */
+    public function validate()
+    {
+        $result = parent::validate();
+
+        if ($this->AnswerInputField()->isMultipleChoice() &&
+            $selections = $this->AnswerInputField()->AnswerSelections()) {
+            $values = $selections->exclude('ID', $this->ID)->Column('Value');
+
+            if ($values && in_array($this->Value, $values)) {
+                $result->addError(
+                  sprintf('"%s" already exists, please add a unique value.', $this->Value)
+                );
+            }
+        }
+
+        return $result;
+    }
 }
