@@ -132,8 +132,7 @@ class MultiChoiceAnswerSelection extends DataObject
         $fields->dataFieldByName('Label')
                 ->setDescription('This is the label for a single checkbox or radio selection.');
         $fields->dataFieldByName('Value')
-                ->setDescription('This is the value for a single checkbox or radio selection and
-                    please enter a unique value for the current checkbox or radio field.');
+                ->setDescription('This should be a <em>unique</em> value for a single checkbox or radio selection.');
 
         if ($this->isRiskType()) {
             // Allow inline-editing for the "Weight" value
@@ -164,14 +163,14 @@ class MultiChoiceAnswerSelection extends DataObject
     public function validate()
     {
         $result = parent::validate();
+        $selections = $this->AnswerInputField()->AnswerSelections();
 
-        if ($this->AnswerInputField()->isMultipleChoice() &&
-            $selections = $this->AnswerInputField()->AnswerSelections()) {
-            $values = $selections->exclude('ID', $this->ID)->Column('Value');
+        if ($this->AnswerInputField()->isMultipleChoice() && $selections->count()) {
+            $values = $selections->exclude('ID', $this->ID)->column('Value');
 
             if ($values && in_array($this->Value, $values)) {
                 $result->addError(
-                  sprintf('"%s" already exists, please add a unique value.', $this->Value)
+                    sprintf('A selection with the value "%s" already exists. Values should be unique.', $this->Value)
                 );
             }
         }
