@@ -40,6 +40,7 @@ use SilverStripe\View\ArrayData;
 use NZTA\SDLT\Helper\Utils;
 use NZTA\SDLT\Traits\SDLTRiskCalc;
 use NZTA\SDLT\Model\TaskSubmission;
+use NZTA\SDLT\Model\LikelihoodThreshold;
 
 /**
  * Class Task
@@ -69,7 +70,7 @@ class Task extends DataObject implements ScaffoldingProvider
         'Name' => 'Varchar(255)',
         'DisplayOnHomePage'=> 'Boolean',
         'KeyInformation' => 'HTMLText',
-        'TaskType' => 'Enum(array("questionnaire", "selection", "risk questionnaire"))',
+        'TaskType' => 'Enum(array("questionnaire", "selection", "risk questionnaire", "security risk assessment"))',
         'LockAnswersWhenComplete' => 'Boolean',
         'IsApprovalRequired' => 'Boolean',
         'RiskCalculation' => "Enum('NztaApproxRepresentation,Maximum')",
@@ -87,7 +88,8 @@ class Task extends DataObject implements ScaffoldingProvider
      */
     private static $has_many = [
         'Questions' => Question::class,
-        'SubmissionEmails' => TaskSubmissionEmail::class
+        'SubmissionEmails' => TaskSubmissionEmail::class,
+        'LikelihoodThresholds' => LikelihoodThreshold::class,
     ];
 
     /**
@@ -139,8 +141,8 @@ class Task extends DataObject implements ScaffoldingProvider
             'RiskCalculation',
         ]);
 
-        // if task type is selection, then please hide Questions tab
-        if ($this->TaskType === 'selection') {
+        // If TaskType doesn't require Questions, hide the "Questions" tab
+        if ($this->isSelectionType() || $this->isSRAType()) {
             // A "selection" type, has no Questions
             $fields->removeByName('Questions');
         } else {
@@ -211,6 +213,14 @@ class Task extends DataObject implements ScaffoldingProvider
             );
         }
 
+        if (!$this->isSRAType()) {
+            $fields->removeByName('LikelihoodThresholds');
+        } else {
+            $fields->dataFieldByName('LikelihoodThresholds')
+                ->getConfig()
+                ->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
+        }
+
         $fields->removeByName(['Questionnaires', 'AnswerActionFields']);
 
         return $fields;
@@ -276,6 +286,29 @@ class Task extends DataObject implements ScaffoldingProvider
     }
 
     /**
+     * @return LikelihoodThreshold[]
+     */
+    public function getLikelihoodRatingsData()
+    {
+        if (!$this->isSRAType()) {
+            return [];
+        }
+
+        $thresholdData = [];
+
+        foreach ($this->LikelihoodThresholds() as $threshold) {
+            $thresholdData[] = [
+                'Name' => $threshold->Name,
+                'Value' => $threshold->Value,
+                'Colour' => $threshold->Colour,
+                'Operator' => $threshold->Operator,
+            ];
+        }
+
+        return $thresholdData;
+    }
+
+    /**
      * @return string
      */
     public function getQuestionsDataJSON()
@@ -334,6 +367,22 @@ class Task extends DataObject implements ScaffoldingProvider
     public function isRiskType() : bool
     {
         return $this->TaskType === 'risk questionnaire' && $this->RiskCalculation;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isSRAType() : bool
+    {
+        return $this->TaskType === 'security risk assessment';
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isSelectionType() : bool
+    {
+        return $this->TaskType === 'selection';
     }
 
     /**

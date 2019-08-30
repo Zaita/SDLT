@@ -3,7 +3,7 @@ import React, {Component} from "react";
 import type {RiskResult} from "../../types/Questionnaire";
 
 type Props = {
-  riskResults: RiskResult | null,
+  riskResults: Array<RiskResult> | null,
 };
 
 class RiskResultContainer extends Component<Props> {
@@ -31,7 +31,7 @@ class RiskResultContainer extends Component<Props> {
             <tbody>
               {riskResults.map((riskResult, index): RiskResult => {
                 return (
-                  <tr key={index+1} style={{backgroundColor:'#' + riskResult.colour}}>
+                  <tr key={index+1}>
                     <td>
                       {riskResult.riskName}
                     </td>
@@ -41,7 +41,7 @@ class RiskResultContainer extends Component<Props> {
                     <td>
                       {riskResult.score}
                     </td>
-                    <td>
+                    <td style={{color:'#' + riskResult.colour}}>
                       {riskResult.rating}
                     </td>
                   </tr>

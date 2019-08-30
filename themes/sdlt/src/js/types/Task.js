@@ -37,3 +37,17 @@ export type TaskSubmission = {
   isTaskApprovalRequired: boolean,
   isCurrentUserAnApprover: boolean
 };
+
+export type SecurityRiskAssessment = {
+  id: string,
+  uuid: string,
+  questionnaireSubmissionUUID: string,
+  likelihoodThresholds: Array<LikelihoodThreshold>,
+};
+
+export type LikelihoodThreshold = {
+  value: string,
+  operator: string,
+  colour: string,
+  name:string
+}

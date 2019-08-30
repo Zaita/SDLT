@@ -60,6 +60,7 @@ query {
       TicketLink
     }
     RiskResultData
+    LikelihoodRatings
   }
 }`;
     const responseJSONObject = await GraphQLRequestHelper.request({query});
@@ -87,7 +88,8 @@ query {
         }),
         selectedComponents: SecurityComponentParser.parseFromJSONOArray(get(submissionJSONObject, "SelectedComponents", [])),
         jiraTickets: JiraTicketParser.parseFromJSONArray(get(submissionJSONObject, "JiraTickets", [])),
-        riskResults: _.has(submissionJSONObject, 'RiskResultData') ? JSON.parse(_.get(submissionJSONObject, "RiskResultData", "")) : ""
+        riskResults: _.has(submissionJSONObject, 'RiskResultData') ? JSON.parse(_.get(submissionJSONObject, "RiskResultData", "")) : "",
+        likelihoodRatings: _.has(submissionJSONObject, 'LikelihoodRatings') ? JSON.parse(_.get(submissionJSONObject, "LikelihoodRatings", "")) : ""
       },
     };
 
