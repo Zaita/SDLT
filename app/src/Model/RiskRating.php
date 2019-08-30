@@ -51,8 +51,9 @@ class RiskRating extends DataObject
      * @var array
      */
     private static $summary_fields = [
-        'Name',
+        'RiskRating',
         'Impact',
+        'Likelihood.Name' => 'Likelihood',
         'getSummaryColour' => 'Colour'
     ];
 
@@ -98,16 +99,6 @@ class RiskRating extends DataObject
         ]);
 
         return $fields;
-    }
-
-    /**
-     * Workaround for GridField components that expect a "Title" or a "Name" field.
-     *
-     * @return string
-     */
-    public function getName() : string
-    {
-        return $this->RiskRating ?: '';
     }
 
     /**
