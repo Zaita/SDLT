@@ -19,3 +19,8 @@ NZTA\SDLT\Model\ImpactThreshold:
     Value: 200
     Colour: 'FFCC00'
     Operator: '>'
+  catastrophic:
+    Name: 'Catastrophic'
+    Value: 201
+    Colour: 'FFCC00'
+    Operator: '>='

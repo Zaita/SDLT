@@ -5,3 +5,9 @@ SilverStripe\Security\Member:
   extensions:
     - 'NZTA\SDLT\Extension\ShowLoginAttemptsExtension'
     - 'NZTA\SDLT\Extension\UserRoleExtension'
+NZTA\SDLT\Model\ImpactThreshold:
+  extensions:
+    - NZTA\SDLT\Extension\ThresholdExtension
+NZTA\SDLT\Model\LikelihoodThreshold:
+  extensions:
+    - NZTA\SDLT\Extension\ThresholdExtension

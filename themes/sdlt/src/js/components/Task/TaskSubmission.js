@@ -12,7 +12,6 @@ import DarkButton from "../Button/DarkButton";
 import pdfIcon from "../../../img/icons/pdf.svg";
 import PDFUtil from "../../utils/PDFUtil";
 import RiskResultContainer from "../Common/RiskResultContainer";
-
 type Props = {
   taskSubmission: TaskSubmissionType,
   saveAnsweredQuestion: (answeredQuestion: Question) => void,

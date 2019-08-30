@@ -98,7 +98,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         'JiraKey' => 'Varchar(255)',
         'IsApprovalRequired' => 'Boolean',
         'IsTaskApprovalLinkSent' => 'Boolean',
-        'RiskResultData' => 'Text'
+        'RiskResultData' => 'Text',
+        'LikelihoodRatings' => 'Text',
     ];
 
     /**
@@ -317,6 +318,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'IsTaskApprovalRequired',
                 'IsCurrentUserAnApprover',
                 'RiskResultData',
+                'LikelihoodRatings',
             ]);
 
         $dataObjectScaffolder
@@ -444,6 +446,9 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         // Initial status of the submission
         $taskSubmission->Status = TaskSubmission::STATUS_START;
         $taskSubmission->LockAnswersWhenComplete = $task->LockAnswersWhenComplete;
+
+        $likelihoodRatingData = $task->getLikelihoodRatingsData();
+        $taskSubmission->LikelihoodRatings = json_encode($likelihoodRatingData);
 
         $taskSubmission->write();
 
