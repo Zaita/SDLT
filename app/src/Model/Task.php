@@ -41,6 +41,7 @@ use NZTA\SDLT\Helper\Utils;
 use NZTA\SDLT\Traits\SDLTRiskCalc;
 use NZTA\SDLT\Model\TaskSubmission;
 use NZTA\SDLT\Model\LikelihoodThreshold;
+use NZTA\SDLT\Model\RiskRating;
 
 /**
  * Class Task
@@ -90,6 +91,7 @@ class Task extends DataObject implements ScaffoldingProvider
         'Questions' => Question::class,
         'SubmissionEmails' => TaskSubmissionEmail::class,
         'LikelihoodThresholds' => LikelihoodThreshold::class,
+        'RiskRatings' => RiskRating::class,
     ];
 
     /**
@@ -214,11 +216,16 @@ class Task extends DataObject implements ScaffoldingProvider
         }
 
         if (!$this->isSRAType()) {
-            $fields->removeByName('LikelihoodThresholds');
+            $fields->removeByName(['LikelihoodThresholds', 'RiskRatings']);
         } else {
             $fields->dataFieldByName('LikelihoodThresholds')
                 ->getConfig()
                 ->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
+            $fields->dataFieldByName('RiskRatings')
+                ->setTitle('Risk Rating Matrix')
+                ->getConfig()
+                ->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
+            $fields->findTab('Root.RiskRatings')->setTitle('Risk Rating Matrix');
         }
 
         $fields->removeByName(['Questionnaires', 'AnswerActionFields']);
