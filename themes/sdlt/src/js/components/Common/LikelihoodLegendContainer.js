@@ -22,7 +22,7 @@ class LikelihoodLegendContainer extends Component<Props> {
           <table className="table">
             <thead className="thead-light">
               <tr key="likelihood_legend_header">
-                <th>Value</th>
+                <th>Threshold</th>
                 <th>Rating</th>
               </tr>
             </thead>

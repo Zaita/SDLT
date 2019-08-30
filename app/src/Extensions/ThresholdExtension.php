@@ -54,10 +54,10 @@ class ThresholdExtension extends DataExtension
      * @var array
      */
     private static $operators = [
-        '<' => 'Score is less than (<)',
-        '>' => 'Score is greater than (>)',
-        '<=' => 'Score is less than or equal to (<=)',
-        '>=' => 'Score is greater than or equal to (>=)',
+        '<' => 'Number is less than (<)',
+        '>' => 'Number is greater than (>)',
+        '<=' => 'Number is less than or equal to (<=)',
+        '>=' => 'Number is greater than or equal to (>=)',
     ];
 
     /**
@@ -130,4 +130,3 @@ class ThresholdExtension extends DataExtension
         return $result;
     }
 }
-
