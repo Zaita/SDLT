@@ -42,8 +42,18 @@ class SendApprovalLinkEmail
     {
         // send email to CISO or Security Architect group
         if ($this->members) {
+            $isSendEmailToSA = $this->questionnaireSubmission->isSAApprovalPending();
+            $isSendEmailToCiso = $this->questionnaireSubmission->isCisoApprovalPending();
+
             foreach ($this->members as $member) {
-                if (!$memberRole = $member->getRoleName()) {
+                $memberRole = '';
+                if ($isSendEmailToSA && $member->getIsSA()) {
+                    $memberRole = UserGroupConstant::ROLE_CODE_SA;
+                } else if ($isSendEmailToCiso && $member->getIsCISO()) {
+                    $memberRole = UserGroupConstant::ROLE_CODE_CISO;
+                }
+
+                if (!$memberRole) {
                     continue;
                 }
 
@@ -51,11 +61,10 @@ class SendApprovalLinkEmail
             }
         }
 
+        // send email to the business owner
         if ($this->businessOwnerEmail != '') {
             $this->sendEmail('Business Owner', $this->businessOwnerEmail, true, UserGroupConstant::ROLE_CODE_BO);
         }
-
-        $this->isComplete = true;
     }
 
     /**
