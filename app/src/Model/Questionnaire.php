@@ -30,6 +30,7 @@ use SilverStripe\Security\Permission;
 use NZTA\SDLT\ModelAdmin\QuestionnaireAdmin;
 use NZTA\SDLT\Helper\Utils;
 use NZTA\SDLT\Traits\SDLTRiskCalc;
+use SilverStripe\Forms\CheckboxField;
 
 /**
  * Class Questionnaire
@@ -73,6 +74,7 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
         'KeyInformation' => 'HTMLText',
         'Type' => "Enum('Questionnaire,RiskQuestionnaire')",
         'RiskCalculation' => "Enum('NztaApproxRepresentation,Maximum')",
+        'ApprovalIsNotRequired' => 'Boolean'
     ];
 
     /**
@@ -164,6 +166,22 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
                 ->isEqualTo('RiskQuestionnaire')
                 ->end()
         );
+
+        if($this->isRiskType()) {
+            // flag this pillar as not requiring any approvals and not sending approval email if no tasks is generated/spawned by the use
+            $fields->addFieldToTab(
+                'Root.Main',
+                CheckboxField::create(
+                    'ApprovalIsNotRequired',
+                    'Bypass all approvals'
+                )->setDescription('If this option is set, then no approvals are'
+                .' required, and no emails will be sent. This bypasses approvals'
+                .' only if the questionnaire submission has no tasks to complete.'
+                .' If there are tasks, then normal approval flow will be applied.')
+            );
+        } else {
+            $fields->removeByName('ApprovalIsNotRequired');
+        }
 
         return $fields;
     }
@@ -384,5 +402,15 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
         }
 
         return $result;
+    }
+
+    /**
+     * get BypassApproval
+     *
+     * @return boolean
+     */
+    public function isBypassApproval() : bool
+    {
+        return $this->ApprovalIsNotRequired;
     }
 }

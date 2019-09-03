@@ -42,6 +42,9 @@ use SilverStripe\Control\Controller;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\FormField;
 use NZTA\SDLT\Traits\SDLTRiskSubmission;
+use SilverStripe\Forms\HeaderField;
+use SilverStripe\Forms\TextareaField;
+use SilverStripe\Forms\ToggleCompositeField;
 use SilverStripe\SiteConfig\SiteConfig;
 
 /**
@@ -100,7 +103,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'BusinessOwnerIPAddress' => 'Varchar(255)',
         'BusinessOwnerEmailAddress' => 'Varchar(255)',
         'BusinessOwnerName' => 'Varchar(255)',
-        'SecurityArchitectApprovalStatus' => 'Enum(array("not_applicable", "pending", "approved", "denied"))',
+        'SecurityArchitectApprovalStatus' => 'Enum(array("not_applicable", "pending", "approved", "denied", "not_required"))',
         'SecurityArchitectApproverIPAddress' => 'Varchar(255)',
         'SecurityArchitectApproverMachineName' => 'Varchar(255)',
         'SecurityArchitectStatusUpdateDate' => 'Varchar(255)',
@@ -108,6 +111,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'ProductName' => 'Varchar(255)',
         'ApprovalOverrideBySecurityArchitect' => 'Boolean',
         'QuestionnaireLevelTaskIDs' => 'Varchar(255)',
+        'RiskResultData' => 'Text',
     ];
 
     /**
@@ -388,14 +392,53 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ]
         );
 
+        $fields->removeByName(['QuestionnaireData', 'AnswerData', 'QuestionnaireLevelTaskIDs', 'RiskResultData']);
+
         $fields->addFieldsToTab(
             'Root.QuestionnaireAnswerData',
             [
-                $fields->dataFieldByName('QuestionnaireData'),
-                $fields->dataFieldByName('AnswerData'),
-                $fields->dataFieldByName('QuestionnaireLevelTaskIDs')
+                ToggleCompositeField::create(
+                    'QuestionnaireDataToggle',
+                    'Questions data',
+                    [
+                        TextareaField::create('QuestionnaireData'),
+                    ]
+                ),
+
+                ToggleCompositeField::create(
+                    'AnswerDataToggle',
+                    'Answers data',
+                    [
+                        TextareaField::create('AnswerData')
+                    ]
+                ),
+
+                ToggleCompositeField::create(
+                    'QuestionnaireLevelTaskIDsToggle',
+                    'Task IDs data',
+                    [
+                        TextField::create('QuestionnaireLevelTaskIDs')
+                    ]
+                ),
             ]
         );
+        if ($this->RiskResultData) {
+            $riskResultTable = $this->getRiskResultTable();
+            $fields->addFieldsToTab(
+                'Root.QuestionnaireAnswerData',
+                [
+                    ToggleCompositeField::create(
+                        'ToggleRiskResultData',
+                        'Risk Result Data',
+                        [
+                            TextareaField::create('RiskResultData')
+                        ]
+                    ),
+                    HeaderField::create('RiskResultDataHeader', 'Risk results', 3),
+                    LiteralField::create('RiskResultDataTable', $riskResultTable),
+                ]
+            );
+        }
 
         $fields->addFieldsToTab(
             'Root.SubmitterDetails',
@@ -567,7 +610,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'Created',
                 'BusinessOwnerApproverName',
                 'ApprovalOverrideBySecurityArchitect',
-                'GQRiskResult',
+                'RiskResultData',
             ]);
 
         $submissionScaffolder
@@ -1004,14 +1047,24 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         );
                     }
 
+                    // calculte risk based on answer
+                    $questionnaireSubmission->RiskResultData = $questionnaireSubmission->getRiskResultBasedOnAnswer();
                     $questionnaireSubmission->write();
 
+                    // create task submission based on answer
                     Question::create_task_submissions_according_to_answers(
                         $questionnaireSubmission->QuestionnaireData,
                         $questionnaireSubmission->AnswerData,
                         $questionnaireSubmission->ID,
                         $questionnaireSubmission->QuestionnaireLevelTaskIDs
                     );
+
+                    // bypass the approvals
+                    // if bypass flag is set and there is no task to complete
+                    if ($questionnaireSubmission->Questionnaire()->isBypassApproval() &&
+                        $questionnaireSubmission->TaskSubmissions()->count() == 0) {
+                        $questionnaireSubmission->bypassApprovals();
+                    }
 
                     return $questionnaireSubmission;
                 }
@@ -1509,7 +1562,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
-<<<<<<< HEAD
      * @param DataObject $question question
      *
      * @return array $finalActionFields
@@ -1968,21 +2020,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * A graphql frontend for the getRiskResult() method.
-     *
      * @return string
      */
-    public function GQRiskResult() : string
-    {
-        return json_encode($this->getRiskResultData());
-    }
-
-    /**
-     * Wrap the related questionnaire's risk-data
-     *
-     * @return array
-     */
-    public function getRiskResultData() : array
+    public function getRiskResultBasedOnAnswer()
     {
         $allRiskResults = [];
 
@@ -1991,8 +2031,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             $allRiskResults = $this->getRiskResult('q');
         }
 
-        return $allRiskResults;
+        return json_encode($allRiskResults);
     }
+
+
     /**
      * Get the current hostname or an alternate one from the SiteConfig
      *
@@ -2267,5 +2309,21 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             "message" => 'Sorry, there is some problem for CISO Group Approval.',
             "group" => $group
         ];
+    }
+
+    /**
+     * bypass all the approvals (SA, CISO, BusinessOwner)
+     * and set QuestionnaireStatus to approved
+     *
+     * @return void
+     */
+    public function bypassApprovals() : void
+    {
+        $this->QuestionnaireStatus = self::STATUS_APPROVED;
+        $this->SecurityArchitectApprovalStatus = self::STATUS_NOT_REQUIRED;
+        $this->CisoApprovalStatus = self::STATUS_NOT_REQUIRED;
+        $this->BusinessOwnerApprovalStatus = self::STATUS_NOT_REQUIRED;
+
+        $this->write();
     }
 }
