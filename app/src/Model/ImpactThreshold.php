@@ -40,9 +40,12 @@ class ImpactThreshold extends DataObject
      */
     public static function match($operand)
     {
+        $operand = str_replace(',', '', $operand);
+
         foreach (array_keys(static::config()->get('operators')) as $op) {
             $where = sprintf("Operator = '%s' AND %s %s Value", $op, $operand, $op);
             $sort = sprintf('ABS(Value - %s)', $operand);
+
             $matches = self::get()
                     ->where($where)
                     ->sort($sort);

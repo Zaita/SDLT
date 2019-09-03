@@ -327,12 +327,12 @@ class Summary extends Component<Props> {
     }
 
     let cisoApprovalStatus = prettifyStatus(approvalStatus.chiefInformationSecurityOfficer);
-    if (cisoApprovalStatus !== "Pending" && cisoApprovalStatus !== "Not Applicable") {
+    if (cisoApprovalStatus !== "Pending" && cisoApprovalStatus !== "Not Required") {
       cisoApprovalStatus = cisoApprover.FirstName + " " + cisoApprover.Surname + " - " + cisoApprovalStatus;
     }
 
     let businessOwnerApprovalStatus = prettifyStatus(approvalStatus.businessOwner)
-    if (businessOwnerApprovalStatus !== "Pending" && businessOwnerApprovalStatus !== 'Not Applicable') {
+    if (businessOwnerApprovalStatus !== "Pending" && businessOwnerApprovalStatus !== 'Not Required') {
       businessOwnerApprovalStatus = submission.businessOwnerApproverName + " - " + businessOwnerApprovalStatus;
     }
     return (

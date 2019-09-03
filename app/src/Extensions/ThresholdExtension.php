@@ -46,6 +46,7 @@ class ThresholdExtension extends DataExtension
      */
     private static $summary_fields = [
         'Name',
+        'Operator',
         'Value',
         'getSummaryColour' => 'Colour'
     ];
