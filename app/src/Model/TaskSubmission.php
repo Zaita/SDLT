@@ -39,6 +39,10 @@ use NZTA\SDLT\Helper\JIRA;
 use NZTA\SDLT\Model\JiraTicket;
 use SilverStripe\Security\Group;
 use NZTA\SDLT\Traits\SDLTRiskSubmission;
+use SilverStripe\Forms\HeaderField;
+use SilverStripe\Forms\LiteralField;
+use SilverStripe\Forms\TextareaField;
+use SilverStripe\Forms\ToggleCompositeField;
 use SilverStripe\SiteConfig\SiteConfig;
 
 /**
@@ -233,15 +237,60 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         $SubmitterList = Member::get()->map('ID', 'Name');
         $taskApproverList = $this->ApprovalGroup()->Members()->map('ID', 'Name');
 
+
+        $fields->removeByName(['RiskResultData', 'QuestionnaireData', 'AnswerData', 'Result']);
+
+
         $fields->addFieldsToTab(
             'Root.TaskSubmissionData',
             [
-                $fields->dataFieldByName('QuestionnaireData'),
-                $fields->dataFieldByName('AnswerData'),
-                $fields->dataFieldByName('RiskResultData'),
-                $fields->dataFieldByName('Result'),
+                ToggleCompositeField::create(
+                    'QuestionnaireDataToggle',
+                    'Questionnaire Data',
+                    [
+                        TextareaField::create('QuestionnaireData'),
+                    ]
+                ),
+
+                ToggleCompositeField::create(
+                    'AnswerDataToggle',
+                    'Answer Data',
+                    [
+                        TextareaField::create('AnswerData'),
+                    ]
+                ),
+
+                ToggleCompositeField::create(
+                    'ResultToggle',
+                    'Result',
+                    [
+                        TextField::create('Result'),
+                    ]
+                ),
+
             ]
         );
+        if ($this->RiskResultData) {
+            $riskResultTable = $this->getRiskResultTable();
+            if ($riskResultTable) {
+                $fields->addFieldsToTab(
+                    'Root.TaskSubmissionData',
+                    [
+                        ToggleCompositeField::create(
+                            'ToggleRiskResultData',
+                            'Risk Result Data',
+                            [
+                                TextareaField::create('RiskResultData')
+                            ]
+                        ),
+                        HeaderField::create('RiskResultDataHeader', 'Risk results', 3),
+                        LiteralField::create('RiskResultDataTable', $riskResultTable),
+                    ]
+                );
+
+            }
+        }
+
 
         $fields->addFieldsToTab(
             'Root.TaskSubmitter',
