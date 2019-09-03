@@ -26,6 +26,7 @@ use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use UncleCheese\DisplayLogic\Forms\Wrapper;
 use NZTA\SDLT\Traits\SDLTModelPermissions;
 use NZTA\SDLT\Model\MultiChoiceAnswerSelection;
+use SilverStripe\Core\Convert;
 
 /**
  * Class AnswerInputField
@@ -250,7 +251,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
 
         if ($selections->exists()) {
             foreach ($selections as $selection) {
-                $data['value'] = $selection->Value;
+                $data['value'] = Convert::html2raw($selection->Value);
                 $data['label'] = $selection->Label;
 
                 //ensure the Risks key always exists as an array
