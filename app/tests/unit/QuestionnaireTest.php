@@ -3,9 +3,11 @@
 use SilverStripe\Dev\SapphireTest;
 use NZTA\SDLT\Model\Questionnaire;
 use NZTA\SDLT\Formulae\NztaApproxRepresentation;
+use NZTA\SDLT\Model\Task;
 
 class QuestionnaireTest extends SapphireTest
 {
+    protected $usesDatabase = true;
     public function testGetFormulaNotRisk()
     {
         $this->expectException('Exception');

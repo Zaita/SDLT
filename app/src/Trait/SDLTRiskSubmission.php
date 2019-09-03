@@ -15,6 +15,7 @@ namespace NZTA\SDLT\Traits;
 
 use NZTA\SDLT\Model\ImpactThreshold;
 use NZTA\SDLT\Model\AnswerInputField;
+use NZTA\SDLT\Model\QuestionnaireSubmission;
 
 trait SDLTRiskSubmission
 {
@@ -102,7 +103,7 @@ trait SDLTRiskSubmission
 
         $default = new class {
             public $Name = 'Unknown';
-            public $Colour = 'ffffff';
+            public $Colour = '000000';
         };
 
         foreach ($riskData as $riskId => $data) {
@@ -116,5 +117,42 @@ trait SDLTRiskSubmission
         }
 
         return array_values($riskData);
+    }
+
+    /**
+     * Generate an HTML table to display the risk results data in the CMS
+     *
+     * @return string
+     */
+    public function getRiskResultTable()
+    {
+        if(!$this->RiskResultData) {
+            return '';
+        }
+
+        $type = __CLASS__ === QuestionnaireSubmission::class
+            ? 'q'
+            : 't';
+        $json = $this->getRiskResult($type);
+        if(!count($json)) {
+            return '';
+        }
+        $riskResultTableHTML = '<table class="table">';
+        $riskResultTableHTML .= '<tr><thead><th>Risk Name</th><th>Weight</th><th>Score</th><th>Rating</th></thead></tr>';
+        $riskResultTableHTML .= '<tbody>';
+        foreach ($json as $row) {
+            $riskResultTableHTML .= sprintf(
+                "<tr><td>%s</td><td>%d</td><td>%2.2f</td><td style=\"color:#%s\">%s</td></tr>",
+                $row['riskName'],
+                $row['weights'],
+                $row['score'],
+                $row['colour'],
+                $row['rating']
+            );
+        }
+        $riskResultTableHTML .= '</tbody>';
+        $riskResultTableHTML .= '</table>';
+
+        return $riskResultTableHTML;
     }
 }
