@@ -57,18 +57,6 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider
     ];
 
     /**
-     * @var array
-     */
-    private static $many_many_extraFields = [
-        'Controls' => [
-            'Likelihood' => DBInt::class,
-            'Impact' => DBInt::class,
-            'LikelihoodPenalty' => DBInt::class,
-            'ImpactPenalty' => DBInt::class,
-        ]
-    ];
-
-    /**
      * @param SchemaScaffolder $scaffolder The scaffolder
      * @return SchemaScaffolder
      */
@@ -171,31 +159,6 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider
 
         $fields->addFieldsToTab('Root.Main', [$name, $description]);
         $fields->addFieldToTab('Root.Controls', $instructions);
-
-        // Deal with many-many-extrafields
-        $controlFields = singleton(SecurityControl::class)->getCMSFields();
-        $controlFields->addFieldsToTab(
-            'Root.Main',
-            FieldGroup::create('Control Weights', (function() {
-                $f = [];
-
-                foreach (array_keys($this->config()->get('many_many_extraFields')['Controls']) as $fieldName) {
-                    $f[] = NumericField::create(
-                        sprintf('ManyMany[%s]', $fieldName),
-                        NumericField::name_to_label($fieldName)
-                    )
-                        ->setAttribute('style', 'width: 100px;')
-                        ->setMaxLength(strstr($fieldName, 'Penalty') ? 3 : 2);
-                }
-
-                return $f;
-            })())
-        );
-
-        $fields->dataFieldByName('Controls')
-            ->getConfig()
-            ->getComponentByType(GridFieldDetailForm::class)
-            ->setFields($controlFields);
 
         return $fields;
     }

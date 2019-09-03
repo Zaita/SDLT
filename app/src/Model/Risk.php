@@ -16,6 +16,9 @@ namespace NZTA\SDLT\Model;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Security;
 use NZTA\SDLT\Model\MultiChoiceAnswerSelection;
+use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Forms\GridField\GridFieldDataColumns;
+use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 
 /**
  * A "Risk" can be associated with a "Risk Questionnaire" and is used to calculate
@@ -35,7 +38,14 @@ class Risk extends DataObject
      * @var array
      */
     private static $belongs_many_many = [
-        'AnswerSelections' => MultiChoiceAnswerSelection::class,
+        'AnswerSelections' => MultiChoiceAnswerSelection::class
+    ];
+
+    /**
+     * @var array
+     */
+    private static $has_many = [
+        'ControlWeightSets' => ControlWeightSet::class
     ];
 
     /**
@@ -94,6 +104,33 @@ class Risk extends DataObject
     public function canView($member = null)
     {
         return (Security::getCurrentUser() !== null);
+    }
+
+    /**
+     * get cms fields
+     *
+     * @return FieldList
+     */
+    public function getCMSFields()
+    {
+        $fields = parent::getCMSFields();
+
+        // set Control Weight Set grid column
+        $controlWeightSetGridConfig = $fields->dataFieldByName('ControlWeightSets')->getConfig();
+        $controlWeightSetGridConfig->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
+
+        $dataColumns = $controlWeightSetGridConfig->getComponentByType(GridFieldDataColumns::class);
+
+        $dataColumns->setDisplayFields([
+            'SecurityComponent.Name' => 'Security Component',
+            'SecurityControl.Name' => 'Security Control',
+            'Likelihood' => 'Likelihood',
+            'Impact' => 'Impact',
+            'LikelihoodPenalty' => 'Likelihood Penalty',
+            'ImpactPenalty' => 'Impact Penalty',
+        ]);
+
+        return $fields;
     }
 
     /**

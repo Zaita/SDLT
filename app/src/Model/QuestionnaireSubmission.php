@@ -46,6 +46,7 @@ use SilverStripe\Forms\HeaderField;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\ToggleCompositeField;
 use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\Forms\GridField\GridFieldDetailForm;
 
 /**
  * Class Questionnaire
