@@ -6,6 +6,7 @@ import PocIcon from "../../img/Home/poc-icon.svg";
 import SaasIcon from "../../img/Home/saas-icon.svg";
 import ProdIcon from "../../img/Home/prod-icon.svg";
 import BugIcon from "../../img/Home/bug-icon.svg";
+import RiskIcon from "../../img/Home/risk-icon.svg";
 
 import get from "lodash/get";
 import toString from "lodash/toString";
@@ -72,7 +73,7 @@ query {
       return [];
     }
     const pillars = pillarsJSONArray.map(item => {
-      let icon = "";
+      let icon = PocIcon;
       switch (item["Type"]) {
         case "proof_of_concept":
           icon = PocIcon;
@@ -85,6 +86,9 @@ query {
           break;
         case "feature_or_bug_fix":
           icon = BugIcon;
+          break;
+        case "risk_questionnaire":
+          icon = RiskIcon;
           break;
       }
 
