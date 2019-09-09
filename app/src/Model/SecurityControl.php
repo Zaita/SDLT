@@ -17,6 +17,14 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\Control\Controller;
+use SilverStripe\Forms\NumericField;
+use SilverStripe\Forms\LiteralField;
+use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Forms\GridField\GridFieldConfig_RelationEditor;
+use SilverStripe\Forms\GridField\GridFieldEditButton;
+use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 
 /**
  * Class SecurityControl
@@ -43,19 +51,23 @@ class SecurityControl extends DataObject
     /**
      * @var array
      */
+    private static $has_many = [
+        'ControlWeightSets' => ControlWeightSet::class
+    ];
+
+    /**
+     * @var array
+     */
     private static $belongs_many_many = [
         'SecurityComponent' => SecurityComponent::class
     ];
 
     /**
-     * get cms fields
-     *
      * @return FieldList
      */
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
-
 
         $name = TextField::create('Name')
             ->setDescription('This is the title of the control. It is displayed'
@@ -66,36 +78,71 @@ class SecurityControl extends DataObject
             .' the title of a line-item in the component checklist.');
 
         $fields->addFieldsToTab('Root.Main', [$name, $desc]);
+        $fields->removeByName(['SecurityComponent', 'ControlWeightSets']);
 
-        $fields->removeByName('SecurityComponent');
+        if ($this->ID) {
+            // Allow inline-editing
+            $componentEditableFields = (new GridFieldEditableColumns())
+                ->setDisplayFields([
+                    'Likelihood' => [
+                        'title' => 'Likelihood',
+                        'field' => NumericField::create('Likelihood')
+                    ],
+                    'Impact' => [
+                        'title' => 'Impact',
+                        'field' => NumericField::create('Impact')
+                    ],
+                    'LikelihoodPenalty' => [
+                        'title' => 'Likelihood Penalty',
+                        'field' => NumericField::create('LikelihoodPenalty')
+                    ],
+                    'ImpactPenalty' => [
+                        'title' => 'Impact Penalty',
+                        'field' => NumericField::create('ImpactPenalty')
+                    ],
+                ]);
+
+            $config = GridFieldConfig_RelationEditor::create()
+                ->addComponent($componentEditableFields, GridFieldEditButton::class)
+                ->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
+
+            $gridField = GridField::create(
+                'ControlWeightSets',
+                'Control Weight Sets',
+                $this->ControlWeightSets()
+                    ->filter(['SecurityComponentID' => $this->getParentComponentID()]),
+                $config
+            );
+
+            $fields->addFieldsToTab('Root.Main', FieldList::create([
+                    LiteralField::create(
+                        'ControlWeightSetIntro',
+                        '<p class="message notice">A <b>Control Weight Set</b> ' .
+                        'is a combination of Risk, Likelihood, Impact and Penalties ' .
+                        'that is unique to a Control.</p>'
+                    ),
+                    $gridField
+                ])
+            );
+        }
 
         return $fields;
     }
 
     /**
-     * @return ValidationResult
+     * Get parent component id
+     *
+     * @return int
      */
-    public function validate()
+    public function getParentComponentID()
     {
-        $result = parent::validate();
+        $req = Controller::curr()->getRequest();
+        $reqParts = explode('NZTA-SDLT-Model-SecurityComponent/item/', $req->getUrl());
 
-        // Validate the ManyManyExtraFields:
-        // Cannot rely on $this->$fieldName for validation. Framework seems to only
-        // validate _after_ saving.
-        $postVars = Controller::curr()->getRequest()->postVar('ManyMany');
-
-        foreach (array_keys(SecurityComponent::config()->get('many_many_extraFields')['Controls']) as $fieldName) {
-            $limit = strstr($fieldName, 'Penalty') ? 100 : 10;
-
-            if ($postVars[$fieldName] > $limit) {
-                $result->addError(sprintf(
-                    '%s cannot be greater than %d.',
-                    TextField::name_to_label($fieldName),
-                    $limit
-                ));
-            }
+        if (!empty($reqParts) && isset($reqParts[1])) {
+            return (int) strtok($reqParts[1], '/');
         }
 
-        return $result;
+        return 0;
     }
 }

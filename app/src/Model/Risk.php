@@ -16,6 +16,8 @@ namespace NZTA\SDLT\Model;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Security;
 use NZTA\SDLT\Model\MultiChoiceAnswerSelection;
+use SilverStripe\Forms\GridField\GridFieldDataColumns;
+use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 
 /**
  * A "Risk" can be associated with a "Risk Questionnaire" and is used to calculate
@@ -35,7 +37,14 @@ class Risk extends DataObject
      * @var array
      */
     private static $belongs_many_many = [
-        'AnswerSelections' => MultiChoiceAnswerSelection::class,
+        'AnswerSelections' => MultiChoiceAnswerSelection::class
+    ];
+
+    /**
+     * @var array
+     */
+    private static $has_many = [
+        'ControlWeightSets' => ControlWeightSet::class
     ];
 
     /**
@@ -94,6 +103,18 @@ class Risk extends DataObject
     public function canView($member = null)
     {
         return (Security::getCurrentUser() !== null);
+    }
+
+    /**
+     * @return FieldList
+     */
+    public function getCMSFields()
+    {
+        $fields = parent::getCMSFields();
+
+        $fields->removeByName('ControlWeightSets');
+
+        return $fields;
     }
 
     /**
