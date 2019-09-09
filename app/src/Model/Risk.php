@@ -16,7 +16,6 @@ namespace NZTA\SDLT\Model;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Security;
 use NZTA\SDLT\Model\MultiChoiceAnswerSelection;
-use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldDataColumns;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 
@@ -107,28 +106,13 @@ class Risk extends DataObject
     }
 
     /**
-     * get cms fields
-     *
      * @return FieldList
      */
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
 
-        // set Control Weight Set grid column
-        $controlWeightSetGridConfig = $fields->dataFieldByName('ControlWeightSets')->getConfig();
-        $controlWeightSetGridConfig->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
-
-        $dataColumns = $controlWeightSetGridConfig->getComponentByType(GridFieldDataColumns::class);
-
-        $dataColumns->setDisplayFields([
-            'SecurityComponent.Name' => 'Security Component',
-            'SecurityControl.Name' => 'Security Control',
-            'Likelihood' => 'Likelihood',
-            'Impact' => 'Impact',
-            'LikelihoodPenalty' => 'Likelihood Penalty',
-            'ImpactPenalty' => 'Impact Penalty',
-        ]);
+        $fields->removeByName('ControlWeightSets');
 
         return $fields;
     }
