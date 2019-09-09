@@ -17,13 +17,13 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\Control\Controller;
-use SilverStripe\ORM\FieldType\DBInt;
 use SilverStripe\Forms\NumericField;
+use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig_RelationEditor;
 use SilverStripe\Forms\GridField\GridFieldEditButton;
 use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
-use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 
 /**
@@ -63,8 +63,6 @@ class SecurityControl extends DataObject
     ];
 
     /**
-     * get cms fields
-     *
      * @return FieldList
      */
     public function getCMSFields()
@@ -80,11 +78,10 @@ class SecurityControl extends DataObject
             .' the title of a line-item in the component checklist.');
 
         $fields->addFieldsToTab('Root.Main', [$name, $desc]);
-
         $fields->removeByName(['SecurityComponent', 'ControlWeightSets']);
 
         if ($this->ID) {
-            // Allow inline-editing for the "Weight" value
+            // Allow inline-editing
             $componentEditableFields = (new GridFieldEditableColumns())
                 ->setDisplayFields([
                     'Likelihood' => [
@@ -109,17 +106,23 @@ class SecurityControl extends DataObject
                 ->addComponent($componentEditableFields, GridFieldEditButton::class)
                 ->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
 
-            $gridField = new GridField(
+            $gridField = GridField::create(
                 'ControlWeightSets',
                 'Control Weight Sets',
                 $this->ControlWeightSets()
-                    ->filter(["SecurityComponentID" => $this->getParentComponentID()]),
+                    ->filter(['SecurityComponentID' => $this->getParentComponentID()]),
                 $config
             );
 
-            $fields->addFieldToTab(
-              'Root.Main',
-              $gridField
+            $fields->addFieldsToTab('Root.Main', FieldList::create([
+                    LiteralField::create(
+                        'ControlWeightSetIntro',
+                        '<p class="message notice">A <b>Control Weight Set</b> ' .
+                        'is a combination of Risk, Likelihood, Impact and Penalties ' .
+                        'that is unique to a Control.</p>'
+                    ),
+                    $gridField
+                ])
             );
         }
 
@@ -127,18 +130,17 @@ class SecurityControl extends DataObject
     }
 
     /**
-     * get parent component id
+     * Get parent component id
      *
-     * @return FieldList
+     * @return int
      */
     public function getParentComponentID()
     {
         $req = Controller::curr()->getRequest();
-
-        $reqParts = explode('NZTA-SDLT-Model-SecurityComponent/item/', $req->getUrl()) ;
+        $reqParts = explode('NZTA-SDLT-Model-SecurityComponent/item/', $req->getUrl());
 
         if (!empty($reqParts) && isset($reqParts[1])) {
-            return (int) strtoK($reqParts[1], '/');
+            return (int) strtok($reqParts[1], '/');
         }
 
         return 0;
