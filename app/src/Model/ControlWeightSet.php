@@ -120,20 +120,20 @@ class ControlWeightSet extends DataObject
     {
         $result = parent::validate();
 
-        if (strlen($this->Likelihood) && $this->Likelihood >10) {
-            $result->addError('Likelihood cannot be greater than 10.');
+        if (strlen($this->Likelihood) && ($this->Likelihood <0 || $this->Likelihood >10)) {
+            $result->addError('Likelihood should be a value between 0 and 10.');
         }
 
-        if (strlen($this->Impact) && $this->Impact >10) {
-            $result->addError('Impact cannot be greater than 10.');
+        if (strlen($this->Impact) && ($this->Impact <0 || $this->Impact >10)) {
+            $result->addError('Impact should be a value between 0 and 10.');
         }
 
-        if (strlen($this->LikelihoodPenalty) && $this->LikelihoodPenalty >100) {
-            $result->addError('Likelihood Penalty cannot be greater than 100.');
+        if (strlen($this->LikelihoodPenalty) && ($this->LikelihoodPenalty <0 || $this->LikelihoodPenalty >100)) {
+            $result->addError('Likelihood Penalty should be a value between 0 and 100.');
         }
 
-        if (strlen($this->ImpactPenalty) && $this->ImpactPenalty >100) {
-            $result->addError('Impact Penalty cannot be greater than 100.');
+        if (strlen($this->ImpactPenalty) && ($this->ImpactPenalty <0 || $this->ImpactPenalty >100)) {
+            $result->addError('Impact Penalty should be a value between 0 and 100.');
         }
 
         if (!$this->RiskID) {
