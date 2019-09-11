@@ -85,7 +85,7 @@ export default class QuestionParser {
           if (type === "multiple-choice: multiple selection") {
             type = "checkbox"
           }
-          const validTypes = ["text", "email", "textarea", "date", "url", "radio", "checkbox"];
+          const validTypes = ["text", "email", "textarea", "product aspects", "date", "url", "radio", "checkbox"];
           if (!validTypes.includes(type)) {
             type = "text";
           }
