@@ -63,8 +63,8 @@ class AnswersPreview extends Component<Props> {
           data = moment(data).format("DD-MM-YYYY");
         }
 
-        // Format textarea
-        if (input.type === "textarea") {
+        // Format textarea and "product aspects"
+        if (input.type === "textarea" || input.type === "product aspects") {
           data = "\n" + data;
         }
 
