@@ -100,7 +100,7 @@ class QuestionForm extends Component<Props> {
           initialValues[input.id] = input.defaultRadioButtonValue;
       }
 
-      //set checkbox default value
+      // set checkbox default value
       if (input.type == "checkbox" && input.data === null && input.defaultCheckboxValue) {
           initialValues[input.id] = input.defaultCheckboxValue;
       }
@@ -144,6 +144,12 @@ class QuestionForm extends Component<Props> {
             if (!date.isValid()) {
               errors[id] = "- Invalid date";
             }
+          }
+
+          if (type === "product aspects" &&
+            !/^[0-9a-zA-Z\s\n]+$/i.test(value)) {
+            errors[id] = "- Please enter alpha-numeric characters only.";
+            return;
           }
         });
 
@@ -298,7 +304,7 @@ class QuestionForm extends Component<Props> {
                   );
                 }
 
-                if (type === "textarea") {
+                if (type === "textarea" || type === "product aspects") {
                   return (
                     <tr key={id}>
                       <td className="label"><label>{label}</label></td>
