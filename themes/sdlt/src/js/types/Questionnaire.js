@@ -8,7 +8,7 @@ import type {TaskSubmissionDisplay} from "./Task";
 export type AnswerInput = {
   id: string,
   label: string,
-  type: string, //"text" | "email" | "textarea" | "date" | "radio" | "checkbox",
+  type: string, //"text" | "email" | "textarea" | "product aspects" | "date" | "radio" | "checkbox",
   required: boolean,
   minLength: number,
   placeholder: string,

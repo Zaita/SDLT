@@ -170,8 +170,8 @@ export default class PDFUtil {
           if (input.type === "date") {
             data = moment(data).format("DD-MM-YYYY");
           }
-          // Format textarea
-          if (input.type === "textarea") {
+          // Format textarea or "product aspects"
+          if (input.type === "textarea" || input.type === "product aspects") {
             data = "\n" + data;
           }
 

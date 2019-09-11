@@ -54,7 +54,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
      */
     private static $db = [
         'Label' => 'Varchar(255)',
-        'InputType' => 'Enum("text, email, textarea, date, url, multiple-choice: single selection, multiple-choice: multiple selection", "text")',
+        'InputType' => 'Enum("text, email, textarea,  product aspects, date, url, multiple-choice: single selection, multiple-choice: multiple selection", "text")',
         'Required' => 'Boolean',
         'MinLength' => 'Int',
         'MaxLength' => 'Int',

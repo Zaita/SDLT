@@ -60,6 +60,10 @@ class QuestionnaireValidation
             if (!empty($inputAnswerfield->data) && $inputfieldDetails->InputType == 'url') {
                 self::validate_url_field($inputAnswerfield->data, $inputfieldDetails);
             }
+
+            if (!empty($inputAnswerfield->data) && $inputfieldDetails->InputType == 'product aspects') {
+                self::validate_alphanumeric_field($inputAnswerfield->data, $inputfieldDetails);
+            }
         }
     }
 
@@ -176,6 +180,24 @@ class QuestionnaireValidation
             throw new Exception(
                 sprintf(
                     'Please enter valid URL for the %s field.',
+                    $inputfieldDetails->Label
+                )
+            );
+        }
+    }
+
+    /**
+     * @param string     $url               url
+     * @param DataObject $inputfieldDetails inputfieldsDetails
+     * @throws Exception
+     * @return void
+     */
+    public static function validate_alphanumeric_field($value, $inputfieldDetails)
+    {
+        if (!preg_match('/^[a-z0-9A-Z\s\n]+$/i', $value)) {
+            throw new Exception(
+                sprintf(
+                    'Please enter only aphanumeric characters for the %s field.',
                     $inputfieldDetails->Label
                 )
             );
