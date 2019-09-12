@@ -14,35 +14,36 @@
 namespace NZTA\SDLT\Model;
 
 use GraphQL\Type\Definition\ResolveInfo;
+use NZTA\SDLT\Form\GridField\GridFieldCustomEditAction;
 use NZTA\SDLT\GraphQL\GraphQLAuthFailure;
+use NZTA\SDLT\Helper\Utils;
+use NZTA\SDLT\ModelAdmin\QuestionnaireAdmin;
+use NZTA\SDLT\Model\LikelihoodThreshold;
+use NZTA\SDLT\Model\RiskRating;
+use NZTA\SDLT\Model\TaskSubmission;
+use NZTA\SDLT\Traits\SDLTModelPermissions;
+use NZTA\SDLT\Traits\SDLTRiskCalc;
 use SilverStripe\Core\Convert;
+use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
+use SilverStripe\Forms\GridField\GridFieldConfig_Base;
+use SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor;
+use SilverStripe\Forms\GridField\GridFieldDataColumns;
+use SilverStripe\Forms\GridField\GridFieldPaginator;
+use SilverStripe\Forms\GridField\GridField_ActionMenu;
+use SilverStripe\Forms\LiteralField;
 use SilverStripe\GraphQL\OperationResolver;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\HasManyList;
 use SilverStripe\Security\Group;
 use SilverStripe\Security\Security;
-use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
-use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
-use SilverStripe\Forms\GridField\GridFieldPaginator;
-use NZTA\SDLT\Traits\SDLTModelPermissions;
-use SilverStripe\ORM\ArrayList;
-use SilverStripe\Forms\GridField\GridFieldConfig_Base;
-use SilverStripe\Forms\GridField\GridField_ActionMenu;
-use SilverStripe\Forms\GridField\GridField;
-use SilverStripe\Forms\GridField\GridFieldDataColumns;
-use NZTA\SDLT\Form\GridField\GridFieldCustomEditAction;
-use NZTA\SDLT\ModelAdmin\QuestionnaireAdmin;
-use SilverStripe\Forms\LiteralField;
-use SilverStripe\Forms\DropdownField;
 use SilverStripe\View\ArrayData;
-use NZTA\SDLT\Helper\Utils;
-use NZTA\SDLT\Traits\SDLTRiskCalc;
-use NZTA\SDLT\Model\TaskSubmission;
-use NZTA\SDLT\Model\LikelihoodThreshold;
-use NZTA\SDLT\Model\RiskRating;
+use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 
 /**
  * Class Task
@@ -83,7 +84,11 @@ class Task extends DataObject implements ScaffoldingProvider
      * @var array
      */
     private static $has_one = [
-        'ApprovalGroup' => Group::class
+        'ApprovalGroup' => Group::class,
+
+        //this is a task of type "risk questionnaire" to grab question data from
+        //it must be filtered to RiskQuestionnaires only, and is required
+        'RiskQuestionnaireDataSource' => Task::class
     ];
 
     /**
@@ -145,10 +150,35 @@ class Task extends DataObject implements ScaffoldingProvider
             'RiskCalculation',
         ]);
 
+        $fields->removeByName(['RiskQuestionnaireDataSourceID']);
         // If TaskType doesn't require Questions, hide the "Questions" tab
         if ($this->isSelectionType() || $this->isSRAType()) {
             // A "selection" type, has no Questions
-            $fields->removeByName('Questions');
+            $riskQuestionnaires = Task::get()->filter('TaskType', 'risk questionnaire');
+
+            if (count($riskQuestionnaires)) {
+                $fields->insertAfter(
+                    'Name',
+                    DropdownField::create(
+                        'RiskQuestionnaireDataSourceID',
+                        'Data source for risk questionnaire',
+                        $riskQuestionnaires
+                    )
+                );
+            } else {
+                $fields->insertAfter(
+                    'Name',
+                    LiteralField::create(
+                        'RiskQuestionnaireDataSourceID_Warning',
+                        sprintf(
+                            "<div class=\"alert alert-warning\">%s</div>",
+                            'Please create a risk questionnaire task before '
+                            .' creating a security risk assessment task'
+                        )
+                    )
+                );
+            }
+
         } else {
             /* @var GridField $questions */
             $questions = $fields->dataFieldByName('Questions');
@@ -226,17 +256,38 @@ class Task extends DataObject implements ScaffoldingProvider
             );
         }
 
-        if (!$this->isSRAType()) {
-            $fields->removeByName(['LikelihoodThresholds', 'RiskRatings']);
-        } else {
-            $fields->dataFieldByName('LikelihoodThresholds')
-                ->getConfig()
-                ->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
-            $fields->dataFieldByName('RiskRatings')
-                ->setTitle('Risk Rating Matrix')
-                ->getConfig()
-                ->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
-            $fields->findTab('Root.RiskRatings')->setTitle('Risk Rating Matrix');
+        $fields->removeByName(['LikelihoodThresholds', 'RiskRatings']);
+        if ($this->isSRAType()) {
+
+            $fields->addFieldsToTab('Root.LikelihoodThresholds', [
+                LiteralField::create(
+                    'LikelihoodThresholdsNotice',
+                    sprintf(
+                        "<div class=\"alert alert-warning\">%s</div>",
+                        'The thresholds entered here are sorted by value in '
+                        . 'ascending order. The frontend matrix table performs'
+                        . ' a lookup starting with the top-most item and makes '
+                        . 'its way down the list. The first threshold which '
+                        . 'meets the conditions is displayed on the page.'
+                    )
+                ),
+                $likelihoodThresholdsField = GridField::create(
+                    'LikelihoodThresholds',
+                    'Likelihood Thresholds',
+                    $this->LikelihoodThresholds(),
+                    GridFieldConfig_RecordEditor::create()
+                )
+            ]);
+
+            $fields->addFieldToTab(
+                'Root.RiskRatingsMatrix',
+                GridField::create(
+                    'RiskRatings',
+                    'Risk Rating Matrix',
+                    $this->RiskRatings(),
+                    GridFieldConfig_RecordEditor::create()
+                )
+            );
         }
 
         $fields->removeByName(['Questionnaires', 'AnswerActionFields']);
@@ -285,7 +336,15 @@ class Task extends DataObject implements ScaffoldingProvider
      */
     public function getQuestionsData()
     {
-        $questions = $this->Questions();
+        $questions = null;
+        if ($this->isSRAType()) {
+            //RiskQuestionnaireDataSourceID
+            $questionnaire = $this->RiskQuestionnaireDataSource();
+            $questions = $questionnaire->Questions();
+        } else {
+            $questions = $this->Questions();
+        }
+
         $questionsData = [];
 
         foreach ($questions as $question) {
@@ -520,6 +579,8 @@ class Task extends DataObject implements ScaffoldingProvider
             $result->addError('Please select a task type.');
         } else if ($this->TaskType === 'risk questionnaire' && !$this->RiskCalculation) {
             $result->addError('Please select a risk-calculation.');
+        } else if ($this->ID && $this->isSRAType() && !$this->RiskQuestionnaireDataSourceID) {
+            $result->addError('Please select a data source for the risk questionnaire.');
         }
 
         return $result;

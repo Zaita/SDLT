@@ -11,6 +11,7 @@ import URLUtil from "../../utils/URLUtil";
 import SubmissionDataUtil from "../../utils/SubmissionDataUtil";
 import type {User} from "../../types/User";
 import RiskResultContainer from "../Common/RiskResultContainer";
+import {DEFAULT_SRA_UNFINISHED_TASKS_MESSAGE} from "../../constants/values";
 
 type Props = {
   submission: Submission | null,
@@ -57,6 +58,25 @@ class Summary extends Component<Props> {
     this.state = {
       skipBoAndCisoApproval: false
     };
+  }
+
+  hasUnfinishedTaskSubmissions(submission)
+  {
+    let taskSubmissions = submission.taskSubmissions,
+      unfinished = false;
+
+    taskSubmissions.forEach((submission, index) => {
+      let isSRA = (submission.taskType === 'security risk assessment'),
+        isRQ = (submission.taskType === 'risk questionnaire'),
+        isInProg = (submission.status === 'start' || submission.status === "in_progress");
+
+        if(!isSRA && isRQ && isInProg) {
+          unfinished = true;
+        }
+
+    });
+
+    return unfinished;
   }
 
   render() {
@@ -106,16 +126,28 @@ class Summary extends Component<Props> {
       return null;
     }
 
+    const unfinished = this.hasUnfinishedTaskSubmissions(submission),
+      unfinishedTasksAlert = (
+        <div className="alert alert-warning">
+          {DEFAULT_SRA_UNFINISHED_TASKS_MESSAGE}
+        </div>
+      );
 
     return (
       <div className="tasks">
         <h3>Tasks</h3>
 
+        {unfinished ? unfinishedTasksAlert : null}
         {taskSubmissions.map(({uuid, taskName, taskType, status, approver}) => {
           let taskNameAndStatus = taskName + ' (' + prettifyStatus(status) + ')';
 
           if (status === "start") {
             taskNameAndStatus = taskName + ' (Please complete me)';
+            if(taskType === 'security risk assessment') {
+              if (unfinished === false) {
+                taskNameAndStatus = taskName;
+              }
+            }
           }
 
           if ((status === "approved" || status === "denied") && approver.name) {
@@ -123,21 +155,25 @@ class Summary extends Component<Props> {
           }
 
           const {token} = {...this.props};
+          const button = (
+            <button className={"btn btn-link"} onClick={(event: Event) => {
+              if (taskType === "selection") {
+                URLUtil.redirectToComponentSelectionSubmission(uuid, token);
+                return;
+              }
+              if (taskType === "security risk assessment") {
+                URLUtil.redirectToSecurityRiskAssessment(uuid, token);
+                return;
+              }
+              URLUtil.redirectToTaskSubmission(uuid, token);
+            }}>
+              {taskNameAndStatus}
+            </button>
+          );
+
           return (
             <div key={uuid}>
-              <button className={"btn btn-link"} onClick={(event: Event) => {
-                if (taskType === "selection") {
-                  URLUtil.redirectToComponentSelectionSubmission(uuid, token);
-                  return;
-                }
-                if (taskType === "security risk assessment") {
-                  URLUtil.redirectToSecurityRiskAssessment(uuid, token);
-                  return;
-                }
-                URLUtil.redirectToTaskSubmission(uuid, token);
-              }}>
-                {taskNameAndStatus}
-              </button>
+              {unfinished && taskType === 'security risk assessment' ? null : button}
             </div>
           );
         })}

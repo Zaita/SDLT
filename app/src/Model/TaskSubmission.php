@@ -404,7 +404,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'RiskResultData',
                 'LikelihoodRatings',
                 'ComponentTarget',
-                'ProductAspects'
+                'ProductAspects',
+                'RiskAssessmentTaskSubmission'
             ]);
 
         $dataObjectScaffolder
@@ -1521,6 +1522,53 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         }
 
         return json_encode($allRiskResults);
+    }
+
+    /**
+     * Get all sibling task submissions from the parent
+     * This list will include the current task submission
+     *
+     * @return DataList | null
+     */
+    public function getSiblingTaskSubmissions() {
+        $qs = $this->QuestionnaireSubmission();
+        if ($qs && $qs->exists()) {
+            return $qs->TaskSubmissions();
+        }
+
+        return null;
+    }
+
+    /**
+     * Find a risk assessment questionnaire task amongst the siblings of this
+     * task submission, and return its risk result data.
+     *
+     * For reasons that escape the developer, GraphQL will not return this
+     * TaskSubmission object as an object. It's cast to a string instead.
+     * It will not return anything at all unless this specific name is used.
+     * Thus, we use this getter to get the submission, and return an actual
+     * string of data that we need (the RiskResultData, in this case)
+     *
+     * If you think you could use an alternative getter method here, like
+     * getRiskResultDataFromTaskSubmission and call this getter, that doesn't
+     * work either.
+     *
+     * @return string it's always a string, even if you want an object. it might
+     *                also be null, if there aren't any other siblings
+     */
+    public function getRiskAssessmentTaskSubmission() {
+
+        $siblings = $this->getSiblingTaskSubmissions();
+        if ($siblings && $siblings->Count()) {
+            $task = $siblings->find('Task.TaskType', 'risk questionnaire');
+
+            //we should actually return a task here, but GraphQL has other ideas
+            //returning the object will cast it to a string, so grab something
+            //useful and return that instead.
+            return $task->RiskResultData;
+        }
+
+        return null;
     }
 
     /**

@@ -33,7 +33,7 @@ class LikelihoodLegendContainer extends Component<Props> {
                     <td>
                       {likelihoodThreshold.operator + likelihoodThreshold.value}
                     </td>
-                    <td style={{color:'#' + likelihoodThreshold.colour}}>
+                    <td style={{backgroundColor:'#' + likelihoodThreshold.colour}}>
                       {likelihoodThreshold.name}
                     </td>
                   </tr>
