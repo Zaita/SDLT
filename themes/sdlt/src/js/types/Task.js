@@ -47,7 +47,7 @@ export type SecurityRiskAssessment = {
 };
 
 export type LikelihoodThreshold = {
-  value: string,
+  value: number,
   operator: string,
   colour: string,
   name:string
@@ -57,3 +57,12 @@ export type ProductAspect = {
   id: string,
   uuid: value
 };
+export type RiskRating = {
+  name: string
+  colour: string,
+  rating: string
+  riskID: number
+  riskName: string
+  score: number
+  weights: number
+}

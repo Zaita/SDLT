@@ -9,6 +9,7 @@ import Footer from "../Footer/Footer";
 import {loadCurrentUser} from "../../actions/user";
 import {loadSiteTitle} from "../../actions/siteConfig";
 import LikelihoodLegendContainer from "../Common/LikelihoodLegendContainer";
+import RiskAssessmentMatrixTableContainer from "../Common/RiskAssessmentMatrixTableContainer";
 import type {User} from "../../types/User";
 import {
   loadSecurityRiskAssessment
@@ -21,7 +22,7 @@ const mapStateToProps = (state: RootState) => {
   return {
     siteTitle: state.siteConfigState.siteTitle,
     currentUser: state.currentUserState.user,
-    securityRiskAssessmentData: state.securityRiskAssessmentState.securityRiskAssessmentData
+    securityRiskAssessmentData: state.securityRiskAssessmentState.securityRiskAssessmentData,
   };
 };
 
@@ -74,8 +75,14 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
     return (
       <div className="SecurityRiskAssessmentContainer">
         <Header title={securityRiskAssessmentData.taskName} subtitle={siteTitle} username={currentUser.name}/>
+
         <div className="SecurityRiskAssessmentResult">
-          <LikelihoodLegendContainer likelihoodThresholds={securityRiskAssessmentData.likelihoodRatings} />
+          <RiskAssessmentMatrixTableContainer
+            riskResults={securityRiskAssessmentData.riskResults}
+            likelihoodThresholds={securityRiskAssessmentData.likelihoodRatings} />
+
+          <LikelihoodLegendContainer
+            likelihoodThresholds={securityRiskAssessmentData.likelihoodRatings} />
           <div className="buttons">
             {backButton}
           </div>
