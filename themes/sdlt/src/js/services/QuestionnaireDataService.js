@@ -189,7 +189,7 @@ query {
             };
             return taskSubmission;
           }),
-        riskResults: _.has(submissionJSON, 'RiskResultData') ? JSON.parse(_.get(submissionJSON, "RiskResultData", "")) : ""
+        riskResults: _.has(submissionJSON, 'RiskResultData') ? JSON.parse(_.get(submissionJSON, "RiskResultData", "[]")) : "[]"
       },
     };
 

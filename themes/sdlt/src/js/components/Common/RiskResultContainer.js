@@ -10,7 +10,7 @@ class RiskResultContainer extends Component<Props> {
   render() {
     const {riskResults} = {...this.props};
 
-    if (riskResults.length === 0) {
+    if (!riskResults || riskResults.length === 0) {
       return null;
     }
 
