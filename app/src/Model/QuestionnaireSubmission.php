@@ -1936,7 +1936,30 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 $this->BusinessOwnerApprover()->Surname
             ]);
         } else {
-            return $this->BusinessOwnerEmailAddress;
+            $email = $this->BusinessOwnerEmailAddress;
+            $businessOwner = Member::get()->filter('Email', $email)->first();
+
+            if ($businessOwner) {
+                return $name = trim($businessOwner->FirstName . ' ' . $businessOwner->Surname);
+            } else {
+                $emailParts = explode("@", $email);
+
+                if (isset($emailParts[0])) {
+                    $name = $emailParts[0];
+
+                    if (strpos($name, '.') !== false) {
+                        $nameParts = explode('.', $name);
+
+                        if (isset($nameParts[0]) && isset($nameParts[1])) {
+                            return $name = $nameParts[0] . ' ' . $nameParts[1];
+                        }
+                    }
+
+                    return $name;
+                }
+            }
+
+            return $email;
         }
     }
 
