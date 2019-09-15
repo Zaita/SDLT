@@ -64,12 +64,7 @@ class SendApprovalLinkEmail
 
         // send email to the business owner
         if ($this->businessOwnerEmail != '') {
-            $name = 'Business Owner';
-            $businessOwner = Member::get()->filter('Email', $this->businessOwnerEmail)->first();
-
-            if ($businessOwner) {
-                $name = $businessOwner->FirstName . ' ' . $businessOwner->Surname;
-            }
+            $name = $this->questionnaireSubmission->getBusinessOwnerApproverName() ?: 'Business Owner';
 
             $this->sendEmail($name, $this->businessOwnerEmail, true, UserGroupConstant::ROLE_CODE_BO);
         }
