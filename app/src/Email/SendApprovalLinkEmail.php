@@ -16,6 +16,7 @@ namespace NZTA\SDLT\Email;
 use SilverStripe\Control\Email\Email;
 use NZTA\SDLT\Model\QuestionnaireEmail;
 use NZTA\SDLT\Constant\UserGroupConstant;
+use SilverStripe\Security\Member;
 
 /**
  * Send Approval Link Email
@@ -63,7 +64,14 @@ class SendApprovalLinkEmail
 
         // send email to the business owner
         if ($this->businessOwnerEmail != '') {
-            $this->sendEmail('Business Owner', $this->businessOwnerEmail, true, UserGroupConstant::ROLE_CODE_BO);
+            $name = 'Business Owner';
+            $businessOwner = Member::get()->filter('Email', $this->businessOwnerEmail)->first();
+
+            if ($businessOwner) {
+                $name = $businessOwner->FirstName . ' ' . $businessOwner->Surname;
+            }
+
+            $this->sendEmail($name, $this->businessOwnerEmail, true, UserGroupConstant::ROLE_CODE_BO);
         }
     }
 

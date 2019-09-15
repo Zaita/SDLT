@@ -1792,7 +1792,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     */
     public function updateBusinessOwnerDetail($status = null, $member)
     {
-        $this->BusinessOwnerApprover = $member->ID;
+        $this->BusinessOwnerApproverID = $member->ID;
         $this->BusinessOwnerApprovalStatus = $status;
         $this->BusinessOwnerStatusUpdateDate = date('Y-m-d H:i:s');
 
