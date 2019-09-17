@@ -22,9 +22,12 @@ use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig_RelationEditor;
 use SilverStripe\Forms\GridField\GridFieldEditButton;
-use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
+use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
+use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
+use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
+
 
 /**
  * Class SecurityControl
@@ -33,7 +36,7 @@ use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
  * @property string Description
  * @property SecurityComponent Component
  */
-class SecurityControl extends DataObject
+class SecurityControl extends DataObject implements ScaffoldingProvider
 {
     /**
      * @var string
@@ -63,6 +66,27 @@ class SecurityControl extends DataObject
     ];
 
     /**
+
+
+     * @param SchemaScaffolder $scaffolder Scaffolder
+     * @return SchemaScaffolder
+     */
+    public function provideGraphQLScaffolding(SchemaScaffolder $scaffolder)
+    {
+        // Provide entity type
+        $typeScaffolder = $scaffolder
+            ->type(self::class)
+            ->addFields([
+                'ID',
+                'Name',
+                'Description',
+            ]);
+
+        return $typeScaffolder;
+    }
+
+    /**
+
      * @return FieldList
      */
     public function getCMSFields()

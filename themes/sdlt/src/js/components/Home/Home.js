@@ -43,20 +43,20 @@ class Home extends Component<Props> {
                   <Pillar link={`/questionnaire/start/${pillar.questionnaireID}`}
                           classes={["col", "mx-1"]}
                           pillar={pillar}
-                          key={index}
+                          key={'pillar_'+(index+1)}
                   />
                 );
               })}
             </div>
           </div>
           <div className="tasks">
-            {tasks.map((task: Task) => {
+            {tasks.map((task: Task, index) => {
               let link = `/tasks/standalone/${task.id}`;
               if (task.type === "selection") {
-                link = "/component-selection/standalone";
+                link = `/component-selection/standalone/${task.id}?componentTarget=${task.componentTarget}`;
               }
               return (
-                <TaskButton link={link} classes={["mx-1"]} title={task.name}/>
+                <TaskButton link={link} classes={["mx-1"]} title={task.name} key={'standalone_task_'+(index+1)}/>
               );
             })}
           </div>

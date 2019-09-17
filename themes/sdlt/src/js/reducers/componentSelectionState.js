@@ -4,7 +4,8 @@ import type {ComponentSelectionState} from "../store/ComponentSelectionState";
 import type {
   AddSelectedComponentAction,
   LoadAvailableComponentsAction,
-  RemoveSelectedComponentAction
+  RemoveSelectedComponentAction,
+  LoadSelectedComponentsAction
 } from "../actions/ActionType";
 import ActionType from "../actions/ActionType";
 import concat from "lodash/concat";
@@ -14,6 +15,7 @@ import type {SetJiraTicketsAction, SetViewModeAction} from "../actions/component
 const defaultState: ComponentSelectionState = {
   availableComponents: [],
   selectedComponents: [],
+  savedComponents: [],
   jiraTickets: [],
   viewMode: "edit"
 };
@@ -67,6 +69,14 @@ export function componentSelectionState(state: ComponentSelectionState = default
     return {
       ...state,
       viewMode: act.payload
+    };
+  }
+
+  if (action.type === ActionType.COMPONENT_SELECTION.LOAD_SELECTED_COMPONENTS) {
+    const act: LoadSelectedComponentsAction = action;
+    return {
+      ...state,
+      selectedComponents: act.payload
     };
   }
 

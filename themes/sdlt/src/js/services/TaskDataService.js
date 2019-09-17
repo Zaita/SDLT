@@ -54,6 +54,11 @@ query {
       ID
       Name
       Description
+      Controls {
+        ID
+        Name
+        Description
+      }
     }
     JiraTickets {
       ID
@@ -63,11 +68,14 @@ query {
     IsTaskApprovalRequired
     IsCurrentUserAnApprover
     RiskResultData
+    ComponentTarget
+    ProductAspects
   }
 }`;
 
     const responseJSONObject = await GraphQLRequestHelper.request({query});
     const submissionJSONObject = get(responseJSONObject, "data.readTaskSubmission.0", null);
+
     if (!submissionJSONObject) {
       throw DEFAULT_NETWORK_ERROR;
     }
@@ -92,7 +100,9 @@ query {
       jiraTickets: JiraTicketParser.parseFromJSONArray(get(submissionJSONObject, "JiraTickets", [])),
       isCurrentUserAnApprover:  _.get(submissionJSONObject, "IsCurrentUserAnApprover", "false") === "true",
       isTaskApprovalRequired: get(submissionJSONObject, "IsTaskApprovalRequired", false) === "true",
-      riskResults: _.has(submissionJSONObject, 'RiskResultData') ? JSON.parse(_.get(submissionJSONObject, "RiskResultData", "[]")) : "[]"
+      riskResults: _.has(submissionJSONObject, 'RiskResultData') ? JSON.parse(_.get(submissionJSONObject, "RiskResultData", "[]")) : "[]",
+      productAspects:  _.has(submissionJSONObject, 'ProductAspects') ? JSON.parse(_.get(submissionJSONObject, "ProductAspects", [])) : [],
+      componentTarget: toString(get(submissionJSONObject, "ComponentTarget", ""))
     };
 
     return data;

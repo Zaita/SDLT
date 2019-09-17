@@ -8,16 +8,19 @@
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-
     padding-top: 45px;
-    padding-bottom: 45px;
+    padding-bottom: 35px !important;
     padding-left: 23px;
 
-    .title {
-        margin-left: 18px;
+    .title,
+    .product-aspect-label {
         font-size: 14px;
         font-weight: bold;
         color: $blue;
+    }
+
+    .product-aspect {
+        padding-bottom: 15px;
     }
 
     .items, .children {
