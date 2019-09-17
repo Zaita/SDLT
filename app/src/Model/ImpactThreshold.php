@@ -33,26 +33,45 @@ class ImpactThreshold extends DataObject
      *                                    "Value" field.
      * @return mixed null|ImpactThreshold  An instance of {@link ImpactThreshold}
      *                                    if a match is found, or null otherwise.
-     * Note: This method is limited in scope.In the event of an operand set where
-     *       an operand is _both_ ">" and ">=" some value, then first "hit" is
-     *       returned. This is simply a case for the user to consider, when configuring
-     *       thresholds within the SDLT, using incremental or "stepped" thresholds.
+     * Note: This method is limited in scope. In the event that an operand is set
+     *       where it's _both_ ">" and ">=" <N>, then the first "hit" is returned.
+     *       This is simply a case for admin users to consider when configuring
+     *       thresholds within the SDLT, with the use of incremental or "stepped"
+     *       thresholds.
      */
     public static function match($operand)
     {
         $operand = str_replace(',', '', $operand);
+        $sort = sprintf('ABS(Value - %s) ASC', $operand);
+        $thresholds = self::get()->sort($sort);
 
-        foreach (array_keys(static::config()->get('operators')) as $op) {
-            $where = sprintf("Operator = '%s' AND %s %s Value", $op, $operand, $op);
-            $sort = sprintf('ABS(Value - %s)', $operand);
+        foreach ($thresholds as $threshold) {
+            $opr = $threshold->Operator;
+            $val = $threshold->Value;
 
-            $matches = self::get()
-                    ->where($where)
-                    ->sort($sort);
-
-            // Conflict resolution: Always take the first match
-            if ($matches && $result = $matches->first()) {
-                return $result;
+            switch ($opr) {
+                case '<':
+                    if ($operand < $val) {
+                        return $threshold;
+                    }
+                    break;
+                case '<=':
+                    if ($operand <= $val) {
+                        return $threshold;
+                    }
+                    break;
+                case '>':
+                    if ($operand > $val) {
+                        return $threshold;
+                    }
+                    break;
+                case '>=':
+                    if ($operand >= $val) {
+                        return $threshold;
+                    }
+                    break;
+                default:
+                    return null;
             }
         }
 
