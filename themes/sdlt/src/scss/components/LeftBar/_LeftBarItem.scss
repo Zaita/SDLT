@@ -5,16 +5,16 @@
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    font-size: 14px;
+    font-size: 12px;
 
     img {
         margin-right: 2px;
-        width: 18px;
-        height: 18px;
+        width: 14px;
+        height: 14px;
     }
 
     i {
-        font-size: 18px;
+        font-size: 14px;
         margin-right: 2px;
     }
 
@@ -36,7 +36,11 @@
 
     .btn {
         background: $white;
-        padding-left: 0;
+        padding: 1px 2px;
         text-align: left;
+        font-size: 14px;
+        &:focus {
+          box-shadow: none  !important;
+        }
     }
 }

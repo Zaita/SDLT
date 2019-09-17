@@ -15,47 +15,21 @@ import {
   addSelectedComponent,
   createJIRATickets,
   loadAvailableComponents,
-  removeSelectedComponent
+  removeSelectedComponent,
+  loadSelectedComponents,
 } from "../../actions/componentSelection";
 import URLUtil from "../../utils/URLUtil";
 import ComponentSelectionReview from "./ComponentSelectionReview";
 import DarkButton from "../Button/DarkButton";
 import type {TaskSubmission} from "../../types/Task";
-import {completeTaskSubmission, loadTaskSubmission, saveSelectedComponents} from "../../actions/task";
-
-const mapStateToProps = (state: RootState) => {
-  return {
-    siteTitle: state.siteConfigState.siteTitle,
-    currentUser: state.currentUserState.user,
-    taskSubmission: state.taskSubmissionState.taskSubmission,
-    availableComponents: state.componentSelectionState.availableComponents,
-    selectedComponents: state.componentSelectionState.selectedComponents,
-  };
-};
-
-const mapDispatchToProps = (dispatch: Dispatch, props: OwnProps) => {
-  return {
-    dispatchLoadDataAction() {
-      const {uuid, secureToken} = {...props};
-      dispatch(loadCurrentUser());
-      dispatch(loadSiteTitle());
-      dispatch(loadAvailableComponents());
-      dispatch(loadTaskSubmission({uuid, secureToken}));
-    },
-    dispatchAddComponentAction(id: string) {
-      dispatch(addSelectedComponent(id));
-    },
-    dispatchRemoveComponentAction(id: string) {
-      dispatch(removeSelectedComponent(id))
-    },
-    dispatchCreateJIRATicketsAction(jiraKey: string) {
-      dispatch(saveSelectedComponents(jiraKey));
-    },
-    dispatchFinishAction() {
-      dispatch(completeTaskSubmission());
-    }
-  };
-};
+import {
+  completeTaskSubmission,
+  loadTaskSubmission,
+  saveSelectedComponents,
+  editCompletedTaskSubmission
+} from "../../actions/task";
+import editIcon from "../../../img/icons/edit.svg";
+import LightButton from "../Button/LightButton";
 
 type OwnProps = {
   uuid: string,
@@ -70,13 +44,55 @@ type Props = OwnProps & {
   selectedComponents?: Array<SecurityComponent>,
   dispatchLoadDataAction?: () => void,
   dispatchCreateJIRATicketsAction?: (jiraKey: string) => void,
+  dispatchSaveLocalControlsAction?: () => void,
   dispatchAddComponentAction?: (id: string) => void,
   dispatchRemoveComponentAction?: (id: string) => void,
   dispatchFinishAction?: () => void,
+  dispatchEditAnswersAction?: () => void,
+  dispatchLoadSelectedComponents?: (selectedComponents: Array<SecurityComponent>) => void
 }
 
-class ComponentSelectionContainer extends Component<Props> {
+const mapStateToProps = (state: RootState) => {
+  return {
+    siteTitle: state.siteConfigState.siteTitle,
+    currentUser: state.currentUserState.user,
+    taskSubmission: state.taskSubmissionState.taskSubmission,
+    availableComponents: state.componentSelectionState.availableComponents,
+    selectedComponents: state.componentSelectionState.selectedComponents
+  };
+};
 
+const mapDispatchToProps = (dispatch: Dispatch, props: OwnProps) => {
+  return {
+    dispatchLoadDataAction() {
+      const {uuid, secureToken} = {...props};
+      dispatch(loadCurrentUser());
+      dispatch(loadSiteTitle());
+      dispatch(loadAvailableComponents());
+      dispatch(loadTaskSubmission({uuid, secureToken, type: "componentSelection"}));
+    },
+    dispatchAddComponentAction(id: string) {
+      dispatch(addSelectedComponent(id));
+    },
+    dispatchRemoveComponentAction(id: string) {
+      dispatch(removeSelectedComponent(id));
+    },
+    dispatchCreateJIRATicketsAction(jiraKey: string) {
+      dispatch(saveSelectedComponents(jiraKey));
+    },
+    dispatchSaveLocalControlsAction() {
+      dispatch(saveSelectedComponents(""));
+    },
+    dispatchFinishAction() {
+      dispatch(completeTaskSubmission());
+    },
+    dispatchEditAnswersAction() {
+      dispatch(editCompletedTaskSubmission({type: "componentSelection"}));
+    }
+  };
+};
+
+class ComponentSelectionContainer extends Component<Props> {
   componentDidMount() {
     const {dispatchLoadDataAction} = {...this.props};
     dispatchLoadDataAction();
@@ -93,7 +109,9 @@ class ComponentSelectionContainer extends Component<Props> {
       dispatchAddComponentAction,
       dispatchRemoveComponentAction,
       dispatchCreateJIRATicketsAction,
-      dispatchFinishAction
+      dispatchSaveLocalControlsAction,
+      dispatchFinishAction,
+      dispatchEditAnswersAction
     } = {...this.props};
 
     if (!currentUser || !taskSubmission) {
@@ -108,6 +126,8 @@ class ComponentSelectionContainer extends Component<Props> {
           <ComponentSelection
             availableComponents={availableComponents}
             selectedComponents={selectedComponents}
+            componentTarget={taskSubmission.componentTarget}
+            productAspects={taskSubmission.productAspects}
             extraButtons={[(
               <DarkButton
                 key="back"
@@ -119,6 +139,9 @@ class ComponentSelectionContainer extends Component<Props> {
             )]}
             createJIRATickets={(jiraKey) => {
               dispatchCreateJIRATicketsAction(jiraKey);
+            }}
+            saveControls={() => {
+              dispatchSaveLocalControlsAction();
             }}
             removeComponent={(id) => {
               dispatchRemoveComponentAction(id);
@@ -137,16 +160,25 @@ class ComponentSelectionContainer extends Component<Props> {
           <ComponentSelectionReview
             selectedComponents={taskSubmission.selectedComponents}
             jiraTickets={taskSubmission.jiraTickets}
-          >
-            <div className="buttons">
-              <DarkButton
-                title={"BACK TO QUESTIONNAIRE SUMMARY"}
-                onClick={() => {
-                  URLUtil.redirectToQuestionnaireSummary(taskSubmission.questionnaireSubmissionUUID, secureToken);
-                }}
-              />
-            </div>
-          </ComponentSelectionReview>
+            componentTarget={taskSubmission.componentTarget}
+            buttons={[(
+              <div key="component-selection-review-button-container">
+                <LightButton
+                  title={"EDIT CONTROLS"}
+                  onClick={dispatchEditAnswersAction}
+                  classes={["button"]}
+                  iconImage={editIcon}
+                />
+                <DarkButton
+                  title={"BACK TO QUESTIONNAIRE SUMMARY"}
+                  onClick={() => {
+                    URLUtil.redirectToQuestionnaireSummary(taskSubmission.questionnaireSubmissionUUID, secureToken);
+                  }}
+                  classes={["button"]}
+                />
+              </div>
+            )]}
+          />
         );
     }
 
