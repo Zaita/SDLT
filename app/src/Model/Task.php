@@ -36,6 +36,7 @@ use SilverStripe\Forms\GridField\GridFieldDataColumns;
 use NZTA\SDLT\Form\GridField\GridFieldCustomEditAction;
 use NZTA\SDLT\ModelAdmin\QuestionnaireAdmin;
 use SilverStripe\Forms\LiteralField;
+use SilverStripe\Forms\DropdownField;
 use SilverStripe\View\ArrayData;
 use NZTA\SDLT\Helper\Utils;
 use NZTA\SDLT\Traits\SDLTRiskCalc;
@@ -75,6 +76,7 @@ class Task extends DataObject implements ScaffoldingProvider
         'LockAnswersWhenComplete' => 'Boolean',
         'IsApprovalRequired' => 'Boolean',
         'RiskCalculation' => "Enum('NztaApproxRepresentation,Maximum')",
+        'ComponentTarget' => "Enum('JIRA Cloud,Local')",
     ];
 
     /**
@@ -186,6 +188,15 @@ class Task extends DataObject implements ScaffoldingProvider
                 ->displayIf('TaskType')
                 ->isEqualTo('risk questionnaire')
                 ->end()
+        );
+
+        $fields->insertAfter('TaskType', DropdownField::create('ComponentTarget', 'Target')
+            ->setEmptyString('-- Select One --')
+            ->setSource(Utils::pretty_source($this, 'ComponentTarget'))
+            ->setDescription('Select the most appropriate target for selections.')
+            ->displayIf('TaskType')
+            ->isEqualTo('selection')
+            ->end()
         );
 
         $fields->addFieldsToTab(
@@ -336,7 +347,8 @@ class Task extends DataObject implements ScaffoldingProvider
                 'ID',
                 'Name',
                 'TaskType',
-                'QuestionsDataJSON'
+                'QuestionsDataJSON',
+                'ComponentTarget'
             ]);
 
         $typeScaffolder
@@ -400,6 +412,16 @@ class Task extends DataObject implements ScaffoldingProvider
     public function isStandalone() : bool
     {
         return (bool) $this->DisplayOnHomePage;
+    }
+
+    /**
+     * Is this task classified as a "Component Selection" task?
+     *
+     * @return boolean
+     */
+    public function isComponentSelection() : bool
+    {
+        return $this->TaskType === 'selection';
     }
 
     /**
@@ -554,5 +576,16 @@ class Task extends DataObject implements ScaffoldingProvider
     {
         $admin = QuestionnaireAdmin::create();
         return $admin->Link('NZTA-SDLT-Model-Task/EditForm/field/NZTA-SDLT-Model-Task/item/' . $this->ID . '/' . $action);
+    }
+
+
+    /**
+     * check target is remote (JIRA Cloud)
+     *
+     * @return Boolean
+     */
+    public function isRemoteTarget() : bool
+    {
+        return $this->ComponentTarget !== "Local";
     }
 }

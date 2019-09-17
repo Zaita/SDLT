@@ -35,7 +35,6 @@ use Symbiote\QueuedJobs\Services\QueuedJobService;
 use NZTA\SDLT\Job\SendTaskSubmissionEmailJob;
 use NZTA\SDLT\Job\SendTaskApprovalLinkEmailJob;
 use SilverStripe\Forms\TextField;
-use NZTA\SDLT\Helper\JIRA;
 use NZTA\SDLT\Model\JiraTicket;
 use SilverStripe\Security\Group;
 use NZTA\SDLT\Traits\SDLTRiskSubmission;
@@ -105,6 +104,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         'IsTaskApprovalLinkSent' => 'Boolean',
         'RiskResultData' => 'Text',
         'LikelihoodRatings' => 'Text',
+        'ProductAspects' => 'Text',
     ];
 
     /**
@@ -190,10 +190,24 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     public function getTaskType()
     {
         $task = $this->Task();
+
         if (!$task->exists()) {
             return "";
         }
+
         return $task->TaskType;
+    }
+
+    /**
+     * @return string
+     */
+    public function getComponentTarget()
+    {
+        $task = $this->Task();
+        if (!$task->exists()) {
+            return "";
+        }
+        return $task->ComponentTarget;
     }
 
     /**
@@ -236,6 +250,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             ]
         );
 
+<<<<<<< 0b78ed98b70b7c33aa8f8faec3cbbbbef1c288d3
         $fields->removeByName([
           'RiskResultData',
           'QuestionnaireData',
@@ -244,7 +259,9 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
           'SubmitterID',
           'TaskApproverID'
         ]);
-
+=======
+        $fields->removeByName(['RiskResultData', 'QuestionnaireData', 'AnswerData', 'Result']);
+>>>>>>> NEW: RM#66439 Completed Component Selection Task
 
         $fields->addFieldsToTab(
             'Root.TaskSubmissionData',
@@ -297,12 +314,15 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             }
         }
 
+<<<<<<< 0b78ed98b70b7c33aa8f8faec3cbbbbef1c288d3
         $taskApproverList = [];
 
         if ($approvalGroup = $this->ApprovalGroup()) {
             $taskApproverList = $approvalGroup->Members() ? $approvalGroup->Members()->map('ID', 'Name') : $taskApproverList;
         }
 
+=======
+>>>>>>> NEW: RM#66439 Completed Component Selection Task
         $fields->addFieldsToTab(
             'Root.TaskSubmitter',
             [
@@ -336,6 +356,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
         if (!$this->Task()->isRiskType()) {
             $fields->removeByName('RiskResultData');
+        }
+
+        if (!$this->Task()->isSelectionType()) {
+            $fields->removeByName('ProductAspects');
         }
 
         $fields->removeByName('QuestionnaireSubmissionID');
@@ -387,6 +411,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'IsCurrentUserAnApprover',
                 'RiskResultData',
                 'LikelihoodRatings',
+                'ComponentTarget',
+                'ProductAspects',
             ]);
 
         $dataObjectScaffolder
@@ -517,6 +543,12 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
         $likelihoodRatingData = $task->getLikelihoodRatingsData();
         $taskSubmission->LikelihoodRatings = json_encode($likelihoodRatingData);
+
+        if ($task->isSelectionType()) {
+            $taskSubmission->ProductAspects = $taskSubmission
+                ->QuestionnaireSubmission()
+                ->getProductAspects();
+        }
 
         $taskSubmission->write();
 
@@ -1231,7 +1263,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * @param SchemaScaffolder $scaffolder scaffolder
+     * This is used by f/e logic for task submissions of _both_ ticket ("JIRA Cloud")
+     * and "Local" types. It will create local records for selected components.
+     *
+     * @param  SchemaScaffolder $scaffolder scaffolder
      * @return void
      */
     private function provideGraphQLScaffoldingForUpdateTaskSubmissionWithSelectedComponents(SchemaScaffolder $scaffolder)
@@ -1241,7 +1276,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             ->addArgs([
                 'UUID' => 'String!',
                 'ComponentIDs' => 'String!',
-                'JiraKey' => 'String!'
+                'JiraKey' => 'String?' // "Local" targets will pass an empty string in the f/e
             ])
             ->setResolver(new class implements ResolverInterface {
                 /**
@@ -1261,40 +1296,62 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     $submission = TaskSubmission::get()
                         ->filter(['UUID' => Convert::raw2sql($args['UUID'])])
                         ->first();
+
                     if (!$submission || !$submission->exists()) {
-                        throw new Exception('Task submission with the given UUID can not be found');
+                        throw new Exception('Task submission with the given UUID cannot be found');
                     }
 
                     $componentIDs = json_decode(base64_decode($args['ComponentIDs']), true);
-
                     $components = [];
+
+                    /** Prevent multiple ticket creation */
+                    $incomingComponentIDs = $componentIDs;
+                    $existingComponentIDs = $submission->SelectedComponents()->column('ID');
+                    $newTicketComponentIDs = array_diff($incomingComponentIDs, $existingComponentIDs);
+
+                    // Reset!!
                     $submission->SelectedComponents()->removeAll();
+
                     foreach ($componentIDs as $componentID) {
                         $component = SecurityComponent::get_by_id(Convert::raw2sql($componentID));
+
                         if ($component) {
                             $components[] = $component;
                             $submission->SelectedComponents()->add($component);
                         }
                     }
 
-                    if (!$components) {
-                        throw new Exception('No components have been selected');
+                    // Component Selection Tasks with a "Local" ComponentTarget
+                    // do not "go to JIRA"...
+                    $ticketId = Convert::raw2sql($args['JiraKey'] ?? '');
+                    $doCreateTicket = !empty($ticketId) && count($newTicketComponentIDs);
+
+                    // Do not permit the modification of a submission with the creation
+                    // of a new ticket, if a different project key is passed-in.
+                    if ($submission->Task()->isRemoteTarget() &&
+                        $submission->JiraKey && $submission->JiraKey !== $ticketId) {
+                        throw new Exception(sprintf('Project key must be the same as: %s', $submission->JiraKey));
                     }
 
-                    $submission->JiraKey = Convert::raw2sql($args['JiraKey']);
-                    $submission->write();
+                    // JIRA
+                    if ($doCreateTicket) {
+                        $submission->JiraKey = $ticketId;
+                        $submission->write();
+                        $components = SecurityComponent::get()->byIDs($newTicketComponentIDs);
 
-                    foreach ($components as $component) {
-                        $jiraTicket = JiraTicket::create();
-                        $jiraTicket->JiraKey = Convert::raw2sql($args['JiraKey']);
-                        $link = JIRA::create()->addTask(
-                            $jiraTicket->JiraKey,
-                            $component->Name,
-                            $component->getJIRABody()
-                        );
-                        $jiraTicket->TicketLink = $link;
-                        $jiraTicket->write();
-                        $submission->JiraTickets()->add($jiraTicket);
+                        foreach ($components as $component) {
+                            $jiraTicket = JiraTicket::create();
+                            $jiraTicket->JiraKey = $ticketId;
+                            $link = $submission->issueTrackerService->addTask( // <-- Makes an API call
+                                $jiraTicket->JiraKey,
+                                $component->Name,
+                                $component->Description,
+                                $component->getTicket()
+                            );
+                            $jiraTicket->TicketLink = $link;
+                            $jiraTicket->write();
+                            $submission->JiraTickets()->add($jiraTicket);
+                        }
                     }
 
                     return $submission;

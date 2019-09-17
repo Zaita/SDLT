@@ -146,7 +146,7 @@ class QuestionForm extends Component<Props> {
             }
           }
 
-          if (type === "product aspects" &&
+          if (type === "product aspects" && value &&
             !/^[0-9a-zA-Z\s\n]+$/i.test(value)) {
             errors[id] = "- Please enter alpha-numeric characters only.";
             return;

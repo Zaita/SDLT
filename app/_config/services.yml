@@ -15,6 +15,20 @@ NZTA\SDLT\Model\Task:
   dependencies:
     auditService: '%$NZTA\SDLT\Service\AuditService'
   
+SilverStripe\Core\Injector\Injector:
+  IssueTrackerService:
+    factory: NZTA\SDLT\IssueTracker\Factory\IssueTrackerFactory
+    
 NZTA\SDLT\Model\TaskSubmission:
   dependencies:
     auditService: '%$NZTA\SDLT\Service\AuditService'
+    issueTrackerService: '%$IssueTrackerService'
+    
+NZTA\SDLT\Model\SecurityComponent:
+  dependencies:
+    issueTrackerService: %$IssueTrackerService
+    
+NZTA\SDLT\Model\JiraTicket:
+  dependencies:
+    issueTrackerService: %$IssueTrackerService
+
