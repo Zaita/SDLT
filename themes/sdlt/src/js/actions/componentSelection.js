@@ -5,7 +5,8 @@ import uniq from "lodash/uniq";
 import type {
   AddSelectedComponentAction,
   LoadAvailableComponentsAction,
-  RemoveSelectedComponentAction
+  RemoveSelectedComponentAction,
+  LoadSelectedComponentsAction
 } from "./ActionType";
 import ActionType from "./ActionType";
 import type {RootState} from "../store/RootState";
@@ -97,6 +98,23 @@ export function setJiraTickets(tickets: Array<JiraTicket>): ThunkAction {
     const action: SetJiraTicketsAction = {
       type: ActionType.COMPONENT_SELECTION.SET_JIRA_TICKETS,
       payload: tickets
+    };
+    await dispatch(action);
+  };
+}
+
+export function loadSelectedComponents(taskSubmission): ThunkAction {
+  const selectedComponents = taskSubmission.selectedComponents;
+
+  const savedComponent = selectedComponents.map((component) => {
+    component.isSaved = true;
+    return component;
+  });
+
+  return async (dispatch) => {
+    const action: LoadSelectedComponentsAction = {
+      type: ActionType.COMPONENT_SELECTION.LOAD_SELECTED_COMPONENTS,
+      payload: savedComponent
     };
     await dispatch(action);
   };

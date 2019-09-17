@@ -97,10 +97,22 @@ class MainApp extends Component<*> {
                 );
               }}
             </Route>
-            <Route path='/component-selection/standalone'>
-              <div className="gray-bg">
-                <ComponentSelectionStandaloneContainer/>
-              </div>
+            <Route path='/component-selection/standalone/:taskId'>
+              {({match, location}) => {
+                let componentTarget = '';
+                if (location.search) {
+                  const queryString = parse(location.search);
+                  componentTarget = queryString.componentTarget;
+                }
+                return (
+                  <div className="gray-bg">
+                    <ComponentSelectionStandaloneContainer
+                    taskId={match.params.taskId}
+                    componentTarget={componentTarget}
+                    />
+                  </div>
+                );
+              }}
             </Route>
             <Route path='/component-selection/submission/:uuid'>
               {({match, location}) => {

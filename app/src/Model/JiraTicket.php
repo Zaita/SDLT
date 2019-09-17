@@ -20,7 +20,6 @@ use SilverStripe\GraphQL\OperationResolver;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
-use NZTA\SDLT\Helper\JIRA;
 
 /**
  * Class JiraTicket
@@ -101,14 +100,14 @@ class JiraTicket extends DataObject implements ScaffoldingProvider
 
                     $jiraTicket = JiraTicket::create();
                     $jiraTicket->JiraKey = Convert::raw2sql($args['JiraKey']);
-                    $link = JIRA::create()->addTask(
+                    $link = $jiraTicket->issueTrackerService->addTask( // <-- Makes an API call
                         $jiraTicket->JiraKey,
                         $component->Name,
-                        $component->getJIRABody()
+                        $component->Description,
+                        $component->getTicket()
                     );
                     $jiraTicket->TicketLink = $link;
                     $jiraTicket->write();
-
 
                     return $jiraTicket;
                 }

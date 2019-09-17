@@ -8,21 +8,22 @@ import toString from "lodash/toString";
 import DarkButton from "../Button/DarkButton";
 import LightButton from "../Button/LightButton";
 import ComponentInfo from "./ComponentInfo";
-import ComponentSelectionUtil from "../../utils/ComponentSelectionUtil";
 
 type Props = {
   availableComponents: Array<SecurityComponent>,
   selectedComponents: Array<SecurityComponent>,
+  componentTarget: taskSubmission.ComponentTarget,
   createJIRATickets: (jiraKey: string) => void,
   removeComponent: (id: string) => void,
   addComponent: (id: string) => void,
   finishWithSelection: () => void,
+  saveControls: () => void,
   extraButtons?: *,
+  isStandaloneTask: boolean
 };
 
 type State = {
-  filter: string,
-  jiraKey: string,
+  jiraKey: string
 };
 
 export default class ComponentSelection extends Component<Props, State> {
@@ -30,7 +31,6 @@ export default class ComponentSelection extends Component<Props, State> {
   constructor(props: *) {
     super(props);
     this.state = {
-      filter: "",
       jiraKey: ""
     };
   }
@@ -43,52 +43,29 @@ export default class ComponentSelection extends Component<Props, State> {
       removeComponent,
       addComponent,
       finishWithSelection,
-      extraButtons
+      saveControls,
+      extraButtons,
+      componentTarget,
+      productAspects,
+      isStandaloneTask
     } = {...this.props};
 
-    const {filter, jiraKey} = {...this.state};
+    const {jiraKey} = {...this.state};
 
     return (
       <div className="ComponentSelection">
 
         <div className="main-wrapper">
-          <LeftBar title={"Available Components".toUpperCase()}>
-            <div className="search">
-              <i className="fas fa-search"/>
-              <input type="text" placeholder="Filter component..." onChange={(event) => {
-                const value = toString(event.target.value).trim();
-                this.setState({filter: value});
-              }}/>
-            </div>
 
-            <div className="items">
-              {availableComponents
-                .filter((component) => {
-                  if (!filter) {
-                    return true;
-                  }
-                  return component.name.includes(filter);
-                })
-                .map((component) => {
-                  const isSelected = ComponentSelectionUtil.isComponentExists(component.id, selectedComponents);
-
-                  return (
-                    <LeftBarItem
-                      title={component.name}
-                      iconType={isSelected ? "success" : "pending"}
-                      disabled={false}
-                      key={component.id}
-                      onItemClick={() => {
-                        // Toggle selection
-                        if (isSelected) {
-                          removeComponent(component.id);
-                        } else {
-                          addComponent(component.id);
-                        }
-                      }}/>
-                  );
-                })}
-            </div>
+          <LeftBar
+            selectedComponents={selectedComponents}
+            availableComponents={availableComponents}
+            title={"Available Components"}
+            removeComponent={removeComponent}
+            addComponent={addComponent}
+            productAspects={productAspects}
+            componentTarget={componentTarget}
+          >
           </LeftBar>
 
           <div className="main-content">
@@ -98,6 +75,9 @@ export default class ComponentSelection extends Component<Props, State> {
 
             <div className="selected-components">
               {selectedComponents.map((component) => {
+
+                const isDisable = component.hasOwnProperty('isSaved') && component.isSaved && componentTarget == "JIRA Cloud";
+
                 return (
                   <ComponentInfo
                     key={component.id}
@@ -107,13 +87,15 @@ export default class ComponentSelection extends Component<Props, State> {
                     removeComponent={() => {
                       removeComponent(component.id);
                     }}
+                    childControls={component.controls}
+                    isDisable={isDisable}
                   />
                 );
               })}
             </div>
 
             <div className="buttons">
-              {selectedComponents.length > 0 && (
+              {selectedComponents.length > 0 && componentTarget === "JIRA Cloud" && (
                 <React.Fragment>
                   <input type="text" placeholder="JIRA Project Key" onChange={(event) => {
                     const value = toString(event.target.value).trim();
@@ -124,9 +106,15 @@ export default class ComponentSelection extends Component<Props, State> {
                   }}/>
                 </React.Fragment>
               )}
-              <LightButton title="FINISH WITHOUT SELECTION" classes={["mr-3"]} onClick={() => {
+              {componentTarget === "Local" && !isStandaloneTask && (
+                <LightButton title="SAVE CONTROLS" classes={["mr-3"]} onClick={() => {
+                  saveControls();
+                }}/>
+              )}
+              <LightButton title="COMPLETE WITHOUT SELECTION" classes={["mr-3"]} onClick={() => {
                 finishWithSelection();
               }}/>
+
             </div>
           </div>
         </div>

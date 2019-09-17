@@ -37,6 +37,7 @@ query {
       ID
       Name
       TaskType
+      ComponentTarget
     }
   }
 }`;

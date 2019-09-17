@@ -47,6 +47,7 @@ use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\ToggleCompositeField;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
+use NZTA\SDLT\Traits\SDLTSubmissionJson;
 
 /**
  * Class Questionnaire
@@ -63,6 +64,7 @@ use SilverStripe\Forms\GridField\GridFieldDetailForm;
 class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 {
     use SDLTRiskSubmission;
+    use SDLTSubmissionJson;
 
     const STATUS_START = 'start';
     const STATUS_IN_PROGRESS = 'in_progress';
@@ -253,6 +255,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         return false;
     }
 
+    /**
+     * @return boolean
+     */
     public function isApprovedBySA() : bool
     {
         if ($this->SecurityArchitectApprovalStatus === self::STATUS_APPROVED) {
@@ -262,6 +267,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         return false;
     }
 
+    /**
+     * @return boolean
+     */
     public function isDeniedBySA() : bool
     {
         if ($this->SecurityArchitectApprovalStatus === self::STATUS_DENIED) {
@@ -2051,7 +2059,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $allRiskResults = [];
 
         // for questionnaire
-        if ($this->QuestionnaireStatus !== self::STATUS_IN_PROGRESS) {
+        if (!$this->isInProgress()) {
             $allRiskResults = $this->getRiskResult('q');
         }
 
@@ -2349,5 +2357,21 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $this->BusinessOwnerApprovalStatus = self::STATUS_NOT_REQUIRED;
 
         $this->write();
+    }
+
+    /**
+     * get the Product Aspects from the submitted questioonaire
+     *
+     * @return string
+     */
+    public function getProductAspects() : string
+    {
+        $productAspects = [];
+
+        // for questionnaire
+        $productAspectAnswerData = $this->getAnswerDataForFieldByType('qs', 'product aspects');
+        $productAspects = $this->getProductAspectList($productAspectAnswerData);
+
+        return json_encode($productAspects);
     }
 }

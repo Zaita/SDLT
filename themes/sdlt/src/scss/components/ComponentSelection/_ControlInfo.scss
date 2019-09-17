@@ -1,0 +1,17 @@
+@import "../../variables";
+
+.ControlInfo {
+  padding-left: 30px;
+  .control-heading {
+    font-size: 14px;
+  }
+  h4 {
+    font-size: 14px;
+    color: $blue;
+    font-weight: 600;
+    padding-left: 30px;
+  }
+  p {
+    font-size: 12px !important;
+  }
+}
