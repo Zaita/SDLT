@@ -11,14 +11,16 @@ import type {Task, TaskSubmission} from "../types/Task";
 import ErrorUtil from "../utils/ErrorUtil";
 import type {
   LoadTaskSubmissionAction,
-  MarkQuestionsNotApplicableInTaskSubmissionAction, MoveToQuestionInTaskSubmissionAction,
+  MarkQuestionsNotApplicableInTaskSubmissionAction,
+  MoveToQuestionInTaskSubmissionAction,
   PutDataInTaskSubmissionAction,
 } from "./ActionType";
+import {loadSelectedComponents} from "./componentSelection";
 import type {User} from "../types/User";
 import type {RootState} from "../store/RootState";
 
-export function loadTaskSubmission(args: {uuid: string, secureToken?: string}): ThunkAction {
-  const {uuid, secureToken} = {...args};
+export function loadTaskSubmission(args: {uuid: string, secureToken?: string, type?: string}): ThunkAction {
+  const {uuid, secureToken, type} = {...args};
 
   return async (dispatch) => {
     try {
@@ -30,7 +32,12 @@ export function loadTaskSubmission(args: {uuid: string, secureToken?: string}): 
         type: ActionType.TASK.LOAD_TASK_SUBMISSION,
         payload,
       };
+
       await dispatch(action);
+
+      if (type === "componentSelection") {
+        await dispatch(loadSelectedComponents(payload));
+      }
     }
     catch (error) {
       ErrorUtil.displayError(error);
@@ -163,6 +170,9 @@ export function saveAnsweredQuestionInTaskSubmission(
   };
 }
 
+/**
+ * Deals to both "JIRA Cloud" (remote) and SDLT (local) component submissions.
+ */
 export function saveSelectedComponents(jiraKey: string): ThunkAction {
   return async (dispatch, getState) => {
     const rootState: RootState = getState();
@@ -277,9 +287,10 @@ export function moveToPreviousQuestionInTaskSubmission(
 export function editCompletedTaskSubmission(
   args: {
     secureToken?: string,
-    bypassNetwork?: boolean
+    bypassNetwork?: boolean,
+    type?: string,
   } = {}): ThunkAction {
-  const {secureToken, bypassNetwork} = {...args};
+  const {secureToken, bypassNetwork, type} = {...args};
 
   return async (dispatch, getState) => {
     const taskSubmission: TaskSubmission = getState().taskSubmissionState.taskSubmission;
@@ -295,6 +306,11 @@ export function editCompletedTaskSubmission(
           secureToken: secureToken,
         });
         await dispatch(loadTaskSubmission({uuid, secureToken}));
+
+        if (type === "componentSelection") {
+          await dispatch(loadSelectedComponents(taskSubmission));
+        }
+
       } catch (error) {
         ErrorUtil.displayError(error);
       }
