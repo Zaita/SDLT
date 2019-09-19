@@ -1274,6 +1274,17 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                         throw new Exception('Task submission with the given UUID cannot be found');
                     }
 
+                    // Component Selection Tasks with a "Local" ComponentTarget
+                    // do not "go to JIRA"...
+                    $ticketId = Convert::raw2sql($args['JiraKey'] ?? '');
+
+                    // Do not permit the modification of a submission with the creation
+                    // of a new ticket, if a different project key is passed-in.
+                    if ($submission->Task()->isRemoteTarget() &&
+                        $submission->JiraKey && $submission->JiraKey !== $ticketId) {
+                        throw new Exception(sprintf('Project key must be the same as: %s', $submission->JiraKey));
+                    }
+
                     $componentIDs = json_decode(base64_decode($args['ComponentIDs']), true);
                     $components = [];
 
@@ -1294,17 +1305,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                         }
                     }
 
-                    // Component Selection Tasks with a "Local" ComponentTarget
-                    // do not "go to JIRA"...
-                    $ticketId = Convert::raw2sql($args['JiraKey'] ?? '');
                     $doCreateTicket = !empty($ticketId) && count($newTicketComponentIDs);
-
-                    // Do not permit the modification of a submission with the creation
-                    // of a new ticket, if a different project key is passed-in.
-                    if ($submission->Task()->isRemoteTarget() &&
-                        $submission->JiraKey && $submission->JiraKey !== $ticketId) {
-                        throw new Exception(sprintf('Project key must be the same as: %s', $submission->JiraKey));
-                    }
 
                     // JIRA
                     if ($doCreateTicket) {
