@@ -18,6 +18,13 @@ export default class SecurityComponentParser {
       id: toString(get(jsonObject, "ID")),
       name: toString(get(jsonObject, "Name")),
       description: toString(get(jsonObject, "Description")),
+      controls: (get(jsonObject, "Controls") || []).map((control) => {
+        return {
+          id: toString(get(control, "ID")),
+          name: toString(get(control, "Name")),
+          description: toString(get(control, "Description"))
+        }
+      })
     }
   }
 }

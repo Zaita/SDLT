@@ -20,4 +20,5 @@ SilverStripe\GraphQL\Manager:
         - NZTA\SDLT\Model\TaskSubmission
         - NZTA\SDLT\Model\Task
         - NZTA\SDLT\Model\SecurityComponent
+        - NZTA\SDLT\Model\SecurityControl
         - NZTA\SDLT\Model\JiraTicket

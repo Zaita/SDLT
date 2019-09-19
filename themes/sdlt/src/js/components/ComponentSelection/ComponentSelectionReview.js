@@ -6,13 +6,14 @@ import type {JiraTicket, SecurityComponent} from "../../types/SecurityComponent"
 type Props = {
   selectedComponents: Array<SecurityComponent>,
   jiraTickets: Array<JiraTicket>,
-  children?: *
+  buttons?: *,
+  componentTarget: string
 };
 
 export default class ComponentSelectionReview extends React.Component<Props> {
 
   render() {
-    const {selectedComponents, jiraTickets, children} = {...this.props};
+    const {selectedComponents, jiraTickets, buttons, componentTarget} = {...this.props};
 
     return (
       <div className="ComponentSelectionReview">
@@ -26,6 +27,7 @@ export default class ComponentSelectionReview extends React.Component<Props> {
             })}
           </ul>
         </div>
+        {componentTarget === "JIRA Cloud" && (
         <div className="section">
           <h4>Created Jira Tickets</h4>
           <ul>
@@ -36,11 +38,11 @@ export default class ComponentSelectionReview extends React.Component<Props> {
             })}
           </ul>
         </div>
-        {children && (
-          <div className="children">
-            {children}
-          </div>
         )}
+
+        <div className="buttons">
+          {buttons}
+        </div>
       </div>
     );
   }

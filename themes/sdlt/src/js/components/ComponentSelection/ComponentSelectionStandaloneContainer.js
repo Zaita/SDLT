@@ -51,7 +51,12 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
   };
 };
 
-type Props = {
+type OwnProps = {
+  taskId: string,
+  componentTarget: string,
+}
+
+type ReduxProps = {
   siteTitle?: string,
   currentUser?: User | null,
   availableComponents?: Array<SecurityComponent>,
@@ -63,6 +68,8 @@ type Props = {
   dispatchAddComponentAction?: (id: string) => void,
   dispatchRemoveComponentAction?: (id: string) => void,
 }
+
+type Props = OwnProps & ReduxProps;
 
 class ComponentSelectionStandaloneContainer extends Component<Props> {
 
@@ -81,7 +88,8 @@ class ComponentSelectionStandaloneContainer extends Component<Props> {
       dispatchRemoveComponentAction,
       dispatchCreateJIRATicketsAction,
       viewMode,
-      jiraTickets
+      jiraTickets,
+      componentTarget
     } = {...this.props};
 
     if (!currentUser) {
@@ -95,6 +103,8 @@ class ComponentSelectionStandaloneContainer extends Component<Props> {
           <ComponentSelection
             availableComponents={availableComponents}
             selectedComponents={selectedComponents}
+            componentTarget={componentTarget}
+            isStandaloneTask={true}
             createJIRATickets={(jiraKey) => {
               dispatchCreateJIRATicketsAction(jiraKey);
             }}

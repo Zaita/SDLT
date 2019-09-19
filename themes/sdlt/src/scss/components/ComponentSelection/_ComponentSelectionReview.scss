@@ -18,4 +18,23 @@
       color: $blue;
     }
   }
+
+  .buttons {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: stretch;
+      margin-top: 25px;
+
+      div {
+          display: flex;
+          flex-direction: row;
+          justify-content: flex-start;
+          align-items: stretch;
+      }
+
+      .BaseButton {
+          margin-right: 16px;
+      }
+  }
 }
