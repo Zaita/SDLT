@@ -47,6 +47,7 @@ use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\ToggleCompositeField;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
+use SilverStripe\Forms\DropdownField;
 
 /**
  * Class Questionnaire
@@ -393,7 +394,16 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             ]
         );
 
-        $fields->removeByName(['QuestionnaireData', 'AnswerData', 'QuestionnaireLevelTaskIDs', 'RiskResultData']);
+        $fields->removeByName([
+          'QuestionnaireData',
+          'AnswerData',
+          'QuestionnaireLevelTaskIDs',
+          'RiskResultData',
+          'SecurityArchitectApproverID',
+          'CisoApproverID',
+          'UserID',
+          'BusinessOwnerApproverID'
+        ]);
 
         $fields->addFieldsToTab(
             'Root.QuestionnaireAnswerData',
@@ -444,7 +454,11 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $fields->addFieldsToTab(
             'Root.SubmitterDetails',
             [
-                $fields->dataFieldByName('UserID'),
+                DropdownField::create(
+                    'UserID',
+                    'Submiiter',
+                    Member::get()->map('ID', 'Name')
+                )->setEmptyString(' '),
                 $fields->dataFieldByName('SubmitterName'),
                 $fields->dataFieldByName('SubmitterEmail'),
                 $fields->dataFieldByName('IsStartLinkEmailSent'),
@@ -458,13 +472,17 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $saMemberList = [];
 
         if ($group) {
-            $saMemberList = $group->Members();
+            $saMemberList = $group->Members()->map('ID', 'Name');
         }
 
         $fields->addFieldsToTab(
             'Root.SecurityArchitectDetails',
             [
-                $fields->dataFieldByName('SecurityArchitectApproverID')->setSource($saMemberList),
+                DropdownField::create(
+                    'SecurityArchitectApproverID',
+                    'Security Architect Approver',
+                    $saMemberList
+                )->setEmptyString(' '),
                 $fields->dataFieldByName('SecurityArchitectApprovalStatus'),
                 $fields->dataFieldByName('SecurityArchitectApproverIPAddress'),
                 $fields->dataFieldByName('SecurityArchitectApproverMachineName'),
@@ -479,12 +497,16 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $cisoMemberList = [];
 
         if ($group) {
-            $cisoMemberList = $group->Members();
+            $cisoMemberList = $group->Members()->map('ID', 'Name');
         }
         $fields->addFieldsToTab(
             'Root.CisoDetails',
             [
-                $fields->dataFieldByName('CisoApproverID')->setSource($cisoMemberList),
+                DropdownField::create(
+                  'CisoApproverID',
+                  'Ciso Approver',
+                  $cisoMemberList
+                )->setEmptyString(' '),
                 $fields->dataFieldByName('CisoApprovalStatus'),
                 $fields->dataFieldByName('CisoApproverIPAddress'),
                 $fields->dataFieldByName('CisoApproverMachineName'),
@@ -497,7 +519,11 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             'Root.BusinessOwnerDetails',
             [
                 $fields->dataFieldByName('BusinessOwnerEmailAddress'),
-                $fields->dataFieldByName('BusinessOwnerApproverID'),
+                DropdownField::create(
+                    'BusinessOwnerApproverID',
+                    'Business Owner Approver',
+                    Member::get()->map('ID', 'Name')
+                )->setEmptyString(' '),
                 $fields->dataFieldByName('BusinessOwnerApprovalStatus'),
                 $fields->dataFieldByName('BusinessOwnerIPAddress'),
                 $fields->dataFieldByName('BusinessOwnerMachineName'),
