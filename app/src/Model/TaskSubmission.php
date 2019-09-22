@@ -43,6 +43,7 @@ use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\ToggleCompositeField;
 use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\Forms\DropdownField;
 
 /**
  * Class TaskSubmission
@@ -248,10 +249,15 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                       .' the submission')
             ]
         );
-        $SubmitterList = Member::get()->map('ID', 'Name');
-        $taskApproverList = $this->ApprovalGroup()->Members()->map('ID', 'Name');
 
-        $fields->removeByName(['RiskResultData', 'QuestionnaireData', 'AnswerData', 'Result']);
+        $fields->removeByName([
+          'RiskResultData',
+          'QuestionnaireData',
+          'AnswerData',
+          'Result',
+          'SubmitterID',
+          'TaskApproverID'
+        ]);
 
         $fields->addFieldsToTab(
             'Root.TaskSubmissionData',
@@ -304,10 +310,19 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             }
         }
 
+        $taskApproverList = [];
+
+        if ($approvalGroup = $this->ApprovalGroup()) {
+            $taskApproverList = $approvalGroup->Members() ? $approvalGroup->Members()->map('ID', 'Name') : $taskApproverList;
+        }
         $fields->addFieldsToTab(
             'Root.TaskSubmitter',
             [
-                $fields->dataFieldByName('SubmitterID')->setSource($SubmitterList),
+                DropdownField::create(
+                    'SubmitterID',
+                    'Submitter',
+                    Member::get()->map('ID', 'Name')
+                )->setEmptyString(' '),
                 $fields->dataFieldByName('SubmitterIPAddress'),
             ]
         );
@@ -316,7 +331,11 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             'Root.TaskApproval',
             [
                 $fields->dataFieldByName('IsApprovalRequired'),
-                $fields->dataFieldByName('TaskApproverID')->setSource($taskApproverList),
+                DropdownField::create(
+                    'TaskApproverID',
+                    'Task Approver',
+                    $taskApproverList
+                )->setEmptyString(' '),
                 $fields->dataFieldByName('ApprovalGroupID'),
                 $fields->dataFieldByName('IsTaskApprovalLinkSent '),
             ]
