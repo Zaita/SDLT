@@ -80,6 +80,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     const STATUS_DENIED = 'denied';
     const STATUS_WAITING_FOR_APPROVAL = 'waiting_for_approval';
 
+    public $ProductAspects;
+
     /**
      * @var string
      */
@@ -104,7 +106,6 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         'IsTaskApprovalLinkSent' => 'Boolean',
         'RiskResultData' => 'Text',
         'LikelihoodRatings' => 'Text',
-        'ProductAspects' => 'Text',
     ];
 
     /**
@@ -122,14 +123,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      * @var array
      */
     private static $has_many = [
-        'JiraTickets' => JiraTicket::class
-    ];
-
-    /**
-     * @var array
-     */
-    private static $many_many = [
-        'SelectedComponents' => SecurityComponent::class,
+        'JiraTickets' => JiraTicket::class,
+        'SelectedComponents' => SelectedComponent::class,
     ];
 
     /**
@@ -159,6 +154,14 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     public function canView($member = null)
     {
         return (Security::getCurrentUser() !== null);
+    }
+
+    /**
+     * @return string
+     */
+    public function getProductAspects()
+    {
+        return $this->ProductAspects;
     }
 
     /**
@@ -209,6 +212,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         }
         return $task->ComponentTarget;
     }
+
 
     /**
      * @return FieldList
@@ -350,10 +354,6 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             $fields->removeByName('RiskResultData');
         }
 
-        if (!$this->Task()->isSelectionType()) {
-            $fields->removeByName('ProductAspects');
-        }
-
         $fields->removeByName('QuestionnaireSubmissionID');
 
         return $fields;
@@ -404,7 +404,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'RiskResultData',
                 'LikelihoodRatings',
                 'ComponentTarget',
-                'ProductAspects',
+                'ProductAspects'
             ]);
 
         $dataObjectScaffolder
@@ -535,12 +535,6 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
         $likelihoodRatingData = $task->getLikelihoodRatingsData();
         $taskSubmission->LikelihoodRatings = json_encode($likelihoodRatingData);
-
-        if ($task->isSelectionType()) {
-            $taskSubmission->ProductAspects = $taskSubmission
-                ->QuestionnaireSubmission()
-                ->getProductAspects();
-        }
 
         $taskSubmission->write();
 
@@ -850,6 +844,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     if (!$canView) {
                         throw new GraphQLAuthFailure();
                     }
+
+                    $data->ProductAspects = $data->QuestionnaireSubmission()->getProductAspects();
 
                     return $data;
                 }
@@ -1267,7 +1263,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             ->mutation('updateTaskSubmissionWithSelectedComponents', TaskSubmission::class)
             ->addArgs([
                 'UUID' => 'String!',
-                'ComponentIDs' => 'String!',
+                'Components' => 'String!',
                 'JiraKey' => 'String?' // "Local" targets will pass an empty string in the f/e
             ])
             ->setResolver(new class implements ResolverInterface {
@@ -1304,23 +1300,30 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                         throw new Exception(sprintf('Project key must be the same as: %s', $submission->JiraKey));
                     }
 
-                    $componentIDs = json_decode(base64_decode($args['ComponentIDs']), true);
-                    $components = [];
+                    $selectedComponents = json_decode(base64_decode($args['Components']), true);
 
                     /** Prevent multiple ticket creation */
-                    $incomingComponentIDs = $componentIDs;
-                    $existingComponentIDs = $submission->SelectedComponents()->column('ID');
+                    $incomingComponentIDs = array_column($selectedComponents, 'SecurityComponentID');
+                    $existingComponentIDs = $submission->SelectedComponents()->column('SecurityComponentID');
                     $newTicketComponentIDs = array_diff($incomingComponentIDs, $existingComponentIDs);
 
-                    // Reset!!
-                    $submission->SelectedComponents()->removeAll();
+                    // Reset!!, removeAll is not working due to validation on SelectedComponent Class
+                    // that's why we need to remove it manually using foreach
+                    foreach ($submission->SelectedComponents() as $savedComponent) {
+                        if ($savedComponent->TaskSubmissionID) {
+                            $savedComponent->delete();
+                        }
+                    }
 
-                    foreach ($componentIDs as $componentID) {
-                        $component = SecurityComponent::get_by_id(Convert::raw2sql($componentID));
+                    foreach ($selectedComponents as $selectedComponent) {
+                        $securityComponent = SecurityComponent::get_by_id(Convert::raw2sql($selectedComponent['SecurityComponentID']));
 
-                        if ($component) {
-                            $components[] = $component;
-                            $submission->SelectedComponents()->add($component);
+                        if ($securityComponent) {
+                            $newComp = SelectedComponent::create();
+                            $newComp->ProductAspect = $selectedComponent['ProductAspect'];
+                            $newComp->SecurityComponentID = $selectedComponent['SecurityComponentID'];
+                            $newComp->TaskSubmissionID = $selectedComponent['TaskSubmissionID'];
+                            $newComp->write();
                         }
                     }
 

@@ -66,8 +66,6 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
     ];
 
     /**
-
-
      * @param SchemaScaffolder $scaffolder Scaffolder
      * @return SchemaScaffolder
      */

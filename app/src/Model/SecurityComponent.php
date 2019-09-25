@@ -53,6 +53,14 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider
     ];
 
     /**
+     * Belongs_many_many relationship
+     * @var array
+     */
+    private static $has_many = [
+        'SelectedComponent' => SelectedComponent::class,
+    ];
+
+    /**
      * @param SchemaScaffolder $scaffolder The scaffolder
      * @return SchemaScaffolder
      */
@@ -160,7 +168,9 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider
             .' the panel at the top of the JIRA story.');
 
         $fields->addFieldsToTab('Root.Main', [$name, $description]);
-        $fields->addFieldToTab('Root.Controls', $instructions);
+        $fields->addFieldToTab('Root.Controls', $instructions, 'Controls');
+
+        $fields->removeByName(['SelectedComponent']);
 
         return $fields;
     }

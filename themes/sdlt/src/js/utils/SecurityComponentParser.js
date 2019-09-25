@@ -9,7 +9,9 @@ export default class SecurityComponentParser {
 
   static parseFromJSONOArray(jsonArray: *): Array<SecurityComponent> {
     return toArray(jsonArray).map((jsonObject) => {
-      return SecurityComponentParser.parseFromJSONObject(jsonObject);
+      let seletcedComponent = SecurityComponentParser.parseFromJSONObject(get(jsonObject, "SecurityComponent"));
+      seletcedComponent.productAspect = toString(get(jsonObject, "ProductAspect"));
+      return seletcedComponent;
     });
   }
 
