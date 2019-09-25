@@ -181,14 +181,18 @@ export function saveSelectedComponents(jiraKey: string): ThunkAction {
       return;
     }
 
-    const componentIDs = rootState.componentSelectionState.selectedComponents.map((component) => {
-      return component.id
+    const components = rootState.componentSelectionState.selectedComponents.map((component) => {
+      return {
+        SecurityComponentID : component.id,
+        ProductAspect: '',
+        TaskSubmissionID: taskSubmission.id
+      }
     });
 
     try {
       await TaskDataService.updateTaskSubmissionWithSelectedComponents({
         jiraKey,
-        componentIDs,
+        components,
         uuid: taskSubmission.uuid,
         csrfToken: await CSRFTokenService.getCSRFToken()
       });

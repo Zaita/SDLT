@@ -27,7 +27,9 @@ export default class LeftBar extends Component<Props> {
       filter: ""
     };
   }
-
+  handleChange(event) {
+    alert(event.target.value);
+  }
   render() {
     const {
       title,
@@ -47,10 +49,10 @@ export default class LeftBar extends Component<Props> {
         <div className="product-aspect">
           <label>
             <span className="product-aspect-label">Please select a Product Aspect:</span>
-            <select className="custom-select custom-select-sm">
+            <select className="custom-select custom-select-sm" onChange={this.handleChange}>
               {
                 productAspects.map((productAspect, index) => {
-                  return <option key={index} value={productAspect.id }>{productAspect.value}</option>;
+                  return <option key={index} value={productAspect}>{productAspect}</option>;
                 })
               }
             </select>

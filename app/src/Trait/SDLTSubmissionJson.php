@@ -156,11 +156,7 @@ trait SDLTSubmissionJson
             return $productAspects;
         }
 
-        $productAspectDataArr = explode("\n", $productAspectData);
-
-        foreach ($productAspectDataArr as $key => $value) {
-            $productAspects[] = ['id' => $key +1, 'value' => $value];
-        }
+        $productAspects = explode("\n", $productAspectData);
 
         return $productAspects;
     }

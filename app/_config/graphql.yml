@@ -22,3 +22,4 @@ SilverStripe\GraphQL\Manager:
         - NZTA\SDLT\Model\SecurityComponent
         - NZTA\SDLT\Model\SecurityControl
         - NZTA\SDLT\Model\JiraTicket
+        - NZTA\SDLT\Model\SelectedComponent
