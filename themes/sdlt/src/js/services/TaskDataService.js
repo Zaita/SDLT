@@ -52,12 +52,16 @@ query {
     AnswerData
     SelectedComponents {
       ID
-      Name
-      Description
-      Controls {
+      ProductAspect
+      SecurityComponent {
         ID
         Name
         Description
+        Controls {
+          ID
+          Name
+          Description
+        }
       }
     }
     JiraTickets {
@@ -212,17 +216,17 @@ query {
     args: {
       uuid: string,
       csrfToken: string,
-      componentIDs: Array<string>,
+      components: Array,
       jiraKey: string
     }
   ): Promise<{ uuid: string }> {
-    const {uuid, csrfToken, componentIDs, jiraKey} = {...args};
+    const {uuid, csrfToken, components, jiraKey} = {...args};
 
     const query = `
 mutation {
  updateTaskSubmissionWithSelectedComponents(
  UUID: "${uuid}",
- ComponentIDs: "${window.btoa(JSON.stringify(componentIDs))}",
+ Components: "${window.btoa(JSON.stringify(components))}",
  JiraKey: "${jiraKey}"
  ) {
    UUID
