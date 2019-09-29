@@ -20,6 +20,7 @@ use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\ORM\FieldType\DBInt;
 use TractorCow\Colorpicker\Color;
 use TractorCow\Colorpicker\Forms\ColorField;
 
@@ -36,7 +37,7 @@ class ThresholdExtension extends DataExtension
      */
     private static $db = [
         'Name' => DBVarchar::class,
-        'Value' => DBVarchar::class,
+        'Value' => DBInt::class,
         'Colour' => Color::class,
         'Operator' => DBVarchar::class,
     ];

@@ -20,8 +20,11 @@ query {
     TaskName
     QuestionnaireSubmission {
       UUID
+      RiskResultData
     }
     LikelihoodRatings
+    RiskAssessmentTaskSubmission
+
   }
 }`;
 
@@ -29,6 +32,11 @@ query {
     const submissionJSONObject = get(responseJSONObject, "data.readTaskSubmission.0", null);
     if (!submissionJSONObject) {
       throw DEFAULT_NETWORK_ERROR;
+    }
+
+    let riskResults = submissionJSONObject.QuestionnaireSubmission.RiskResultData
+    if(submissionJSONObject.RiskAssessmentTaskSubmission) {
+      riskResults = submissionJSONObject.RiskAssessmentTaskSubmission;
     }
 
     const data: TaskSubmission = {
@@ -41,7 +49,9 @@ query {
       questionnaireSubmissionUUID: toString(get(submissionJSONObject, "QuestionnaireSubmission.UUID", "")),
       questionnaireSubmissionID: toString(get(submissionJSONObject, "QuestionnaireSubmission.ID", "")),
       questionnaireSubmissionStatus: toString(get(submissionJSONObject, "QuestionnaireSubmission.QuestionnaireStatus", "")),
-      likelihoodRatings: TaskParser.parseLikelihoodJSONObject(get(submissionJSONObject, "LikelihoodRatings"))
+      likelihoodRatings: TaskParser.parseLikelihoodJSONObject(get(submissionJSONObject, "LikelihoodRatings")),
+
+      riskResults: JSON.parse(riskResults)
     };
 
     return data;
