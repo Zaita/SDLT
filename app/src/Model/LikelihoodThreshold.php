@@ -26,6 +26,16 @@ use NZTA\SDLT\Model\RiskRating;
 class LikelihoodThreshold extends DataObject
 {
     /**
+     * The list of likelihood thresholds must be a sorted list
+     * This means we can exit the calculator as soon as the first condition is
+     * met
+     *
+     * In the case of a tie on the value, sort by <, <=, >, >=
+     *
+     * @var string
+     */
+    private static $default_sort = 'Value ASC, Operator ASC';
+    /**
      * @var array
      */
     private static $has_one = [
