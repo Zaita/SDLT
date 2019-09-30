@@ -20,7 +20,8 @@ const defaultState: ComponentSelectionState = {
   viewMode: "edit"
 };
 
-const isComponentExists = ComponentSelectionUtil.isComponentExists;
+const isComponentExist = ComponentSelectionUtil.isComponentExist;
+const isSelectedComponentExist = ComponentSelectionUtil.isSelectedComponentExist;
 
 export function componentSelectionState(state: ComponentSelectionState = defaultState, action: *) {
   if (action.type === ActionType.COMPONENT_SELECTION.SET_AVAILABLE_COMPONENTS) {
@@ -33,25 +34,38 @@ export function componentSelectionState(state: ComponentSelectionState = default
 
   if (action.type === ActionType.COMPONENT_SELECTION.ADD_SELECTED_COMPONENT) {
     const act: AddSelectedComponentAction = action;
-    if (!isComponentExists(act.payload, state.selectedComponents) &&
-      isComponentExists(act.payload, state.availableComponents)) {
+    const id = act.payload.id;
+    const productAspect = act.payload.productAspect;
+
+    if (!isSelectedComponentExist(id, productAspect, state.selectedComponents) &&
+      isComponentExist(id, state.availableComponents)) {
+      const availableComponent = state.availableComponents.filter((component) => component.id === id );
+      const seletedComponent = Object.assign({}, availableComponent[0]);
+      seletedComponent.productAspect = productAspect;
       return {
         ...state,
         selectedComponents: concat(
           state.selectedComponents,
-          state.availableComponents.filter((component) => component.id === act.payload)
+          seletedComponent
         )
       };
     }
   }
 
   if (action.type === ActionType.COMPONENT_SELECTION.REMOVE_SELECTED_COMPONENT) {
+
     const act: RemoveSelectedComponentAction = action;
-    if (isComponentExists(act.payload, state.selectedComponents) &&
-      isComponentExists(act.payload, state.availableComponents)) {
+    const id = act.payload.id;
+    const productAspect = act.payload.productAspect;
+
+    if (isSelectedComponentExist(id, productAspect, state.selectedComponents) &&
+      isComponentExist(id, state.availableComponents)) {
+
       return {
         ...state,
-        selectedComponents: state.selectedComponents.filter((component) => component.id !== act.payload)
+        selectedComponents: state.selectedComponents.filter((component) =>
+          component.id !== id || component.productAspect !== productAspect
+        )
       };
     }
   }
