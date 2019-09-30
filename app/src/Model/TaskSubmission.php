@@ -44,6 +44,8 @@ use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\ToggleCompositeField;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
+use SilverStripe\Forms\GridField\GridFieldAddNewButton;
 
 /**
  * Class TaskSubmission
@@ -79,8 +81,6 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     const STATUS_APPROVED = 'approved';
     const STATUS_DENIED = 'denied';
     const STATUS_WAITING_FOR_APPROVAL = 'waiting_for_approval';
-
-    public $ProductAspects;
 
     /**
      * @var string
@@ -161,7 +161,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      */
     public function getProductAspects()
     {
-        return $this->ProductAspects;
+        return $this->QuestionnaireSubmission()->getProductAspects();
     }
 
     /**
@@ -350,6 +350,14 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             'Status'
         );
 
+        $selectedComponentGrid = $fields->dataFieldByName('SelectedComponents');
+
+        if ($selectedComponentGrid) {
+            $config = $selectedComponentGrid->getConfig();
+            $config->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
+            $config->getComponentByType(GridFieldAddNewButton::class)->setButtonName('Add New Component');
+        }
+
         if (!$this->Task()->isRiskType()) {
             $fields->removeByName('RiskResultData');
         }
@@ -410,6 +418,36 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
         $dataObjectScaffolder
             ->nestedQuery('SelectedComponents')
+            ->setResolver(new class implements ResolverInterface {
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
+                 * @throws Exception
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    $selectedComponent = $object->SelectedComponents();
+                    $productAspect = json_decode($object->ProductAspects);
+
+                    if (!empty($productAspect) ) {
+                        $selectedComponent = $selectedComponent->filter([
+                            'ProductAspect' => $productAspect
+                        ]);
+                    } else {
+                        $selectedComponent = $selectedComponent->filter([
+                            'ProductAspect' => ''
+                        ]);
+                    }
+
+                    return $selectedComponent;
+                }
+            })
             ->setUsePagination(false)
             ->end();
 
@@ -845,8 +883,6 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     if (!$canView) {
                         throw new GraphQLAuthFailure();
                     }
-
-                    $data->ProductAspects = $data->QuestionnaireSubmission()->getProductAspects();
 
                     return $data;
                 }
@@ -1302,15 +1338,27 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     }
 
                     $selectedComponents = json_decode(base64_decode($args['Components']), true);
-
                     /** Prevent multiple ticket creation */
-                    $incomingComponentIDs = array_column($selectedComponents, 'SecurityComponentID');
-                    $existingComponentIDs = $submission->SelectedComponents()->column('SecurityComponentID');
-                    $newTicketComponentIDs = array_diff($incomingComponentIDs, $existingComponentIDs);
+                    $existingComponents = $submission->SelectedComponents();
+                    $newTicketComponents= [];
+
+                    foreach ($selectedComponents as $selectedComponent) {
+                        $doesComponentExist = $existingComponents->filter([
+                            'ProductAspect' => $selectedComponent['ProductAspect'],
+                            'SecurityComponentID' => $selectedComponent['SecurityComponentID']
+                        ])->first();
+
+                        if (!$doesComponentExist) {
+                            $newTicketComponents[] = [
+                                'ComponentID' =>$selectedComponent['SecurityComponentID'],
+                                'ProductAspect' =>$selectedComponent['ProductAspect'],
+                            ];
+                        }
+                    }
 
                     // Reset!!, removeAll is not working due to validation on SelectedComponent Class
                     // that's why we need to remove it manually using foreach
-                    foreach ($submission->SelectedComponents() as $savedComponent) {
+                    foreach ($existingComponents as $savedComponent) {
                         if ($savedComponent->TaskSubmissionID) {
                             $savedComponent->delete();
                         }
@@ -1328,29 +1376,30 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                         }
                     }
 
-                    $doCreateTicket = !empty($ticketId) && count($newTicketComponentIDs);
-
+                    $doCreateTicket = !empty($ticketId) && count($newTicketComponents);
                     // JIRA
                     if ($doCreateTicket) {
                         $submission->JiraKey = $ticketId;
                         $submission->write();
-                        $components = SecurityComponent::get()->byIDs($newTicketComponentIDs);
+                        $components = SecurityComponent::get()->byIDs(array_column($newTicketComponents, 'ComponentID'));
 
-                        foreach ($components as $component) {
+                        foreach ($newTicketComponents as $newTicketComponent) {
+                            $component = $components->filter('ID', $newTicketComponent['ComponentID'])->first();
                             $jiraTicket = JiraTicket::create();
                             $jiraTicket->JiraKey = $ticketId;
-                            $link = $submission->issueTrackerService->addTask( // <-- Makes an API call
+                            $link = $submission->issueTrackerService->addTask(// <-- Makes an API call
                                 $jiraTicket->JiraKey,
                                 $component->Name,
                                 $component->Description,
-                                $component->getTicket()
+                                $component->getTicket(),
+                                'Task',
+                                $newTicketComponent['ProductAspect']
                             );
                             $jiraTicket->TicketLink = $link;
                             $jiraTicket->write();
                             $submission->JiraTickets()->add($jiraTicket);
                         }
                     }
-
                     return $submission;
                 }
             })

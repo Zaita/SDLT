@@ -24,7 +24,7 @@ class MockIssueTracker extends IssueTrackerSystem implements TestOnly
         return '';
     }
 
-    public function addTask(string $projectName, string $title, string $descr, IssueTrackerTicket $issue, string $issueType = 'Task') : string
+    public function addTask(string $projectName, string $title, string $descr, IssueTrackerTicket $issue, string $issueType = 'Task', string $productAspect = '') : string
     {
         return '';
     }

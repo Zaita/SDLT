@@ -20,7 +20,7 @@ export default class ComponentInfo extends React.Component<Props> {
     const {id, name, description, removeComponent, childControls, isDisable} = {...this.props};
 
     return (
-      <div className="ComponentInfo" key={id}>
+      <div className="ComponentInfo" key={id+name}>
         <h3>
           {!isDisable && (<button onClick={(event) => {
             event.preventDefault();

@@ -71,11 +71,11 @@ const mapDispatchToProps = (dispatch: Dispatch, props: OwnProps) => {
       dispatch(loadAvailableComponents());
       dispatch(loadTaskSubmission({uuid, secureToken, type: "componentSelection"}));
     },
-    dispatchAddComponentAction(id: string) {
-      dispatch(addSelectedComponent(id));
+    dispatchAddComponentAction(id: string, productAspect: string) {
+      dispatch(addSelectedComponent(id, productAspect));
     },
-    dispatchRemoveComponentAction(id: string) {
-      dispatch(removeSelectedComponent(id));
+    dispatchRemoveComponentAction(id: string, productAspect: string) {
+      dispatch(removeSelectedComponent(id, productAspect));
     },
     dispatchCreateJIRATicketsAction(jiraKey: string) {
       dispatch(saveSelectedComponents(jiraKey));
@@ -143,11 +143,11 @@ class ComponentSelectionContainer extends Component<Props> {
             saveControls={() => {
               dispatchSaveLocalControlsAction();
             }}
-            removeComponent={(id) => {
-              dispatchRemoveComponentAction(id);
+            removeComponent={(id, productAspect) => {
+              dispatchRemoveComponentAction(id, productAspect);
             }}
-            addComponent={(id) => {
-              dispatchAddComponentAction(id);
+            addComponent={(id, productAspect) => {
+              dispatchAddComponentAction(id, productAspect);
             }}
             finishWithSelection={() => {
               dispatchFinishAction();
@@ -161,6 +161,7 @@ class ComponentSelectionContainer extends Component<Props> {
             selectedComponents={taskSubmission.selectedComponents}
             jiraTickets={taskSubmission.jiraTickets}
             componentTarget={taskSubmission.componentTarget}
+            productAspects={taskSubmission.productAspects}
             buttons={[(
               <div key="component-selection-review-button-container">
                 <LightButton

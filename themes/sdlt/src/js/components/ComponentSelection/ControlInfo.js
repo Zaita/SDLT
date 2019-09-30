@@ -15,9 +15,7 @@ export default class ControlInfo extends React.Component<Props> {
 
     return (
       <div className="ControlInfo">
-        <h4>
-          <span>{name}</span>
-        </h4>
+        <h5>{name}</h5>
         <p>{description}</p>
       </div>
     );

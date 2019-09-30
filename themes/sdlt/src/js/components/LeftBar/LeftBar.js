@@ -18,13 +18,15 @@ type Props = {
 
 type State = {
   filter: string,
+  selectedProductAspect: string,
 };
 
 export default class LeftBar extends Component<Props> {
   constructor(props: *) {
     super(props);
     this.state = {
-      filter: ""
+      filter: "",
+      selectedProductAspect: props.productAspects && props.productAspects.length ? props.productAspects[0] : ''
     };
   }
   handleChange(event) {
@@ -41,23 +43,30 @@ export default class LeftBar extends Component<Props> {
       componentTarget
     } = {...this.props};
 
-    const {filter} = {...this.state};
+    const {filter, selectedProductAspect} = {...this.state};
 
     return (
       <div className="LeftBar">
         {productAspects && productAspects.length > 0 && (
-        <div className="product-aspect">
-          <label>
-            <span className="product-aspect-label">Please select a Product Aspect:</span>
-            <select className="custom-select custom-select-sm" onChange={this.handleChange}>
-              {
-                productAspects.map((productAspect, index) => {
-                  return <option key={index} value={productAspect}>{productAspect}</option>;
-                })
-              }
-            </select>
-          </label>
-        </div>)}
+          <div className="product-aspect">
+            <label>
+              <span className="product-aspect-label">Please select a Product Aspect:</span>
+              <select
+                className="custom-select custom-select-sm"
+                onChange={(event) => {
+                  const value = toString(event.target.value).trim();
+                  this.setState({selectedProductAspect: value});
+                }}
+                value={selectedProductAspect}>
+                {
+                  productAspects.map((productAspect, index) => {
+                    return <option key={index} value={productAspect}>{productAspect}</option>;
+                  })
+                }
+              </select>
+            </label>
+          </div>
+        )}
 
         <div className="title">{title}</div>
         <div className="search">
@@ -76,8 +85,8 @@ export default class LeftBar extends Component<Props> {
               return component.name.includes(filter);
             })
             .map((component) => {
-              const isSelected = ComponentSelectionUtil.isComponentExists(component.id, selectedComponents);
-              const isDisable = ComponentSelectionUtil.isComponentSaved(component.id, selectedComponents, componentTarget)
+              const isSelected = ComponentSelectionUtil.isSelectedComponentExist(component.id, selectedProductAspect, selectedComponents);
+              const isDisable = ComponentSelectionUtil.isComponentSaved(component.id, selectedProductAspect, selectedComponents, componentTarget)
                 && componentTarget == "JIRA Cloud";
 
               return (
@@ -89,9 +98,9 @@ export default class LeftBar extends Component<Props> {
                   onItemClick={() => {
                     // Toggle selection
                     if (isSelected) {
-                      removeComponent(component.id);
+                      removeComponent(component.id, selectedProductAspect);
                     } else {
-                      addComponent(component.id);
+                      addComponent(component.id, selectedProductAspect);
                     }
                   }}/>
               );

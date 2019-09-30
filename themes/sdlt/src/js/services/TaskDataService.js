@@ -221,7 +221,6 @@ query {
     }
   ): Promise<{ uuid: string }> {
     const {uuid, csrfToken, components, jiraKey} = {...args};
-
     const query = `
 mutation {
  updateTaskSubmissionWithSelectedComponents(
