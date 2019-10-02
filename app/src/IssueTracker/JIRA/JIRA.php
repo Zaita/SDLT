@@ -70,16 +70,21 @@ class JIRA extends IssueTrackerSystem
      * @throws \Exception               When project name is not set
      * @return string
      */
-    public function addTask(string $projectName, string $title, string $descr, IssueTrackerTicket $issue, string $issueType = 'Task') : string
+    public function addTask(string $projectName, string $title, string $descr, IssueTrackerTicket $issue, string $issueType = 'Task', string $productAspect = '') : string
     {
         $projectName = strtoupper($projectName);
+
+        if (!empty($productAspect)) {
+            $title = $productAspect . ' - '. $title;
+        }
+
         $issue
-                ->setSummaryText(sprintf('SDLT Controls - %s', $title))
-                ->setProjectKey($projectName)
-                ->setHeadingText($title)
-                ->setDescriptionText($descr)
-                ->setEmail($this->ticket_info_email)
-                ->setIssueType($issueType);
+            ->setSummaryText(sprintf('SDLT Controls - %s', $title))
+            ->setProjectKey($projectName)
+            ->setHeadingText($title)
+            ->setDescriptionText($descr)
+            ->setEmail($this->ticket_info_email)
+            ->setIssueType($issueType);
 
         $baseUri = sprintf('/rest/api/%d/issue', $this->config()->get('api_version'));
         $body = $issue->compose();

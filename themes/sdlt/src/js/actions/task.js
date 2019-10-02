@@ -184,7 +184,7 @@ export function saveSelectedComponents(jiraKey: string): ThunkAction {
     const components = rootState.componentSelectionState.selectedComponents.map((component) => {
       return {
         SecurityComponentID : component.id,
-        ProductAspect: '',
+        ProductAspect: component.productAspect,
         TaskSubmissionID: taskSubmission.id
       }
     });

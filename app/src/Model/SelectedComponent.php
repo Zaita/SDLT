@@ -31,7 +31,7 @@ class SelectedComponent extends DataObject implements ScaffoldingProvider
     /**
      * @var string
      */
-    private static $table_name = 'TaskSubmission_SelectedComponents'; // if we use this name, then we don't need to write a migrate script 
+    private static $table_name = 'TaskSubmission_SelectedComponents'; // if we use this name, then we don't need to write a migrate script
 
     /**
      * @var array
@@ -91,6 +91,10 @@ class SelectedComponent extends DataObject implements ScaffoldingProvider
     {
         $fields = parent::getCMSFields();
 
+        $fields->removeByName([
+          'TaskSubmissionID'
+        ]);
+
         $fields->addFieldToTab(
             'Root.Main',
             DropdownField::create(
@@ -112,10 +116,6 @@ class SelectedComponent extends DataObject implements ScaffoldingProvider
 
         if (!$this->SecurityComponentID) {
             $result->addError('Please select a Security Component.');
-        }
-
-        if (!$this->TaskSubmissionID) {
-            $result->addError('Please select a Task Submission.');
         }
 
         $filterValues = [
