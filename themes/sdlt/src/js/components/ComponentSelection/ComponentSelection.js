@@ -8,6 +8,7 @@ import toString from "lodash/toString";
 import DarkButton from "../Button/DarkButton";
 import LightButton from "../Button/LightButton";
 import ComponentInfo from "./ComponentInfo";
+import ComponentSelectionUtil from "../../utils/ComponentSelectionUtil";
 
 type Props = {
   availableComponents: Array<SecurityComponent>,
@@ -19,7 +20,8 @@ type Props = {
   finishWithSelection: () => void,
   saveControls: () => void,
   extraButtons?: *,
-  isStandaloneTask: boolean
+  isStandaloneTask: boolean,
+  productAspects: Array<*>
 };
 
 type State = {
@@ -49,8 +51,8 @@ export default class ComponentSelection extends Component<Props, State> {
       productAspects,
       isStandaloneTask
     } = {...this.props};
-
     const {jiraKey} = {...this.state};
+    const isGroupbyProductAspect = productAspects && productAspects.length > 0 && selectedComponents.length > 0;
 
     return (
       <div className="ComponentSelection">
@@ -72,20 +74,45 @@ export default class ComponentSelection extends Component<Props, State> {
             <div className="heading">
               Selected Components
             </div>
-
             <div className="selected-components">
-              {selectedComponents.map((component) => {
+              {isGroupbyProductAspect > 0 && productAspects.map ((productAspect, index) => {
+                return (
+                  <div key={index}>
+                    {ComponentSelectionUtil.doescomponentExistForProductAspect(productAspect, selectedComponents) &&
+                      <h4 key={index}>{productAspect}</h4>
+                    }
+                    {selectedComponents.map((component, index) => {
+                      const isDisable = component.hasOwnProperty('isSaved') && component.isSaved && componentTarget == "JIRA Cloud";
+                      if (component.productAspect === productAspect) {
+                        return (
+                          <ComponentInfo
+                            key={component.id + (component.productAspect ? `_${component.productAspect}`: "")}
+                            id={component.id}
+                            name={component.name}
+                            description={component.description}
+                            removeComponent={() => {
+                              removeComponent(component.id, component.productAspect);
+                            }}
+                            childControls={component.controls}
+                            isDisable={isDisable}
+                          />
+                        );
+                      }
+                    })}
+                  </div>
+                );
+              })}
 
+              {(productAspects === undefined || productAspects === '') && selectedComponents.map((component, index) => {
                 const isDisable = component.hasOwnProperty('isSaved') && component.isSaved && componentTarget == "JIRA Cloud";
-
                 return (
                   <ComponentInfo
                     key={component.id}
                     id={component.id}
-                    name={component.name}
+                    name={component.name }
                     description={component.description}
                     removeComponent={() => {
-                      removeComponent(component.id);
+                      removeComponent(component.id, component.productAspect);
                     }}
                     childControls={component.controls}
                     isDisable={isDisable}

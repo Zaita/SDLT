@@ -37,21 +37,21 @@ export function loadAvailableComponents(): ThunkAction {
   };
 }
 
-export function addSelectedComponent(id: string): ThunkAction {
+export function addSelectedComponent(id: string, productAspect: string): ThunkAction {
   return async (dispatch) => {
     const action: AddSelectedComponentAction = {
       type: ActionType.COMPONENT_SELECTION.ADD_SELECTED_COMPONENT,
-      payload: id
+      payload: {"id": id, "productAspect": productAspect}
     };
     await dispatch(action);
   }
 }
 
-export function removeSelectedComponent(id: string): ThunkAction {
+export function removeSelectedComponent(id: string, productAspect: string): ThunkAction {
   return async (dispatch) => {
     const action: RemoveSelectedComponentAction = {
       type: ActionType.COMPONENT_SELECTION.REMOVE_SELECTED_COMPONENT,
-      payload: id
+      payload: {"id": id, "productAspect": productAspect}
     };
     await dispatch(action);
   }

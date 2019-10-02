@@ -57,7 +57,7 @@ abstract class IssueTrackerSystem
      * @param  string $issueType   The type of issue to write-to e.g. "Task" in JIRA.
      * @return string
      */
-    abstract public function addTask(string $projectName, string $title, string $descr, IssueTrackerTicket $issue, string $issueType = 'Task') : string;
+    abstract public function addTask(string $projectName, string $title, string $descr, IssueTrackerTicket $issue, string $issueType = 'Task', string $productAspect = '') : string;
 
     /**
      * @return IssueTrackerTicket
