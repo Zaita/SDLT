@@ -132,8 +132,10 @@ trait SDLTSubmissionJson
         if (isset($selectedQuestionAnswer['inputs'])) {
             foreach ($selectedQuestionAnswer['inputs'] as $answerForInputField) {
                 // return first matching for field type
-                if ((int)$answerForInputField['id'] === (int)$inputField['ID']) {
-                    return $data = $answerForInputField['data'];
+                if ((int) $answerForInputField['id'] === (int)$inputField['ID']) {
+                    if (isset($answerForInputField['data'])) {
+                        return $answerForInputField['data'];
+                    }
                 }
             }
         }
