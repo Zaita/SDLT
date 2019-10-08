@@ -53,7 +53,6 @@ export function componentSelectionState(state: ComponentSelectionState = default
   }
 
   if (action.type === ActionType.COMPONENT_SELECTION.REMOVE_SELECTED_COMPONENT) {
-
     const act: RemoveSelectedComponentAction = action;
     const id = act.payload.id;
     const productAspect = act.payload.productAspect;

@@ -17,7 +17,6 @@ export default class ComponentSelectionReview extends React.Component<Props> {
   render() {
     const {selectedComponents, jiraTickets, buttons, componentTarget, productAspects} = {...this.props};
     const isGroupbyProductAspect = productAspects && productAspects.length > 0 && selectedComponents.length > 0;
-
     return (
       <div className="ComponentSelectionReview">
         <div className="section">
@@ -32,7 +31,7 @@ export default class ComponentSelectionReview extends React.Component<Props> {
                   if (component.productAspect === productAspect) {
                     return (
                       <li key={component.id + (productAspect ? `_${productAspect}`: "")}>
-                        {component.name + (productAspect ? ` - ${productAspect}`: "")}
+                        {component.name}
                       </li>
                     );
                   }
@@ -41,12 +40,10 @@ export default class ComponentSelectionReview extends React.Component<Props> {
             );
           })}
           <ul>
-            {(productAspects === undefined || productAspects === '') && selectedComponents.map((component: SecurityComponent) => {
-              const productAspect = component.productAspect ? `${component.productAspect}`: "";
-
+            {(productAspects === undefined || productAspects === '' || productAspects.length === 0) && selectedComponents.map((component: SecurityComponent) => {
               return (
-                <li key={component.id + (productAspect ? `_${productAspect}`: "")}>
-                  {component.name + (productAspect ? ` - ${productAspect}`: "")}
+                <li key={component.id}>
+                  {component.name}
                 </li>
               );
             })}

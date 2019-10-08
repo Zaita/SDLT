@@ -23,7 +23,6 @@ use NZTA\SDLT\Model\RiskRating;
 use NZTA\SDLT\Model\TaskSubmission;
 use NZTA\SDLT\Traits\SDLTModelPermissions;
 use NZTA\SDLT\Traits\SDLTRiskCalc;
-use SilverStripe\Core\Convert;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\GridField\GridField;
@@ -33,6 +32,7 @@ use SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor;
 use SilverStripe\Forms\GridField\GridFieldDataColumns;
 use SilverStripe\Forms\GridField\GridFieldPaginator;
 use SilverStripe\Forms\GridField\GridField_ActionMenu;
+use SilverStripe\Forms\ListboxField;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\GraphQL\OperationResolver;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
@@ -73,7 +73,7 @@ class Task extends DataObject implements ScaffoldingProvider
         'Name' => 'Varchar(255)',
         'DisplayOnHomePage'=> 'Boolean',
         'KeyInformation' => 'HTMLText',
-        'TaskType' => 'Enum(array("questionnaire", "selection", "risk questionnaire", "security risk assessment"))',
+        'TaskType' => 'Enum(array("questionnaire", "selection", "risk questionnaire", "security risk assessment", "control validation audit"))',
         'LockAnswersWhenComplete' => 'Boolean',
         'IsApprovalRequired' => 'Boolean',
         'RiskCalculation' => "Enum('NztaApproxRepresentation,Maximum')",
@@ -107,6 +107,10 @@ class Task extends DataObject implements ScaffoldingProvider
     private static $belongs_many_many = [
         'Questionnaires' => Questionnaire::class,
         'AnswerActionFields' => AnswerActionField::class
+    ];
+
+    private static $many_many = [
+        'DefaultSecurityComponents' => SecurityComponent::class
     ];
 
     /**
@@ -292,6 +296,11 @@ class Task extends DataObject implements ScaffoldingProvider
 
         $fields->removeByName(['Questionnaires', 'AnswerActionFields']);
 
+        if ($this->isControlValidationAudit()) {
+            $this->getCVA_CMSFields($fields);
+        }
+
+
         return $fields;
     }
 
@@ -373,7 +382,7 @@ class Task extends DataObject implements ScaffoldingProvider
 
         $thresholdData = [];
 
-        foreach ($this->LikelihoodThresholds() as $threshold) {
+        foreach ($this->LikelihoodThresholds()->sort('Value ASC, Operator ASC') as $threshold) {
             $thresholdData[] = [
                 'Name' => $threshold->Name,
                 'Value' => $threshold->Value,
@@ -481,6 +490,16 @@ class Task extends DataObject implements ScaffoldingProvider
     public function isComponentSelection() : bool
     {
         return $this->TaskType === 'selection';
+    }
+
+    /**
+     * Is this task classified as a "Control validation audit" task?
+     *
+     * @return boolean
+     */
+    public function isControlValidationAudit() : bool
+    {
+        return $this->TaskType === 'control validation audit';
     }
 
     /**
@@ -648,5 +667,50 @@ class Task extends DataObject implements ScaffoldingProvider
     public function isRemoteTarget() : bool
     {
         return $this->ComponentTarget !== "Local";
+    }
+
+    /**
+     * Update CMS Fields specific to the control validation audit task
+     * At some point this should be moved into the getCMSFields method of a
+     * separate subclass of Task
+     *
+     *
+     * @param [type] $fields FieldList obtained from getCMSFields
+     * @return FieldList a modified version of $fields, passed in via parameter
+     */
+    public function getCVA_CMSFields($fields) {
+        //remove fields not required for CVA task
+        $fields->removeByName([
+            'Questions',
+            'SubmissionEmails',
+            'IsApprovalRequired',
+            'ApprovalGroupID',
+            'DisplayOnHomePage',
+            'KeyInformation',
+            'LockAnswersWhenComplete',
+            'TaskApproval',
+            'DefaultSecurityComponents'
+        ]);
+
+        if($this->ID) {
+            $fields->addFieldToTab(
+                'Root.Main',
+                ListboxField::create(
+                    'DefaultSecurityComponents',
+                    'Default Security Components',
+                    SecurityComponent::get()
+                )->setDescription(
+                    'If no component selection task is configured, these default'
+                    . ' security components will be selected for the security'
+                    . ' risk assessment task. They will appear as selected'
+                    . ' components in the task submission.'
+                    . '<br/><br/><strong>Note: </strong>'
+                    . 'The selected components of the component selection task'
+                    . ' will always override the default components specified'
+                    . ' here.'
+                )
+            );
+        }
+        return $fields;
     }
 }

@@ -14,7 +14,8 @@ import ComponentSelectionContainer from "../ComponentSelection/ComponentSelectio
 import MySubmissionList from "../QuestionnaireSubmissionList/MySubmissionList";
 import AwaitingApprovalList from "../QuestionnaireSubmissionList/AwaitingApprovalList";
 import MyProductList from "../QuestionnaireSubmissionList/MyProductList";
-import SecurityRiskAssessmentContainer from "../SecurityRiskAssessment/SecurityRiskAssessmentContainer.js"
+import SecurityRiskAssessmentContainer from "../SecurityRiskAssessment/SecurityRiskAssessmentContainer.js";
+import ControlValidationAuditContainer from "../ControlValidationAudit/ControlValidationAuditContainer.js";
 import {parse} from "query-string";
 
 class MainApp extends Component<*> {
@@ -124,6 +125,21 @@ class MainApp extends Component<*> {
                 return (
                   <div className="gray-bg">
                     <ComponentSelectionContainer uuid={match.params.uuid} secureToken={secureToken}/>
+                  </div>
+                );
+              }}
+            </Route>
+
+            <Route path='/control-validation-audit/submission/:uuid'>
+              {({match, location}) => {
+                let secureToken = '';
+                if (location.search) {
+                  const queryString = parse(location.search);
+                  secureToken = queryString.token;
+                }
+                return (
+                  <div className="gray-bg">
+                    <ControlValidationAuditContainer uuid={match.params.uuid} secureToken={secureToken}/>
                   </div>
                 );
               }}
