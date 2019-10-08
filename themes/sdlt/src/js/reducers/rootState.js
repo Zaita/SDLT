@@ -10,6 +10,7 @@ import {siteConfigState} from "./siteConfigState";
 import {componentSelectionState} from "./componentSelectionState";
 import {questionnaireSubmissionListState} from "./questionnaireSubmissionListState"
 import {securityRiskAssessmentState} from "./securityRiskAssessmentState";
+import {controlValidationAuditState} from "./controlValidationAuditState";
 
 export default combineReducers<RootState>({
   homeState,
@@ -19,5 +20,6 @@ export default combineReducers<RootState>({
   siteConfigState,
   componentSelectionState,
   questionnaireSubmissionListState,
-  securityRiskAssessmentState
+  securityRiskAssessmentState,
+  controlValidationAuditState
 });

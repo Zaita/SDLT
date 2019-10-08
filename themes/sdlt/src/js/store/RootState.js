@@ -7,6 +7,7 @@ import type {SiteConfigState} from "./SiteConfigState";
 import type {CurrentUserState} from "./CurrentUserState";
 import type {ComponentSelectionState} from "./ComponentSelectionState";
 import type {SecurityRiskAssessmentState} from "./SecurityRiskAssessmentState";
+import type {} from "./ControlValidatioAuditState";
 import type {
   MySubmissionListState,
   QuestionnaireSubmissionListState
@@ -21,5 +22,6 @@ export type RootState = {
   componentSelectionState: ComponentSelectionState,
   mySubmissionListState: MySubmissionListState,
   questionnaireSubmissionListState: QuestionnaireSubmissionListState,
-  securityRiskAssessmentState: SecurityRiskAssessmentState
+  securityRiskAssessmentState: SecurityRiskAssessmentState,
+  controlValidatioAuditState: ControlValidatioAuditState,
 }

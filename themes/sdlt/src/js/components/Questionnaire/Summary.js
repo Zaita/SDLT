@@ -11,7 +11,10 @@ import URLUtil from "../../utils/URLUtil";
 import SubmissionDataUtil from "../../utils/SubmissionDataUtil";
 import type {User} from "../../types/User";
 import RiskResultContainer from "../Common/RiskResultContainer";
-import {DEFAULT_SRA_UNFINISHED_TASKS_MESSAGE} from "../../constants/values";
+import {
+  DEFAULT_CVA_CONTROLS_MESSAGE,
+  DEFAULT_SRA_UNFINISHED_TASKS_MESSAGE
+} from "../../constants/values";
 
 type Props = {
   submission: Submission | null,
@@ -79,6 +82,22 @@ class Summary extends Component<Props> {
     return unfinished;
   }
 
+  hasSelectableComponents(sub)
+  {
+    let taskSubmissions = sub.taskSubmissions,
+      hasSelectableComponents = false;
+
+    taskSubmissions.forEach((submission, index) => {
+      console.log(submission.taskType);
+      let isComponentSelection = (submission.taskType === 'selection');
+      if(isComponentSelection) {
+        hasSelectableComponents = true;
+      }
+    });
+
+    return hasSelectableComponents;
+  }
+
   render() {
     const {submission, viewAs, user} = {...this.props};
     if (!submission) {
@@ -131,6 +150,11 @@ class Summary extends Component<Props> {
         <div className="alert alert-warning">
           {DEFAULT_SRA_UNFINISHED_TASKS_MESSAGE}
         </div>
+      ),
+      defaultControlsAlert = (
+        <div className="alert alert-info">
+          {DEFAULT_CVA_CONTROLS_MESSAGE}
+        </div>
       );
 
     return (
@@ -138,6 +162,7 @@ class Summary extends Component<Props> {
         <h3>Tasks</h3>
 
         {unfinished ? unfinishedTasksAlert : null}
+        {!this.hasSelectableComponents(submission) ? defaultControlsAlert : null}
         {taskSubmissions.map(({uuid, taskName, taskType, status, approver}) => {
           let taskNameAndStatus = taskName + ' (' + prettifyStatus(status) + ')';
 
@@ -163,6 +188,11 @@ class Summary extends Component<Props> {
               }
               if (taskType === "security risk assessment") {
                 URLUtil.redirectToSecurityRiskAssessment(uuid, token);
+                return;
+              }
+
+              if (taskType === "control validation audit") {
+                URLUtil.redirectToControlValidationAudit(uuid, token);
                 return;
               }
               URLUtil.redirectToTaskSubmission(uuid, token);

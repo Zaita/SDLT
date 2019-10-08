@@ -53,10 +53,12 @@ export type LikelihoodThreshold = {
   name:string
 }
 
+
 export type ProductAspect = {
   id: string,
   uuid: value
 };
+
 export type RiskRating = {
   name: string
   colour: string,

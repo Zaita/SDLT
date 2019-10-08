@@ -171,6 +171,23 @@ export function saveAnsweredQuestionInTaskSubmission(
 }
 
 /**
+ * Obtain selected security controls from rootState and save to task submission
+ *
+ * @param {*} selectedControls
+ */
+export function saveCVASelectedControls(selectedControls: object): ThunkAction {
+  return async (dispatch, getState) => {
+    const rootState: RootState = getState();
+    const taskSubmission = rootState.taskSubmissionState.taskSubmission;
+    if (!taskSubmission) {
+      return;
+    }
+
+    //@TODO: Complete graphql submission endpoint
+  }
+}
+
+/**
  * Deals to both "JIRA Cloud" (remote) and SDLT (local) component submissions.
  */
 export function saveSelectedComponents(jiraKey: string): ThunkAction {
