@@ -18,7 +18,6 @@ use GraphQL\Type\Definition\ResolveInfo;
 use NZTA\SDLT\Constant\UserGroupConstant;
 use NZTA\SDLT\GraphQL\GraphQLAuthFailure;
 use Ramsey\Uuid\Uuid;
-use SilverStripe\Forms\DatetimeField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ResolverInterface;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
@@ -106,6 +105,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         'IsTaskApprovalLinkSent' => 'Boolean',
         'RiskResultData' => 'Text',
         'LikelihoodRatings' => 'Text',
+        'CVATaskData' => 'Text',
     ];
 
     /**
@@ -364,6 +364,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
         $fields->removeByName('QuestionnaireSubmissionID');
 
+        if ($this->Task()->isControlValidationAudit()) {
+            $this->getCVA_CMSFields($fields);
+        }
+
         return $fields;
     }
 
@@ -383,6 +387,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         $this->provideGraphQLScaffoldingForReadTaskSubmission($dataObjectScaffolder);
         $this->provideGraphQLScaffoldingForUpdateTaskSubmissionStatusToApproved($scaffolder);
         $this->provideGraphQLScaffoldingForUpdateTaskSubmissionStatusToDenied($scaffolder);
+        $this->provideGraphQLScaffoldingForUpdateControlValidationAuditTaskSubmission($scaffolder);
     }
 
     /**
@@ -413,7 +418,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'LikelihoodRatings',
                 'ComponentTarget',
                 'ProductAspects',
-                'RiskAssessmentTaskSubmission'
+                //you would be forgiven for thinking this returns a TaskSubmission
+                //it doesn't. It returns the RiskResultData instead.
+                'RiskAssessmentTaskSubmission',
+                'CVATaskData',
             ]);
 
         $dataObjectScaffolder
@@ -435,16 +443,11 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     $selectedComponent = $object->SelectedComponents();
                     $productAspect = json_decode($object->ProductAspects);
 
-                    if (!empty($productAspect) ) {
-                        $selectedComponent = $selectedComponent->filter([
+                    if (!empty($productAspect)) {
+                      return $selectedComponent = $selectedComponent->filter([
                             'ProductAspect' => $productAspect
                         ]);
-                    } else {
-                        $selectedComponent = $selectedComponent->filter([
-                            'ProductAspect' => ''
-                        ]);
                     }
-
                     return $selectedComponent;
                 }
             })
@@ -692,6 +695,65 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      * @param SchemaScaffolder $scaffolder The scaffolder of the schema
      * @return void
      */
+    private function provideGraphQLScaffoldingForUpdateControlValidationAuditTaskSubmission(SchemaScaffolder $scaffolder)
+    {
+      $scaffolder
+          ->mutation('updateControlValidationAuditTaskSubmission', TaskSubmission::class)
+          ->addArgs([
+              'UUID' => 'String!',
+              'CVATaskData' => 'String'
+          ])
+          ->setResolver(new class implements ResolverInterface {
+              /**
+               * Invoked by the Executor class to resolve this mutation / query
+               * @see Executor
+               *
+               * @param mixed       $object  object
+               * @param array       $args    args
+               * @param mixed       $context context
+               * @param ResolveInfo $info    info
+               * @throws GraphQLAuthFailure
+               * @return mixed
+               */
+              public function resolve($object, array $args, $context, ResolveInfo $info)
+              {
+                  $member = Security::getCurrentUser();
+                  $uuid = Convert::raw2sql($args['UUID']);
+                  $submission = TaskSubmission::get_task_submission_by_uuid($uuid);
+                  $canEdit = TaskSubmission::can_edit_task_submission(
+                      $submission,
+                      $member,
+                      ''
+                  );
+                  if (!$canEdit) {
+                      throw new GraphQLAuthFailure();
+                  }
+                  $submission->CompletedAt = date('Y-m-d H:i:s');
+                  $submission->CVATaskData = base64_decode($args['CVATaskData']);
+
+                  // set Submitter IP Address
+                  if ($_SERVER['REMOTE_ADDR']) {
+                      $submission->SubmitterIPAddress = Convert::raw2sql($_SERVER['REMOTE_ADDR']);
+                  }
+
+                  $submission->Status = TaskSubmission::STATUS_COMPLETE;
+
+                  // if task approval requires then set status to waiting for approval
+                  if ($submission->IsTaskApprovalRequired) {
+                      $submission->setStatusToWatingforApproval();
+                  }
+
+                  $submission->write();
+                  return $submission;
+              }
+          })
+          ->end();
+    }
+
+    /**
+     * @param SchemaScaffolder $scaffolder The scaffolder of the schema
+     * @return void
+     */
     private function provideGraphQLScaffoldingForCompleteTaskSubmission(SchemaScaffolder $scaffolder)
     {
         $scaffolder
@@ -733,23 +795,9 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     $submission->Status = TaskSubmission::STATUS_COMPLETE;
                     $submission->RiskResultData = $submission->getRiskResultBasedOnAnswer();
 
+                    // if task approval requires then set status to waiting for approval
                     if ($submission->IsTaskApprovalRequired) {
-                        $submission->Status = TaskSubmission::STATUS_WAITING_FOR_APPROVAL;
-
-                        if (!$submission->IsTaskApprovalLinkSent) {
-                            $members = $submission->approvalGroupMembers();
-                            $submission->IsTaskApprovalLinkSent = 1;
-
-                            // send approval link email to the approver group
-                            if ($members->exists()) {
-                                $qs = QueuedJobService::create();
-
-                                $qs->queueJob(
-                                    new SendTaskApprovalLinkEmailJob($submission, $members),
-                                    date('Y-m-d H:i:s', time() + 30)
-                                );
-                            }
-                        }
+                        $submission->setStatusToWatingforApproval();
                     }
 
                     if ($_SERVER['REMOTE_ADDR']) {
@@ -762,7 +810,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                         $submission->Result = trim($args['Result']);
                     }
 
-                    // create tasks for task submission
+                    // create another tasks form task submission based on task submission's answer
                     Question::create_task_submissions_according_to_answers (
                         $submission->QuestionnaireData,
                         $submission->AnswerData,
@@ -775,6 +823,31 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 }
             })
             ->end();
+    }
+
+    /**
+     * set task submission status to waitig for approval
+     * and send emai lto the approver
+     * @return void
+     */
+    public function setStatusToWatingforApproval() : void
+    {
+        $this->Status = TaskSubmission::STATUS_WAITING_FOR_APPROVAL;
+
+        if (!$this->IsTaskApprovalLinkSent) {
+            $members = $this->approvalGroupMembers();
+            $this->IsTaskApprovalLinkSent = 1;
+
+            // send approval link email to the approver group
+            if ($members->exists()) {
+                $qs = QueuedJobService::create();
+
+                $qs->queueJob(
+                    new SendTaskApprovalLinkEmailJob($this, $members),
+                    date('Y-m-d H:i:s', time() + 30)
+                );
+            }
+        }
     }
 
     /**
@@ -823,6 +896,15 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     $submission->SubmitterIPAddress = null;
                     $submission->CompletedAt = null;
                     $submission->Result = null;
+
+                    // if task type is component selection, then delete
+                    // it's sibling CSV task data
+                    if ($submission->TaskType === 'selection' &&
+                        $siblingCVATask = $submission->getSiblingTaskSubmissionsByType("control validation audit")) {
+                        $siblingCVATask->CVATaskData = '';
+                        $siblingCVATask->Status = TaskSubmission::STATUS_START;
+                        $siblingCVATask->write();
+                    }
                     $submission->write();
 
                     return $submission;
@@ -882,6 +964,20 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
                     if (!$canView) {
                         throw new GraphQLAuthFailure();
+                    }
+                    $data->ProductAspects = $data->QuestionnaireSubmission()->getProductAspects();
+
+                    if (empty($data->CVATaskData)) {
+                        $siblingComponentSelectionTask = $data->getSiblingTaskSubmissionsByType('selection');
+                        if (!empty($siblingComponentSelectionTask) &&
+                            $data->isSiblingTaskCompleted($siblingComponentSelectionTask) &&
+                            !empty($selectedComponent = ($data->getSelectedComponentsFromTaskSubmission($siblingComponentSelectionTask)))) {
+                            $data->CVATaskData = json_encode($selectedComponent);
+                        }
+
+                        if (empty($data->CVATaskData) && (empty($siblingComponentSelectionTask))) {
+                          $data->CVATaskData = json_encode($data->getDefaultComponentsFromCVATask());
+                        }
                     }
 
                     return $data;
@@ -1246,7 +1342,9 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         if ($this->Task()->TaskType == 'selection') {
             return "#/component-selection/submission/{$this->UUID}";
         }
-
+        if ($this->TaskType == 'control validation audit') {
+            return "#/control-validation-audit/submission/{$this->UUID}";
+        }
         return '#/task/submission/' . $this->UUID;
     }
 
@@ -1579,13 +1677,47 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      *
      * @return DataList | null
      */
-    public function getSiblingTaskSubmissions() {
+    public function getSiblingTaskSubmissions()
+    {
         $qs = $this->QuestionnaireSubmission();
         if ($qs && $qs->exists()) {
             return $qs->TaskSubmissions();
         }
 
         return null;
+    }
+
+    /**
+     * Get sibling task submissions by type from the parent
+     * This list will include the current task submission
+     *
+     * @return DataList | null
+     */
+    public function getSiblingTaskSubmissionsByType($type)
+    {
+        $siblingTasks = $this->getSiblingTaskSubmissions();
+
+        if ($siblingTasks && $siblingTasks->Count() && ($taskByType = $siblingTasks->find('Task.TaskType', $type))) {
+            return $taskByType;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get sibling task submissions status by type
+     *
+     * @param Dataonject $siblingTask sibling task
+     * @return bool
+     */
+    public function isSiblingTaskCompleted($siblingTask) : bool
+    {
+        if ($siblingTask) {
+            return ($siblingTask->Status === self::STATUS_COMPLETE ||
+            $siblingTask->Status === self::STATUS_APPROVED);
+        }
+
+        return false;
     }
 
     /**
@@ -1605,8 +1737,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      * @return string it's always a string, even if you want an object. it might
      *                also be null, if there aren't any other siblings
      */
-    public function getRiskAssessmentTaskSubmission() {
-
+    public function getRiskAssessmentTaskSubmission()
+    {
         $siblings = $this->getSiblingTaskSubmissions();
         if ($siblings && $siblings->Count()) {
             $task = $siblings->find('Task.TaskType', 'risk questionnaire');
@@ -1618,6 +1750,88 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         }
 
         return null;
+    }
+
+    /**
+     * Find a component selection task amongst the siblings of this
+     * task submission, and return an array of selected components.
+     *
+     * @param DataObject $siblingTask
+     *
+     * @return array
+     */
+    public function getSelectedComponentsFromTaskSubmission($siblingTask)
+    {
+        $out = [];
+
+        if ($siblingTask) {
+            $selectedComponents = $siblingTask->SelectedComponents();
+            foreach ($selectedComponents as $comp) {
+                $controls = [];
+
+                if (!$comp->SecurityComponentID) {
+                    continue;
+                }
+
+                foreach($comp->SecurityComponent()->Controls() as $ctrl) {
+                    $controls[] = [
+                        'id' => $ctrl->ID,
+                        'name' => $ctrl->Name,
+                        'selectedOption' => 'No'
+                    ];
+                }
+
+                $out[] = [
+                    'id' => $comp->SecurityComponent()->ID,
+                    'name' => $comp->SecurityComponent()->Name,
+                    'productAspect' => $comp->ProductAspect,
+                    'controls' => $controls
+                ];
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * When no component selection task is available, we show default components
+     * from the CVA task amongst the siblings of this task submission. These
+     * default components are configured on the CVA task itself
+     *
+     * @return array
+     */
+    public function getDefaultComponentsFromCVATask()
+    {
+        $out = [];
+
+        $siblings = $this->getSiblingTaskSubmissions();
+        if ($siblings && $siblings->Count()) {
+            $selectionSubmission = $siblings->find('Task.TaskType', 'control validation audit');
+
+            if ($selectionSubmission) {
+                $selectedComponents = $selectionSubmission->Task()->DefaultSecurityComponents();
+            }
+            foreach ($selectedComponents as $comp) {
+                $controls = [];
+
+                foreach ($comp->Controls() as $ctrl) {
+                    $controls[] = [
+                        'id' => $ctrl->ID,
+                        'name' => $ctrl->Name,
+                        'selectedOption' => 'No'
+                    ];
+                }
+
+                $out[] = [
+                    'id' => $comp->ID,
+                    'name' => $comp->Name,
+                    'productAspect' => $comp->ProductAspect,
+                    'controls' => $controls
+                ];
+            }
+        }
+
+        return $out;
     }
 
     /**
@@ -1634,5 +1848,41 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         }
 
         return $hostname;
+    }
+
+    /**
+     * Update CMS Fields specific to the control validation audit task
+     * submission. At some point this should be moved into the getCMSFields
+     * method of a separate subclass of Task
+     *
+     * @param [type] $fields FieldList obtained from getCMSFields
+     * @return FieldList a modified version of $fields, passed in via parameter
+     */
+    public function getCVA_CMSFields($fields) {
+        $fields->removeByName([
+            'QuestionData',
+            'AnswerData',
+            'QuestionnaireDataToggle',
+            'AnswerDataToggle',
+            'CVATaskData',
+            'EmailRelativeLinkToTask',
+            'JiraKey',
+            'LikelihoodRatings',
+            'JiraTickets',
+            'SelectedComponents',
+            'ResultToggle',
+            'Result'
+        ]);
+        $fields->addFieldToTab(
+            'Root.TaskSubmissionData',
+            ToggleCompositeField::create(
+                'CVATaskDataToggle',
+                'CVA Task Data',
+                [
+                    TextareaField::create('CVATaskData')
+                ]
+            )
+        );
+        return $fields;
     }
 }

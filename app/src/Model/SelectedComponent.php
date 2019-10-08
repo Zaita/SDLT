@@ -48,6 +48,10 @@ class SelectedComponent extends DataObject implements ScaffoldingProvider
         'TaskSubmission' => TaskSubmission::class
     ];
 
+    private static $belongs_many_many = [
+        'DefaultsForTask' => Task::class
+    ];
+
     /**
      * @var array
      */

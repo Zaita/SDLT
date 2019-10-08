@@ -56,9 +56,7 @@ export default class ComponentSelection extends Component<Props, State> {
 
     return (
       <div className="ComponentSelection">
-
         <div className="main-wrapper">
-
           <LeftBar
             selectedComponents={selectedComponents}
             availableComponents={availableComponents}
@@ -103,7 +101,7 @@ export default class ComponentSelection extends Component<Props, State> {
                 );
               })}
 
-              {(productAspects === undefined || productAspects === '') && selectedComponents.map((component, index) => {
+              {(productAspects === undefined || productAspects === ''|| productAspects.length === 0 ) && selectedComponents.map((component, index) => {
                 const isDisable = component.hasOwnProperty('isSaved') && component.isSaved && componentTarget == "JIRA Cloud";
                 return (
                   <ComponentInfo

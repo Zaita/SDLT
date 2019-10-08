@@ -51,6 +51,7 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
     dispatchLoadDataAction(uuid, secureToken);
   }
 
+
   render() {
     const {
       siteTitle,
@@ -77,6 +78,7 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
         <Header title={securityRiskAssessmentData.taskName} subtitle={siteTitle} username={currentUser.name}/>
 
         <div className="SecurityRiskAssessmentResult">
+
           <RiskAssessmentMatrixTableContainer
             riskResults={securityRiskAssessmentData.riskResults}
             likelihoodThresholds={securityRiskAssessmentData.likelihoodRatings} />

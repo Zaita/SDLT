@@ -50,6 +50,15 @@ export default class URLUtil {
     window.location.href = `/#/security-risk-assessment/submission/${uuid}`;
   }
 
+  static redirectToControlValidationAudit(uuid: string, token: string = "") {
+    if (token) {
+      window.location.href = `/#/control-validation-audit/submission/${uuid}?token=${token}`;
+      return;
+    }
+
+    window.location.href = `/#/control-validation-audit/submission/${uuid}`;
+  }
+
   static redirectToLogout() {
     window.location.href = "/Security/Logout";
   }
