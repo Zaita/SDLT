@@ -24,7 +24,7 @@ query {
     }
     LikelihoodRatings
     RiskAssessmentTaskSubmission
-
+    CVATaskData
   }
 }`;
 
@@ -39,6 +39,8 @@ query {
       riskResults = submissionJSONObject.RiskAssessmentTaskSubmission;
     }
 
+    let selectedComponents = submissionJSONObject.CVATaskData;
+
     const data: TaskSubmission = {
       id: toString(get(submissionJSONObject, "ID", "")),
       uuid: toString(get(submissionJSONObject, "UUID", "")),
@@ -50,8 +52,8 @@ query {
       questionnaireSubmissionID: toString(get(submissionJSONObject, "QuestionnaireSubmission.ID", "")),
       questionnaireSubmissionStatus: toString(get(submissionJSONObject, "QuestionnaireSubmission.QuestionnaireStatus", "")),
       likelihoodRatings: TaskParser.parseLikelihoodJSONObject(get(submissionJSONObject, "LikelihoodRatings")),
-
-      riskResults: JSON.parse(riskResults)
+      riskResults: JSON.parse(riskResults),
+      selectedComponents: JSON.parse(selectedComponents),
     };
 
     return data;
