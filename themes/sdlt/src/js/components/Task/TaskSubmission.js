@@ -44,6 +44,17 @@ class TaskSubmission extends Component<Props> {
       <AnswersPreview questions={taskSubmission.questions}/>
     );
 
+    if(taskSubmission.status === 'expired'){
+      body = (
+        <div className="container">
+          <div className="alert alert-danger">
+            The submission you are attempting to view does not exist or has expired.
+            Please follow <a href="/">this link</a> to the homepage where you can create a new submission.
+          </div>
+        </div>
+      );
+    }
+
     if (canUpdateAnswers) {
       body = (
         <Questionnaire
@@ -67,7 +78,7 @@ class TaskSubmission extends Component<Props> {
       <LightButton title={"EDIT ANSWERS"} onClick={editAnswers} iconImage={editIcon}/>
     ) : null;
 
-    const pdfButton = (
+    const pdfButton = (taskSubmission.status === 'expired') ? null : (
       <LightButton title={"DOWNLOAD PDF"} iconImage={pdfIcon} onClick={() => this.downloadPdf()}/>
     );
 
