@@ -28,10 +28,12 @@ use SilverStripe\Security\Security;
 use SilverStripe\Security\Group;
 use SilverStripe\ORM\HasManyList;
 use Symbiote\QueuedJobs\Services\QueuedJobService;
+use Symbiote\QueuedJobs\DataObjects\QueuedJobDescriptor;
 use NZTA\SDLT\Job\SendStartLinkEmailJob;
 use NZTA\SDLT\Job\SendSummaryPageLinkEmailJob;
 use NZTA\SDLT\Job\SendApprovalLinkEmailJob;
 use NZTA\SDLT\Job\SendDeniedNotificationEmailJob;
+use NZTA\SDLT\Job\CheckSubmissionExpiredJob;
 use Silverstripe\Control\Director;
 use SilverStripe\Core\Convert;
 use Ramsey\Uuid\Uuid;
@@ -48,6 +50,7 @@ use SilverStripe\Forms\ToggleCompositeField;
 use SilverStripe\SiteConfig\SiteConfig;
 use NZTA\SDLT\Traits\SDLTSubmissionJson;
 use SilverStripe\Forms\DropdownField;
+use SilverStripe\Core\Injector\Injector;
 
 /**
  * Class Questionnaire
@@ -74,6 +77,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     const STATUS_SUBMITTED = 'submitted';
     const STATUS_APPROVED = 'approved';
     const STATUS_DENIED = 'denied';
+    const STATUS_EXPIRED ='expired';
     const STATUS_AWAITING_SA_REVIEW = 'awaiting_security_architect_review';
     const STATUS_WAITING_FOR_SA_APPROVAL = 'waiting_for_security_architect_approval';
     const STATUS_WAITING_FOR_APPROVAL = 'waiting_for_approval';
@@ -91,7 +95,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SubmitterEmail'=> 'Varchar(255)',
         'QuestionnaireData' => 'Text',
         'AnswerData' => 'Text',
-        'QuestionnaireStatus' => 'Enum(array("in_progress", "submitted", "awaiting_security_architect_review", "waiting_for_security_architect_approval","waiting_for_approval", "approved", "denied"))',
+        'QuestionnaireStatus' => 'Enum(array("in_progress", "submitted", "awaiting_security_architect_review", "waiting_for_security_architect_approval","waiting_for_approval", "approved", "denied", "expired"))',
         'UUID' => 'Varchar(36)',
         'IsStartLinkEmailSent' => 'Boolean',
         'IsEmailSentToSecurityArchitect' => 'Boolean',
@@ -510,9 +514,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             'Root.CisoDetails',
             [
                 DropdownField::create(
-                  'CisoApproverID',
-                  'Ciso Approver',
-                  $cisoMemberList
+                    'CisoApproverID',
+                    'Ciso Approver',
+                    $cisoMemberList
                 )->setEmptyString(' '),
                 $fields->dataFieldByName('CisoApprovalStatus'),
                 $fields->dataFieldByName('CisoApproverIPAddress'),
@@ -593,7 +597,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             'waiting_for_security_architect_approval' => 'Awaiting Security Architect Approval',
             'waiting_for_approval' => 'Awaiting Business Owner Approval',
             'approved' => 'Approved',
-            'denied' => 'Denied'
+            'denied' => 'Denied',
+            'expired' => 'Expired'
         ];
 
         return isset($mapping[$this->QuestionnaireStatus]) ? $mapping[$this->QuestionnaireStatus] : $this->QuestionnaireStatus;
@@ -720,7 +725,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     }
 
                     if ($userID && $pageType == 'awaiting_approval_list') {
-
                         if ($member->getIsSA() && $member->getIsCISO()) {
                             $status = [
                                 QuestionnaireSubmission::STATUS_AWAITING_SA_REVIEW,
@@ -736,8 +740,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                                 'SecurityArchitectApprovalStatus' => QuestionnaireSubmission::STATUS_PENDING,
                                 'CisoApprovalStatus' => QuestionnaireSubmission::STATUS_PENDING
                             ]);
-
-                        } else if ($member->getIsSA()) {
+                        } elseif ($member->getIsSA()) {
                             $data = QuestionnaireSubmission::get()->filter([
                                 'QuestionnaireStatus' => [
                                     QuestionnaireSubmission::STATUS_AWAITING_SA_REVIEW,
@@ -745,7 +748,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                                 ],
                                 'SecurityArchitectApprovalStatus' => QuestionnaireSubmission::STATUS_PENDING
                             ]);
-                        } else if ($member->getIsCISO()) {
+                        } elseif ($member->getIsCISO()) {
                             $data = QuestionnaireSubmission::get()->filter([
                                 'QuestionnaireStatus' => [
                                   QuestionnaireSubmission::STATUS_WAITING_FOR_APPROVAL,
@@ -1210,7 +1213,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         $qs = QueuedJobService::create();
 
                         $qs->queueJob(
-                            new SendApprovalLinkEmailJob($questionnaireSubmission, $members),
+                            new CheckSubmissionExpiredJob($questionnaireSubmission, $members),
                             date('Y-m-d H:i:s', time() + 90)
                         );
                     }
@@ -1559,7 +1562,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             $msg = sprintf(
                 '"%s" had its status changed from "%s" to "%s". (UUID: %s)',
                 $this->Questionnaire()->Name,
-                $statusChange['before'] ?: 'start' ,
+                $statusChange['before'] ?: 'start',
                 $statusChange['after'],
                 $this->UUID
             );
@@ -1582,7 +1585,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                                 $user->getIsCISO() ||
                                 $user->getIsSA()
                             )
-                    ))) {
+                        )
+                    )) {
                 $doAudit = true;
                 break;
             }
@@ -1789,7 +1793,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         }
 
         // update CISO member details
-        else if ($accessDetail['group'] == UserGroupConstant::GROUP_CODE_CISO) {
+        elseif ($accessDetail['group'] == UserGroupConstant::GROUP_CODE_CISO) {
             $this->updateCisoDetail($member, $status);
             $this->write();
         }
@@ -1926,7 +1930,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         return (Security::getCurrentUser() !== null);
     }
 
-      /**
+    /**
      * Allow logged-in user to delete the object
      *
      * @param Member|null $member member
@@ -1963,7 +1967,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     {
         if (!empty($this->BusinessOwnerName)) {
             return $this->BusinessOwnerName;
-        } else if ($this->BusinessOwnerApproverID) {
+        } elseif ($this->BusinessOwnerApproverID) {
             return implode(' ', [
                 $this->BusinessOwnerApprover()->FirstName,
                 $this->BusinessOwnerApprover()->Surname
@@ -2097,16 +2101,16 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      *
      * @return string
      */
-   public function getHostname() : string
-   {
-       $hostname = Director::absoluteBaseURL();
-       $config = SiteConfig::current_site_config();
-       if ($config->AlternateHostnameForEmail) {
-           $hostname = $config->AlternateHostnameForEmail;
-       }
+    public function getHostname() : string
+    {
+        $hostname = Director::absoluteBaseURL();
+        $config = SiteConfig::current_site_config();
+        if ($config->AlternateHostnameForEmail) {
+            $hostname = $config->AlternateHostnameForEmail;
+        }
 
-       return $hostname;
-   }
+        return $hostname;
+    }
 
     /**
      * @return boolean
@@ -2117,7 +2121,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             $this->isBusinessOwnerEmailAddress());
     }
 
-      /**
+    /**
      * @return boolean
      */
     public function isRequestFromBusinessOwner() : bool
@@ -2266,9 +2270,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         }
 
         // if approval from SA is pending
-        if ($this->isSAApprovalPending()){
-            if($this->isAwaitingSecurityArchitectReview()) {
-              return [
+        if ($this->isSAApprovalPending()) {
+            if ($this->isAwaitingSecurityArchitectReview()) {
+                return [
                   "hasAccess" => true,
                   "message" => 'Yes, current SA user has access to assign to themself.',
                   "group" => $group
@@ -2276,7 +2280,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             }
 
             if (($this->isWaitingForSecurityArchitectApproval()) && ($this->isAssignedToCurrentSAUser())) {
-              return [
+                return [
                   "hasAccess" => true,
                   "message" => 'Yes, current SA user has access to approve and denied.',
                   "group" => $group
@@ -2398,5 +2402,30 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $productAspects = $this->getProductAspectList($productAspectAnswerData);
 
         return json_encode($productAspects);
+    }
+
+    /**
+     * this method runs during the /dev/build task
+     * and add the CheckSubmissionExpiredJob in QueuedJob
+     * @return void
+     */
+    public function requireDefaultRecords()
+    {
+        parent::requireDefaultRecords();
+
+        //checks the job queue for any existing instances of the job
+        $job = QueuedJobDescriptor::get()->filter([
+            'Implementation' => CheckSubmissionExpiredJob::class,
+            'JobStatus' => 'New'
+        ])->first();
+
+        /**If even one exists, we can expect that job to re-queue,
+          *so we don't need to add it here. If there are no jobs,
+          *this `if` will evaluate to true
+          */
+        if (!($job && $job->ID)) {
+            $nextJob = Injector::inst()->create(CheckSubmissionExpiredJob::class);
+            singleton(QueuedJobService::class)->queueJob($nextJob, date('Y-m-d H:i:s', strtotime("tomorrow 0:27:30")));
+        }
     }
 }
