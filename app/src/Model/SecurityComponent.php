@@ -61,6 +61,13 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider
     ];
 
     /**
+     * @var array
+     */
+    private static $belongs_many_many = [
+        'DefaultsForCVATask' => Task::class
+    ];
+
+    /**
      * @param SchemaScaffolder $scaffolder The scaffolder
      * @return SchemaScaffolder
      */
@@ -170,7 +177,7 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider
         $fields->addFieldsToTab('Root.Main', [$name, $description]);
         $fields->addFieldToTab('Root.Controls', $instructions, 'Controls');
 
-        $fields->removeByName(['SelectedComponent']);
+        $fields->removeByName(['SelectedComponent', 'DefaultsForCVATask']);
 
         return $fields;
     }
