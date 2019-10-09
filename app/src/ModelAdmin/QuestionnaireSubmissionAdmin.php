@@ -64,6 +64,10 @@ class QuestionnaireSubmissionAdmin extends ModelAdmin
         /* @var GridField $gridField */
         $gridField = $form->Fields()->fieldByName($gridFieldName);
 
+        $list = $gridField->getList();
+
+        $gridField->setList($list->exclude('QuestionnaireStatus', 'expired'));
+
         $config = GridFieldConfig_RelationEditor::create();
 
         $config->removeComponentsByType(GridFieldAddNewButton::class);
