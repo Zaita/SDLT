@@ -80,6 +80,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     const STATUS_APPROVED = 'approved';
     const STATUS_DENIED = 'denied';
     const STATUS_WAITING_FOR_APPROVAL = 'waiting_for_approval';
+    const STATUS_EXPIRED = 'expired';
 
     /**
      * @var string
@@ -92,7 +93,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     private static $db = [
         'QuestionnaireData' => 'Text', // store in JSON format
         'AnswerData' => 'Text', // store in JSON format
-        'Status' => 'Enum(array("start", "in_progress", "complete", "waiting_for_approval", "approved", "denied", "invalid"))',
+        'Status' => 'Enum(array("start", "in_progress", "complete", "waiting_for_approval", "approved", "denied", "invalid", "expired"))',
         'UUID' => 'Varchar(255)',
         'Result' => 'Varchar(255)',
         'SecureToken' => 'Varchar(64)',

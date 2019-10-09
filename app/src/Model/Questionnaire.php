@@ -1,5 +1,4 @@
 <?php
-
 /**
  * This file contains the "Questionnaire" class.
  *
@@ -31,6 +30,8 @@ use NZTA\SDLT\ModelAdmin\QuestionnaireAdmin;
 use NZTA\SDLT\Helper\Utils;
 use NZTA\SDLT\Traits\SDLTRiskCalc;
 use SilverStripe\Forms\CheckboxField;
+use SilverStripe\Forms\OptionsetField;
+use SilverStripe\Forms\NumericField;
 
 /**
  * Class Questionnaire
@@ -67,6 +68,16 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     private static $table_name = 'Questionnaire';
 
     /**
+     * @var Int
+     */
+    private static $expiry_days = 14;
+
+    /**
+     * @var Int
+     */
+    private static $min_expiry_days = 5;
+
+    /**
      * @var array
      */
     private static $db = [
@@ -74,7 +85,9 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
         'KeyInformation' => 'HTMLText',
         'Type' => "Enum('Questionnaire,RiskQuestionnaire')",
         'RiskCalculation' => "Enum('NztaApproxRepresentation,Maximum')",
-        'ApprovalIsNotRequired' => 'Boolean'
+        'ApprovalIsNotRequired' => 'Boolean',
+        'DoesSubmissionExpire' => "Enum('No,Yes', 'Yes')",
+        'ExpireAfterDays' => 'Int',
     ];
 
     /**
@@ -182,6 +195,27 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
         } else {
             $fields->removeByName('ApprovalIsNotRequired');
         }
+
+        $fields->removeByName(['DoesSubmissionExpire']);
+
+        $fields->addFieldsToTab(
+            'Root.Main',
+            [
+                OptionsetField::create(
+                    'DoesSubmissionExpire',
+                    'Does Submission Expire?',
+                    $this->dbObject('DoesSubmissionExpire')->enumValues()
+                ),
+                $fields->dataFieldByName('ExpireAfterDays')
+                    ->setAttribute('min', $this->config()->min_expiry_days)
+                    ->setDescription('If number of expire days for the submission is not defined,
+                    then submission will be expired in '.$this->config()->expiry_days.' days.')
+                    ->displayIf('DoesSubmissionExpire')
+                    ->isEqualTo('Yes')
+                    ->end()
+            ],
+            'ApprovalIsNotRequired'
+        );
 
         return $fields;
     }
@@ -326,6 +360,14 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     {
         parent::onBeforeWrite();
 
+        $expiryDays = $this->config()->expiry_days;
+
+        if (!$this->ExpireAfterDays) {
+            $this->ExpireAfterDays= $expiryDays;
+        }
+
+
+
         $this->audit();
     }
 
@@ -399,6 +441,10 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
             $result->addError('Please select a questionnnaire type.');
         } else if ($this->Type === 'RiskQuestionnaire' && !$this->RiskCalculation) {
             $result->addError('Please select a risk-calculation type.');
+        }
+
+        if ($this->DoesSubmissionExpire === 'Yes' && $this->ExpireAfterDays < $this->config()->min_expiry_days) {
+            $result->addError('Please enter number of days greater than '.$this->config()->min_expiry_days.'.');
         }
 
         return $result;
