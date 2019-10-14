@@ -7,14 +7,15 @@ import Footer from "../Footer/Footer";
 import type {User} from "../../types/User";
 import type {QuestionnaireSubmissionListItem} from "../../types/Questionnaire";
 import {loadCurrentUser} from "../../actions/user";
-import {loadSiteTitle} from "../../actions/siteConfig";
 import {loadAwaitingApprovalList} from "../../actions/questionnaire";
 import moment from "moment";
+import {loadSiteConfig} from "../../actions/siteConfig";
+import type {SiteConfig} from "../../types/SiteConfig";
 
 const mapStateToProps = (state: RootState) => {
   return {
     currentUser: state.currentUserState.user,
-    siteTitle: state.siteConfigState.siteTitle,
+    siteConfig: state.siteConfigState.siteConfig,
     awaitingApprovalList: state.questionnaireSubmissionListState.awaitingApprovalList
   };
 };
@@ -24,14 +25,14 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
     async dispatchLoadDataAction() {
       await dispatch(loadCurrentUser());
       await dispatch(loadAwaitingApprovalList());
-      await dispatch(loadSiteTitle());
+      await dispatch(loadSiteConfig());
     }
   };
 };
 
 type Props = {
   currentUser?: User | null,
-  siteTitle?: string,
+  siteConfig?: SiteConfig | null,
   dispatchLoadDataAction?: () => void,
   awaitingApprovalList?: Array<QuestionnaireSubmissionListItem>
 };
@@ -59,19 +60,19 @@ class AwaitingApprovalList extends Component<Props> {
   render() {
     const {
       currentUser,
-      siteTitle,
+      siteConfig,
       awaitingApprovalList
     } = {...this.props};
 
-    if (!currentUser || !awaitingApprovalList || !siteTitle) {
+    if (!currentUser || !awaitingApprovalList || !siteConfig) {
       return null;
     }
-
+    
     return (
       <div className="AnswersPreview">
-        <Header title="Awaiting Approvals" subtitle={siteTitle} username={currentUser.name} />
+        <Header title="Awaiting Approvals" username={currentUser.name} subtitle={siteConfig.siteTitle} logopath={siteConfig.logoPath}/>
         {list(awaitingApprovalList, currentUser)}
-        <Footer/>
+        <Footer footerCopyrightText={siteConfig.footerCopyrightText}/>
       </div>
     );
   }

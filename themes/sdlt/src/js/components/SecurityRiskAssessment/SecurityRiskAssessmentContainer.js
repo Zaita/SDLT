@@ -7,7 +7,6 @@ import {Dispatch} from "redux";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import {loadCurrentUser} from "../../actions/user";
-import {loadSiteTitle} from "../../actions/siteConfig";
 import LikelihoodLegendContainer from "../Common/LikelihoodLegendContainer";
 import RiskAssessmentMatrixTableContainer from "../Common/RiskAssessmentMatrixTableContainer";
 import type {User} from "../../types/User";
@@ -25,7 +24,7 @@ import SecurityRiskAssessmentUtil from "../../utils/SecurityRiskAssessmentUtil";
 
 const mapStateToProps = (state: RootState) => {
   return {
-    siteTitle: state.siteConfigState.siteTitle,
+    siteConfig: state.siteConfigState.siteConfig,
     currentUser: state.currentUserState.user,
     securityRiskAssessmentData: state.securityRiskAssessmentState.securityRiskAssessmentData,
   };
@@ -35,7 +34,6 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
   return {
     dispatchLoadDataAction(uuid: string, secureToken: string) {
       dispatch(loadCurrentUser());
-      dispatch(loadSiteTitle());
       dispatch(loadSecurityRiskAssessment({uuid, secureToken}));
     },
     dispatchFinaliseAction(uuid: string, secureToken?: string | null, questionnaireUUID) {
@@ -47,7 +45,7 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
 type Props = {
   uuid: string,
   secureToken: string,
-  siteTitle?: string,
+  siteConfig?: SiteConfig | null,
   currentUser?: User | null,
   securityRiskAssessmentData?: SecurityRiskAssessment | null,
   dispatchLoadDataAction?: (uuid: string, secureToken: string) => void,
@@ -63,13 +61,13 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
 
   render() {
     const {
-      siteTitle,
+      siteConfig,
       currentUser,
       securityRiskAssessmentData,
       secureToken
     } = {...this.props};
 
-    if (!currentUser || !siteTitle || !securityRiskAssessmentData) {
+    if (!currentUser || !siteConfig || !securityRiskAssessmentData) {
       return null;
     }
 
@@ -98,7 +96,7 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
 
     return (
       <div className="SecurityRiskAssessmentContainer">
-        <Header title={securityRiskAssessmentData.taskName} subtitle={siteTitle} username={currentUser.name}/>
+        <Header title={securityRiskAssessmentData.taskName} subtitle={siteConfig.siteTitle} username={currentUser.name} logopath={siteConfig.logoPath} />
 
         <div className="SecurityRiskAssessmentResult">
           {isSRATaskFinalised ? SecurityRiskAssessmentUtil.getSraIsFinalisedAlert() : false}
@@ -117,7 +115,7 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
           </div>
 
         </div>
-        <Footer/>
+        <Footer footerCopyrightText={siteConfig.footerCopyrightText}/>
       </div>
     )
   }

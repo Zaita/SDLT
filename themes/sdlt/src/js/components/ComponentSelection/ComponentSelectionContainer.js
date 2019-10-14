@@ -7,8 +7,8 @@ import {Dispatch} from "redux";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import type {User} from "../../types/User";
+import type {SiteConfig} from "../../types/SiteConfig";
 import {loadCurrentUser} from "../../actions/user";
-import {loadSiteTitle} from "../../actions/siteConfig";
 import type {JiraTicket, SecurityComponent} from "../../types/SecurityComponent";
 import ComponentSelection from "./ComponentSelection";
 import {
@@ -31,6 +31,7 @@ import {
 import editIcon from "../../../img/icons/edit.svg";
 import LightButton from "../Button/LightButton";
 import SecurityRiskAssessmentUtil from "../../utils/SecurityRiskAssessmentUtil";
+import {loadSiteConfig} from "../../actions/siteConfig";
 
 type OwnProps = {
   uuid: string,
@@ -38,7 +39,7 @@ type OwnProps = {
 };
 
 type Props = OwnProps & {
-  siteTitle?: string,
+  siteConfig?: SiteConfig | null,
   currentUser?: User | null,
   taskSubmission?: TaskSubmission | null,
   availableComponents?: Array<SecurityComponent>,
@@ -55,7 +56,7 @@ type Props = OwnProps & {
 
 const mapStateToProps = (state: RootState) => {
   return {
-    siteTitle: state.siteConfigState.siteTitle,
+    siteConfig: state.siteConfigState.siteConfig,
     currentUser: state.currentUserState.user,
     taskSubmission: state.taskSubmissionState.taskSubmission,
     availableComponents: state.componentSelectionState.availableComponents,
@@ -67,8 +68,8 @@ const mapDispatchToProps = (dispatch: Dispatch, props: OwnProps) => {
   return {
     dispatchLoadDataAction() {
       const {uuid, secureToken} = {...props};
+      dispatch(loadSiteConfig());
       dispatch(loadCurrentUser());
-      dispatch(loadSiteTitle());
       dispatch(loadAvailableComponents());
       dispatch(loadTaskSubmission({uuid, secureToken, type: "componentSelection"}));
     },
@@ -101,6 +102,7 @@ class ComponentSelectionContainer extends Component<Props> {
 
   render() {
     const {
+      siteConfig,
       siteTitle,
       secureToken,
       currentUser,
@@ -115,7 +117,7 @@ class ComponentSelectionContainer extends Component<Props> {
       dispatchEditAnswersAction
     } = {...this.props};
 
-    if (!currentUser || !taskSubmission) {
+    if (!currentUser || !taskSubmission || !siteConfig) {
       return null;
     }
     const isSRATaskFinalised = SecurityRiskAssessmentUtil.isSRATaskFinalised(taskSubmission.siblingSubmissions);
@@ -193,9 +195,9 @@ class ComponentSelectionContainer extends Component<Props> {
 
     return (
       <div className="ComponentSelectionContainer">
-        <Header title="Component Selection" subtitle={siteTitle} username={currentUser.name}/>
+        <Header title="Component Selection" subtitle={siteConfig.siteTitle} logopath={siteConfig.logoPath} username={currentUser.name} />
         {body}
-        <Footer/>
+        <Footer footerCopyrightText={siteConfig.footerCopyrightText}/>
       </div>
     );
   }

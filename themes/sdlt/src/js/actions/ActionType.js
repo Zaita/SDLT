@@ -50,6 +50,11 @@ export type SetCurrentUserAction = {
   payload: User | null
 };
 
+export type LoadSiteConfigAction = {
+  type: string,
+  payload: string
+}
+
 export type SetSiteTitleAction = {
   type: string,
   payload: string
@@ -126,7 +131,7 @@ const ActionType = {
     SET_CURRENT_USER: "ACTION_USER_SET_CURRENT_USER",
   },
   SITE_CONFIG: {
-    SET_SITE_TITLE: "ACTION_SITE_CONFIG_SET_SITE_TITLE",
+    LOAD_SITE_CONFIG: "SITE_CONFIG/LOAD_SITE_CONFIG",
   },
 };
 

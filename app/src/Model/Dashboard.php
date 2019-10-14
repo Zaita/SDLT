@@ -35,6 +35,7 @@ use NZTA\SDLT\Traits\SDLTModelPermissions;
 class Dashboard extends DataObject implements ScaffoldingProvider
 {
     use SDLTModelPermissions;
+
     /**
      * @var string
      */
@@ -70,6 +71,10 @@ class Dashboard extends DataObject implements ScaffoldingProvider
         'Subtitle'
     ];
 
+    public function canView($member = null)
+    {
+        return true;
+    }
 
     /**
      * CMS Fields
