@@ -1,14 +1,14 @@
 // @flow
 
 import React, {Component} from "react";
-import LogoImage from "../../../img/Logo.svg";
 import LogoutButton from "../Button/LogoutButton";
 
 type Props = {
   title: string,
   subtitle: string,
   username: string,
-  showLogoutButton?: boolean;
+  showLogoutButton?: boolean,
+  logopath?: string,
 };
 
 class Header extends Component<Props> {
@@ -17,16 +17,17 @@ class Header extends Component<Props> {
     title: "",
     subtitle: "",
     username: "",
+    logopath: "",
     showLogoutButton: true
   };
 
   render() {
-    const {title, subtitle, showLogoutButton, username} = {...this.props};
-
+    const {title, subtitle, showLogoutButton, username, logopath} = {...this.props};
+    
     return (
       <header className="Header">
         <div className="top-banner">
-          <a href="/"><img src={LogoImage} className="logo"/></a>
+          <a href="/"><img src={logopath} className="logo"/></a>
         </div>
         <div className="logout-layout">
           {showLogoutButton && (

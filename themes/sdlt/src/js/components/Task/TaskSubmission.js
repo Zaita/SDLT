@@ -134,19 +134,21 @@ class TaskSubmission extends Component<Props> {
   downloadPdf() {
     const {
       taskSubmission,
-      siteTitle,
-      currentUser
+      currentUser,
+      siteConfig
     } = {...this.props};
 
-    if (!taskSubmission) {
+    if (!taskSubmission && !siteConfig && !currentUser) {
       return;
     }
 
+    console.log(siteConfig);
+    console.log(this.props);
     PDFUtil.generatePDF({
       questions: taskSubmission.questions,
       submitter: taskSubmission.submitter.email ? taskSubmission.submitter : currentUser,
       questionnaireTitle: taskSubmission.taskName,
-      siteTitle: siteTitle,
+      siteConfig: siteConfig,
       result: taskSubmission.result,
       riskResults: taskSubmission.riskResults,
     });

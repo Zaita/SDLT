@@ -8,6 +8,7 @@ import type {SubmissionQuestionData, MyQuestionnaireItem} from "../types/Questio
 import type {TaskSubmissionDisplay} from "../types/Task";
 import QuestionParser from "../utils/QuestionParser";
 import UserParser from "../utils/UserParser";
+import SiteConfigParser from "../utils/SiteConfigParser";
 
 export default class QuestionnaireDataService {
 
@@ -47,6 +48,11 @@ query {
   }
   readSiteConfig {
     Title
+    FooterCopyrightText
+    LogoPath
+    HomePageBackgroundImagePath
+    PdfHeaderImageLink
+    PdfFooterImageLink
   }
 }
 `;
@@ -62,6 +68,7 @@ query {
 
     return {
       title: _.get(questionnaireData, "Name", ""),
+      siteConfig: SiteConfigParser.parseSiteConfigFromJSON(siteData),
       subtitle: _.get(siteData, "Title", ""),
       questionnaireID: _.get(questionnaireData, "ID", ""),
       keyInformation: _.get(questionnaireData, "KeyInformation", ""),
@@ -127,19 +134,25 @@ query {
   }
   readSiteConfig {
     Title
+    FooterCopyrightText
+    LogoPath
+    HomePageBackgroundImagePath
+    PdfHeaderImageLink
+    PdfFooterImageLink
   }
 }`;
     const json = await GraphQLRequestHelper.request({query});
-
     const memberData = _.get(json, "data.readCurrentMember.0", {});
     const submissionJSON = _.get(json, "data.readQuestionnaireSubmission.0", {});
-    if (!memberData || !submissionJSON) {
+    const siteData = _.get(json, "data.readSiteConfig.0", null);
+    
+    if (!memberData || !submissionJSON || !siteData) {
       throw DEFAULT_NETWORK_ERROR;
     }
 
     const data: QuestionnaireSubmissionState = {
       title: _.toString(_.get(submissionJSON, "Questionnaire.Name", "")),
-      siteTitle: _.toString(_.get(json, "data.readSiteConfig.0.Title", "")),
+      siteConfig: SiteConfigParser.parseSiteConfigFromJSON(siteData),
       user: UserParser.parseUserFromJSON(memberData),
       isCurrentUserApprover: _.get(submissionJSON, "IsCurrentUserAnApprover", "false") === "true",
       isCurrentUserABusinessOwnerApprover: _.get(submissionJSON, "IsCurrentUserABusinessOwnerApprover", "false") === "true",

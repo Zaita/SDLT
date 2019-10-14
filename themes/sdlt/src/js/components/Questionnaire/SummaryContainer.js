@@ -107,9 +107,9 @@ class SummaryContainer extends Component<Props, State> {
 
   render() {
     const {secureToken} = {...this.props};
-    const {location, title, user, submission, isCurrentUserApprover, isCurrentUserABusinessOwnerApprover} = {...this.props.submissionState};
+    const {location, title, user, submission, isCurrentUserApprover, isCurrentUserABusinessOwnerApprover, siteConfig} = {...this.props.submissionState};
 
-    if (!user || !submission) {
+    if (!user || !submission || !siteConfig) {
       return null;
     }
 
@@ -138,7 +138,7 @@ class SummaryContainer extends Component<Props, State> {
 
     return (
       <div className="SummaryContainer">
-        <Header title={title} subtitle="Summary" username={user.name}/>
+        <Header title={title} subtitle="Summary" username={user.name} logopath={siteConfig.logoPath}/>
         <Summary submission={submission}
                  handlePDFDownloadButtonClick={this.handlePDFDownloadButtonClick.bind(this)}
                  handleSubmitButtonClick={this.handleSubmitButtonClick.bind(this)}
@@ -150,7 +150,7 @@ class SummaryContainer extends Component<Props, State> {
                  user={user}
                  token={secureToken}
         />
-        <Footer/>
+        <Footer footerCopyrightText={siteConfig.footerCopyrightText}/>
         <ReactModal
           isOpen={this.state.showModal}
           parentSelector={() => {return document.querySelector(".SummaryContainer");}}
@@ -171,8 +171,9 @@ class SummaryContainer extends Component<Props, State> {
   }
 
   handlePDFDownloadButtonClick() {
-    const {submission, siteTitle} = {...this.props.submissionState};
-    if (!submission) {
+    const {submission, siteConfig} = {...this.props.submissionState};
+
+    if (!submission || !siteConfig) {
       return;
     }
 
@@ -185,7 +186,7 @@ class SummaryContainer extends Component<Props, State> {
       questions: submission.questions,
       submitter: submission.submitter,
       questionnaireTitle: submission.questionnaireTitle,
-      siteTitle,
+      siteConfig: siteConfig,
       riskResults: riskResults ? riskResults : [],
     });
   }
