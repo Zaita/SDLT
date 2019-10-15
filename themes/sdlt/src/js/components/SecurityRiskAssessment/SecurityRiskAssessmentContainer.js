@@ -78,16 +78,19 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
         <Header title={securityRiskAssessmentData.taskName} subtitle={siteTitle} username={currentUser.name}/>
 
         <div className="SecurityRiskAssessmentResult">
-
           <RiskAssessmentMatrixTableContainer
             riskResults={securityRiskAssessmentData.riskResults}
-            likelihoodThresholds={securityRiskAssessmentData.likelihoodRatings} />
+            likelihoodThresholds={securityRiskAssessmentData.likelihoodRatings}
+          />
 
           <LikelihoodLegendContainer
-            likelihoodThresholds={securityRiskAssessmentData.likelihoodRatings} />
+            likelihoodThresholds={securityRiskAssessmentData.likelihoodRatings}
+          />
+
           <div className="buttons">
             {backButton}
           </div>
+
         </div>
         <Footer/>
       </div>

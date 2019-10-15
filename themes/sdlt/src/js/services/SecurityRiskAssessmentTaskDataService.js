@@ -38,7 +38,6 @@ query {
     if(submissionJSONObject.RiskAssessmentTaskSubmission) {
       riskResults = submissionJSONObject.RiskAssessmentTaskSubmission;
     }
-
     let selectedComponents = submissionJSONObject.CVATaskData;
 
     const data: TaskSubmission = {

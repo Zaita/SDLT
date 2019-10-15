@@ -15,7 +15,8 @@ namespace NZTA\SDLT\Test;
 
 use SilverStripe\Dev\TestOnly;
 use NZTA\SDLT\IssueTracker\IssueTrackerSystem;
-use NZTA\SDLT\IssueTracker\IssueTrackerTicket;
+use NZTA\SDLT\Model\SecurityComponent;
+use SilverStripe\ORM\DataObject;
 
 class MockIssueTracker extends IssueTrackerSystem implements TestOnly
 {
@@ -24,9 +25,13 @@ class MockIssueTracker extends IssueTrackerSystem implements TestOnly
         return '';
     }
 
-    public function addTask(string $projectName, string $title, string $descr, IssueTrackerTicket $issue, string $issueType = 'Task', string $productAspect = '') : string
+    public function addTask(string $projectName, SecurityComponent $component, string $issueType = 'Task', string $productAspect = '') : string
     {
         return '';
+    }
+
+    public function updateStatusesFor(DataObject $issue) : void
+    {
     }
 
     public function getIntro(string $introTitle, string $bgColor) : string

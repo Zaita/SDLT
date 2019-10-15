@@ -88,6 +88,11 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     private static $table_name = 'TaskSubmission';
 
     /**
+     * @var string
+     */
+    public $CVATaskDataSource = 'DefaultComponent';
+
+    /**
      * @var array
      */
     private static $db = [
@@ -214,6 +219,13 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         return $task->ComponentTarget;
     }
 
+    /**
+     * @return string
+     */
+    public function getCVATaskDataSource() : string
+    {
+        return $this->CVATaskDataSource;
+    }
 
     /**
      * @return FieldList
@@ -389,6 +401,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         $this->provideGraphQLScaffoldingForUpdateTaskSubmissionStatusToApproved($scaffolder);
         $this->provideGraphQLScaffoldingForUpdateTaskSubmissionStatusToDenied($scaffolder);
         $this->provideGraphQLScaffoldingForUpdateControlValidationAuditTaskSubmission($scaffolder);
+        $this->provideGraphQLScaffoldingtoReSyncWithJira($scaffolder);
     }
 
     /**
@@ -423,6 +436,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 //it doesn't. It returns the RiskResultData instead.
                 'RiskAssessmentTaskSubmission',
                 'CVATaskData',
+                'CVATaskDataSource'
             ]);
 
         $dataObjectScaffolder
@@ -447,6 +461,12 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     if (!empty($productAspect)) {
                       return $selectedComponent = $selectedComponent->filter([
                             'ProductAspect' => $productAspect
+                        ]);
+                    }
+
+                    if (empty($productAspect)) {
+                      return $selectedComponent = $selectedComponent->filter([
+                            'ProductAspect' => null
                         ]);
                     }
                     return $selectedComponent;
@@ -690,6 +710,60 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 }
             })
             ->end();
+    }
+
+    /**
+     * change task submission status to in-progress and re-load the data from JIRA\
+     *
+     * @param SchemaScaffolder $scaffolder The scaffolder of the schema
+     * @return void
+     */
+    public function provideGraphQLScaffoldingtoReSyncWithJira(SchemaScaffolder $scaffolder) {
+      $scaffolder
+          ->mutation('reSyncWithJira', TaskSubmission::class)
+          ->addArgs([
+              'UUID' => 'String!'
+          ])
+          ->setResolver(new class implements ResolverInterface {
+              /**
+               * Invoked by the Executor class to resolve this mutation / query
+               * @see Executor
+               *
+               * @param mixed       $object  object
+               * @param array       $args    args
+               * @param mixed       $context context
+               * @param ResolveInfo $info    info
+               * @throws GraphQLAuthFailure
+               * @return mixed
+               */
+              public function resolve($object, array $args, $context, ResolveInfo $info)
+              {
+                  $member = Security::getCurrentUser();
+                  $uuid = Convert::raw2sql($args['UUID']);
+                  $submission = TaskSubmission::get_task_submission_by_uuid($uuid);
+                  $canEdit = TaskSubmission::can_edit_task_submission(
+                      $submission,
+                      $member,
+                      ''
+                  );
+                  if (!$canEdit) {
+                      throw new GraphQLAuthFailure();
+                  }
+
+                  $submission->Status = TaskSubmission::STATUS_IN_PROGRESS;
+                  $submission->write();
+
+                  if ($submission->TaskType === 'control validation audit') {
+                      $siblingComponentSelectionTask = $submission->getSiblingTaskSubmissionsByType('selection');
+
+                      if (empty($data->CVATaskData)) {
+                          $submission->CVATaskData = $submission->getDataforCVATask($siblingComponentSelectionTask);
+                      }
+                  }
+                  return $submission;
+              }
+          })
+          ->end();
     }
 
     /**
@@ -966,18 +1040,18 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     if (!$canView) {
                         throw new GraphQLAuthFailure();
                     }
+
                     $data->ProductAspects = $data->QuestionnaireSubmission()->getProductAspects();
 
-                    if (empty($data->CVATaskData)) {
+                    if ($data->TaskType === 'control validation audit') {
                         $siblingComponentSelectionTask = $data->getSiblingTaskSubmissionsByType('selection');
-                        if (!empty($siblingComponentSelectionTask) &&
-                            $data->isSiblingTaskCompleted($siblingComponentSelectionTask) &&
-                            !empty($selectedComponent = ($data->getSelectedComponentsFromTaskSubmission($siblingComponentSelectionTask)))) {
-                            $data->CVATaskData = json_encode($selectedComponent);
+
+                        if ($siblingComponentSelectionTask) {
+                            $data->CVATaskDataSource = $siblingComponentSelectionTask->ComponentTarget;
                         }
 
-                        if (empty($data->CVATaskData) && (empty($siblingComponentSelectionTask))) {
-                          $data->CVATaskData = json_encode($data->getDefaultComponentsFromCVATask());
+                        if (empty($data->CVATaskData)) {
+                            $data->CVATaskData = $data->getDataforCVATask($siblingComponentSelectionTask);
                         }
                     }
 
@@ -1429,80 +1503,146 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     // do not "go to JIRA"...
                     $ticketId = Convert::raw2sql($args['JiraKey'] ?? '');
 
+                    $isRemoteTarget = $submission->Task()->isRemoteTarget();
+
                     // Do not permit the modification of a submission with the creation
                     // of a new ticket, if a different project key is passed-in.
-                    if ($submission->Task()->isRemoteTarget() &&
+                    if ($isRemoteTarget &&
                         $submission->JiraKey && $submission->JiraKey !== $ticketId) {
                         throw new Exception(sprintf('Project key must be the same as: %s', $submission->JiraKey));
                     }
 
                     $selectedComponents = json_decode(base64_decode($args['Components']), true);
-                    /** Prevent multiple ticket creation */
                     $existingComponents = $submission->SelectedComponents();
-                    $newTicketComponents= [];
 
-                    foreach ($selectedComponents as $selectedComponent) {
-                        $doesComponentExist = $existingComponents->filter([
-                            'ProductAspect' => $selectedComponent['ProductAspect'],
-                            'SecurityComponentID' => $selectedComponent['SecurityComponentID']
-                        ])->first();
+                    /** Prevent multiple ticket creation */
+                    $newTicketComponents = TaskSubmission::get_component_diff(
+                        $selectedComponents,
+                        $existingComponents->toNestedArray(),
+                        'add'
+                    );
 
-                        if (!$doesComponentExist) {
-                            $newTicketComponents[] = [
-                                'ComponentID' =>$selectedComponent['SecurityComponentID'],
-                                'ProductAspect' =>$selectedComponent['ProductAspect'],
+                    $removedComponentdetails = TaskSubmission::get_component_diff(
+                       $existingComponents->toNestedArray(),
+                       $selectedComponents,
+                       'remove'
+                    );
+
+                    // remove the component
+                    foreach ($removedComponentdetails as $removedComponent) {
+                        $filterArray = [
+                            'SecurityComponentID' => $removedComponent['SecurityComponentID']
+                        ];
+
+                        if (!empty($removedComponent['ProductAspect'])){
+                            $filterArray = [
+                                'SecurityComponentID' => $removedComponent['SecurityComponentID'],
+                                'ProductAspect' => $removedComponent['ProductAspect']
                             ];
                         }
-                    }
 
-                    // Reset!!, removeAll is not working due to validation on SelectedComponent Class
-                    // that's why we need to remove it manually using foreach
-                    foreach ($existingComponents as $savedComponent) {
-                        if ($savedComponent->TaskSubmissionID) {
-                            $savedComponent->delete();
+                        $existingComponent = $existingComponents->filter($filterArray)->first();
+
+                        if ($existingComponent) {
+                            $existingComponent->delete();
                         }
                     }
 
-                    foreach ($selectedComponents as $selectedComponent) {
-                        $securityComponent = SecurityComponent::get_by_id(Convert::raw2sql($selectedComponent['SecurityComponentID']));
+                    // first save JIRA project key for the task submission
+                    if (!empty($ticketId) && $isRemoteTarget && !empty($newTicketComponents)) {
+                        $submission->JiraKey = $ticketId;
+                        $submission->write();
+                    }
+
+                    // add the component
+                    foreach ($newTicketComponents as $newTicketComponent) {
+                        $securityComponent = SecurityComponent::get_by_id(Convert::raw2sql($newTicketComponent['SecurityComponentID']));
 
                         if ($securityComponent) {
                             $newComp = SelectedComponent::create();
-                            $newComp->ProductAspect = $selectedComponent['ProductAspect'];
-                            $newComp->SecurityComponentID = $selectedComponent['SecurityComponentID'];
-                            $newComp->TaskSubmissionID = $selectedComponent['TaskSubmissionID'];
+                            $newComp->ProductAspect = $newTicketComponent['ProductAspect'];
+                            $newComp->SecurityComponentID = $newTicketComponent['SecurityComponentID'];
+                            $newComp->TaskSubmissionID = $submission->ID;
                             $newComp->write();
+
+                            // crete ticket
+                            if (!empty($ticketId) && $isRemoteTarget) {
+
+                                // create a new ticket for the selected component
+                                $jiraTicket = JiraTicket::create();
+                                $jiraTicket->JiraKey = $ticketId;
+                                $link = $submission->issueTrackerService->addTask(// <-- Makes an API call
+                                    $jiraTicket->JiraKey,
+                                    $securityComponent,
+                                    'Task',
+                                    $newTicketComponent['ProductAspect']
+                                );
+                                $jiraTicket->TicketLink = $link;
+                                $jiraTicket->SecurityComponentID = $newComp->SecurityComponentID;
+                                $jiraTicket->TaskSubmissionID = $newComp->TaskSubmissionID;
+                                $jiraTicket->TaskSubmissionSelectedComponentID = $newComp->ID;
+                                $jiraTicket->write();
+                            }
                         }
                     }
 
-                    $doCreateTicket = !empty($ticketId) && count($newTicketComponents);
-                    // JIRA
-                    if ($doCreateTicket) {
-                        $submission->JiraKey = $ticketId;
-                        $submission->write();
-                        $components = SecurityComponent::get()->byIDs(array_column($newTicketComponents, 'ComponentID'));
-
-                        foreach ($newTicketComponents as $newTicketComponent) {
-                            $component = $components->filter('ID', $newTicketComponent['ComponentID'])->first();
-                            $jiraTicket = JiraTicket::create();
-                            $jiraTicket->JiraKey = $ticketId;
-                            $link = $submission->issueTrackerService->addTask(// <-- Makes an API call
-                                $jiraTicket->JiraKey,
-                                $component->Name,
-                                $component->Description,
-                                $component->getTicket(),
-                                'Task',
-                                $newTicketComponent['ProductAspect']
-                            );
-                            $jiraTicket->TicketLink = $link;
-                            $jiraTicket->write();
-                            $submission->JiraTickets()->add($jiraTicket);
-                        }
-                    }
                     return $submission;
                 }
             })
             ->end();
+    }
+
+    /**
+     * get component different for remove and add component
+     *
+     * @param array  $primaryArray   array 1
+     * @param array  $secondaryArray array 2
+     * @param string $type           add/remove
+     * @return array
+     */
+    public static function get_component_diff(array $primaryArray, array $secondaryArray, string $type) : array
+    {
+        $returnArray = [];
+
+        if (empty($primaryArray))
+        {
+            return $returnArray;
+        }
+
+        foreach ($primaryArray as $primaryComponent) {
+            $doesComponentExist = array_filter($secondaryArray, function ($secondaryComponent) use ($primaryComponent, $type) {
+                $primaryProductAspect = isset($primaryComponent['ProductAspect']) ? $primaryComponent['ProductAspect']: '';
+                $secondaryProductAspect = isset($secondaryComponent['ProductAspect']) ? $secondaryComponent['ProductAspect']: '';
+
+                if (empty($primaryProductAspect) && empty($secondaryProductAspect)) {
+                    return (int)$secondaryComponent['SecurityComponentID'] === (int)$primaryComponent['SecurityComponentID'];
+                }
+
+                if (!empty($primaryProductAspect) && $type === 'add' && empty($secondaryProductAspect)) {
+                    return [];
+                }
+
+                if (empty($primaryProductAspect) && $type === 'remove' && !empty($secondaryProductAspect)) {
+                    return [];
+                }
+
+                if (!empty($primaryProductAspect) && !empty($secondaryProductAspect)) {
+                    return (
+                        (int)$secondaryComponent['SecurityComponentID'] === (int)$primaryComponent['SecurityComponentID'] &&
+                        (string)$secondaryProductAspect === (string)$primaryProductAspect
+                    );
+                }
+            });
+
+            if (empty($doesComponentExist)) {
+                $returnArray[] = [
+                    'SecurityComponentID' => $primaryComponent['SecurityComponentID'],
+                    'ProductAspect' => isset($primaryComponent['ProductAspect']) ? $primaryComponent['ProductAspect'] : '' ,
+                ];
+            }
+        }
+
+        return $returnArray;
     }
 
     /**
@@ -1754,41 +1894,145 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * Find a component selection task amongst the siblings of this
-     * task submission, and return an array of selected components.
+     * @param DataObject $siblingTask sibling component selection task
      *
-     * @param DataObject $siblingTask
+     * @return string
+     */
+    public function getDataforCVATask($siblingTask) : string
+    {
+        $selectedComponent = [];
+
+        // if there is no sibling component selection task, then return default component od CVA task
+        if (empty($siblingTask)) {
+          return json_encode($this->getDefaultComponentsFromCVATask());
+        }
+
+        $isSiblingTaskCompleted = $this->isSiblingTaskCompleted($siblingTask);
+
+        // if sibling component selection task exist and component target is "Local"
+        if ($isSiblingTaskCompleted && $siblingTask->ComponentTarget == "Local") {
+            $selectedComponent = $this->getSelectedComponentForLocal($siblingTask);
+        }
+
+        if ($isSiblingTaskCompleted && $siblingTask->ComponentTarget == "JIRA Cloud") {
+            $selectedComponent = $this->getSelectedComponentForJiraCloud($siblingTask);
+        }
+
+        return json_encode($selectedComponent);
+    }
+
+    /**
+     * get the selected component from the "component selection" task
+     * when target type is "Local".
+     *
+     * @param DataObject $componentSelectionTask component selection task
      *
      * @return array
      */
-    public function getSelectedComponentsFromTaskSubmission($siblingTask)
+    public function getSelectedComponentForLocal($componentSelectionTask) : array
     {
         $out = [];
 
-        if ($siblingTask) {
-            $selectedComponents = $siblingTask->SelectedComponents();
-            foreach ($selectedComponents as $comp) {
-                $controls = [];
+        if (!$componentSelectionTask) {
+            return $out;
+        }
 
-                if (!$comp->SecurityComponentID) {
-                    continue;
-                }
+        $selectedComponents = $componentSelectionTask->SelectedComponents();
 
-                foreach($comp->SecurityComponent()->Controls() as $ctrl) {
-                    $controls[] = [
-                        'id' => $ctrl->ID,
-                        'name' => $ctrl->Name,
-                        'selectedOption' => 'No'
-                    ];
-                }
+        if (!$selectedComponents) {
+            return $out;
+        }
 
-                $out[] = [
-                    'id' => $comp->SecurityComponent()->ID,
-                    'name' => $comp->SecurityComponent()->Name,
-                    'productAspect' => $comp->ProductAspect,
-                    'controls' => $controls
+        foreach ($selectedComponents as $comp) {
+            $controls = [];
+
+            if (!$comp->SecurityComponentID) {
+                continue;
+            }
+
+            foreach($comp->SecurityComponent()->Controls() as $ctrl) {
+                $controls[] = [
+                    'id' => $ctrl->ID,
+                    'name' => $ctrl->Name,
+                    'selectedOption' => SecurityControl::CTL_STATUS_2
                 ];
             }
+
+            $out[] = [
+                'id' => $comp->SecurityComponent()->ID,
+                'name' => $comp->SecurityComponent()->Name,
+                'productAspect' => $comp->ProductAspect,
+                'controls' => $controls
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * get the selected component from the "component selection" task
+     * when target type is "JIRA Cloud"
+     *
+     * @param DataObject $componentSelectionTask component selection task
+     *
+     * @return array
+     */
+    public function getSelectedComponentForJiraCloud($componentSelectionTask) : array
+    {
+        $out = [];
+
+        if (!$componentSelectionTask) {
+            return $out;
+        }
+
+        $selectedComponents = $componentSelectionTask->SelectedComponents();
+
+        if (!$selectedComponents) {
+            return $out;
+        }
+
+        foreach ($selectedComponents as $selectedComponent) {
+            $securityComponent = $selectedComponent->SecurityComponent();
+
+            if (!$securityComponent) {
+                continue;
+            }
+
+            $controls = [];
+            // get JiraTicket details
+            $ticket = JiraTicket::get()
+            ->filter([
+                'TaskSubmissionID' => $selectedComponent->TaskSubmissionID,
+                'SecurityComponentID' => $selectedComponent->SecurityComponentID,
+                'TaskSubmissionSelectedComponentID' => $selectedComponent->ID
+            ])->first();
+
+            if (($localControls = $securityComponent->Controls()) && $ticket) {
+                $remoteControls =  $componentSelectionTask->issueTrackerService->getControlDetailsFromJiraTicket($ticket) ?: [];
+
+                foreach ($localControls as $localControl) {
+                    $doesControlExist = [];
+                    $doesControlExist = array_filter($remoteControls, function ($remoteControl) use ($localControl) {
+                        return (int)$remoteControl['ID'] === (int)$localControl->ID;
+                    });
+
+                    if (!empty($remoteControl = array_pop($doesControlExist))) {
+                        $controls[] = [
+                            'id' => $localControl->ID,
+                            'name' => $localControl->Name,
+                            'selectedOption' => $remoteControl['SelectedOption']
+                        ];
+                    }
+                }
+            }
+
+            $out[] = [
+                'id' => $securityComponent->ID,
+                'name' => $securityComponent->Name,
+                'productAspect' => $selectedComponent->ProductAspect,
+                'jiraTicketLink' => $ticket->TicketLink,
+                'controls' => $controls
+            ];
         }
 
         return $out;
@@ -1801,35 +2045,37 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      *
      * @return array
      */
-    public function getDefaultComponentsFromCVATask()
+    public function getDefaultComponentsFromCVATask() : array
     {
         $out = [];
 
-        $siblings = $this->getSiblingTaskSubmissions();
-        if ($siblings && $siblings->Count()) {
-            $selectionSubmission = $siblings->find('Task.TaskType', 'control validation audit');
+        if ($this->TaskType !== 'control validation audit') {
+            return $out;
+        }
 
-            if ($selectionSubmission) {
-                $selectedComponents = $selectionSubmission->Task()->DefaultSecurityComponents();
-            }
-            foreach ($selectedComponents as $comp) {
-                $controls = [];
+        $selectedComponents = $this->Task()->DefaultSecurityComponents();
 
-                foreach ($comp->Controls() as $ctrl) {
-                    $controls[] = [
-                        'id' => $ctrl->ID,
-                        'name' => $ctrl->Name,
-                        'selectedOption' => 'No'
-                    ];
-                }
+        if (!$selectedComponents) {
+            return $out;
+        }
 
-                $out[] = [
-                    'id' => $comp->ID,
-                    'name' => $comp->Name,
-                    'productAspect' => $comp->ProductAspect,
-                    'controls' => $controls
+        foreach ($selectedComponents as $comp) {
+            $controls = [];
+
+            foreach ($comp->Controls() as $ctrl) {
+                $controls[] = [
+                    'id' => $ctrl->ID,
+                    'name' => $ctrl->Name,
+                    'selectedOption' => SecurityControl::CTL_STATUS_2
                 ];
             }
+
+            $out[] = [
+                'id' => $comp->ID,
+                'name' => $comp->Name,
+                'productAspect' => $comp->ProductAspect,
+                'controls' => $controls
+            ];
         }
 
         return $out;

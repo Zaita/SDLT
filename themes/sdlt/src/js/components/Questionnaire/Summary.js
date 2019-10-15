@@ -12,7 +12,6 @@ import SubmissionDataUtil from "../../utils/SubmissionDataUtil";
 import type {User} from "../../types/User";
 import RiskResultContainer from "../Common/RiskResultContainer";
 import {
-  DEFAULT_CVA_CONTROLS_MESSAGE,
   DEFAULT_SRA_UNFINISHED_TASKS_MESSAGE
 } from "../../constants/values";
 
@@ -161,19 +160,12 @@ class Summary extends Component<Props> {
         <div className="alert alert-warning">
           {DEFAULT_SRA_UNFINISHED_TASKS_MESSAGE}
         </div>
-      ),
-      defaultControlsAlert = (
-        <div className="alert alert-info">
-          {DEFAULT_CVA_CONTROLS_MESSAGE}
-        </div>
-      );
-
+      )
     return (
       <div className="tasks">
         <h3>Tasks</h3>
 
         {unfinished ? unfinishedTasksAlert : null}
-        {!this.hasSelectableComponents(submission) ? defaultControlsAlert : null}
         {taskSubmissions.map(({uuid, taskName, taskType, status, approver}) => {
           let taskNameAndStatus = taskName + ' (' + prettifyStatus(status) + ')';
 

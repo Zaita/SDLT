@@ -15,7 +15,9 @@ namespace NZTA\SDLT\IssueTracker;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\Core\Extensible;
+use SilverStripe\ORM\DataObject;
 use NZTA\SDLT\IssueTracker\IssueTrackerTicket;
+use NZTA\SDLT\Model\SecurityComponent;
 
 /**
  * Abstract base class from which all ticket-systems extend.
@@ -49,15 +51,23 @@ abstract class IssueTrackerSystem
     abstract public function call(string $endpoint, string $data) : string;
 
     /**
-     * Adds a task to a ticket-system.
+     * Adds a task to the JIRA board.
      *
-     * @param  string $projectName The name of the board to post issues to.
-     * @param  string $name        This shows at the title of the task.
-     * @param  string $description This is the body of the task.
-     * @param  string $issueType   The type of issue to write-to e.g. "Task" in JIRA.
-     * @return string
+     * @param string            $projectName   The name of the JIRA board to post issues to
+     * @param string            $projectAspect
+     * @param SecurityComponent $component     Each ticket represents a single SecurityComponent.
+     * @throws \Exception                      When project name is not set
+     * @return string                          A string to use as the "TicketLink" field
+     *                                         in the {@link JiraTicket} model.
      */
-    abstract public function addTask(string $projectName, string $title, string $descr, IssueTrackerTicket $issue, string $issueType = 'Task', string $productAspect = '') : string;
+    abstract public function addTask(string $projectName, SecurityComponent $component, string $issueType = 'Task', string $productAspect = '') : string;
+
+    /**
+     * Fetches remote statuses from objects represented as or within tickets.
+     *
+     * @param  DataObject $issue
+     * @return void
+     */
 
     /**
      * @return IssueTrackerTicket
