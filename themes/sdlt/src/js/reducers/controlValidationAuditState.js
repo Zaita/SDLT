@@ -34,7 +34,6 @@ export function controlValidationAuditState(state: ContolValidationAuditState = 
     const controlID = action.payload.controlID;
     const componentID = action.payload.componentID;
     const selectedComponents = cloneDeep(state.cvaSelectedComponents);
-
     let selectedcomponent = [];
     if (productAspect !== "") {
       selectedcomponent = selectedComponents.filter((component) => component.id == componentID && component.productAspect == productAspect);
@@ -52,6 +51,14 @@ export function controlValidationAuditState(state: ContolValidationAuditState = 
         };
       }
     }
+  }
+
+  if (action.type === ActionType.CVA.RE_SYNC_WITH_JIRA) {
+    const newCVATaskData = action.payload;
+    return {
+      ...state,
+      cvaSelectedComponents: newCVATaskData
+    };
   }
 
   return state;

@@ -22,12 +22,11 @@ use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig_RelationEditor;
 use SilverStripe\Forms\GridField\GridFieldEditButton;
+use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
-use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
-
 
 /**
  * Class SecurityControl
@@ -41,6 +40,13 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
     /**
      * @var string
      */
+    const CTL_STATUS_1 = 'Realised';
+    const CTL_STATUS_2 = 'Intended';
+    const CTL_STATUS_3 = 'Not Applicable';
+
+    /**
+     * @var string
+     */
     private static $table_name = 'SecurityControl';
 
     /**
@@ -49,6 +55,11 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
     private static $db = [
         'Name' => 'Varchar(255)',
         'Description' => 'Text',
+        'Status' => "Enum('" .
+            self::CTL_STATUS_1 . "," .
+            self::CTL_STATUS_2 . "," .
+            self::CTL_STATUS_3 .
+        "')",
     ];
 
     /**
@@ -84,7 +95,6 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
     }
 
     /**
-
      * @return FieldList
      */
     public function getCMSFields()

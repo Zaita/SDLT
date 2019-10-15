@@ -7,6 +7,7 @@ export type CVATaskSubmission = {
   productAspects: Array<*>,
   questionnaireSubmissionUUID: string,
   submitterID: string,
+  componentTarget: string,
 };
 
 export type CVASelectedComponents = {
