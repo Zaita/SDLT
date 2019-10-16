@@ -174,7 +174,7 @@ class JIRA extends IssueTrackerSystem
      */
     public function getControlDetailsFromJiraTicket($jiraTicket)
     {
-        $contolDetails = [];
+        $controlDetails = [];
 
         if ($this->config()->get('api_version') != 3) {
             throw new \Exception(__FUNCTION__ . ' will only work in v3+ API.');
@@ -182,12 +182,14 @@ class JIRA extends IssueTrackerSystem
 
         $emojiStatusMap = $this->issue()->config()->get('emoji_status_map');
 
+        $ticketID = $jiraTicket->getJiraTicketID();
+
         /** One ticket per {@link SecurityComponent} */
         // Query JIRA...
         $baseUri = sprintf(
             '/rest/api/%d/issue/%s',
             $this->config()->get('api_version'),
-            $jiraTicket ->getId()
+            $ticketID
         );
 
         $result = $this->call($baseUri, null, 'GET');
@@ -206,17 +208,30 @@ class JIRA extends IssueTrackerSystem
 
         $controlBody = $ret['fields']['description']['content'];
 
+        if (empty ($controlBody)) {
+            return $controlDetails;
+        }
+
         // Lose the response' "preamble"
         $remoteControls = array_chunk(array_slice($controlBody, 3), 2);
 
-        foreach ($remoteControls as $remoteControl) {
-            $remoteControlContent = $remoteControl[0]['content'];
-            $emoji = $remoteControlContent[0]['attrs']['shortName'] ?? null;
-            $heading = $remoteControlContent[1]['text'] ?? null;
+        if (empty($remoteControls)) {
+            return $controlDetails;
+        }
 
-            if (empty(trim($heading)) && isset($remoteControlContent[2]['text'])) {
-              $heading = $remoteControlContent[2]['text'] ?? null;
-            };
+        foreach ($remoteControls as $remoteControl) {
+            $remoteControlContent = isset($remoteControl[0]['content']) ? $remoteControl[0]['content'] : null;
+            $emoji = null;
+            $heading = null;
+
+            if (!empty ($remoteControlContent)) {
+              $emoji = isset($remoteControlContent[0]['attrs']['shortName']) ? $remoteControlContent[0]['attrs']['shortName'] : null;
+              $heading = isset($remoteControlContent[1]['text']) ? $remoteControlContent[1]['text'] : null;
+
+              if (empty(trim($heading)) && isset($remoteControlContent[2]['text'])) {
+                $heading = isset($remoteControlContent[2]['text']) ?$remoteControlContent[2]['text'] : null;
+              };
+            }
 
             if (!in_array($emoji, array_keys($emojiStatusMap))) {
                 throw new \RuntimeException('Unexpected API response: Unmatched emoji.');
@@ -225,7 +240,7 @@ class JIRA extends IssueTrackerSystem
             if ($emoji && $heading) {
                 $matches = [];
                 if (preg_match("@(?<=#)[\d]+@", trim($heading), $matches)) {
-                    $contolDetails[] = [
+                    $controlDetails[] = [
                         'ID' =>$matches[0],
                         'ControlHeading' => trim($heading),
                         'SelectedOption' => $emojiStatusMap[$emoji]
@@ -234,7 +249,7 @@ class JIRA extends IssueTrackerSystem
             }
         }
 
-        return $contolDetails;
+        return $controlDetails;
     }
 
 }

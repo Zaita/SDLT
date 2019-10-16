@@ -118,8 +118,22 @@ class JiraTicket extends DataObject implements ScaffoldingProvider
     /**
      * @return string
      */
-    public function getId() : string
+    public function getJiraTicketID()
     {
-        return trim(@end(explode('/', $this->TicketLink)));
+        $ticketID = '';
+
+        if (!$this->TicketLink) {
+            return $ticketID;
+        }
+
+        $ticketParts = explode('/', $this->TicketLink);
+
+        if (empty($ticketParts)) {
+            return $ticketID;
+        }
+
+        $ticketID = trim(array_pop($ticketParts));
+
+        return $ticketID;
     }
 }

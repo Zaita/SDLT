@@ -18,7 +18,7 @@ import type {User} from "../../types/User";
 import type {
   CVATaskSubmission,
   CVASelectedComponents
-} from "../../types/ContolValidationAudit";
+} from "../../types/ControlValidationAudit";
 import URLUtil from "../../utils/URLUtil";
 import LightButton from "../Button/LightButton";
 import DarkButton from "../Button/DarkButton";
@@ -32,13 +32,12 @@ import {
   CTL_STATUS_2,
   CTL_STATUS_3
 } from '../../constants/values.js';
-import CVATaskForJiraCloud from "./CVATaskForJiraCloud";
 
 const mapStateToProps = (state: RootState) => {
   return {
     siteTitle: state.siteConfigState.siteTitle,
     currentUser: state.currentUserState.user,
-    contolValidationAuditData: state.controlValidationAuditState.contolValidationAuditData,
+    controlValidationAuditData: state.controlValidationAuditState.controlValidationAuditData,
     cvaSelectedComponents: state.controlValidationAuditState.cvaSelectedComponents
   };
 };
@@ -69,7 +68,7 @@ type Props = {
   secureToken: string,
   siteTitle?: string,
   currentUser?: User | null,
-  contolValidationAuditData?: CVATaskSubmission | null,
+  controlValidationAuditData?: CVATaskSubmission | null,
   dispatchLoadDataAction?: (uuid: string, secureToken: string) => void,
   dispatchSaveControlValidationAuditDataAction?: () => void,
   dispatchUpdateControlValidationQuestionDataAction?: (selectedOptionDetail: object) => void,
@@ -87,7 +86,7 @@ class ControlValidationAuditContainer extends Component<Props, State> {
    * Display a list of security component headlines with radio inputs for controls
    */
   renderCVAQuestionsForm() {
-    const productAspects = this.props.contolValidationAuditData.productAspects;
+    const productAspects = this.props.controlValidationAuditData.productAspects;
     const selectedComponents = this.props.cvaSelectedComponents;
     if (productAspects.length > 0 && selectedComponents.length > 0) {
       return (
@@ -145,12 +144,12 @@ class ControlValidationAuditContainer extends Component<Props, State> {
     const componentKey = component.productAspect ? `${component.productAspect}_${component.id}`: component.id;
     const controls = component.controls;
     const link = component.jiraTicketLink ? (<a href={component.jiraTicketLink}>{component.jiraTicketLink}</a>) : null;
-    const componetTitle = link !== null ? (component.name + '-' + link) : component.name;
+
     return (
       <div key={componentKey}>
         <h5>
           {component.name}
-          {link && this.props.contolValidationAuditData.componentTarget == "JIRA Cloud" && (<span> - {link}</span>)}
+          {link && this.props.controlValidationAuditData.componentTarget == "JIRA Cloud" && (<span> - {link}</span>)}
         </h5>
         {
           controls && controls.map((control) => {
@@ -163,7 +162,7 @@ class ControlValidationAuditContainer extends Component<Props, State> {
 
   renderControl(control, component) {
     const controlKey = component.productAspect ? `${component.productAspect}_${component.id}_${control.id}`: `${component.id}_${control.id}`;
-    const componentTarget = this.props.contolValidationAuditData.componentTarget;
+    const componentTarget = this.props.controlValidationAuditData.componentTarget;
 
     if (componentTarget === "JIRA Cloud") {
       return this.renderRemoteControls(control, controlKey);
@@ -226,25 +225,25 @@ class ControlValidationAuditContainer extends Component<Props, State> {
     const {
       siteTitle,
       currentUser,
-      contolValidationAuditData,
+      controlValidationAuditData,
       secureToken,
       dispatchSaveControlValidationAuditDataAction,
       cvaSelectedComponents,
       dispatchReSyncWithJira
     } = {...this.props};
 
-    if (!currentUser || !siteTitle || !contolValidationAuditData) {
+    if (!currentUser || !siteTitle || !controlValidationAuditData) {
       return null;
     }
-    const isSubmitter = contolValidationAuditData.submitterID === currentUser.id;
+    const isSubmitter = controlValidationAuditData.submitterID === currentUser.id;
     const submitButton = isSubmitter && cvaSelectedComponents.length > 0 ? (
       <LightButton
       title="SUBMIT"
       classes={["mr-3"]}
       onClick={() => dispatchSaveControlValidationAuditDataAction(
-        contolValidationAuditData.uuid,
+        controlValidationAuditData.uuid,
         cvaSelectedComponents,
-        contolValidationAuditData.questionnaireSubmissionUUID,
+        controlValidationAuditData.questionnaireSubmissionUUID,
         secureToken
       )}/>
     ): null;
@@ -253,23 +252,23 @@ class ControlValidationAuditContainer extends Component<Props, State> {
       <DarkButton
         title={"BACK TO QUESTIONNAIRE SUMMARY"}
         onClick={() => {
-          URLUtil.redirectToQuestionnaireSummary(contolValidationAuditData.questionnaireSubmissionUUID, secureToken);
+          URLUtil.redirectToQuestionnaireSummary(controlValidationAuditData.questionnaireSubmissionUUID, secureToken);
         }}
       />
     );
 
-    const reSync = isSubmitter && contolValidationAuditData.componentTarget == "JIRA Cloud" && cvaSelectedComponents.length > 0 ? (
+    const reSync = isSubmitter && controlValidationAuditData.componentTarget == "JIRA Cloud" && cvaSelectedComponents.length > 0 ? (
       <DarkButton
         title={"RE SYNC WITH JIRA"}
         classes={["mr-3"]}
-        onClick={() => dispatchReSyncWithJira(contolValidationAuditData.uuid)}
+        onClick={() => dispatchReSyncWithJira(controlValidationAuditData.uuid)}
       />
     ) : null;
 
 
     return (
       <div className="ControlValidationAuditContainer">
-        <Header title={contolValidationAuditData.taskName} subtitle={siteTitle} username={currentUser.name}/>
+        <Header title={controlValidationAuditData.taskName} subtitle={siteTitle} username={currentUser.name}/>
 
         <div className="ControlValidationAuditResult" key="0">
           <div className=""  key="component_validation_questions">
