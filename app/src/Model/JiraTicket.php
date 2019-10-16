@@ -47,7 +47,9 @@ class JiraTicket extends DataObject implements ScaffoldingProvider
      * @var array
      */
     private static $has_one = [
-        'TaskSubmission' => TaskSubmission::class
+        'TaskSubmission' => TaskSubmission::class,
+        'SecurityComponent' => SecurityComponent::class,
+        'TaskSubmissionSelectedComponent' => SelectedComponent::class,
     ];
 
     /**
@@ -102,9 +104,7 @@ class JiraTicket extends DataObject implements ScaffoldingProvider
                     $jiraTicket->JiraKey = Convert::raw2sql($args['JiraKey']);
                     $link = $jiraTicket->issueTrackerService->addTask( // <-- Makes an API call
                         $jiraTicket->JiraKey,
-                        $component->Name,
-                        $component->Description,
-                        $component->getTicket()
+                        $component
                     );
                     $jiraTicket->TicketLink = $link;
                     $jiraTicket->write();
@@ -113,5 +113,27 @@ class JiraTicket extends DataObject implements ScaffoldingProvider
                 }
             })
             ->end();
+    }
+
+    /**
+     * @return string
+     */
+    public function getJiraTicketID()
+    {
+        $ticketID = '';
+
+        if (!$this->TicketLink) {
+            return $ticketID;
+        }
+
+        $ticketParts = explode('/', $this->TicketLink);
+
+        if (empty($ticketParts)) {
+            return $ticketID;
+        }
+
+        $ticketID = trim(array_pop($ticketParts));
+
+        return $ticketID;
     }
 }

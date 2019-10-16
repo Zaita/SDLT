@@ -1,0 +1,37 @@
+NZTA\SDLT\Model\SecurityControl:
+  control-realised:
+    ID: 44
+    Name: 'Azure Active Directory Integration'
+    Description: 'This product integrates with Azure Active Directory for User Authentication'
+    Status: null
+  control-intended:
+    ID: 45
+    Name: 'OAUTH2'
+    Description: 'OAUTH2 is used for integration between the Product and Azure Active Directory'
+    Status: null
+  control-not-applicable:
+    ID: 46
+    Name: 'JWT'
+    Description: 'Application makes use of JSON Web Tokens'
+    Status: null
+    
+NZTA\SDLT\Model\SecurityComponent:
+  component-001:
+    Name: 'User Login'
+    Description: 'The product will authenticate Staff.'
+    Controls: =>NZTA\SDLT\Model\SecurityControl.control-realised,=>NZTA\SDLT\Model\SecurityControl.control-intended,=>NZTA\SDLT\Model\SecurityControl.control-not-applicable
+    
+NZTA\SDLT\Model\SelectedComponent:
+  selected-component-001:
+    SecurityComponent: =>NZTA\SDLT\Model\SecurityComponent.component-001
+    
+NZTA\SDLT\Model\TaskSubmission:
+  submission:
+    UUID: 'f55777cc-a3ed-47dc-a755-6f010d68cd58'
+    SelectedComponents: =>NZTA\SDLT\Model\SelectedComponent.selected-component-001
+
+NZTA\SDLT\Model\JiraTicket:
+  component-001-ticket:
+    TicketLink: 'https://foo.awesomeboards.net/projects/TEST/issues/TEST-44'
+    JiraKey: TEST
+    TaskSubmission: =>NZTA\SDLT\Model\TaskSubmission.submission

@@ -17,14 +17,14 @@ export default class SecurityComponentParser {
 
   static parseFromJSONObject(jsonObject: *): SecurityComponent {
     return {
-      id: toString(get(jsonObject, "ID")),
-      name: toString(get(jsonObject, "Name")),
+      id: toString(get(jsonObject, "ID", "")),
+      name: toString(get(jsonObject, "Name", "")),
       description: toString(get(jsonObject, "Description")),
       controls: (get(jsonObject, "Controls") || []).map((control) => {
         return {
-          id: toString(get(control, "ID")),
-          name: toString(get(control, "Name")),
-          description: toString(get(control, "Description"))
+          id: toString(get(control, "ID", "")),
+          name: toString(get(control, "Name", "")),
+          description: toString(get(control, "Description", ""))
         }
       })
     }
@@ -32,17 +32,19 @@ export default class SecurityComponentParser {
 
   static parseCVAFromJSONObject(jsonArray: *): SecurityComponent {
     return jsonArray.map((jsonObject) => {
+
       return {
-        id: toString(get(jsonObject, "id")),
-        name: toString(get(jsonObject, "name")),
+        id: toString(get(jsonObject, "id", "")),
+        name: toString(get(jsonObject, "name", "")),
         productAspect:toString(get(jsonObject, "productAspect", "")),
         controls: (get(jsonObject, "controls") || []).map((control) => {
           return {
-            id: toString(get(control, "id")),
-            name: toString(get(control, "name")),
-            selectedOption: toString(get(control, "selectedOption")),
+            id: toString(get(control, "id", "")),
+            name: toString(get(control, "name", "")),
+            selectedOption: toString(get(control, "selectedOption", "")),
           }
-        })
+        }),
+        jiraTicketLink: toString(get(jsonObject, "jiraTicketLink", "")),
       }
     });
   }

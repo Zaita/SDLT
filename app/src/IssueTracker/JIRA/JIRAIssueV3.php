@@ -14,6 +14,7 @@
 namespace NZTA\SDLT\IssueTracker\JIRA;
 
 use NZTA\SDLT\IssueTracker\IssueTrackerTicket;
+use NZTA\SDLT\Model\SecurityControl;
 
 /**
  * A very basic encapsulation of a v3 JIRA issue format.
@@ -22,11 +23,23 @@ use NZTA\SDLT\IssueTracker\IssueTrackerTicket;
  */
 class JIRAIssueV3 extends IssueTrackerTicket
 {
-
     /**
      * @var string
      */
     protected $introText = 'Instruction';
+
+    /**
+     * @var array
+     *
+     * A map of JIRA emoji "states" to {@link Control} Status values. This should probably
+     * be implemented on an intermediary class with no knowledge of either {@link JIRA}
+     * or {@link SecurityControl}.
+     */
+    private static $emoji_status_map = [
+        ':check_mark:' => SecurityControl::CTL_STATUS_1,
+        ':cross_mark:' => SecurityControl::CTL_STATUS_2,
+        ':link:' => SecurityControl::CTL_STATUS_3,
+    ];
 
     /**
      * The v3 ticket format.

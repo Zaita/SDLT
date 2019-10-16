@@ -1,8 +1,8 @@
 // @flow
 
-import type {ContolValidationAudit} from "../types/Task";
+import type {ControlValidationAudit} from "../types/Task";
 
-export type ContolValidationAuditState = {
-  contolValidationAuditData: ContolValidationAudit | null,
-  cvaSelectedComponents: CVASelectedComponents | [],
+export type ControlValidationAuditState = {
+  controlValidationAuditData: ControlValidationAudit | null,
+  cvaSelectedComponents: CVASelectedComponents | []
 };
