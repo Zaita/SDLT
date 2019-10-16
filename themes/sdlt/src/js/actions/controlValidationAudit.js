@@ -11,7 +11,6 @@ export function loadControlValidationAudit(args: {uuid: string, secureToken?: st
 
   return async (dispatch) => {
     try {
-
       // Clear data first
       await dispatch( {
         type: ActionType.CVA.LOAD_CONTROL_VALIDATION_AUDIT,
@@ -71,5 +70,30 @@ export function updateControlValidationAuditData(args: {selectedOption: string, 
       payload: args
     };
     await dispatch(action);
+  }
+}
+
+export function reSyncWithJira (uuid: string) : ThunkAction {
+  return async (dispatch) => {
+    try {
+      // Get CSRF token
+      const csrfToken = await CSRFTokenService.getCSRFToken();
+
+      // Call re sync with jira data api
+      const payload = await ControlValidationAuditDataService.reSyncWithJira({
+        uuid,
+        csrfToken
+      });
+
+      const action = {
+        type: ActionType.CVA.RE_SYNC_WITH_JIRA,
+        payload,
+      };
+
+      await dispatch(action);
+    }
+    catch (error) {
+      ErrorUtil.displayError(error);
+    }
   }
 }

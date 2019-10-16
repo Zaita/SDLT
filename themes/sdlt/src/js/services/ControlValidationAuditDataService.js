@@ -2,6 +2,7 @@ import GraphQLRequestHelper from "../utils/GraphQLRequestHelper";
 import get from "lodash/get";
 import toString from "lodash/toString";
 import SecurityComponentParser from "../utils/SecurityComponentParser";
+import {DEFAULT_NETWORK_ERROR} from "../constants/errors";
 
 export default class ControlValidationAuditDataService {
   static async fetchControlValidationAuditTaskSubmission(args: { uuid: string, secureToken?: string }): Promise<TaskSubmission> {
@@ -17,6 +18,7 @@ query {
     TaskName
     CVATaskData
     ProductAspects
+    CVATaskDataSource
     Submitter {
       ID
     }
@@ -45,6 +47,7 @@ query {
       taskName: toString(get(submissionJSONObject, "TaskName", "")),
       selectedComponents: components,
       submitterID: toString(get(submissionJSONObject, "Submitter.ID", "")),
+      componentTarget: toString(get(submissionJSONObject, "CVATaskDataSource", "")),
       productAspects:  _.has(submissionJSONObject, 'ProductAspects') ? JSON.parse(get(submissionJSONObject, "ProductAspects", [])) : [],
     };
 
@@ -71,5 +74,30 @@ mutation {
     if (!updatedData) {
       throw DEFAULT_NETWORK_ERROR;
     }
+  }
+
+  static async reSyncWithJira(argument: {uuid: string, csrfToken: string}) : Promise<TaskSubmission> {
+    const {uuid, csrfToken} = {...argument};
+    const query = `
+mutation {
+  reSyncWithJira(UUID: "${uuid}") {
+    UUID
+    CVATaskData
+  }
+}`;
+    const json = await GraphQLRequestHelper.request({query, csrfToken});
+    const updatedData = _.get(json, "data.reSyncWithJira", null);
+
+    if (!updatedData) {
+      throw DEFAULT_NETWORK_ERROR;
+    }
+    let jsonArray = JSON.parse(get(updatedData, "CVATaskData", "[]"));
+
+    if (!Array.isArray(jsonArray)) {
+      jsonArray = [];
+    }
+
+    const components = jsonArray.length > 0 ? SecurityComponentParser.parseCVAFromJSONObject(jsonArray) : jsonArray;
+    return components;
   }
 }
