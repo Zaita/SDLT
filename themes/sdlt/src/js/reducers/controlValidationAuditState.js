@@ -1,29 +1,29 @@
 // @flow
 
-import type {ContolValidationAuditState} from "../store/ContolValidationAuditState";
+import type {ControlValidationAuditState} from "../store/ControlValidationAuditState";
 import ActionType from "../actions/ActionType";
 import ComponentSelectionUtil from "../utils/ComponentSelectionUtil";
 import { cloneDeep } from 'lodash';
 
-const defaultStartState: ContolValidationAuditState = {
-  contolValidationAuditData: null,
+const defaultStartState: ControlValidationAuditState = {
+  controlValidationAuditData: null,
   cvaSelectedComponents: []
 };
 const isSelectedComponentExist = ComponentSelectionUtil.isSelectedComponentExist;
 
-export function controlValidationAuditState(state: ContolValidationAuditState = defaultStartState, action: *): ContolValidationAuditState {
+export function controlValidationAuditState(state: ControlValidationAuditState = defaultStartState, action: *): ControlValidationAuditState {
   if (action.type === ActionType.CVA.LOAD_CONTROL_VALIDATION_AUDIT) {
-    let contolValidationAuditData = action.payload;
+    let controlValidationAuditData = action.payload;
     let selectedComponents = [];
 
-    if (contolValidationAuditData) {
-      selectedComponents = contolValidationAuditData.selectedComponents;
-      delete contolValidationAuditData.selectedComponents;
+    if (controlValidationAuditData) {
+      selectedComponents = controlValidationAuditData.selectedComponents;
+      delete controlValidationAuditData.selectedComponents;
     }
 
     return {
       ...state,
-      contolValidationAuditData: contolValidationAuditData,
+      controlValidationAuditData: controlValidationAuditData,
       cvaSelectedComponents: selectedComponents
     };
   }

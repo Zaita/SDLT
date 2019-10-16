@@ -90,7 +90,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     /**
      * @var string
      */
-    public $CVATaskDataSource = 'DefaultComponent';
+    private $cvaTaskDataSource;
 
     /**
      * @var array
@@ -213,9 +213,11 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     public function getComponentTarget()
     {
         $task = $this->Task();
+
         if (!$task->exists()) {
             return "";
         }
+
         return $task->ComponentTarget;
     }
 
@@ -224,7 +226,18 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      */
     public function getCVATaskDataSource() : string
     {
-        return $this->CVATaskDataSource;
+        if (!$this->cvaTaskDataSource) {
+            $this->setCVATaskDataSource();
+        }
+
+        return $this->cvaTaskDataSource;
+    }
+
+    /**
+     * @return string
+     */
+    public function setCVATaskDataSource($dataSource = 'DefaultComponent') {
+        $this->cvaTaskDataSource = $dataSource;
     }
 
     /**
@@ -1047,7 +1060,9 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                         $siblingComponentSelectionTask = $data->getSiblingTaskSubmissionsByType('selection');
 
                         if ($siblingComponentSelectionTask) {
-                            $data->CVATaskDataSource = $siblingComponentSelectionTask->ComponentTarget;
+                            $data->setCVATaskDataSource ($siblingComponentSelectionTask->ComponentTarget);
+                        } else {
+                            $data->setCVATaskDataSource ();
                         }
 
                         if (empty($data->CVATaskData)) {
@@ -2001,11 +2016,11 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             $controls = [];
             // get JiraTicket details
             $ticket = JiraTicket::get()
-            ->filter([
-                'TaskSubmissionID' => $selectedComponent->TaskSubmissionID,
-                'SecurityComponentID' => $selectedComponent->SecurityComponentID,
-                'TaskSubmissionSelectedComponentID' => $selectedComponent->ID
-            ])->first();
+              ->filter([
+                  'TaskSubmissionID' => $selectedComponent->TaskSubmissionID,
+                  'SecurityComponentID' => $selectedComponent->SecurityComponentID,
+                  'TaskSubmissionSelectedComponentID' => $selectedComponent->ID
+              ])->first();
 
             if (($localControls = $securityComponent->Controls()) && $ticket) {
                 $remoteControls =  $componentSelectionTask->issueTrackerService->getControlDetailsFromJiraTicket($ticket) ?: [];
@@ -2030,7 +2045,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'id' => $securityComponent->ID,
                 'name' => $securityComponent->Name,
                 'productAspect' => $selectedComponent->ProductAspect,
-                'jiraTicketLink' => $ticket->TicketLink,
+                'jiraTicketLink' => $ticket ? $ticket->TicketLink : '',
                 'controls' => $controls
             ];
         }

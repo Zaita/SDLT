@@ -30,7 +30,7 @@ class MockIssueTracker extends IssueTrackerSystem implements TestOnly
         return '';
     }
 
-    public function updateStatusesFor(DataObject $issue) : void
+    public function getControlDetailsFromJiraTicket(DataObject $issue) : void
     {
     }
 
