@@ -14,6 +14,7 @@ import RiskResultContainer from "../Common/RiskResultContainer";
 import {
   DEFAULT_SRA_UNFINISHED_TASKS_MESSAGE
 } from "../../constants/values";
+import SecurityRiskAssessmentUtil from "../../utils/SecurityRiskAssessmentUtil";
 
 type Props = {
   submission: Submission | null,
@@ -62,23 +63,24 @@ class Summary extends Component<Props> {
     };
   }
 
-  hasUnfinishedTaskSubmissions(submission)
+  unfinishedTaskSubmissionMessage()
   {
-    let taskSubmissions = submission.taskSubmissions,
-      unfinished = false;
+    const taskSubmissions = this.props.submission.taskSubmissions;
+    let unfinishedMessage = '';
 
-    taskSubmissions.forEach((submission, index) => {
-      let isSRA = (submission.taskType === 'security risk assessment'),
-        isRQ = (submission.taskType === 'risk questionnaire'),
-        isInProg = (submission.status === 'start' || submission.status === "in_progress");
-
-        if(!isSRA && isRQ && isInProg) {
-          unfinished = true;
-        }
-
+    const filteredTask = taskSubmissions.filter((taskSubmission)=> {
+      return taskSubmission.taskType === 'risk questionnaire'
     });
 
-    return unfinished;
+    if (filteredTask.length > 0) {
+      const riskQuestionnaireTask = filteredTask[0];
+      const isRQCompleted = (riskQuestionnaireTask.status === 'complete' || riskQuestionnaireTask.status == "approved");
+      if(riskQuestionnaireTask && !isRQCompleted) {
+        unfinishedMessage = `Please complete "${riskQuestionnaireTask.taskName}" to see the Security Risk Assessment`;
+      }
+    }
+
+    return unfinishedMessage;
   }
 
   hasSelectableComponents(sub)
@@ -87,7 +89,6 @@ class Summary extends Component<Props> {
       hasSelectableComponents = false;
 
     taskSubmissions.forEach((submission, index) => {
-      console.log(submission.taskType);
       let isComponentSelection = (submission.taskType === 'selection');
       if(isComponentSelection) {
         hasSelectableComponents = true;
@@ -135,6 +136,7 @@ class Summary extends Component<Props> {
       </div>
     );
   }
+
   renderSubmitterInfo(submission: Submission) {
     const submitter = submission.submitter;
 
@@ -151,30 +153,29 @@ class Summary extends Component<Props> {
 
   renderTasks(submission: Submission) {
     const taskSubmissions = submission.taskSubmissions;
+    const isSRATaskFinalised = SecurityRiskAssessmentUtil.isSRATaskFinalised(submission.taskSubmissions);
+
     if (taskSubmissions.length === 0) {
       return null;
     }
 
-    const unfinished = this.hasUnfinishedTaskSubmissions(submission),
-      unfinishedTasksAlert = (
-        <div className="alert alert-warning">
-          {DEFAULT_SRA_UNFINISHED_TASKS_MESSAGE}
-        </div>
-      )
+    const unfinshedRQTaskMessage = this.unfinishedTaskSubmissionMessage() ? (
+      <div className="alert alert-warning">{this.unfinishedTaskSubmissionMessage()}</div>
+    ) : null;
+
     return (
       <div className="tasks">
         <h3>Tasks</h3>
+        {unfinshedRQTaskMessage}
+        {isSRATaskFinalised ? SecurityRiskAssessmentUtil.getSraIsFinalisedAlert() : null}
 
-        {unfinished ? unfinishedTasksAlert : null}
         {taskSubmissions.map(({uuid, taskName, taskType, status, approver}) => {
           let taskNameAndStatus = taskName + ' (' + prettifyStatus(status) + ')';
 
           if (status === "start") {
             taskNameAndStatus = taskName + ' (Please complete me)';
             if(taskType === 'security risk assessment') {
-              if (unfinished === false) {
-                taskNameAndStatus = taskName;
-              }
+              taskNameAndStatus = taskName;
             }
           }
 
@@ -185,28 +186,28 @@ class Summary extends Component<Props> {
           const {token} = {...this.props};
           const button = (
             <button className={"btn btn-link"} onClick={(event: Event) => {
-              if (taskType === "selection") {
-                URLUtil.redirectToComponentSelectionSubmission(uuid, token);
-                return;
-              }
-              if (taskType === "security risk assessment") {
-                URLUtil.redirectToSecurityRiskAssessment(uuid, token);
-                return;
-              }
+                if (taskType === "selection") {
+                  URLUtil.redirectToComponentSelectionSubmission(uuid, token);
+                  return;
+                }
+                if (taskType === "security risk assessment") {
+                  URLUtil.redirectToSecurityRiskAssessment(uuid, token);
+                  return;
+                }
 
-              if (taskType === "control validation audit") {
-                URLUtil.redirectToControlValidationAudit(uuid, token);
-                return;
-              }
-              URLUtil.redirectToTaskSubmission(uuid, token);
-            }}>
-              {taskNameAndStatus}
+                if (taskType === "control validation audit") {
+                  URLUtil.redirectToControlValidationAudit(uuid, token);
+                  return;
+                }
+                URLUtil.redirectToTaskSubmission(uuid, token);
+              }}>
+                {taskNameAndStatus}
             </button>
           );
 
           return (
             <div key={uuid}>
-              {unfinished && taskType === 'security risk assessment' ? null : button}
+              {unfinshedRQTaskMessage && taskType === 'security risk assessment' ? null : button}
             </div>
           );
         })}

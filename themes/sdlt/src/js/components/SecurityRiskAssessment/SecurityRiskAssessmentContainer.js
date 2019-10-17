@@ -14,9 +14,14 @@ import type {User} from "../../types/User";
 import {
   loadSecurityRiskAssessment
 } from "../../actions/securityRiskAssessment";
+import {
+  completeTaskSubmission
+} from "../../actions/task";
 import type {SecurityRiskAssessment} from "../../types/Task";
 import URLUtil from "../../utils/URLUtil";
+import LightButton from "../Button/LightButton";
 import DarkButton from "../Button/DarkButton";
+import SecurityRiskAssessmentUtil from "../../utils/SecurityRiskAssessmentUtil";
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -32,6 +37,9 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
       dispatch(loadCurrentUser());
       dispatch(loadSiteTitle());
       dispatch(loadSecurityRiskAssessment({uuid, secureToken}));
+    },
+    dispatchFinaliseAction(uuid: string, secureToken?: string | null, questionnaireUUID) {
+      dispatch(completeTaskSubmission({'taskSubmissionUUID': uuid, 'secureToken': secureToken, 'questionnaireUUID': questionnaireUUID}));
     }
   };
 };
@@ -43,6 +51,7 @@ type Props = {
   currentUser?: User | null,
   securityRiskAssessmentData?: SecurityRiskAssessment | null,
   dispatchLoadDataAction?: (uuid: string, secureToken: string) => void,
+  dispatchFinaliseAction?: (uuid: string, secureToken: string) => void,
 };
 
 class SecurityRiskAssessmentContainer extends Component<Props> {
@@ -64,8 +73,9 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
       return null;
     }
 
+    const isSRATaskFinalised = SecurityRiskAssessmentUtil.isSRATaskFinalised(securityRiskAssessmentData.taskSubmissions);
     const backButton = (
-      <DarkButton
+      <LightButton
         title={"BACK TO QUESTIONNAIRE SUMMARY"}
         onClick={() => {
           URLUtil.redirectToQuestionnaireSummary(securityRiskAssessmentData.questionnaireSubmissionUUID, secureToken);
@@ -73,11 +83,25 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
       />
     );
 
+    const isSiblingTaskPending = SecurityRiskAssessmentUtil.isSiblingTaskPending(securityRiskAssessmentData.taskSubmissions);
+    const finaliseButton = !isSRATaskFinalised && !isSiblingTaskPending
+      ? (
+        <DarkButton title="FINALISE"
+          classes={["button ml-2"]}
+
+          onClick={() => {
+            this.props.dispatchFinaliseAction(securityRiskAssessmentData.uuid, secureToken, securityRiskAssessmentData.questionnaireSubmissionUUID);
+          }}
+        />
+      )
+      : null;
+
     return (
       <div className="SecurityRiskAssessmentContainer">
         <Header title={securityRiskAssessmentData.taskName} subtitle={siteTitle} username={currentUser.name}/>
 
         <div className="SecurityRiskAssessmentResult">
+          {isSRATaskFinalised ? SecurityRiskAssessmentUtil.getSraIsFinalisedAlert() : false}
           <RiskAssessmentMatrixTableContainer
             riskResults={securityRiskAssessmentData.riskResults}
             likelihoodThresholds={securityRiskAssessmentData.likelihoodRatings}
@@ -89,6 +113,7 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
 
           <div className="buttons">
             {backButton}
+            {finaliseButton}
           </div>
 
         </div>

@@ -12,6 +12,8 @@ import DarkButton from "../Button/DarkButton";
 import pdfIcon from "../../../img/icons/pdf.svg";
 import PDFUtil from "../../utils/PDFUtil";
 import RiskResultContainer from "../Common/RiskResultContainer";
+import SecurityRiskAssessmentUtil from "../../utils/SecurityRiskAssessmentUtil";
+
 type Props = {
   taskSubmission: TaskSubmissionType,
   saveAnsweredQuestion: (answeredQuestion: Question) => void,
@@ -74,8 +76,14 @@ class TaskSubmission extends Component<Props> {
       />
     ) : null;
 
-    const editButton = showEditButton ? (
-      <LightButton title={"EDIT ANSWERS"} onClick={editAnswers} iconImage={editIcon}/>
+    const isSRATaskFinalised = taskSubmission.taskType === 'risk questionnaire' && SecurityRiskAssessmentUtil.isSRATaskFinalised(taskSubmission.siblingSubmissions);
+
+    const editButton = showEditButton && !isSRATaskFinalised ? (
+      <LightButton
+        title="EDIT ANSWERS"
+        onClick={editAnswers}
+        iconImage={editIcon}
+      />
     ) : null;
 
     const pdfButton = (taskSubmission.status === 'expired') ? null : (
@@ -105,6 +113,7 @@ class TaskSubmission extends Component<Props> {
 
     return (
       <div className="TaskSubmission">
+        {taskSubmission.taskType === 'risk questionnaire' && isSRATaskFinalised ? SecurityRiskAssessmentUtil.getSraIsFinalisedAlert() : false}
         {result}
         {body}
         {riskResult}

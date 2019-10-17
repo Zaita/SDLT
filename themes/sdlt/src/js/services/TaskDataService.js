@@ -39,6 +39,11 @@ query {
       ID
       UUID
       QuestionnaireStatus
+      TaskSubmissions {
+        UUID
+        Status
+        TaskType
+      }
     }
     Submitter {
       ID
@@ -106,7 +111,8 @@ query {
       isTaskApprovalRequired: get(submissionJSONObject, "IsTaskApprovalRequired", false) === "true",
       riskResults: _.has(submissionJSONObject, 'RiskResultData') ? JSON.parse(_.get(submissionJSONObject, "RiskResultData", "[]")) : "[]",
       productAspects:  _.has(submissionJSONObject, 'ProductAspects') ? JSON.parse(_.get(submissionJSONObject, "ProductAspects", [])) : [],
-      componentTarget: toString(get(submissionJSONObject, "ComponentTarget", ""))
+      componentTarget: toString(get(submissionJSONObject, "ComponentTarget", "")),
+      siblingSubmissions: submissionJSONObject.QuestionnaireSubmission.TaskSubmissions
     };
 
     return data;

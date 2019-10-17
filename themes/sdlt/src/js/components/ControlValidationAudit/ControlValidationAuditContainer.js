@@ -32,6 +32,7 @@ import {
   CTL_STATUS_2,
   CTL_STATUS_3
 } from '../../constants/values.js';
+import SecurityRiskAssessmentUtil from "../../utils/SecurityRiskAssessmentUtil";
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -142,9 +143,9 @@ class ControlValidationAuditContainer extends Component<Props, State> {
 
   renderComponent(component) {
     const componentKey = component.productAspect ? `${component.productAspect}_${component.id}`: component.id;
+
     const controls = component.controls;
     const link = component.jiraTicketLink ? (<a href={component.jiraTicketLink}>{component.jiraTicketLink}</a>) : null;
-
     return (
       <div key={componentKey}>
         <h5>
@@ -235,11 +236,13 @@ class ControlValidationAuditContainer extends Component<Props, State> {
     if (!currentUser || !siteTitle || !controlValidationAuditData) {
       return null;
     }
+
     const isSubmitter = controlValidationAuditData.submitterID === currentUser.id;
-    const submitButton = isSubmitter && cvaSelectedComponents.length > 0 ? (
+    const isSRATaskFinalised = SecurityRiskAssessmentUtil.isSRATaskFinalised(controlValidationAuditData.siblingSubmissions);
+
+    const submitButton = isSubmitter && !isSRATaskFinalised && cvaSelectedComponents.length > 0 ? (
       <LightButton
       title="SUBMIT"
-      classes={["mr-3"]}
       onClick={() => dispatchSaveControlValidationAuditDataAction(
         controlValidationAuditData.uuid,
         cvaSelectedComponents,
@@ -257,29 +260,29 @@ class ControlValidationAuditContainer extends Component<Props, State> {
       />
     );
 
-    const reSync = isSubmitter && controlValidationAuditData.componentTarget == "JIRA Cloud" && cvaSelectedComponents.length > 0 ? (
+    const reSync = isSubmitter && !isSRATaskFinalised && controlValidationAuditData.componentTarget == "JIRA Cloud" && cvaSelectedComponents.length > 0 ? (
       <DarkButton
         title={"RE SYNC WITH JIRA"}
-        classes={["mr-3"]}
         onClick={() => dispatchReSyncWithJira(controlValidationAuditData.uuid)}
       />
     ) : null;
-
 
     return (
       <div className="ControlValidationAuditContainer">
         <Header title={controlValidationAuditData.taskName} subtitle={siteTitle} username={currentUser.name}/>
 
         <div className="ControlValidationAuditResult" key="0">
-          <div className=""  key="component_validation_questions">
+          <div className="ControlValidationAuditForm"  key="component_validation_questions">
             <h3>Have These Controls Been Implemented?</h3>
+            {isSRATaskFinalised ? SecurityRiskAssessmentUtil.getSraIsFinalisedAlert() : false}
             {this.renderCVAQuestionsForm()}
           </div>
-
           <div className="buttons" key="component_validation_buttons">
-            {submitButton}
-            {reSync}
-            {backButton}
+            <div>
+              {submitButton}
+              {reSync}
+              {backButton}
+            </div>
           </div>
         </div>
 

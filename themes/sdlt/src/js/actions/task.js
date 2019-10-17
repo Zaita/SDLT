@@ -18,6 +18,7 @@ import type {
 import {loadSelectedComponents} from "./componentSelection";
 import type {User} from "../types/User";
 import type {RootState} from "../store/RootState";
+import URLUtil from "../utils/URLUtil";
 
 export function loadTaskSubmission(args: {uuid: string, secureToken?: string, type?: string}): ThunkAction {
   const {uuid, secureToken, type} = {...args};
@@ -223,9 +224,11 @@ export function saveSelectedComponents(jiraKey: string): ThunkAction {
 export function completeTaskSubmission(args: {
   secureToken?: string,
   bypassNetwork?: boolean,
-  result?: string
+  result?: string,
+  taskSubmissionUUID?: string | null,
+  questionnaireUUID?: string | null,
 } = {}): ThunkAction {
-  const {secureToken, bypassNetwork, result} = {...args};
+  const {secureToken, bypassNetwork, result, taskSubmissionUUID, questionnaireUUID} = {...args};
 
   return async (dispatch, getState) => {
     const getTaskSubmission = () => {
@@ -237,13 +240,16 @@ export function completeTaskSubmission(args: {
         const csrfToken = await CSRFTokenService.getCSRFToken();
 
         const {uuid} = await TaskDataService.completeTaskSubmission({
-          uuid: getTaskSubmission().uuid,
+          uuid: (taskSubmissionUUID === undefined) ? getTaskSubmission().uuid : taskSubmissionUUID,
           result: result || "",
           secureToken: secureToken,
           csrfToken
         });
 
         await dispatch(loadTaskSubmission({uuid, secureToken}));
+        if(questionnaireUUID !== undefined) {
+          URLUtil.redirectToQuestionnaireSummary(questionnaireUUID, secureToken)
+        }
       } catch (error) {
         ErrorUtil.displayError(error);
       }
