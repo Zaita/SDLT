@@ -71,11 +71,6 @@ class Dashboard extends DataObject implements ScaffoldingProvider
         'Subtitle'
     ];
 
-    public function canView($member = null)
-    {
-        return true;
-    }
-
     /**
      * CMS Fields
      * @return FieldList
