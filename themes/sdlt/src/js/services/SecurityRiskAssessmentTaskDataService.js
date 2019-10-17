@@ -18,9 +18,16 @@ query {
     ID
     UUID
     TaskName
+    Status
     QuestionnaireSubmission {
       UUID
       RiskResultData
+      QuestionnaireStatus
+      TaskSubmissions {
+        UUID
+        Status
+        TaskType
+      }
     }
     LikelihoodRatings
     RiskAssessmentTaskSubmission
@@ -50,6 +57,7 @@ query {
       questionnaireSubmissionUUID: toString(get(submissionJSONObject, "QuestionnaireSubmission.UUID", "")),
       questionnaireSubmissionID: toString(get(submissionJSONObject, "QuestionnaireSubmission.ID", "")),
       questionnaireSubmissionStatus: toString(get(submissionJSONObject, "QuestionnaireSubmission.QuestionnaireStatus", "")),
+      taskSubmissions: submissionJSONObject.QuestionnaireSubmission.TaskSubmissions,
       likelihoodRatings: TaskParser.parseLikelihoodJSONObject(get(submissionJSONObject, "LikelihoodRatings")),
       riskResults: JSON.parse(riskResults),
       selectedComponents: JSON.parse(selectedComponents),
