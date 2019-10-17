@@ -15,12 +15,13 @@ import {
 } from "../../actions/task";
 import TaskSubmission from "./TaskSubmission";
 import type {TaskSubmission as TaskSubmissionType} from "../../types/Task";
-import {loadSiteTitle} from "../../actions/siteConfig";
+import {loadSiteConfig} from "../../actions/siteConfig";
+import type {SiteConfig} from "../../types/SiteConfig";
 
 const mapStateToProps = (state: RootState) => {
   return {
     taskSubmission: state.taskSubmissionState.taskSubmission,
-    siteTitle: state.siteConfigState.siteTitle,
+    siteConfig: state.siteConfigState.siteConfig,
   };
 };
 
@@ -28,8 +29,8 @@ const mapDispatchToProps = (dispatch: Dispatch, props: OwnProps) => {
   return {
     dispatchLoadDataAction() {
       const {uuid, secureToken} = {...props};
-      dispatch(loadSiteTitle());
       dispatch(loadTaskSubmission({uuid, secureToken}));
+      dispatch(loadSiteConfig());
     },
     dispatchSaveAnsweredQuestionAction(answeredQuestion: Question) {
       const {secureToken} = {...props};
@@ -52,8 +53,8 @@ type OwnProps = {
 };
 
 type ReduxProps = {
+  siteConfig?: SiteConfig | null,
   taskSubmission?: TaskSubmissionType | null,
-  siteTitle?: string,
   dispatchLoadDataAction?: () => void,
   dispatchSaveAnsweredQuestionAction?: (answeredQuestion: Question) => void,
   dispatchMoveToPreviousQuestionAction?: (targetQuestion: Question) => void,
@@ -71,20 +72,20 @@ class TaskSubmissionForVendorContainer extends Component<Props> {
 
   render() {
     const {
-      siteTitle,
+      siteConfig,
       taskSubmission,
       dispatchSaveAnsweredQuestionAction,
       dispatchMoveToPreviousQuestionAction,
       dispatchEditAnswersAction,
     } = {...this.props};
 
-    if (!taskSubmission) {
+    if (!taskSubmission || !siteConfig) {
       return null;
     }
 
     return (
       <div className="TaskSubmissionContainer">
-        <Header title={taskSubmission.taskName} subtitle={siteTitle} showLogoutButton={false}/>
+        <Header title={taskSubmission.taskName} subtitle={siteConfig.siteTitle} showLogoutButton={false} logopath={siteConfig.logoPath}/>
         <TaskSubmission
           taskSubmission={taskSubmission}
           saveAnsweredQuestion={dispatchSaveAnsweredQuestionAction}
@@ -93,9 +94,9 @@ class TaskSubmissionForVendorContainer extends Component<Props> {
           showBackButton={false}
           showEditButton={false}
           canUpdateAnswers={taskSubmission.status === "in_progress"}
-          siteTitle={siteTitle}
+          siteTitle={siteConfig.siteTitle}
         />
-        <Footer/>
+        <Footer footerCopyrightText={siteConfig.footerCopyrightText}/>
       </div>
     );
   }

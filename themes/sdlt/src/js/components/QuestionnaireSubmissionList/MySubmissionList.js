@@ -7,14 +7,15 @@ import Footer from "../Footer/Footer";
 import type {User} from "../../types/User";
 import type {QuestionnaireSubmissionListItem} from "../../types/Questionnaire";
 import {loadCurrentUser} from "../../actions/user";
-import {loadSiteTitle} from "../../actions/siteConfig";
 import {loadMySubmissionList} from "../../actions/questionnaire";
 import moment from "moment";
+import {loadSiteConfig} from "../../actions/siteConfig";
+import type {SiteConfig} from "../../types/SiteConfig";
 
 const mapStateToProps = (state: RootState) => {
   return {
     currentUser: state.currentUserState.user,
-    siteTitle: state.siteConfigState.siteTitle,
+    siteConfig: state.siteConfigState.siteConfig,
     mySubmissionList: state.questionnaireSubmissionListState.mySubmissionList
   };
 };
@@ -24,14 +25,14 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
     async dispatchLoadDataAction() {
       await dispatch(loadCurrentUser());
       await dispatch(loadMySubmissionList());
-      await dispatch(loadSiteTitle());
+      await dispatch(loadSiteConfig());
     }
   };
 };
 
 type Props = {
   currentUser?: User | null,
-  siteTitle?: string,
+  siteConfig?: SiteConfig | null,
   dispatchLoadDataAction?: () => void,
   mySubmissionList?: Array<QuestionnaireSubmissionListItem>
 };
@@ -114,18 +115,18 @@ class MySubmissionList extends Component<Props> {
     const {
       currentUser,
       mySubmissionList,
-      siteTitle,
+      siteConfig,
     } = {...this.props};
 
-    if (!currentUser || !mySubmissionList || !siteTitle) {
+    if (!currentUser || !mySubmissionList || !siteConfig) {
       return null;
     }
 
     return (
       <div className="AnswersPreview">
-        <Header title="My Submission" subtitle={siteTitle} username={currentUser.name} />
+        <Header title="My Submission" subtitle={siteConfig.siteTitle} username={currentUser.name} logopath={siteConfig.logoPath} />
         {list(mySubmissionList)}
-        <Footer/>
+        <Footer footerCopyrightText={siteConfig.footerCopyrightText}/>
       </div>
     );
   }

@@ -2,13 +2,21 @@
 
 import React, {Component} from "react";
 
-class Footer extends Component<*> {
+type Props = {
+  footerCopyrightText: string;
+};
+
+class Footer extends Component<Props> {
+  static defaultProps = {
+    footerCopyrightText: "",
+  };
 
   render() {
+    const {footerCopyrightText} = {...this.props};
     return (
       <footer className="Footer">
         <div>
-          © 2019 | NZ Transport Agency
+        {footerCopyrightText}
         </div>
       </footer>
     );

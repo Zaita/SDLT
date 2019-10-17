@@ -11,7 +11,6 @@ import SubmissionDataUtil from "../../utils/SubmissionDataUtil";
 import URLUtil from "../../utils/URLUtil";
 
 type Props = {
-  siteTitle: string,
   secureToken: string,
   submission: Submission | null,
   handleSubmitButtonClick: () => void,

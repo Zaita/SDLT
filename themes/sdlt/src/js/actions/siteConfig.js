@@ -1,19 +1,19 @@
 // @flow
 
 import {ThunkAction} from "redux-thunk";
-import type {SetSiteTitleAction} from "./ActionType";
+import type {LoadSiteConfigAction} from "./ActionType";
 import ActionType from "./ActionType";
 import ErrorUtil from "../utils/ErrorUtil";
 import SiteConfigDataService from "../services/SiteConfigDataService";
 
-export function loadSiteTitle(): ThunkAction {
+export function loadSiteConfig(): ThunkAction {
   return async (dispatch) => {
     // TODO: loading
     try {
       const siteConfig = await SiteConfigDataService.fetchSiteConfig();
-      const action: SetSiteTitleAction = {
-        type: ActionType.SITE_CONFIG.SET_SITE_TITLE,
-        payload: siteConfig.siteTitle,
+      const action: LoadSiteConfigAction = {
+        type: ActionType.SITE_CONFIG.LOAD_SITE_CONFIG,
+        payload: siteConfig,
       };
       dispatch(action);
     }
