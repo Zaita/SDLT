@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Site Config Extension for SDLT Tool
  *
@@ -8,8 +9,8 @@
  * @copyright 2018 Catalyst.Net Ltd
  * @license https://www.catalyst.net.nz (Commercial)
  * @link https://www.catalyst.net.nz
- *
- * */
+ */
+
 namespace NZTA\SDLT\Extension;
 
 use GraphQL\Type\Definition\ResolveInfo;
@@ -20,14 +21,14 @@ use SilverStripe\Assets\Image;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\AssetAdmin\Forms\UploadField;
 use SilverStripe\Forms\CheckboxField;
-use SilverStripe\Forms\EmailField;
 use SilverStripe\Forms\HTMLEditor\HtmlEditorField;
 use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\LiteralField;
 use SilverStripe\SiteConfig\SiteConfig;
 
 /**
  * Site Config Extension for SDLT Tool
- **/
+ */
 class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvider
 {
     /**
@@ -38,6 +39,8 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
         'AlertMessage' => 'HTMLText',
         'NoScriptAlertMessage' => 'HTMLText',
         'AlternateHostnameForEmail' => 'Varchar(255)',
+        // Customisation Config
+        'FooterCopyrightText' => 'Text',
     ];
 
     /**
@@ -47,7 +50,11 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
      */
     private static $has_one = [
         'Logo' => Image::class,
-        'LoginHeroImage' => Image::class
+        'LoginHeroImage' => Image::class,
+        // Customisation Config
+        'HomePageBackgroundImage' => Image::class,
+        'QuestionnairePdfHeaderImage' => Image::class,
+        'QuestionnairePdfFooterImage' => Image::class,
     ];
 
     /**
@@ -57,7 +64,10 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
      */
     private static $owns = [
         'Logo',
-        'LoginHeroImage'
+        'LoginHeroImage',
+        'HomePageBackgroundImage',
+        'QuestionnairePdfHeaderImage',
+        'QuestionnairePdfFooterImage',
     ];
 
     /**
@@ -68,9 +78,39 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
      */
     public function updateCMSFields(FieldList $fields)
     {
-        $fields->addFieldsToTab(
+        // Main Tab
+        $fields->dataFieldByName('Title')
+            ->setDescription('This title is displayed in the HTML &lt;title&gt;, and at the top of most screens.');
+        $fields->removeByName('Tagline');
+
+        // "Main" tab
+        $fields->addFieldToTab(
             'Root.Main',
+            LiteralField::create(
+               'MainIntro',
+              '<p class="message notice">Configure general SDLT settings.</p>'
+            ),
+            'Title'
+        );
+
+        // "Access" tab
+        $fields->addFieldToTab(
+            'Root.Access',
+            LiteralField::create(
+               'AlerIntro',
+              '<p class="message notice">Configure who can do what within the SDLT.</p>'
+            ),
+            'CanViewType'
+        );
+
+        // "Email" tab
+        $fields->addFieldsToTab(
+            'Root.Email',
             [
+                LiteralField::create(
+                   'AlerIntro',
+                  '<p class="message notice">Configure some aspects of how email is treated in the system.</p>'
+                ),
                 TextField::create(
                     'AlternateHostnameForEmail',
                     'Alternate hostname for email'
@@ -81,19 +121,32 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
                 )
             ]
         );
+
+        // "Images" tab
         $fields->addFieldsToTab(
             'Root.Images',
             [
+                LiteralField::create(
+                   'ImagesIntro',
+                  '<p class="message notice">Configure how various images and logos appear to users.</p>'
+                ),
                 UploadField::create('Logo', 'Logo')
-                    ->setDescription('This is official logo that appears throughout the application. Should be an SVG'),
+                    ->setDescription('This is the logo that appears throughout the application; in the header and within authentication screens.'),
                 UploadField::create('LoginHeroImage', 'Login screen background image')
                     ->setDescription('This is the background image shown on the login screen.'),
+                UploadField::create('HomePageBackgroundImage', 'Home Page Background Image')
+                    ->setDescription('This is the background image shown on the home-screen.'),
             ]
         );
 
+        // "Alert" tab.
         $fields->addFieldsToTab(
-            'Root.SiteAlertMessage',
+            'Root.Alert',
             [
+              LiteralField::create(
+                   'AlerIntro',
+                  '<p class="message notice">Check the box below, to display a global banner-message along the top of each screen.</p>'
+              ),
               CheckboxField::create(
                   'AlertEnabled',
                   'Alert Enabled'
@@ -101,11 +154,41 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
               HtmlEditorField::create(
                   'AlertMessage',
                   'Alert Message'
-              ),
+              )
+                ->setRows(5),
               HtmlEditorField::create(
                   'NoScriptAlertMessage',
                   'Javascript disabled Alert Message'
               )
+                ->setRows(5)
+            ]
+        );
+
+        // "PDF" tab
+        $fields->addFieldsToTab(
+            'Root.PDF',
+            [
+                LiteralField::create(
+                   'PDFIntro',
+                  '<p class="message notice">Configure how generated PDFs appear to users.</p>'
+                ),
+                UploadField::create('QuestionnairePdfHeaderImage'),
+                UploadField::create('QuestionnairePdfFooterImage')
+            ]
+        );
+
+        // "Footer" tab
+        $fields->addFieldsToTab(
+            'Root.Footer',
+            [
+                LiteralField::create(
+                   'FooterIntro',
+                  '<p class="message notice">Configure how the global footer appears to users.</p>'
+                ),
+                TextField::create(
+                    'FooterCopyrightText',
+                    'Footer Text'
+                )
             ]
         );
     }
@@ -119,7 +202,12 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
         $scaffolder
             ->type(SiteConfig::class)
             ->addFields([
-                'Title'
+                'Title',
+                'FooterCopyrightText',
+                'LogoPath',
+                'HomePageBackgroundImagePath',
+                'PdfHeaderImageLink',
+                'PdfFooterImageLink',
             ])
             ->operation(SchemaScaffolder::READ)
             ->setName('readSiteConfig')
@@ -149,5 +237,45 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
             //we're now guaranteed to have a URL without a trailing slash so if we add one now it's consistently present
             $this->owner->AlternateHostnameForEmail .= '/';
         }
+    }
+
+   /**
+     * Called from provideGraphQLScaffolding().
+     *
+     * @return string
+     */
+    public function getLogoPath() : string
+    {
+        return (string) $this->owner->Logo()->Link();
+    }
+
+    /**
+     * Called from provideGraphQLScaffolding().
+     *
+     * @return string
+     */
+    public function getHomePageBackgroundImagePath() : string
+    {
+        return (string) $this->owner->HomePageBackgroundImage()->Link();
+    }
+
+    /**
+     * Called from provideGraphQLScaffolding().
+     *
+     * @return string
+     */
+    public function getPdfHeaderImageLink() : string
+    {
+        return (string) $this->owner->QuestionnairePdfHeaderImage()->Link();
+    }
+
+    /**
+     * Called from provideGraphQLScaffolding().
+     *
+     * @return string
+     */
+    public function getPdfFooterImageLink() : string
+    {
+        return (string) $this->owner->QuestionnairePdfFooterImage()->Link();
     }
 }

@@ -54,14 +54,14 @@ class ReviewContainer extends Component<Props> {
     const {secureToken} = {...this.props};
     const {
       title,
-      siteTitle,
+      siteConfig,
       user,
       submission,
       isCurrentUserApprover,
       isCurrentUserABusinessOwnerApprover
     } = {...this.props.submissionState};
 
-    if (!user) {
+    if (!user || !siteConfig) {
       return null;
     }
 
@@ -89,15 +89,15 @@ class ReviewContainer extends Component<Props> {
 
     return (
       <div className="ReviewContainer">
-        <Header title={title} subtitle="Review Responses" username={user.name}/>
-        <Review siteTitle={siteTitle}
+        <Header title={title} subtitle="Review Responses" username={user.name} logopath={siteConfig.logoPath}/>
+        <Review siteTitle={siteConfig.siteTitle}
           viewAs={viewAs}
           submission={submission}
           secureToken={secureToken}
           handleSubmitButtonClick={this.handleSubmitButtonClick.bind(this)}
           handlePDFDownloadButtonClick={this.handlePDFDownloadButtonClick.bind(this)}
           handleEditAnswerButtonClick={this.handleEditAnswerButtonClick.bind(this)}/>
-        <Footer/>
+        <Footer footerCopyrightText={siteConfig.footerCopyrightText}/>
       </div>
     );
   }
@@ -107,8 +107,8 @@ class ReviewContainer extends Component<Props> {
   }
 
   handlePDFDownloadButtonClick() {
-    const {submission, siteTitle} = {...this.props.submissionState};
-    if (!submission) {
+    const {submission, siteTitle, siteConfig} = {...this.props.submissionState};
+    if (!submission || !siteConfig) {
       return;
     }
 
@@ -116,7 +116,7 @@ class ReviewContainer extends Component<Props> {
       questions: submission.questions,
       submitter: submission.submitter,
       questionnaireTitle: submission.questionnaireTitle,
-      siteTitle,
+      siteConfig: siteConfig,
     });
   }
 

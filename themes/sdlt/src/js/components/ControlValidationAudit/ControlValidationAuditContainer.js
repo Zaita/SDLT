@@ -7,7 +7,6 @@ import {Dispatch} from "redux";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import {loadCurrentUser} from "../../actions/user";
-import {loadSiteTitle} from "../../actions/siteConfig";
 import {
   updateControlValidationAuditData,
   loadControlValidationAudit,
@@ -33,13 +32,15 @@ import {
   CTL_STATUS_3
 } from '../../constants/values.js';
 import SecurityRiskAssessmentUtil from "../../utils/SecurityRiskAssessmentUtil";
+import {loadSiteConfig} from "../../actions/siteConfig";
+import type {SiteConfig} from "../../types/SiteConfig";
 
 const mapStateToProps = (state: RootState) => {
   return {
-    siteTitle: state.siteConfigState.siteTitle,
     currentUser: state.currentUserState.user,
     controlValidationAuditData: state.controlValidationAuditState.controlValidationAuditData,
-    cvaSelectedComponents: state.controlValidationAuditState.cvaSelectedComponents
+    cvaSelectedComponents: state.controlValidationAuditState.cvaSelectedComponents,
+    siteConfig: state.siteConfigState.siteConfig
   };
 };
 
@@ -49,7 +50,7 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
       await Promise.all([
         dispatch(loadControlValidationAudit({uuid, secureToken})),
         dispatch(loadCurrentUser()),
-        dispatch(loadSiteTitle())
+        dispatch(loadSiteConfig())
       ]);
     },
     dispatchSaveControlValidationAuditDataAction(uuid: string, controlData: object, questionnaireSubmissionUUID: string, secureToken: string) {
@@ -67,7 +68,6 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
 type Props = {
   uuid: string,
   secureToken: string,
-  siteTitle?: string,
   currentUser?: User | null,
   controlValidationAuditData?: CVATaskSubmission | null,
   dispatchLoadDataAction?: (uuid: string, secureToken: string) => void,
@@ -75,6 +75,7 @@ type Props = {
   dispatchUpdateControlValidationQuestionDataAction?: (selectedOptionDetail: object) => void,
   cvaSelectedComponents: CVASelectedComponents,
   dispatchReSyncWithJira?: (uuid: string) => void,
+  siteConfig?: SiteConfig | null,
 };
 
 class ControlValidationAuditContainer extends Component<Props, State> {
@@ -224,7 +225,7 @@ class ControlValidationAuditContainer extends Component<Props, State> {
 
   render() {
     const {
-      siteTitle,
+      siteConfig,
       currentUser,
       controlValidationAuditData,
       secureToken,
@@ -233,7 +234,7 @@ class ControlValidationAuditContainer extends Component<Props, State> {
       dispatchReSyncWithJira
     } = {...this.props};
 
-    if (!currentUser || !siteTitle || !controlValidationAuditData) {
+    if (!currentUser || !controlValidationAuditData || !siteConfig) {
       return null;
     }
 
@@ -269,7 +270,12 @@ class ControlValidationAuditContainer extends Component<Props, State> {
 
     return (
       <div className="ControlValidationAuditContainer">
-        <Header title={controlValidationAuditData.taskName} subtitle={siteTitle} username={currentUser.name}/>
+        <Header
+          title={controlValidationAuditData.taskName}
+          subtitle={siteConfig.siteTitle}
+          username={currentUser.name}
+          logopath={siteConfig.logoPath}
+        />
 
         <div className="ControlValidationAuditResult" key="0">
           <div className="ControlValidationAuditForm"  key="component_validation_questions">
@@ -286,7 +292,7 @@ class ControlValidationAuditContainer extends Component<Props, State> {
           </div>
         </div>
 
-        <Footer/>
+        <Footer footerCopyrightText={siteConfig.footerCopyrightText}/>
       </div>
     )
   }

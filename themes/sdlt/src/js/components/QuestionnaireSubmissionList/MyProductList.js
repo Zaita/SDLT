@@ -7,14 +7,15 @@ import Footer from "../Footer/Footer";
 import type {User} from "../../types/User";
 import type {QuestionnaireSubmissionListItem} from "../../types/Questionnaire";
 import {loadCurrentUser} from "../../actions/user";
-import {loadSiteTitle} from "../../actions/siteConfig";
 import {loadMyProductList} from "../../actions/questionnaire";
 import moment from "moment";
+import {loadSiteConfig} from "../../actions/siteConfig";
+import type {SiteConfig} from "../../types/SiteConfig";
 
 const mapStateToProps = (state: RootState) => {
   return {
     currentUser: state.currentUserState.user,
-    siteTitle: state.siteConfigState.siteTitle,
+    siteConfig: state.siteConfigState.siteConfig,
     myProductList: state.questionnaireSubmissionListState.myProductList
   };
 };
@@ -24,14 +25,14 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
     async dispatchLoadDataAction() {
       await dispatch(loadCurrentUser());
       await dispatch(loadMyProductList());
-      await dispatch(loadSiteTitle());
+      await dispatch(loadSiteConfig());
     }
   };
 };
 
 type Props = {
   currentUser?: User | null,
-  siteTitle?: string,
+  siteConfig?: SiteConfig | null,
   dispatchLoadDataAction?: () => void,
   myProductList?: Array<QuestionnaireSubmissionListItem>
 };
@@ -110,18 +111,18 @@ class MyProductList extends Component<Props> {
     const {
       currentUser,
       myProductList,
-      siteTitle,
+      siteConfig,
     } = {...this.props};
 
-    if (!currentUser || !myProductList || !siteTitle) {
+    if (!currentUser || !myProductList || !siteConfig) {
       return null;
     }
 
     return (
       <div className="AnswersPreview">
-        <Header title="My Products" subtitle={siteTitle} username={currentUser.name} />
+        <Header title="My Products" subtitle={siteConfig.siteTitle} username={currentUser.name} logopath={siteConfig.logoPath} />
         {list(myProductList)}
-        <Footer/>
+        <Footer footerCopyrightText={siteConfig.footerCopyrightText}/>
       </div>
     );
   }

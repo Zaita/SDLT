@@ -1,19 +1,19 @@
 // @flow
 
 import type {SiteConfigState} from "../store/SiteConfigState";
-import type {SetSiteTitleAction} from "../actions/ActionType";
+import type {LoadSiteConfigAction} from "../actions/ActionType";
 import ActionType from "../actions/ActionType";
 
 const defaultState: SiteConfigState = {
-  siteTitle: "",
+  siteConfig: null,
 };
 
-export function siteConfigState(state: SiteConfigState = defaultState, action: SetSiteTitleAction) {
+export function siteConfigState(state: SiteConfigState = defaultState, action: LoadSiteConfigAction) {
   switch (action.type) {
-    case ActionType.SITE_CONFIG.SET_SITE_TITLE:
+    case ActionType.SITE_CONFIG.LOAD_SITE_CONFIG:
       return {
         ...state,
-        siteTitle: action.payload
+        siteConfig: action.payload
       };
     default:
       return state;

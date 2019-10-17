@@ -24,3 +24,14 @@ SilverStripe\Control\Session:
 
 SilverStripe\Security\Security:
   frame_options: 'DENY'
+
+# SVG Capabilities
+# Mostly lifted from: https://github.com/restruct/silverstripe-svg-images
+SilverStripe\Assets\File:
+  app_categories:
+    image:
+      - svg
+    image/supported:
+      - svg
+  allowed_extensions:
+    - 'svg'

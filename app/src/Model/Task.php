@@ -44,6 +44,7 @@ use SilverStripe\Security\Group;
 use SilverStripe\Security\Security;
 use SilverStripe\View\ArrayData;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
+use SilverStripe\Core\Convert;
 
 /**
  * Class Task
@@ -445,7 +446,7 @@ class Task extends DataObject implements ScaffoldingProvider
                     return $task;
                 }
             })
-            ->end();
+             ->end();
     }
 
     /**
