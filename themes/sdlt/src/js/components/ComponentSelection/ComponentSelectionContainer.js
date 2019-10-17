@@ -30,6 +30,7 @@ import {
 } from "../../actions/task";
 import editIcon from "../../../img/icons/edit.svg";
 import LightButton from "../Button/LightButton";
+import SecurityRiskAssessmentUtil from "../../utils/SecurityRiskAssessmentUtil";
 
 type OwnProps = {
   uuid: string,
@@ -117,6 +118,7 @@ class ComponentSelectionContainer extends Component<Props> {
     if (!currentUser || !taskSubmission) {
       return null;
     }
+    const isSRATaskFinalised = SecurityRiskAssessmentUtil.isSRATaskFinalised(taskSubmission.siblingSubmissions);
 
     let body = null;
     switch (taskSubmission.status) {
@@ -157,6 +159,11 @@ class ComponentSelectionContainer extends Component<Props> {
         break;
       case "complete":
         body = (
+          <div>
+            <div className="ComponentSelectionReview">
+                {isSRATaskFinalised ? SecurityRiskAssessmentUtil.getSraIsFinalisedAlert() : false}
+            </div>
+
           <ComponentSelectionReview
             selectedComponents={taskSubmission.selectedComponents}
             jiraTickets={taskSubmission.jiraTickets}
@@ -164,12 +171,12 @@ class ComponentSelectionContainer extends Component<Props> {
             productAspects={taskSubmission.productAspects}
             buttons={[(
               <div key="component-selection-review-button-container">
-                <LightButton
-                  title={"EDIT CONTROLS"}
-                  onClick={dispatchEditAnswersAction}
+                {!isSRATaskFinalised && (<LightButton
+                  title="EDIT CONTROLS"
+                  onClick={ dispatchEditAnswersAction}
                   classes={["button"]}
                   iconImage={editIcon}
-                />
+                />)}
                 <DarkButton
                   title={"BACK TO QUESTIONNAIRE SUMMARY"}
                   onClick={() => {
@@ -180,6 +187,7 @@ class ComponentSelectionContainer extends Component<Props> {
               </div>
             )]}
           />
+          </div>
         );
     }
 
