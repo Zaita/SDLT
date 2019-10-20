@@ -130,8 +130,10 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
                    'ImagesIntro',
                   '<p class="message notice">Configure how various images and logos appear to users.</p>'
                 ),
-                UploadField::create('Logo', 'Logo')
-                    ->setDescription('This is the logo that appears throughout the application; in the header and within authentication screens.'),
+                UploadField::create('AuthLogo', 'Login screen logo')
+                    ->setDescription('This is the logo that appears within the authentication screens.'),
+                UploadField::create('Logo', 'Header and Footer Logo')
+                    ->setDescription('This is the logo that appears in the header and footer'),
                 UploadField::create('LoginHeroImage', 'Login screen background image')
                     ->setDescription('This is the background image shown on the login screen.'),
                 UploadField::create('HomePageBackgroundImage', 'Home Page Background Image')
