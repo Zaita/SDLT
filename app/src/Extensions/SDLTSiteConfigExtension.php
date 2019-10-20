@@ -50,6 +50,7 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
      */
     private static $has_one = [
         'Logo' => Image::class,
+        'AuthLogo' => Image::class,
         'LoginHeroImage' => Image::class,
         // Customisation Config
         'HomePageBackgroundImage' => Image::class,
@@ -64,6 +65,7 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
      */
     private static $owns = [
         'Logo',
+        'AuthLogo',
         'LoginHeroImage',
         'HomePageBackgroundImage',
         'QuestionnairePdfHeaderImage',
@@ -132,8 +134,8 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
                 ),
                 UploadField::create('AuthLogo', 'Login screen logo')
                     ->setDescription('This is the logo that appears within the authentication screens.'),
-                UploadField::create('Logo', 'Header and Footer Logo')
-                    ->setDescription('This is the logo that appears in the header and footer'),
+                UploadField::create('Logo', 'Header Logo')
+                    ->setDescription('This is the logo that appears in the header.'),
                 UploadField::create('LoginHeroImage', 'Login screen background image')
                     ->setDescription('This is the background image shown on the login screen.'),
                 UploadField::create('HomePageBackgroundImage', 'Home Page Background Image')
