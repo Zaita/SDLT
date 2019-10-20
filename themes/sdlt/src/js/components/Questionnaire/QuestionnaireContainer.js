@@ -62,7 +62,7 @@ class QuestionnaireContainer extends Component<Props> {
     if (!user || !submission || !siteConfig) {
       return null;
     }
-    
+
     if (submission.status !== "in_progress") {
       return (
         <div className="QuestionnaireContainer">
@@ -80,7 +80,7 @@ class QuestionnaireContainer extends Component<Props> {
 
     return (
       <div className="QuestionnaireContainer">
-        <Header title={title} subtitle={siteConfig.siteTitle} logopath={siteConfig.logoPath}/>
+        <Header title={title} subtitle={siteConfig.siteTitle} logopath={siteConfig.logoPath} username={user.name} />
         <Questionnaire
           questions={submission.questions}
           saveAnsweredQuestion={(answeredQuestion) => {

@@ -90,7 +90,9 @@ class ControlValidationAuditContainer extends Component<Props, State> {
   renderCVAQuestionsForm() {
     const productAspects = this.props.controlValidationAuditData.productAspects;
     const selectedComponents = this.props.cvaSelectedComponents;
-    if (productAspects.length > 0 && selectedComponents.length > 0) {
+    const componentTarget =this.props.controlValidationAuditData.componentTarget;
+
+    if (componentTarget !== 'DefaultComponent' && productAspects.length > 0 && selectedComponents.length > 0) {
       return (
         this.renderComponentGroupByProductAspect(productAspects, selectedComponents)
       );
