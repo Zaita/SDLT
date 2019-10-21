@@ -73,13 +73,11 @@ class ControlWeightSet extends DataObject
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
+        $componentID = $this->SecurityComponentID || $this->SecurityControl()->getParentComponentID();
 
-        if (($componentID = $this->SecurityComponentID) ||
-            ($componentID = $this->SecurityControl()->getParentComponentID())) {
-                $fields->dataFieldByName('SecurityComponentID')
-                    ->setValue($componentID)
-                    ->setDisabled(true);
-        }
+        $fields->dataFieldByName('SecurityComponentID')
+            ->setValue($componentID)
+            ->setDisabled(true);
 
         if ($this->SecurityControlID) {
             $fields->dataFieldByName('SecurityControlID')->setDisabled(true);
@@ -107,7 +105,7 @@ class ControlWeightSet extends DataObject
     {
         parent::onBeforeWrite();
 
-        if (!$this->ID) {
+        if (!$this->ID && !$this->SecurityComponentID) {
             $this->SecurityComponentID = $this->SecurityControl()
                 ->getParentComponentID();
         }
@@ -140,17 +138,19 @@ class ControlWeightSet extends DataObject
             $result->addError('Please select a Risk for this Control.');
         }
 
-        if ($this->RiskID) {
-            $controlRisks = self::get()
-              ->filter([
-                  'SecurityControlID' => $this->SecurityControlID,
-                  'RiskID' => $this->RiskID,
-                  'SecurityComponentID' => $this->SecurityComponentID,
-              ])->exclude('ID', $this->ID);
+        if (!$this->SecurityComponentID) {
+            $this->SecurityComponentID = $this->SecurityControl()->getParentComponentID();
+        }
 
-            if ($controlRisks->count()) {
-                $result->addError('Please select a unique Risk for this Control.');
-            }
+        $controlRisks = self::get()
+            ->filter([
+                'SecurityControlID' => $this->SecurityControlID,
+                'RiskID' => $this->RiskID,
+                'SecurityComponentID' => $this->SecurityComponentID,
+            ])->exclude('ID', $this->ID);
+
+        if ($controlRisks->count()) {
+            $result->addError('Please select a unique Risk for this Control.');
         }
 
         return $result;
