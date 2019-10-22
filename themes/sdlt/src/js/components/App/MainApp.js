@@ -1,6 +1,7 @@
 // @flow
 
 import React, {Component} from "react";
+import {connect} from "react-redux";
 import {Route, Switch} from "react-router-dom";
 import HomeContainer from "../Home/HomeContainer";
 import StartContainer from "../Questionnaire/StartContainer";
@@ -17,11 +18,29 @@ import MyProductList from "../QuestionnaireSubmissionList/MyProductList";
 import SecurityRiskAssessmentContainer from "../SecurityRiskAssessment/SecurityRiskAssessmentContainer.js";
 import ControlValidationAuditContainer from "../ControlValidationAudit/ControlValidationAuditContainer.js";
 import {parse} from "query-string";
+import { Loading } from "../Common/Loading.js";
+import { withRouter } from 'react-router-dom';
+import _ from "lodash";
+
+const mapStateToProps = (state: RootState) => {
+  return {
+    loading: _.chain(state.loadingState).values().some(val => val).value()
+  };
+};
+
+const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
+  return {};
+};
+
+type Props = {
+  loading: boolean
+};
 
 class MainApp extends Component<*> {
   render() {
     return (
       <div>
+        {this.props.loading && <Loading/>}
         <main>
           <Switch>
             <Route exact path='/'>
@@ -190,9 +209,12 @@ class MainApp extends Component<*> {
           </Switch>
         </main>
       </div>
-
     );
   }
 }
-
-export default MainApp;
+export default withRouter(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps,
+  )(MainApp)
+);

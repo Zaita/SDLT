@@ -53,7 +53,7 @@ export function controlValidationAuditState(state: ControlValidationAuditState =
     }
   }
 
-  if (action.type === ActionType.CVA.RE_SYNC_WITH_JIRA) {
+  if (action.type === ActionType.CVA.RE_SYNC_WITH_JIRA_SUCCESS) {
     const newCVATaskData = action.payload;
     return {
       ...state,

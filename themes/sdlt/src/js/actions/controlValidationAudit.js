@@ -75,6 +75,8 @@ export function updateControlValidationAuditData(args: {selectedOption: string, 
 
 export function reSyncWithJira (uuid: string) : ThunkAction {
   return async (dispatch) => {
+    await dispatch({ type: ActionType.CVA.RE_SYNC_WITH_JIRA_REQUEST});
+
     try {
       // Get CSRF token
       const csrfToken = await CSRFTokenService.getCSRFToken();
@@ -86,13 +88,14 @@ export function reSyncWithJira (uuid: string) : ThunkAction {
       });
 
       const action = {
-        type: ActionType.CVA.RE_SYNC_WITH_JIRA,
+        type: ActionType.CVA.RE_SYNC_WITH_JIRA_SUCCESS,
         payload,
       };
 
       await dispatch(action);
     }
     catch (error) {
+      await dispatch({ type: RE_SYNC_WITH_JIRA_FAILURE, error: error});
       ErrorUtil.displayError(error);
     }
   }
