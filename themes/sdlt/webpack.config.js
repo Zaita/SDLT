@@ -49,6 +49,17 @@ module.exports = (env, argv) => {
             },
           ],
         },
+        {
+          test: /\.(woff|woff2|eot|ttf)$/,
+          use: [
+            {
+              loader: 'file-loader',
+              options: {
+                outputPath: "../font",
+              },
+            },
+          ],
+        },
       ],
     },
     resolve: {extensions: ["*", ".js", ".jsx"]},
