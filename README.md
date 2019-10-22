@@ -29,6 +29,12 @@ The codebase comes with a data-importer which will configure most of what you wi
 
 Rename the `.env.example` file included with the project to `.env` and ensure it is in the project-root with r+x permissions by your webserver's user. You'll need to change the dummy entries for the environment variables within the file, to suit your own environment.
 
+In order to protect the entire project behind an authentication screen, run the following task:
+
+```
+./vendor/bin/sake dev/tasks/HydrateCustomConfig
+```
+
 ### Tests
 
 To run the suite ("dev" environments only - see the .env file example below):
