@@ -50,4 +50,27 @@ export default class TaskParser {
 
     return [];
   }
+
+  static parseAlltaskSubmissionforQuestionnaire(tsObject) {
+    if (!tsObject) {
+      return [];
+    }
+    const taskSubmissions = get(tsObject, "QuestionnaireSubmission.TaskSubmissions", "")
+
+    if(get(tsObject, "Submission.TaskType", "") === 'questionnaire') {
+      return [];
+    }
+
+    if (!taskSubmissions) {
+      return [];
+    }
+
+    return taskSubmissions.map((taskSubmission) => {
+      return {
+        uuid: toString(get(taskSubmission, "UUID")),
+        taskType: toString(get(taskSubmission, "TaskType")),
+        status: toString(get(taskSubmission, "Status"))
+      }
+    });
+  }
 }
