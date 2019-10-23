@@ -3,6 +3,7 @@ import get from "lodash/get";
 import toString from "lodash/toString";
 import SecurityComponentParser from "../utils/SecurityComponentParser";
 import {DEFAULT_NETWORK_ERROR} from "../constants/errors";
+import TaskParser from "../utils/TaskParser";
 
 export default class ControlValidationAuditDataService {
   static async fetchControlValidationAuditTaskSubmission(args: { uuid: string, secureToken?: string }): Promise<TaskSubmission> {
@@ -54,7 +55,7 @@ query {
       submitterID: toString(get(submissionJSONObject, "Submitter.ID", "")),
       componentTarget: toString(get(submissionJSONObject, "CVATaskDataSource", "")),
       productAspects:  _.has(submissionJSONObject, 'ProductAspects') ? JSON.parse(get(submissionJSONObject, "ProductAspects", [])) : [],
-      siblingSubmissions: submissionJSONObject.QuestionnaireSubmission.TaskSubmissions
+    siblingSubmissions: TaskParser.parseAlltaskSubmissionforQuestionnaire(submissionJSONObject)
     };
 
     return data;

@@ -48,7 +48,7 @@ abstract class IssueTrackerSystem
      * @param  string $data      JSON-encoded data.
      * @return string
      */
-    abstract public function call(string $endpoint, string $data) : string;
+    abstract public function call(string $endpoint, string $data = '', string $method = 'POST') : string;
 
     /**
      * Adds a task to the JIRA board.
