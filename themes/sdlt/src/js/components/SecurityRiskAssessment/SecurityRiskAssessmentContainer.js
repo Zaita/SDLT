@@ -7,8 +7,8 @@ import {Dispatch} from "redux";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import {loadCurrentUser} from "../../actions/user";
-import LikelihoodLegendContainer from "../Common/LikelihoodLegendContainer";
-import RiskAssessmentMatrixTableContainer from "../Common/RiskAssessmentMatrixTableContainer";
+import LikelihoodLegendContainer from "./LikelihoodLegendContainer";
+import RiskAssessmentMatrixTableContainer from "./RiskAssessmentMatrixTableContainer";
 import type {User} from "../../types/User";
 import {
   loadSecurityRiskAssessment
@@ -20,6 +20,8 @@ import type {SecurityRiskAssessment} from "../../types/Task";
 import URLUtil from "../../utils/URLUtil";
 import LightButton from "../Button/LightButton";
 import DarkButton from "../Button/DarkButton";
+import {loadSiteConfig} from "../../actions/siteConfig";
+import type {SiteConfig} from "../../types/SiteConfig";
 import SecurityRiskAssessmentUtil from "../../utils/SecurityRiskAssessmentUtil";
 
 const mapStateToProps = (state: RootState) => {
@@ -34,6 +36,7 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
   return {
     dispatchLoadDataAction(uuid: string, secureToken: string) {
       dispatch(loadCurrentUser());
+      dispatch(loadSiteConfig());
       dispatch(loadSecurityRiskAssessment({uuid, secureToken}));
     },
     dispatchFinaliseAction(uuid: string, secureToken?: string | null, questionnaireUUID) {
@@ -101,14 +104,12 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
         <div className="SecurityRiskAssessmentResult">
           {isSRATaskFinalised ? SecurityRiskAssessmentUtil.getSraIsFinalisedAlert() : false}
           <RiskAssessmentMatrixTableContainer
-            riskResults={securityRiskAssessmentData.riskResults}
-            likelihoodThresholds={securityRiskAssessmentData.likelihoodRatings}
+            tableData={securityRiskAssessmentData.securityRiskAssessmentTableData}
           />
 
           <LikelihoodLegendContainer
-            likelihoodThresholds={securityRiskAssessmentData.likelihoodRatings}
+            likelihoodThresholds={securityRiskAssessmentData.securityRiskAssessmentTableData.LikelihoodThresholds}
           />
-
           <div className="buttons">
             {backButton}
             {finaliseButton}

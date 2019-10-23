@@ -112,9 +112,8 @@ query {
       riskResults: _.has(submissionJSONObject, 'RiskResultData') ? JSON.parse(_.get(submissionJSONObject, "RiskResultData", "[]")) : "[]",
       productAspects:  _.has(submissionJSONObject, 'ProductAspects') ? JSON.parse(_.get(submissionJSONObject, "ProductAspects", [])) : [],
       componentTarget: toString(get(submissionJSONObject, "ComponentTarget", "")),
-      siblingSubmissions: submissionJSONObject.QuestionnaireSubmission.TaskSubmissions
+      siblingSubmissions: TaskParser.parseAlltaskSubmissionforQuestionnaire(submissionJSONObject)
     };
-
     return data;
   }
 
