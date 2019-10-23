@@ -156,9 +156,16 @@ class ControlValidationAuditContainer extends Component<Props, State> {
           {link && this.props.controlValidationAuditData.componentTarget == "JIRA Cloud" && (<span> - {link}</span>)}
         </h5>
         {
-          controls && controls.map((control) => {
+          controls && controls.length > 0 && controls.map((control) => {
             return (this.renderControl(control, component));
           })
+        }
+        {
+          !controls || controls.length == 0 && (
+            <div className="alert alert-warning" key="no_controls_message">
+              {DEFAULT_NO_CONTROLS_MESSAGE}
+            </div>
+          )
         }
       </div>
     );

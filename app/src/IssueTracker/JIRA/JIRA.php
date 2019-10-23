@@ -48,7 +48,7 @@ class JIRA extends IssueTrackerSystem
      * @param  string $method    Which HTTP verb to use
      * @return string
      */
-    public function call($endpoint, $data = '', $method = 'POST') : string
+    public function call(string $endpoint, string $data = '', string $method = 'POST') : string
     {
         $this->client = new Client([
             'base_uri' => $this->atlassian_instance
