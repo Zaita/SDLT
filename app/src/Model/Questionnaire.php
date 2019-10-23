@@ -91,6 +91,13 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     ];
 
     /**
+     * @var Int
+     */
+    private static $defaults = [
+       'ExpireAfterDays' => 14,
+   ];
+
+    /**
      * @var array
      */
     private static $has_one = [
@@ -163,24 +170,29 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
             $pageConfig->setItemsPerPage(250);
         }
 
-        $fields->insertAfter('Name', $typeField
-            ->setEmptyString('-- Select One --')
-            ->setSource(Utils::pretty_source($this, 'Type'))
+        $fields->insertAfter(
+            'Name',
+            $typeField
+                ->setEmptyString('-- Select One --')
+                ->setSource(Utils::pretty_source($this, 'Type'))
         );
 
-        $fields->insertAfter('Type', $riskField
-            ->setEmptyString('-- Select One --')
-            ->setSource(Utils::pretty_source($this, 'RiskCalculation'))
-            ->setDescription(''
-                . 'Select the most appropriate formula with which to perform'
-                . ' risk calculations.'
-            )
-                ->displayIf('Type')
-                ->isEqualTo('RiskQuestionnaire')
-                ->end()
+        $fields->insertAfter(
+            'Type',
+            $riskField
+                ->setEmptyString('-- Select One --')
+                ->setSource(Utils::pretty_source($this, 'RiskCalculation'))
+                ->setDescription(
+                    ''
+                    .'Select the most appropriate formula with which to perform'
+                    .' risk calculations.'
+                )
+            ->displayIf('Type')
+            ->isEqualTo('RiskQuestionnaire')
+            ->end()
         );
 
-        if($this->isRiskType()) {
+        if ($this->isRiskType()) {
             // flag this pillar as not requiring any approvals and not sending approval email if no tasks is generated/spawned by the use
             $fields->addFieldToTab(
                 'Root.Main',
@@ -203,13 +215,18 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
             [
                 OptionsetField::create(
                     'DoesSubmissionExpire',
-                    'Does Submission Expire?',
+                    'Should submissions expire?',
                     $this->dbObject('DoesSubmissionExpire')->enumValues()
                 ),
+
                 $fields->dataFieldByName('ExpireAfterDays')
+                    ->setTitle('Expiry Time (Days)')
                     ->setAttribute('min', $this->config()->min_expiry_days)
-                    ->setDescription('If number of expire days for the submission is not defined,
-                    then submission will be expired in '.$this->config()->expiry_days.' days.')
+                    ->setDescription(
+                        'If this is not set, submissions will auto-expire in '
+                        .$this->config()->expiry_days
+                        .' days.'
+                    )
                     ->displayIf('DoesSubmissionExpire')
                     ->isEqualTo('Yes')
                     ->end()
@@ -362,11 +379,9 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
 
         $expiryDays = $this->config()->expiry_days;
 
-        if (!$this->ExpireAfterDays) {
-            $this->ExpireAfterDays= $expiryDays;
+        if (empty($this->ExpireAfterDays) && $this->DoesSubmissionExpire === 'Yes') {
+            $this->ExpireAfterDays = $expiryDays;
         }
-
-
 
         $this->audit();
     }
@@ -435,17 +450,29 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     {
         $result = parent::validate();
 
+        $changedFields = $this->getChangedFields();
+
         if (!$this->Name) {
             $result->addError('Please add a questionnnaire name.');
-        } else if (!$this->Type) {
+        } elseif (!$this->Type) {
             $result->addError('Please select a questionnnaire type.');
-        } else if ($this->Type === 'RiskQuestionnaire' && !$this->RiskCalculation) {
+        } elseif ($this->Type === 'RiskQuestionnaire' && !$this->RiskCalculation) {
             $result->addError('Please select a risk-calculation type.');
         }
 
-        if ($this->DoesSubmissionExpire === 'Yes' && $this->ExpireAfterDays < $this->config()->min_expiry_days) {
-            $result->addError('Please enter number of days greater than '.$this->config()->min_expiry_days.'.');
-        }
+        if(isset($changedFields['ExpireAfterDays']['after'])) {
+
+            $newExpireAfterDays = $changedFields['ExpireAfterDays']['after'];
+            $doesSubmissionExpire = ($this->DoesSubmissionExpire === 'Yes');
+            $newValueIsInvalid = $newExpireAfterDays < $this->config()->min_expiry_days;
+
+            if ($doesSubmissionExpire && $newValueIsInvalid) {
+                $result->addError(
+                    'Expiry Time should be greater than '
+                    . $this->config()->min_expiry_days
+                    . ' days.'
+                );}
+            }
 
         return $result;
     }

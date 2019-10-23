@@ -728,7 +728,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         if ($member->getIsSA() && $member->getIsCISO()) {
                             $status = [
                                 QuestionnaireSubmission::STATUS_AWAITING_SA_REVIEW,
-                                QuestionnaireSubmission::  STATUS_WAITING_FOR_SA_APPROVAL,
+                                QuestionnaireSubmission::STATUS_WAITING_FOR_SA_APPROVAL,
                                 QuestionnaireSubmission::STATUS_WAITING_FOR_APPROVAL,
                                 QuestionnaireSubmission::STATUS_APPROVED,
                                 QuestionnaireSubmission::STATUS_DENIED
@@ -739,7 +739,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                             ])->filterAny([
                                 'SecurityArchitectApprovalStatus' => QuestionnaireSubmission::STATUS_PENDING,
                                 'CisoApprovalStatus' => QuestionnaireSubmission::STATUS_PENDING
-                            ]);
+                            ])->exclude('QuestionnaireStatus', QuestionnaireSubmission::STATUS_EXPIRED);
                         } elseif ($member->getIsSA()) {
                             $data = QuestionnaireSubmission::get()->filter([
                                 'QuestionnaireStatus' => [
@@ -747,7 +747,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                                     QuestionnaireSubmission::  STATUS_WAITING_FOR_SA_APPROVAL,
                                 ],
                                 'SecurityArchitectApprovalStatus' => QuestionnaireSubmission::STATUS_PENDING
-                            ]);
+                            ])->exclude('QuestionnaireStatus', QuestionnaireSubmission::STATUS_EXPIRED);
                         } elseif ($member->getIsCISO()) {
                             $data = QuestionnaireSubmission::get()->filter([
                                 'QuestionnaireStatus' => [
@@ -756,7 +756,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                                   QuestionnaireSubmission::STATUS_DENIED
                                 ],
                                 'CisoApprovalStatus' => QuestionnaireSubmission::STATUS_PENDING
-                            ]);
+                            ])->exclude('QuestionnaireStatus', QuestionnaireSubmission::STATUS_EXPIRED);
                         } else {
                             // @todo : We might need to change this logic in future for Story:-
                             // Change behaviour of Business Owner approval Token
@@ -765,20 +765,22 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                                 'QuestionnaireStatus' => QuestionnaireSubmission::STATUS_WAITING_FOR_APPROVAL,
                                 'BusinessOwnerApprovalStatus' => QuestionnaireSubmission::STATUS_PENDING,
                                 'BusinessOwnerEmailAddress' => $member->Email
-                            ]);
+                            ])->exclude('QuestionnaireStatus', QuestionnaireSubmission::STATUS_EXPIRED);
                         }
                     }
 
                     // data for my sumission list
                     if ($userID && $pageType == 'my_submission_list') {
-                        $data = QuestionnaireSubmission::get()->filter(['UserID' => $userID]);
+                        $data = QuestionnaireSubmission::get()
+                            ->filter(['UserID' => $userID])
+                            ->exclude('QuestionnaireStatus', QuestionnaireSubmission::STATUS_EXPIRED);
                     }
 
                     // data for my product list
                     if ($userID && $pageType == 'my_product_list') {
-                        $data = QuestionnaireSubmission::get()->filter([
-                            'BusinessOwnerEmailAddress' => $member->Email
-                        ]);
+                        $data = QuestionnaireSubmission::get()
+                            ->filter(['BusinessOwnerEmailAddress' => $member->Email])
+                            ->exclude('QuestionnaireStatus', QuestionnaireSubmission::STATUS_EXPIRED);
                     }
 
                     // If the user is not logged-in and the secure token is not valid, throw error
