@@ -113,7 +113,6 @@ class Summary extends Component<Props> {
         </div>
       );
     }
-
     if (submission.status === "expired") {
       return (
         <div className="container">
@@ -124,7 +123,6 @@ class Summary extends Component<Props> {
         </div>
       );
     }
-
     return (
       <div className="Summary">
         {this.renderSubmitterInfo(submission)}
