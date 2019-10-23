@@ -73,7 +73,6 @@ const list = (myProductList: QuestionnaireSubmissionListItem) => {
           <tbody>
             {myProductList.map((myProduct) => {
               let url = "#/questionnaire/summary/" + myProduct.uuid;
-
               return (
                 <tr key={myProduct.id}>
                   <td>
