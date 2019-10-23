@@ -192,7 +192,7 @@ class JIRA extends IssueTrackerSystem
             $ticketID
         );
 
-        $result = $this->call($baseUri, null, 'GET');
+        $result = $this->call($baseUri, '', 'GET');
 
         if (!$result) {
             throw new \RuntimeException('Unexpected API response: Bad response.');
