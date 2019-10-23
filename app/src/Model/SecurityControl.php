@@ -54,12 +54,7 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
      */
     private static $db = [
         'Name' => 'Varchar(255)',
-        'Description' => 'Text',
-        'Status' => "Enum('" .
-            self::CTL_STATUS_1 . "," .
-            self::CTL_STATUS_2 . "," .
-            self::CTL_STATUS_3 .
-        "')",
+        'Description' => 'Text'
     ];
 
     /**

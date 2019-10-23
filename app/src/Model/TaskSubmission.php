@@ -37,6 +37,7 @@ use SilverStripe\Forms\TextField;
 use NZTA\SDLT\Model\JiraTicket;
 use SilverStripe\Security\Group;
 use NZTA\SDLT\Traits\SDLTRiskSubmission;
+use NZTA\SDLT\Helper\SecurityRiskAssessmentCalculator;
 use SilverStripe\Forms\HeaderField;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\TextareaField;
@@ -449,7 +450,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 //it doesn't. It returns the RiskResultData instead.
                 'RiskAssessmentTaskSubmission',
                 'CVATaskData',
-                'CVATaskDataSource'
+                'CVATaskDataSource',
+                'SecurityRiskAssessmentTableData',
             ]);
 
         $dataObjectScaffolder
@@ -786,56 +788,56 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     private function provideGraphQLScaffoldingForUpdateControlValidationAuditTaskSubmission(SchemaScaffolder $scaffolder)
     {
       $scaffolder
-          ->mutation('updateControlValidationAuditTaskSubmission', TaskSubmission::class)
-          ->addArgs([
-              'UUID' => 'String!',
-              'CVATaskData' => 'String'
-          ])
-          ->setResolver(new class implements ResolverInterface {
-              /**
-               * Invoked by the Executor class to resolve this mutation / query
-               * @see Executor
-               *
-               * @param mixed       $object  object
-               * @param array       $args    args
-               * @param mixed       $context context
-               * @param ResolveInfo $info    info
-               * @throws GraphQLAuthFailure
-               * @return mixed
-               */
-              public function resolve($object, array $args, $context, ResolveInfo $info)
-              {
-                  $member = Security::getCurrentUser();
-                  $uuid = Convert::raw2sql($args['UUID']);
-                  $submission = TaskSubmission::get_task_submission_by_uuid($uuid);
-                  $canEdit = TaskSubmission::can_edit_task_submission(
-                      $submission,
-                      $member,
-                      ''
-                  );
-                  if (!$canEdit) {
-                      throw new GraphQLAuthFailure();
-                  }
-                  $submission->CompletedAt = date('Y-m-d H:i:s');
-                  $submission->CVATaskData = base64_decode($args['CVATaskData']);
+        ->mutation('updateControlValidationAuditTaskSubmission', TaskSubmission::class)
+        ->addArgs([
+            'UUID' => 'String!',
+            'CVATaskData' => 'String'
+        ])
+        ->setResolver(new class implements ResolverInterface {
+            /**
+             * Invoked by the Executor class to resolve this mutation / query
+             * @see Executor
+             *
+             * @param mixed       $object  object
+             * @param array       $args    args
+             * @param mixed       $context context
+             * @param ResolveInfo $info    info
+             * @throws GraphQLAuthFailure
+             * @return mixed
+             */
+            public function resolve($object, array $args, $context, ResolveInfo $info)
+            {
+                $member = Security::getCurrentUser();
+                $uuid = Convert::raw2sql($args['UUID']);
+                $submission = TaskSubmission::get_task_submission_by_uuid($uuid);
+                $canEdit = TaskSubmission::can_edit_task_submission(
+                    $submission,
+                    $member,
+                    ''
+                );
+                if (!$canEdit) {
+                    throw new GraphQLAuthFailure();
+                }
+                $submission->CompletedAt = date('Y-m-d H:i:s');
+                $submission->CVATaskData = base64_decode($args['CVATaskData']);
 
-                  // set Submitter IP Address
-                  if ($_SERVER['REMOTE_ADDR']) {
-                      $submission->SubmitterIPAddress = Convert::raw2sql($_SERVER['REMOTE_ADDR']);
-                  }
+                // set Submitter IP Address
+                if ($_SERVER['REMOTE_ADDR']) {
+                    $submission->SubmitterIPAddress = Convert::raw2sql($_SERVER['REMOTE_ADDR']);
+                }
 
-                  $submission->Status = TaskSubmission::STATUS_COMPLETE;
+                $submission->Status = TaskSubmission::STATUS_COMPLETE;
 
-                  // if task approval requires then set status to waiting for approval
-                  if ($submission->IsTaskApprovalRequired) {
-                      $submission->setStatusToWatingforApproval();
-                  }
+                // if task approval requires then set status to waiting for approval
+                if ($submission->IsTaskApprovalRequired) {
+                    $submission->setStatusToWatingforApproval();
+                }
 
-                  $submission->write();
-                  return $submission;
-              }
-          })
-          ->end();
+                $submission->write();
+                return $submission;
+            }
+        })
+        ->end();
     }
 
     /**
@@ -1055,6 +1057,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     }
 
                     $data->ProductAspects = $data->QuestionnaireSubmission()->getProductAspects();
+
+                    if ($data->TaskType === 'security risk assessment') {
+                        $data->SecurityRiskAssessmentTableData = $data->getSecurityRiskAssessmentTableData();
+                    }
 
                     if ($data->TaskType === 'control validation audit') {
                         $siblingComponentSelectionTask = $data->getSiblingTaskSubmissionsByType('selection');
@@ -2110,6 +2116,20 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         }
 
         return $hostname;
+    }
+
+    /**
+     * Get Security Risk Assessment Table Data
+     *
+     * @return string
+     */
+    public function getSecurityRiskAssessmentTableData()
+    {
+        $sraCalculator = SecurityRiskAssessmentCalculator::create(
+            $this->QuestionnaireSubmission()
+        );
+
+        return json_encode($sraCalculator->getTableData());
     }
 
     /**

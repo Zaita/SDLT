@@ -1,3 +1,5 @@
+// @flow
+// site wide loading Icon
 
 import { Icon } from 'react-fa';
 import React, {Component} from "react";

@@ -142,8 +142,6 @@ class TaskSubmission extends Component<Props> {
       return;
     }
 
-    console.log(siteConfig);
-    console.log(this.props);
     PDFUtil.generatePDF({
       questions: taskSubmission.questions,
       submitter: taskSubmission.submitter.email ? taskSubmission.submitter : currentUser,
