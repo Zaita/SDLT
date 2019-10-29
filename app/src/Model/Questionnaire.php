@@ -68,12 +68,12 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     private static $table_name = 'Questionnaire';
 
     /**
-     * @var Int
+     * @var integer
      */
     private static $expiry_days = 14;
 
     /**
-     * @var Int
+     * @var integer
      */
     private static $min_expiry_days = 5;
 
@@ -184,16 +184,15 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
                 ->setSource(Utils::pretty_source($this, 'RiskCalculation'))
                 ->setDescription(
                     ''
-                    .'Select the most appropriate formula with which to perform'
-                    .' risk calculations.'
+                    . 'Select the most appropriate formula with which to perform'
+                    . ' risk calculations.'
                 )
-            ->displayIf('Type')
-            ->isEqualTo('RiskQuestionnaire')
-            ->end()
+                ->displayIf('Type')
+                ->isEqualTo('RiskQuestionnaire')
+                ->end()
         );
 
         if ($this->isRiskType()) {
-            // flag this pillar as not requiring any approvals and not sending approval email if no tasks is generated/spawned by the use
             $fields->addFieldToTab(
                 'Root.Main',
                 CheckboxField::create(
@@ -215,7 +214,7 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
             [
                 OptionsetField::create(
                     'DoesSubmissionExpire',
-                    'Should submissions expire?',
+                    'Should Submission Expire?',
                     $this->dbObject('DoesSubmissionExpire')->enumValues()
                 ),
 
@@ -369,6 +368,20 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     }
 
     /**
+     * @return Int
+     */
+    public function getExpireAfterDays() : int
+    {
+        $value = (int) $this->getField('ExpireAfterDays');
+
+        if (!$value || $value < $this->config()->min_expiry_days) {
+            $this->setField('ExpireAfterDays', $this->config()->expiry_days);
+        }
+
+        return (int) $this->getField('ExpireAfterDays');
+    }
+
+    /**
      * Deal with pre-write processes.
      *
      * @return void
@@ -440,7 +453,8 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     public function getLink($action = 'edit')
     {
         $admin = QuestionnaireAdmin::create();
-        return $admin->Link('NZTA-SDLT-Model-Questionnaire/EditForm/field/NZTA-SDLT-Model-Questionnaire/item/' . $this->ID . '/' . $action);
+        return $admin->Link('NZTA-SDLT-Model-Questionnaire/EditForm/field/NZTA-SDLT-Model-Questionnaire/item/'
+        . $this->ID . '/' . $action);
     }
 
     /**
@@ -460,19 +474,19 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
             $result->addError('Please select a risk-calculation type.');
         }
 
-        if(isset($changedFields['ExpireAfterDays']['after'])) {
-
+        if (isset($changedFields['ExpireAfterDays']['after'])) {
             $newExpireAfterDays = $changedFields['ExpireAfterDays']['after'];
             $doesSubmissionExpire = ($this->DoesSubmissionExpire === 'Yes');
             $newValueIsInvalid = $newExpireAfterDays < $this->config()->min_expiry_days;
 
             if ($doesSubmissionExpire && $newValueIsInvalid) {
                 $result->addError(
-                    'Expiry Time should be greater than '
+                    'Expiry time should be greater than '
                     . $this->config()->min_expiry_days
                     . ' days.'
-                );}
+                );
             }
+        }
 
         return $result;
     }
