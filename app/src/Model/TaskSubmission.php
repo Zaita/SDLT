@@ -1970,6 +1970,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 $controls[] = [
                     'id' => $ctrl->ID,
                     'name' => $ctrl->Name,
+                    'description' => $ctrl->Description,
                     'selectedOption' => SecurityControl::CTL_STATUS_2
                 ];
             }
