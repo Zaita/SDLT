@@ -216,7 +216,7 @@ class ControlValidationAuditContainer extends Component<Props, State> {
         <label className="ml-2" key={control.id}>
           <strong>{control.name}</strong>
         </label>
-        <span className="control-description">{control.description ? `- ${control.description} )`: ''}</span>
+        <span className="control-description">{control.description ? `- ${control.description}`: ''}</span>
 
       </div>
     );
