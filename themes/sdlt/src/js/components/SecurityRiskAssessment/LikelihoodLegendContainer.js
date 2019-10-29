@@ -19,7 +19,7 @@ class LikelihoodLegendContainer extends Component<Props> {
         <h3>Likelihood Legend</h3>
 
         <div className="table-responsive">
-          <table className="table">
+          <table className="table table-sm">
             <thead className="thead-light">
               <tr key="likelihood_legend_header">
                 <th>Threshold</th>
@@ -31,10 +31,10 @@ class LikelihoodLegendContainer extends Component<Props> {
                 return (
                   <tr key={index+1}>
                     <td>
-                      {likelihoodThreshold.Operator + likelihoodThreshold.Value}
+                      {likelihoodThreshold.operator + likelihoodThreshold.value}
                     </td>
-                    <td style={{backgroundColor:'#' + likelihoodThreshold.Colour}}>
-                      {likelihoodThreshold.Name}
+                    <td style={{backgroundColor:'#' + likelihoodThreshold.color}}>
+                      {likelihoodThreshold.name}
                     </td>
                   </tr>
                 );

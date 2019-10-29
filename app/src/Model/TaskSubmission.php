@@ -111,7 +111,6 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         'IsApprovalRequired' => 'Boolean',
         'IsTaskApprovalLinkSent' => 'Boolean',
         'RiskResultData' => 'Text',
-        'LikelihoodRatings' => 'Text',
         'CVATaskData' => 'Text',
     ];
 
@@ -443,7 +442,6 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'IsTaskApprovalRequired',
                 'IsCurrentUserAnApprover',
                 'RiskResultData',
-                'LikelihoodRatings',
                 'ComponentTarget',
                 'ProductAspects',
                 //you would be forgiven for thinking this returns a TaskSubmission
@@ -451,7 +449,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'RiskAssessmentTaskSubmission',
                 'CVATaskData',
                 'CVATaskDataSource',
-                'SecurityRiskAssessmentTableData',
+                'SecurityRiskAssessmentData',
             ]);
 
         $dataObjectScaffolder
@@ -610,9 +608,6 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         // Initial status of the submission
         $taskSubmission->Status = TaskSubmission::STATUS_START;
         $taskSubmission->LockAnswersWhenComplete = $task->LockAnswersWhenComplete;
-
-        $likelihoodRatingData = $task->getLikelihoodRatingsData();
-        $taskSubmission->LikelihoodRatings = json_encode($likelihoodRatingData);
 
         $taskSubmission->write();
 
@@ -1059,7 +1054,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     $data->ProductAspects = $data->QuestionnaireSubmission()->getProductAspects();
 
                     if ($data->TaskType === 'security risk assessment') {
-                        $data->SecurityRiskAssessmentTableData = $data->getSecurityRiskAssessmentTableData();
+                        $data->SecurityRiskAssessmentData = $data->getSecurityRiskAssessmentData();
                     }
 
                     if ($data->TaskType === 'control validation audit') {
@@ -2123,7 +2118,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      *
      * @return string
      */
-    public function getSecurityRiskAssessmentTableData()
+    public function getSecurityRiskAssessmentData()
     {
         $sraCalculator = SecurityRiskAssessmentCalculator::create(
             $this->QuestionnaireSubmission()
@@ -2149,7 +2144,6 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             'CVATaskData',
             'EmailRelativeLinkToTask',
             'JiraKey',
-            'LikelihoodRatings',
             'JiraTickets',
             'SelectedComponents',
             'ResultToggle',

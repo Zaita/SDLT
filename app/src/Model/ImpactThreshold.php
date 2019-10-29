@@ -14,12 +14,14 @@
 namespace NZTA\SDLT\Model;
 
 use SilverStripe\ORM\DataObject;
+use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
+use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 
 /**
  * Class ImpactThreshold. Represents an admin-managed record for association with
  * Base Impact Ratings.
  */
-class ImpactThreshold extends DataObject
+class ImpactThreshold extends DataObject implements ScaffoldingProvider
 {
     /**
      * @var string
@@ -29,9 +31,9 @@ class ImpactThreshold extends DataObject
     /**
      * If $operator and $operand match an impact-rating, return it.
      *
-     * @param  mixed int|float  $operand  The RHS operand to compare against the
-     *                                    "Value" field.
-     * @return mixed null|ImpactThreshold  An instance of {@link ImpactThreshold}
+     * @param mixed int|float $operand The RHS operand to compare against the
+     *                                 "Value" field.
+     * @return mixed null|ImpactThreshold An instance of {@link ImpactThreshold}
      *                                    if a match is found, or null otherwise.
      * Note: This method is limited in scope. In the event that an operand is set
      *       where it's _both_ ">" and ">=" <N>, then the first "hit" is returned.
@@ -76,5 +78,28 @@ class ImpactThreshold extends DataObject
         }
 
         return null;
+    }
+
+    /**
+     * @param SchemaScaffolder $scaffolder Scaffolder
+     * @return SchemaScaffolder
+     */
+    public function provideGraphQLScaffolding(SchemaScaffolder $scaffolder)
+    {
+        // Provide entity type
+        $typeScaffolder = $scaffolder
+            ->type(ImpactThreshold::class)
+            ->addFields([
+                'Name',
+                'Value',
+                'Colour',
+                'Operator'
+            ])
+            ->operation(SchemaScaffolder::READ)
+            ->setUsePagination(false)
+            ->setName('readImpactThreshold')
+            ->end();
+
+        return $scaffolder;
     }
 }

@@ -110,6 +110,9 @@ class Task extends DataObject implements ScaffoldingProvider
         'AnswerActionFields' => AnswerActionField::class
     ];
 
+    /**
+     * @var array
+     */
     private static $many_many = [
         'DefaultSecurityComponents' => SecurityComponent::class
     ];
@@ -183,7 +186,6 @@ class Task extends DataObject implements ScaffoldingProvider
                     )
                 );
             }
-
         } else {
             /* @var GridField $questions */
             $questions = $fields->dataFieldByName('Questions');
@@ -208,15 +210,20 @@ class Task extends DataObject implements ScaffoldingProvider
                 ->setPlaceholderText('Find Risk Questionnaires by Name');
         }
 
-        $fields->insertAfter('Name', $typeField
+        $fields->insertAfter(
+            'Name',
+            $typeField
             ->setEmptyString('-- Select One --')
             ->setSource(Utils::pretty_source($this, 'TaskType'))
         );
 
-        $fields->insertAfter('TaskType', $riskField
+        $fields->insertAfter(
+            'TaskType',
+            $riskField
             ->setEmptyString('-- Select One --')
             ->setSource(Utils::pretty_source($this, 'RiskCalculation'))
-            ->setDescription(''
+            ->setDescription(
+                ''
                 . 'Select the most appropriate formula with which to perform'
                 . ' risk calculations.'
             )
@@ -225,7 +232,9 @@ class Task extends DataObject implements ScaffoldingProvider
                 ->end()
         );
 
-        $fields->insertAfter('TaskType', DropdownField::create('ComponentTarget', 'Target')
+        $fields->insertAfter(
+            'TaskType',
+            DropdownField::create('ComponentTarget', 'Target')
             ->setEmptyString('-- Select One --')
             ->setSource(Utils::pretty_source($this, 'ComponentTarget'))
             ->setDescription('Select the most appropriate target for selections.')
@@ -247,10 +256,10 @@ class Task extends DataObject implements ScaffoldingProvider
         );
 
         if ($this->getUsedOnData()->Count()) {
-          $fields->addFieldToTab(
-              'Root.UsedOn',
-              $this->getUsedOnGridField()
-          );
+            $fields->addFieldToTab(
+                'Root.UsedOn',
+                $this->getUsedOnGridField()
+            );
         } else {
             $fields->addFieldToTab(
                 'Root.UsedOn',
@@ -263,7 +272,6 @@ class Task extends DataObject implements ScaffoldingProvider
 
         $fields->removeByName(['LikelihoodThresholds', 'RiskRatings']);
         if ($this->isSRAType()) {
-
             $fields->addFieldsToTab('Root.LikelihoodThresholds', [
                 LiteralField::create(
                     'LikelihoodThresholdsNotice',
@@ -385,10 +393,35 @@ class Task extends DataObject implements ScaffoldingProvider
 
         foreach ($this->LikelihoodThresholds()->sort('Value ASC, Operator ASC') as $threshold) {
             $thresholdData[] = [
-                'Name' => $threshold->Name,
-                'Value' => $threshold->Value,
-                'Colour' => $threshold->Colour,
-                'Operator' => $threshold->Operator,
+                'name' => $threshold->Name,
+                'value' => $threshold->Value,
+                'color' => $threshold->Colour,
+                'operator' => $threshold->Operator,
+            ];
+        }
+
+        return $thresholdData;
+    }
+
+
+
+    /**
+     * @return array RiskRatings
+     */
+    public function getRiskRatingsData()
+    {
+        if (!$this->isSRAType()) {
+            return [];
+        }
+
+        $thresholdData = [];
+
+        foreach ($this->RiskRatings() as $threshold) {
+            $thresholdData[] = [
+                'riskRating' => $threshold->RiskRating,
+                'impact' => $threshold->Impact,
+                'color' => $threshold->Colour,
+                'likelihood' => $threshold->Likelihood()->Name,
             ];
         }
 
@@ -595,11 +628,11 @@ class Task extends DataObject implements ScaffoldingProvider
 
         if ($this->IsApprovalRequired && !$this->ApprovalGroup()->exists()) {
             $result->addError('Please select Approval group.');
-        } else if (!$this->TaskType) {
+        } elseif (!$this->TaskType) {
             $result->addError('Please select a task type.');
-        } else if ($this->TaskType === 'risk questionnaire' && !$this->RiskCalculation) {
+        } elseif ($this->TaskType === 'risk questionnaire' && !$this->RiskCalculation) {
             $result->addError('Please select a risk-calculation.');
-        } else if ($this->ID && $this->isSRAType() && !$this->RiskQuestionnaireDataSourceID) {
+        } elseif ($this->ID && $this->isSRAType() && !$this->RiskQuestionnaireDataSourceID) {
             $result->addError('Please select a data source for the risk questionnaire.');
         }
 
@@ -651,12 +684,14 @@ class Task extends DataObject implements ScaffoldingProvider
     /**
      * get current object link in model admin
      *
+     * @param string $action action type edit/add/delete
      * @return string
      */
     public function getLink($action = 'edit')
     {
         $admin = QuestionnaireAdmin::create();
-        return $admin->Link('NZTA-SDLT-Model-Task/EditForm/field/NZTA-SDLT-Model-Task/item/' . $this->ID . '/' . $action);
+        return $admin->Link('NZTA-SDLT-Model-Task/EditForm/field/NZTA-SDLT-Model-Task/item/'
+            . $this->ID . '/' . $action);
     }
 
 
@@ -679,7 +714,8 @@ class Task extends DataObject implements ScaffoldingProvider
      * @param [type] $fields FieldList obtained from getCMSFields
      * @return FieldList a modified version of $fields, passed in via parameter
      */
-    public function getCVA_CMSFields($fields) {
+    public function getCVA_CMSFields($fields)
+    {
         //remove fields not required for CVA task
         $fields->removeByName([
             'Questions',
@@ -693,7 +729,7 @@ class Task extends DataObject implements ScaffoldingProvider
             'DefaultSecurityComponents'
         ]);
 
-        if($this->ID) {
+        if ($this->ID) {
             $fields->addFieldToTab(
                 'Root.Main',
                 ListboxField::create(
