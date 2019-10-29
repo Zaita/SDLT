@@ -23,3 +23,4 @@ SilverStripe\GraphQL\Manager:
         - NZTA\SDLT\Model\SecurityControl
         - NZTA\SDLT\Model\JiraTicket
         - NZTA\SDLT\Model\SelectedComponent
+        - NZTA\SDLT\Model\ImpactThreshold
