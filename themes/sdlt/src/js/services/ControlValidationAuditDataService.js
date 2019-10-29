@@ -55,7 +55,7 @@ query {
       submitterID: toString(get(submissionJSONObject, "Submitter.ID", "")),
       componentTarget: toString(get(submissionJSONObject, "CVATaskDataSource", "")),
       productAspects:  _.has(submissionJSONObject, 'ProductAspects') ? JSON.parse(get(submissionJSONObject, "ProductAspects", [])) : [],
-    siblingSubmissions: TaskParser.parseAlltaskSubmissionforQuestionnaire(submissionJSONObject)
+      siblingSubmissions: TaskParser.parseAlltaskSubmissionforQuestionnaire(submissionJSONObject)
     };
 
     return data;

@@ -16,6 +16,10 @@ $white-background: rgba(255, 255, 255, 0.7);
     padding: 25px;
     background-color: $white-background;
   }
+  .control-description {
+      font-size: 14px;
+      margin-left: -5px;
+  }
 
   label {
     margin-right: 10px;
