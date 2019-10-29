@@ -24,7 +24,6 @@ use SilverStripe\Core\Injector\Injector;
 /**
  * A QueuedJob is specifically designed to be invoked at midnight everyday regularly
  */
-
 class CheckSubmissionExpiredJob extends AbstractQueuedJob implements QueuedJob
 {
     /**
@@ -51,14 +50,13 @@ class CheckSubmissionExpiredJob extends AbstractQueuedJob implements QueuedJob
      */
     public function process()
     {
-        $questionnaireSubmissionInProgress = QuestionnaireSubmission::get()
+        $questionnaireInProgress = QuestionnaireSubmission::get()
         ->filter([
             'QuestionnaireStatus'=> 'in_progress',
             'Questionnaire.ExpireAfterDays:GreaterThanOrEqual' => Questionnaire::config()->min_expiry_days
         ]);
 
-        $questionnaireSubmissionInProgress->each(function (QuestionnaireSubmission $questionnaireSubmission) {
-
+        $questionnaireInProgress->each(function (QuestionnaireSubmission $questionnaireSubmission) {
             $isQuestionnaireAllowedToExpire = false;
             $questionnaire = $questionnaireSubmission->Questionnaire();
 
@@ -94,8 +92,8 @@ class CheckSubmissionExpiredJob extends AbstractQueuedJob implements QueuedJob
                 }
             }
         });
-        //Regenerate the CheckSubmissionExpiredJob and run it at next midnight
 
+        //Regenerate the CheckSubmissionExpiredJob and run it at next midnight
         $nextJob = Injector::inst()->create(CheckSubmissionExpiredJob::class);
 
         singleton(QueuedJobService::class)
