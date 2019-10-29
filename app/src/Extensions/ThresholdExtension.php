@@ -69,8 +69,18 @@ class ThresholdExtension extends DataExtension
     {
         return DBField::create_field(
             DBHTMLText::class,
-            sprintf('<div style="width:30px;height:30px;background:#%s;"></div>', $this->owner->Colour)
+            sprintf('<div style="width:30px;height:30px;background:%s;"></div>', $this->getHexColour())
         );
+    }
+
+    /**
+     * Get hexadecimal colour with # prefix
+     *
+     * @return string
+     */
+    public function getHexColour()
+    {
+        return sprintf("#%s", $this->owner->Colour);
     }
 
     /**
