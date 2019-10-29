@@ -7,7 +7,7 @@ import {DEFAULT_NETWORK_ERROR} from "../constants/errors";
 import type {Task, TaskSubmission} from "../types/Task";
 import UserParser from "../utils/UserParser";
 import TaskParser from "../utils/TaskParser";
-
+import type {ImapctThreshold} from "../types/ImapctThreshold";
 export default class SecurityRiskAssessmentTaskDataService {
 
   static async fetchSecurityRiskAssessmentTasK(args: { uuid: string, secureToken?: string }): Promise<TaskSubmission> {
@@ -26,7 +26,7 @@ query {
         TaskType
       }
     }
-    SecurityRiskAssessmentTableData
+    SecurityRiskAssessmentData
   }
 }`;
 
@@ -41,8 +41,37 @@ query {
       taskName: toString(get(submissionJSONObject, "TaskName", "")),
       questionnaireSubmissionUUID: toString(get(submissionJSONObject, "QuestionnaireSubmission.UUID", "")),
       taskSubmissions: TaskParser.parseAlltaskSubmissionforQuestionnaire(submissionJSONObject),
-      securityRiskAssessmentTableData: JSON.parse(get(submissionJSONObject, 'SecurityRiskAssessmentTableData', ''))
+      securityRiskAssessmentTableData: JSON.parse(get(submissionJSONObject, 'SecurityRiskAssessmentData', ''))
     };
+
+    return data;
+  }
+
+  static async fetchImpactThreshold(): Promise<ImapctThreshold> {
+    const query = `
+query {
+  readImpactThreshold {
+    Name
+    Value
+    Colour
+    Operator
+  }
+}`;
+
+    const responseJSONObject = await GraphQLRequestHelper.request({query});
+    const impactThresholdJSONObject = get(responseJSONObject, "data.readImpactThreshold", null);
+    if (!impactThresholdJSONObject) {
+      throw DEFAULT_NETWORK_ERROR;
+    }
+
+    const data:ImapctThreshold = impactThresholdJSONObject.map((impactThreshold) => {
+      return {
+        name: _.toString(_.get(impactThreshold, "Name", "")),
+        color: _.toString(_.get(impactThreshold, "Colour", "")),
+        operator: _.toString(_.get(impactThreshold, "Operator", "")),
+        value: _.toString(_.get(impactThreshold, "Value", "")),
+      }
+    });
 
     return data;
   }

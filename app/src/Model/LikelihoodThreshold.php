@@ -75,10 +75,65 @@ class LikelihoodThreshold extends DataObject
 
         if ($this->Value > 100 || $this->Value <= 0) {
             $result->addError('"Value" represents a percentage and therefore ' .
-                'cannot be less than or equal to zero, or exceed 100.'
-            );
+                'cannot be less than or equal to zero, or exceed 100.');
         }
 
         return $result;
+    }
+
+    /**
+     * If $operator and $operand match an likelihood-rating, return it.
+     *
+     * @param mixed int|float $operand The RHS operand to compare against the
+     *                                 "Value" field.
+     * @param int             $taskID  Security Risk Assessment task id
+     * @return mixed null|LikelihoodThreshold  An instance of
+     *                  {@link LikelihoodThreshold} if a match is found, or null
+     *                   otherwise.
+     * Note: This method is limited in scope. In the event that an operand is set
+     *       where it's _both_ ">" and ">=" <N>, then the first "hit" is returned.
+     *       This is simply a case for admin users to consider when configuring
+     *       thresholds within the SDLT, with the use of incremental or "stepped"
+     *       thresholds.
+     */
+    public static function match($operand, $taskID)
+    {
+        $operand = str_replace(',', '', $operand);
+        $sort = sprintf('ABS(Value - %s) ASC', $operand);
+        $thresholds = self::get()
+            ->filter(['TaskID' => $taskID])
+            ->sort($sort);
+
+        foreach ($thresholds as $threshold) {
+            $opr = $threshold->Operator;
+            $val = $threshold->Value;
+
+            switch ($opr) {
+                case '<':
+                    if ($operand < $val) {
+                        return $threshold;
+                    }
+                    break;
+                case '<=':
+                    if ($operand <= $val) {
+                        return $threshold;
+                    }
+                    break;
+                case '>':
+                    if ($operand > $val) {
+                        return $threshold;
+                    }
+                    break;
+                case '>=':
+                    if ($operand >= $val) {
+                        return $threshold;
+                    }
+                    break;
+                default:
+                    return null;
+            }
+        }
+
+        return null;
     }
 }

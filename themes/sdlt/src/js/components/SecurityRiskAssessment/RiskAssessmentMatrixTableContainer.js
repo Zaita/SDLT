@@ -14,76 +14,6 @@ type Props = {
 };
 
 class RiskAssessmentMatrixTableContainer extends Component<Props> {
-
-  /**
-   * Given an array of likelihoods and a base impact score, return the
-   * nearest corresponding likelihood object that meets the threshold.
-   * This depends entirely on the sorted order of thresholds defined in the CMS
-   * @param {*} sourceArray this is an array of object (likelihoods) obtained
-   * from the CMS. It contains {name: 'xxx', value: '100', colour: 'edaaed'}
-   * @param {*} score depends on usage: it might be the base impact score
-   * obtained directly from the risk results, or it is a sum of weights
-   * obtained from the selected controls.
-   * @return object
-   */
-  lookupLikelihood (sourceArray, weightedImpactScore) {
-    let output = {};
-    // the use of `for ( let i of array)` is intentional. The loop needs to be
-    // exited prematurely when the first threshold condition is met.
-    // JavaScript's native array iterator methods won't do this.
-    for (let likelihood of sourceArray) {
-      let thresholdValue = +likelihood.value,
-        likelihoodImpactScore = parseInt(weightedImpactScore);
-      switch(likelihood.operator) {
-        case '<=':
-          if(Comparators.lte(likelihoodImpactScore, thresholdValue)) {
-            return likelihood;
-          };
-          break;
-        case '<':
-          if(Comparators.lt(likelihoodImpactScore, thresholdValue)) {
-            return likelihood;
-          };
-          break;
-        case '>':
-          if(Comparators.gt(likelihoodImpactScore, thresholdValue)) {
-            return likelihood;
-          };
-          break;
-        case '>=':
-          if(Comparators.gte(likelihoodImpactScore, thresholdValue)) {
-            return likelihood;
-          };
-          break;
-      }
-
-    }
-
-    return output;
-  }
-
-  /**
-   * Helper to display summary scores
-   * @param {object} aspectSums with the following keys:
-   * I = impact
-   * L = likelihood
-   * IP = impact penalty
-   * LP = likelihood penalty
-   */
-  showComponentSelectionSummaryScores(aspectSums) {
-    return (
-      <small className="text-muted">
-      <br/><strong>Sums</strong>
-      <br/>
-      Impact: {aspectSums.I},
-      Likelihood: {aspectSums.L}
-      <br/>
-      IPenalty: {aspectSums.IP},
-      LPenalty: {aspectSums.LP}
-      </small>
-    );
-  }
-
   /**
    * Render the security risk assessment matrix as an HTML table
    */
@@ -91,12 +21,6 @@ class RiskAssessmentMatrixTableContainer extends Component<Props> {
     const {
       tableData
     } = {...this.props};
-
-    let likelihoodThresholds = tableData.LikelihoodThresholds;
-
-    if(!likelihoodThresholds || likelihoodThresholds.length === 0) return [];
-
-    likelihoodThresholds = TaskParser.parseLikelihoodJSONObject(likelihoodThresholds);
 
     return (
       <div className="RiskMatrix">
@@ -153,15 +77,7 @@ class RiskAssessmentMatrixTableContainer extends Component<Props> {
                     //filter by DEFAULT_CVA_CONTROLS_ANSWER_NO controls that also have a calculated weight
                     recommendedControls = component.controls
                       .filter(control => control.selectedOption === CTL_STATUS_2)
-                      .filter(control => risk.Weights[control.id] !== undefined),
-
-                    //look up the current likelihood threshold, given the score calculated by this aspect's summary weights for likelihood
-                    //this also accounts for penalties
-                    currentLikelihood = this.lookupLikelihood(likelihoodThresholds, DEFAULT_SRA_MATRIX_THRESHOLD_SCORE - aspectSums.L + aspectSums.LP),
-
-                    //look up the current impact threshold, given the score calculated by this aspect's summary weights for impact
-                    //this also accounts for penalties
-                    currentImpact = this.lookupLikelihood(likelihoodThresholds, riskScore - aspectSums.I + aspectSums.IP);
+                      .filter(control => risk.Weights[control.id] !== undefined);
 
                   return (
                     <tr key={topIndex+'-'+subindex}>
@@ -169,13 +85,11 @@ class RiskAssessmentMatrixTableContainer extends Component<Props> {
                       {/* Display Risk name and base impact score */}
                       <td data-risk-id={riskID}>
                         {subindex === 0 ? riskName : null}
-                        <small className="text-muted">{subindex === 0 ? '('+riskScore+')' : null}</small>
-                        {!risk.HasAspects ? this.showComponentSelectionSummaryScores(aspectSums) : null}
+                        <small className="text-muted">{subindex === 0 ? ' ('+riskScore+')' : null}</small>
                       </td>
 
                       <td>
                       {risk.HasAspects ? aspectName : null}
-                      {risk.HasAspects ? this.showComponentSelectionSummaryScores(aspectSums) : null}
                       </td>
 
                       {/* Display Components name */}
@@ -192,8 +106,8 @@ class RiskAssessmentMatrixTableContainer extends Component<Props> {
                               {/* Display Control name and impact/likelihood scores */}
                               {control.name}
                               <small className="text-muted">(
-                                I: {controlWeights.I},
-                                L: {controlWeights.L}
+                                I: {control.Weights.I},
+                                L: {control.Weights.L}
                               )</small>
 
                             </div>
@@ -202,20 +116,20 @@ class RiskAssessmentMatrixTableContainer extends Component<Props> {
                       </td>
 
                       {/* Display Likelihood rating and score */}
-                      <td style={currentLikelihood ? {color: '#'+currentLikelihood.colour} : null}>
-                        {currentLikelihood.name} {currentLikelihood ? '(' + (DEFAULT_SRA_MATRIX_THRESHOLD_SCORE - aspectSums.L + aspectSums.LP) + ')' : null}
-                      <br/><small className="text-muted">{DEFAULT_SRA_MATRIX_THRESHOLD_SCORE} - {aspectSums.L} + {aspectSums.LP} = {DEFAULT_SRA_MATRIX_THRESHOLD_SCORE - aspectSums.L + aspectSums.LP}</small>
+                      <td style={componentContainer.currentLikelihoodColour ? {color: componentContainer.currentLikelihoodColour} : null}>
+                      {componentContainer.currentLikelihoodName} {componentContainer.currentLikelihoodName ? '(' + (componentContainer.currentLikelihoodScore) + ')' : null}
+                      <br/><small className="text-muted">max(1, ({DEFAULT_SRA_MATRIX_THRESHOLD_SCORE} - {aspectSums.L}) + {aspectSums.LP}) = {componentContainer.currentLikelihoodScore}</small>
                       </td>
 
                       {/* Display Impact rating and score */}
-                      <td style={currentImpact ? {color: '#'+currentImpact.colour} : null}>
-                        {currentImpact.name} {currentImpact ? '(' + (riskScore - aspectSums.I + aspectSums.IP) + ')' : null}
-                      <br/><small className="text-muted">{riskScore} - {aspectSums.I} + {aspectSums.IP} = {riskScore - aspectSums.I + aspectSums.IP}</small>
+                      <td style={componentContainer.currentImpactColour ? {color: componentContainer.currentImpactColour} : null}>
+                        {componentContainer.currentImpactName} {componentContainer.currentImpactName ? '(' + (componentContainer.currentImpactScore) + ')' : null}
+                      <br/><small className="text-muted">max(1, ({riskScore} - {aspectSums.I}) + {aspectSums.IP}) = {componentContainer.currentImpactScore}</small>
                       </td>
 
                       {/* Display Risk rating and score */}
-                      <td style={riskColour ? {backgroundColor: riskColour} : null}>
-                        {riskRating ? riskRating : null}
+                      <td style={componentContainer.riskRatingColour ? {backgroundColor: componentContainer.riskRatingColour} : null}>
+                        {componentContainer.riskRatingName ? componentContainer.riskRatingName : null}
                       </td>
 
                       {/* Show recommended controls in this aspect */}
@@ -230,6 +144,8 @@ class RiskAssessmentMatrixTableContainer extends Component<Props> {
                               {/* Display Control name and impact/likelihood scores */}
                               {control.name}
                               <small className="text-muted">(
+                                I: {control.Weights.I},
+                                L: {control.Weights.L},
                                 IP: {controlWeights.IP},
                                 LP: {controlWeights.LP}
                               )</small>

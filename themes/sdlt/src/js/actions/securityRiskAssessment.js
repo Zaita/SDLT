@@ -25,3 +25,21 @@ export function loadSecurityRiskAssessment(args: {uuid: string, secureToken?: st
     }
   };
 }
+
+export function loadImapctThreshold() {
+    return async (dispatch) => {
+    try {
+      const payload = await SecurityRiskAssessmentTaskDataService.fetchImpactThreshold();
+
+      const action = {
+        type: ActionType.SRA.LOAD_IMPACT_THRESHOLD,
+        payload,
+      };
+
+      await dispatch(action);
+    }
+    catch (error) {
+      ErrorUtil.displayError(error);
+    }
+  };
+}
