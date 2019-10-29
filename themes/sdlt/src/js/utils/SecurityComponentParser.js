@@ -42,6 +42,7 @@ export default class SecurityComponentParser {
             id: toString(get(control, "id", "")),
             name: toString(get(control, "name", "")),
             selectedOption: toString(get(control, "selectedOption", "")),
+            description: toString(get(control, "description", ""))
           }
         }),
         jiraTicketLink: toString(get(jsonObject, "jiraTicketLink", "")),
