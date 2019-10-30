@@ -23,7 +23,7 @@ class RiskRatingThresholdContainer extends Component<Props> {
             <thead className="thead-light">
               <tr key="risk_rating_legend_header">
                 <th>Likelihood</th>
-                <th>Imapct</th>
+                <th>Impact</th>
                 <th>Risk Rating</th>
               </tr>
             </thead>

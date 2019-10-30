@@ -16,7 +16,7 @@ class ImpactThresholdContainer extends Component<Props> {
 
     return (
       <div className="ImapctLegend">
-        <h3>Imapct Legend</h3>
+        <h3>Impact Legend</h3>
 
         <div className="table-responsive">
           <table className="table table-sm">

@@ -22,6 +22,10 @@ class RiskAssessmentMatrixTableContainer extends Component<Props> {
       tableData
     } = {...this.props};
 
+    if (!tableData) {
+      return null;
+    }
+
     return (
       <div className="RiskMatrix">
         <h3>Your risk assessment results</h3>
@@ -31,7 +35,8 @@ class RiskAssessmentMatrixTableContainer extends Component<Props> {
             <thead className="thead-light">
               <tr key="risk_matrix_legend_header">
                 <th>Risk</th>
-                <th>{tableData.Risks.length && tableData.Risks[0].HasAspects ? 'Product Aspect' : null}</th>
+                {tableData.Risks.length && tableData.Risks[0].HasAspects &&
+                  (<th>Product Aspect</th>)}
                 <th>Current Controls</th>
                 <th>Current Likelihood</th>
                 <th>Current Impact</th>
@@ -87,10 +92,7 @@ class RiskAssessmentMatrixTableContainer extends Component<Props> {
                         {subindex === 0 ? riskName : null}
                         <small className="text-muted">{subindex === 0 ? ' ('+riskScore+')' : null}</small>
                       </td>
-
-                      <td>
-                      {risk.HasAspects ? aspectName : null}
-                      </td>
+                      {risk.HasAspects &&(<td>{aspectName}</td>)}
 
                       {/* Display Components name */}
                       <td>
