@@ -111,6 +111,7 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
 
         <div className="SecurityRiskAssessmentResult">
           {isSRATaskFinalised ? SecurityRiskAssessmentUtil.getSraIsFinalisedAlert() : false}
+
           <RiskAssessmentMatrixTableContainer
             tableData={securityRiskAssessmentData.securityRiskAssessmentTableData}
           />
@@ -118,6 +119,7 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
           <LikelihoodLegendContainer
             likelihoodThresholds={securityRiskAssessmentData.securityRiskAssessmentTableData.LikelihoodThresholds}
           />
+
           <ImpactThresholdContainer impactThresholds={impactThresholdData} />
 
           <RiskRatingThresholdContainer

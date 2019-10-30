@@ -17,7 +17,6 @@ query {
   readTaskSubmission(UUID: "${uuid}", SecureToken: "${secureToken || ""}") {
     UUID
     TaskName
-    Status
     QuestionnaireSubmission {
       UUID
       TaskSubmissions {
