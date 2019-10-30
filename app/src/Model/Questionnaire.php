@@ -36,11 +36,6 @@ use SilverStripe\Forms\NumericField;
 /**
  * Class Questionnaire
  *
- * @property string Name
- * @property string KeyInformation
- *
- * @method HasManyList Questions
- *
  * This class represents multiple "kinds" of questionnaire.
  *
  * A Risk Questionnaire allows administrators to populate a submission's answers
@@ -91,11 +86,11 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     ];
 
     /**
-     * @var Int
+     * @var array
      */
     private static $defaults = [
-       'ExpireAfterDays' => 14,
-   ];
+        'ExpireAfterDays' => 14,
+    ];
 
     /**
      * @var array
@@ -390,12 +385,6 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     {
         parent::onBeforeWrite();
 
-        $expiryDays = $this->config()->expiry_days;
-
-        if (empty($this->ExpireAfterDays) && $this->DoesSubmissionExpire === 'Yes') {
-            $this->ExpireAfterDays = $expiryDays;
-        }
-
         $this->audit();
     }
 
@@ -447,7 +436,7 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
 
     /**
      * get current object link in model admin
-     *
+     * @param string $action action name
      * @return string
      */
     public function getLink($action = 'edit')
