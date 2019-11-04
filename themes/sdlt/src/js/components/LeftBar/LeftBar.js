@@ -82,7 +82,7 @@ export default class LeftBar extends Component<Props> {
               if (!filter) {
                 return true;
               }
-              return component.name.includes(filter);
+              return component.name.toUpperCase().includes(filter.toUpperCase());
             })
             .map((component) => {
               const isSelected = ComponentSelectionUtil.isSelectedComponentExist(component.id, selectedProductAspect, selectedComponents);
