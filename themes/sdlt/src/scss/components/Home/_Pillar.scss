@@ -8,6 +8,7 @@ a.Pillar {
     background: rgba(255,255,255,0.7);
     padding-top: 30px;
     margin-top: 10px;
+    flex: 1 1 8%;
 
     .icon {
         @extend .rounded-circle;
@@ -32,6 +33,7 @@ a.Pillar {
         color: #333333;
         text-transform: uppercase;
         padding-bottom: 5px;
+        max-width: 100%;
     }
 
     &:hover {
