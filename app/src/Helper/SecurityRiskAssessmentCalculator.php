@@ -511,6 +511,10 @@ class SecurityRiskAssessmentCalculator
                         return $component['productAspect'] == $productAspect;
                     });
 
+                    if (empty($filteredComponents)) {
+                        continue;
+                    }
+
                     // we need to do this trick to start array index from 0
                     // so that we will get the array after json decode in the frontend
                     $productAspectComponents = array_merge([], $filteredComponents);

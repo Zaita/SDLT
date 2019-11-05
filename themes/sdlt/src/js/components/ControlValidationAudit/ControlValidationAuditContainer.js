@@ -123,15 +123,20 @@ class ControlValidationAuditContainer extends Component<Props, State> {
       <div>
       {
         productAspects.map((productAspect, productAspectIndex) => {
+          const filterComponent = components.filter((component) => {
+            return component.productAspect === productAspect;
+          })
+
+          if (filterComponent.length == 0) {
+            return null;
+          }
+
           return (
             <div className="mt-2" key={productAspectIndex} >
               <h4>{productAspect}</h4>
               {
-                components.map((component) => {
+                filterComponent.map((component) => {
                   return (
-                    //Default components have no user-defined product aspects,
-                    //so we need to check for empty string too ''
-                    (component.productAspect === productAspect || component.productAspect === '') &&
                     this.renderComponent(component)
                   );
                 })
