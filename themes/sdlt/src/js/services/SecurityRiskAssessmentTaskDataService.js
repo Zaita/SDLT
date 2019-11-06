@@ -30,17 +30,19 @@ query {
 }`;
 
     const responseJSONObject = await GraphQLRequestHelper.request({query});
+
     const submissionJSONObject = get(responseJSONObject, "data.readTaskSubmission.0", null);
     if (!submissionJSONObject) {
       throw DEFAULT_NETWORK_ERROR;
     }
 
+    const securityRiskAssessmentData = JSON.parse(get(submissionJSONObject, 'SecurityRiskAssessmentData', ''));
     const data: TaskSubmission = {
       uuid: submissionJSONObject && submissionJSONObject.UUID ? submissionJSONObject.UUID : '',
       taskName: toString(get(submissionJSONObject, "TaskName", "")),
       questionnaireSubmissionUUID: toString(get(submissionJSONObject, "QuestionnaireSubmission.UUID", "")),
       taskSubmissions: TaskParser.parseAlltaskSubmissionforQuestionnaire(submissionJSONObject),
-      securityRiskAssessmentTableData: JSON.parse(get(submissionJSONObject, 'SecurityRiskAssessmentData', ''))
+      sraData: securityRiskAssessmentData
     };
 
     return data;
