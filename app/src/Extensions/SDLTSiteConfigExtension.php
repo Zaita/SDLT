@@ -89,8 +89,8 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
         $fields->addFieldToTab(
             'Root.Main',
             LiteralField::create(
-               'MainIntro',
-              '<p class="message notice">Configure general SDLT settings.</p>'
+                'MainIntro',
+                '<p class="message notice">Configure general SDLT settings.</p>'
             ),
             'Title'
         );
@@ -99,8 +99,8 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
         $fields->addFieldToTab(
             'Root.Access',
             LiteralField::create(
-               'AlerIntro',
-              '<p class="message notice">Configure who can do what within the SDLT.</p>'
+                'AlerIntro',
+                '<p class="message notice">Configure who can do what within the SDLT.</p>'
             ),
             'CanViewType'
         );
@@ -110,8 +110,8 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
             'Root.Email',
             [
                 LiteralField::create(
-                   'AlerIntro',
-                  '<p class="message notice">Configure some aspects of how email is treated in the system.</p>'
+                    'AlerIntro',
+                    '<p class="message notice">Configure some aspects of how email is treated in the system.</p>'
                 ),
                 TextField::create(
                     'AlternateHostnameForEmail',
@@ -129,13 +129,14 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
             'Root.Images',
             [
                 LiteralField::create(
-                   'ImagesIntro',
-                  '<p class="message notice">Configure how various images and logos appear to users.</p>'
+                    'ImagesIntro',
+                    '<p class="message notice">Configure how various images and logos appear to users.</p>'
                 ),
                 UploadField::create('AuthLogo', 'Login screen logo')
                     ->setDescription('This is the logo that appears within the authentication screens.'),
                 UploadField::create('Logo', 'Header Logo')
-                    ->setDescription('This is the logo that appears in the header.'),
+                    ->setDescription('This is the logo that appears in the header.
+                    The default dimensions for the logo are 370px x 82px.'),
                 UploadField::create('LoginHeroImage', 'Login screen background image')
                     ->setDescription('This is the background image shown on the login screen.'),
                 UploadField::create('HomePageBackgroundImage', 'Home Page Background Image')
@@ -148,8 +149,9 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
             'Root.Alert',
             [
               LiteralField::create(
-                   'AlerIntro',
-                  '<p class="message notice">Check the box below, to display a global banner-message along the top of each screen.</p>'
+                  'AlerIntro',
+                  '<p class="message notice">Check the box below, to display a global
+                  banner-message along the top of each screen.</p>'
               ),
               CheckboxField::create(
                   'AlertEnabled',
@@ -173,8 +175,8 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
             'Root.PDF',
             [
                 LiteralField::create(
-                   'PDFIntro',
-                  '<p class="message notice">Configure how generated PDFs appear to users.</p>'
+                    'PDFIntro',
+                    '<p class="message notice">Configure how generated PDFs appear to users.</p>'
                 ),
                 UploadField::create('QuestionnairePdfHeaderImage'),
                 UploadField::create('QuestionnairePdfFooterImage')
@@ -186,8 +188,8 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
             'Root.Footer',
             [
                 LiteralField::create(
-                   'FooterIntro',
-                  '<p class="message notice">Configure how the global footer appears to users.</p>'
+                    'FooterIntro',
+                    '<p class="message notice">Configure how the global footer appears to users.</p>'
                 ),
                 TextField::create(
                     'FooterCopyrightText',
@@ -243,11 +245,11 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
         }
     }
 
-   /**
-     * Called from provideGraphQLScaffolding().
-     *
-     * @return string
-     */
+    /**
+      * Called from provideGraphQLScaffolding().
+      *
+      * @return string
+      */
     public function getLogoPath() : string
     {
         return (string) $this->owner->Logo()->Link();
