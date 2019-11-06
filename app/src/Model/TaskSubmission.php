@@ -94,6 +94,11 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     private $cvaTaskDataSource;
 
     /**
+     * @var string
+     */
+    private $securityRiskAssessmentData = '';
+
+    /**
      * @var array
      */
     private static $db = [
@@ -238,6 +243,30 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      */
     public function setCVATaskDataSource($dataSource = 'DefaultComponent') {
         $this->cvaTaskDataSource = $dataSource;
+    }
+
+    /**
+     * Get Security Risk Assessment Data
+     *
+     * @return string
+     */
+    public function getSecurityRiskAssessmentData()
+    {
+        return $this->securityRiskAssessmentData;
+    }
+
+    /**
+     * @return string
+     */
+    public function calculateSecurityRiskAssessmentData()
+    {
+        if ($this->TaskType === 'security risk assessment') {
+            $sraCalculator = SecurityRiskAssessmentCalculator::create(
+                $this->QuestionnaireSubmission()
+            );
+
+            $this->securityRiskAssessmentData = json_encode($sraCalculator->getSRATaskdetails());
+        }
     }
 
     /**
@@ -1054,7 +1083,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     $data->ProductAspects = $data->QuestionnaireSubmission()->getProductAspects();
 
                     if ($data->TaskType === 'security risk assessment') {
-                        $data->SecurityRiskAssessmentData = $data->getSecurityRiskAssessmentData();
+                        $data->SecurityRiskAssessmentData = $data->calculateSecurityRiskAssessmentData();
                     }
 
                     if ($data->TaskType === 'control validation audit') {
@@ -2083,7 +2112,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 $controls[] = [
                     'id' => $ctrl->ID,
                     'name' => $ctrl->Name,
-                    'selectedOption' => SecurityControl::CTL_STATUS_2
+                    'selectedOption' => SecurityControl::CTL_STATUS_2,
+                    'description' => $ctrl->Description,
                 ];
             }
 
@@ -2112,20 +2142,6 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         }
 
         return $hostname;
-    }
-
-    /**
-     * Get Security Risk Assessment Table Data
-     *
-     * @return string
-     */
-    public function getSecurityRiskAssessmentData()
-    {
-        $sraCalculator = SecurityRiskAssessmentCalculator::create(
-            $this->QuestionnaireSubmission()
-        );
-
-        return json_encode($sraCalculator->getTableData());
     }
 
     /**

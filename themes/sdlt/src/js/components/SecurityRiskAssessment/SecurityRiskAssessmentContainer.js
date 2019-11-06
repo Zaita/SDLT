@@ -82,24 +82,34 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
       return null;
     }
 
-    const isSRATaskFinalised = SecurityRiskAssessmentUtil.isSRATaskFinalised(securityRiskAssessmentData.taskSubmissions);
+    const {
+      uuid,
+      taskName,
+      questionnaireSubmissionUUID,
+      taskSubmissions,
+      sraData
+    } = {...securityRiskAssessmentData};
+
+    const isSRATaskFinalised = SecurityRiskAssessmentUtil.isSRATaskFinalised(taskSubmissions);
+
     const backButton = (
       <LightButton
         title={"BACK TO QUESTIONNAIRE SUMMARY"}
         onClick={() => {
-          URLUtil.redirectToQuestionnaireSummary(securityRiskAssessmentData.questionnaireSubmissionUUID, secureToken);
+          URLUtil.redirectToQuestionnaireSummary(questionnaireSubmissionUUID, secureToken);
         }}
       />
     );
 
-    const isSiblingTaskPending = SecurityRiskAssessmentUtil.isSiblingTaskPending(securityRiskAssessmentData.taskSubmissions);
+    const isSiblingTaskPending = SecurityRiskAssessmentUtil.isSiblingTaskPending(taskSubmissions);
+
     const finaliseButton = !isSRATaskFinalised && !isSiblingTaskPending
       ? (
         <DarkButton title="FINALISE"
           classes={["button ml-2"]}
 
           onClick={() => {
-            this.props.dispatchFinaliseAction(securityRiskAssessmentData.uuid, secureToken, securityRiskAssessmentData.questionnaireSubmissionUUID);
+            this.props.dispatchFinaliseAction(uuid, secureToken, questionnaireSubmissionUUID);
           }}
         />
       )
@@ -113,18 +123,21 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
           {isSRATaskFinalised ? SecurityRiskAssessmentUtil.getSraIsFinalisedAlert() : false}
 
           <RiskAssessmentMatrixTableContainer
-            tableData={securityRiskAssessmentData.securityRiskAssessmentTableData}
+            calculatedSRAData={sraData.calculatedSRAData}
+            hasProductAspects={sraData.hasProductAspects}
           />
 
           <LikelihoodLegendContainer
-            likelihoodThresholds={securityRiskAssessmentData.securityRiskAssessmentTableData.LikelihoodThresholds}
+            likelihoodThresholds={sraData.likelihoodThresholds}
           />
 
           <ImpactThresholdContainer impactThresholds={impactThresholdData} />
 
           <RiskRatingThresholdContainer
-            riskRatingThresholds={securityRiskAssessmentData.securityRiskAssessmentTableData.RiskRatingThresholds}
+            riskRatingThresholds={sraData.riskRatingThresholds}
           />
+
+
           <div className="buttons">
             {backButton}
             {finaliseButton}
