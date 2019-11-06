@@ -242,8 +242,18 @@ class SecurityRiskAssessmentCalculator
      */
     public function calculateCurrentLikelihoodScore($sumOfLikelihoodWeights, $sumOfLikelihoodPenalties)
     {
+
         $likelihoodScore = (100 - $sumOfLikelihoodWeights) + $sumOfLikelihoodPenalties;
-        return number_format(max(1, $likelihoodScore), 2);
+        $score = number_format(max(1, $likelihoodScore), 2);
+
+        $formula = sprintf(
+            '%s = max (1, (100 - %s) + %s)',
+            $score,
+            $sumOfLikelihoodWeights,
+            $sumOfLikelihoodPenalties
+        );
+
+        return ['score' => $score, 'formula' => $formula];
     }
 
     /**
@@ -260,7 +270,16 @@ class SecurityRiskAssessmentCalculator
     public function calculateCurrentImpactScore($sumOfImpactWeights, $sumOfImpactPenalties, $baseImpactScore)
     {
         $impactScore = ($baseImpactScore - $sumOfImpactWeights) + $sumOfImpactPenalties;
-        return number_format(max(1, $impactScore), 2);
+        $score =  number_format(max(1, $impactScore), 2);
+        $formula = sprintf(
+            '%s = max (1, (%s - %s) + %s)',
+            $score,
+            $baseImpactScore,
+            $sumOfImpactWeights,
+            $sumOfImpactPenalties
+        );
+
+        return ['score' => $score, 'formula' => $formula];
     }
 
     /**
@@ -671,7 +690,7 @@ class SecurityRiskAssessmentCalculator
         );
 
         // calculate current Likelihood
-        $riskComponentdetails['currentLikelihood']['score'] = $this->calculateCurrentLikelihoodScore(
+        $riskComponentdetails['currentLikelihood'] = $this->calculateCurrentLikelihoodScore(
             $riskComponentdetails['sums']['sumOfImplementedLikelihoodWeight'],
             $riskComponentdetails['sums']['sumOfRecommendedLikelihoodPenalty']
         );
@@ -685,7 +704,7 @@ class SecurityRiskAssessmentCalculator
             $currentLikelihoodThreshold->getHexColour() : null;
 
         // calculate current Impact
-        $riskComponentdetails['currentImpact']['score'] = $this->calculateCurrentImpactScore(
+        $riskComponentdetails['currentImpact'] = $this->calculateCurrentImpactScore(
             $riskComponentdetails['sums']['sumOfImplementedImpactWeight'],
             $riskComponentdetails['sums']['sumOfRecommendedImpactPenalty'],
             $baseImapctScore

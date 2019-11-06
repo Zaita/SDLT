@@ -83,7 +83,9 @@ class RiskAssessmentMatrixTableContainer extends Component<Props> {
         <td>
           {this.renderCurrentImapct(rowData.currentImpact)}
         </td>
-        <td>
+        <td
+          style={rowData.currentRiskRating.colour ? {backgroundColor: rowData.currentRiskRating.colour} : null}
+        >
           {this.renderCurrentRiskRating(rowData.currentRiskRating)}
         </td>
         <td>
@@ -130,29 +132,29 @@ class RiskAssessmentMatrixTableContainer extends Component<Props> {
 
   renderCurrentLikelihood(currentLikelihood) {
     return (
-      <div
-        style={currentLikelihood.colour ? {color: currentLikelihood.colour} : null}
-      >
-        {currentLikelihood.name} {currentLikelihood.score ? '(' + (currentLikelihood.score) + ')' : null}
+      <div>
+        <p style={currentLikelihood.colour ? {color: currentLikelihood.colour} : null}>
+          {currentLikelihood.name} {currentLikelihood.score ? '(' + (currentLikelihood.score) + ')' : null}
+        </p>
+        <p>{currentLikelihood.formula}</p>
       </div>
     );
   }
 
   renderCurrentImapct(currentImapct) {
     return (
-      <div
-        style={currentImapct.colour ? {color: currentImapct.colour} : null}
-      >
-        {currentImapct.name} {currentImapct.score ? '(' + (currentImapct.score) + ')' : null}
+      <div>
+        <p style={currentImapct.colour ? {color: currentImapct.colour} : null}>
+          {currentImapct.name} {currentImapct.score ? '(' + (currentImapct.score) + ')' : null}
+        </p>
+        <p>{currentImapct.formula}</p>
       </div>
     );
   }
 
   renderCurrentRiskRating(currentRiskRating) {
     return (
-      <div
-        style={currentRiskRating.colour ? {color: currentRiskRating.colour} : null}
-      >
+      <div>
         {currentRiskRating.name}
       </div>
     );
