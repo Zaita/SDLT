@@ -53,38 +53,38 @@ class CheckSubmissionExpiredJob extends AbstractQueuedJob implements QueuedJob
         $questionnaireInProgress = QuestionnaireSubmission::get()
         ->filter([
             'QuestionnaireStatus'=> 'in_progress',
-            'Questionnaire.ExpireAfterDays:GreaterThanOrEqual' => Questionnaire::config()->min_expiry_days
+            'Questionnaire.ExpireAfterDays:GreaterThanOrEqual'
+            => Questionnaire::config()->min_expiry_days
         ]);
 
-        $questionnaireInProgress->each(function (QuestionnaireSubmission $questionnaireSubmission) {
-            $isQuestionnaireAllowedToExpire = false;
-            $questionnaire = $questionnaireSubmission->Questionnaire();
+        $questionnaireInProgress->each(function (QuestionnaireSubmission $submission) {
+            $allowedToExpire = 'No';
+            $questionnaire = $submission->Questionnaire();
 
-            if ($questionnaireSubmission && $questionnaireSubmission->exists() && $questionnaire) {
-                $isQuestionnaireAllowedToExpire = $questionnaire->DoesSubmissionExpire;
-                $questionnaireCreated = $questionnaireSubmission->Created;
+            if ($submission && $submission->exists() && $questionnaire) {
+                $allowedToExpire = $questionnaire->DoesSubmissionExpire;
+                $createdDate = $submission->Created;
 
                 if ($questionnaire->ExpireAfterDays && $questionnaire->exists()) {
-                    $questionnaireExpiryDate = strtotime(
-                        sprintf("%d days", $questionnaire->ExpireAfterDays)
-                    );
+                    $expiryDays = (string)($questionnaire->ExpireAfterDays);
                 } else {
-                    $questionnaireExpiryDate = $questionnaire->config()->expiry_days;
+                    $expiryDays = (string)($questionnaire->config()->expiry_days);
                 }
 
-                $questionnaireExpiryDate = strtotime(
-                    sprintf("%d days", $questionnaire->ExpireAfterDays)
+                $expiryDate = strtotime(
+                    $createdDate . ' + ' . $expiryDays .' days'
                 );
 
-                $questionnaireExpiry = $questionnaireCreated + $questionnaireExpiryDate;
-                $questionnaireIsExpired = $questionnaireExpiry < time();
+                $isExpired = false;
 
-                if ($isQuestionnaireAllowedToExpire === 'Yes' && $questionnaireIsExpired) {
-                    $questionnaireSubmission->QuestionnaireStatus = QuestionnaireSubmission::STATUS_EXPIRED;
-                    $questionnaireSubmission->write();
+                $isExpired = $expiryDate < time();
+
+                if ($allowedToExpire === 'Yes' && $isExpired) {
+                    $submission->QuestionnaireStatus = QuestionnaireSubmission::STATUS_EXPIRED;
+                    $submission->write();
 
                     //Mark all related task submissions as "expired"
-                    $questionnaireSubmission->TaskSubmissions()
+                    $submission->TaskSubmissions()
                         ->each(function (TaskSubmission $taskSubmission) {
                             $taskSubmission->Status = TaskSubmission::STATUS_EXPIRED;
                             $taskSubmission->write();
