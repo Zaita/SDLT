@@ -10,11 +10,39 @@ $white-background: rgba(255, 255, 255, 0.7);
     .LikelihoodLegend,
     .ImapctLegend,
     .RiskRatingLegend {
-      @extend .mx-0;
-      background-color: $white-background;
-      margin-bottom: 1rem;
-      padding: 20px;
+        @extend .mx-0;
+        background-color: $white-background;
+        margin-bottom: 1rem;
+        padding: 20px;
     }
+    .RiskRatingLegend {
+        th:first-child{
+            font-weight: bold;
+            font-size: 22px;
+            width: 250px;
+            color: #808080;
+            background-color: #ffffff;
+        }
+
+        td:first-child{
+            font-weight: bold;
+
+        }
+
+        .impact-heading {
+            text-align: center;
+            font-weight: bold;
+            color: #808080;
+            background-color: #ffffff;
+            font-size: 22px;
+            border: 1px solid #dee2e6;
+            border-bottom: none;
+            margin-bottom: 0;
+            padding: 5px;
+            margin-left: 250px;
+        }
+    }
+
 
     .LikelihoodLegend,
     .ImapctLegend {

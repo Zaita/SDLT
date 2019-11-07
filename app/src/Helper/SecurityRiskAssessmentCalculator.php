@@ -480,7 +480,7 @@ class SecurityRiskAssessmentCalculator
         $productAspectList = $this->getProductAspectList();
 
         $sraTaskDetail['likelihoodThresholds'] = $sraTask->task()->getLikelihoodRatingsData();
-        $sraTaskDetail['riskRatingThresholds'] = $sraTask->task()->getRiskRatingsData();
+        $sraTaskDetail['riskRatingThresholds'] = $sraTask->task()->getRiskRatingMatix();
         $sraTaskDetail['hasProductAspects'] = false;
         if (!empty($productAspectList)) {
             $sraTaskDetail['hasProductAspects'] = true;

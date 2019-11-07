@@ -21,7 +21,7 @@ class RiskAssessmentMatrixTableContainer extends Component<Props> {
    renderTableHeader()
    {
       return (
-        <tr key="risk_matrix_legend_header">
+        <tr key="sra_header">
           <th>Risk</th>
           {this.props.hasProductAspects && (<th>Product Aspect</th>)}
           <th>Current Controls</th>
@@ -133,10 +133,10 @@ class RiskAssessmentMatrixTableContainer extends Component<Props> {
   renderCurrentLikelihood(currentLikelihood) {
     return (
       <div>
-        <p style={currentLikelihood.colour ? {color: currentLikelihood.colour} : null}>
+        <span style={currentLikelihood.colour ? {color: currentLikelihood.colour, display:'block'} : null}>
           {currentLikelihood.name} {currentLikelihood.score ? '(' + (currentLikelihood.score) + ')' : null}
-        </p>
-        <p>{currentLikelihood.formula}</p>
+        </span>
+        <small className="text-muted">{currentLikelihood.formula}</small>
       </div>
     );
   }
@@ -144,10 +144,10 @@ class RiskAssessmentMatrixTableContainer extends Component<Props> {
   renderCurrentImapct(currentImapct) {
     return (
       <div>
-        <p style={currentImapct.colour ? {color: currentImapct.colour} : null}>
+        <span style={currentImapct.colour ? {color: currentImapct.colour, display:'block'} : null}>
           {currentImapct.name} {currentImapct.score ? '(' + (currentImapct.score) + ')' : null}
-        </p>
-        <p>{currentImapct.formula}</p>
+        </span>
+        <small className="text-muted">{currentImapct.formula}</small>
       </div>
     );
   }

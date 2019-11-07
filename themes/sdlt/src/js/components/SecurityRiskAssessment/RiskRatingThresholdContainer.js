@@ -14,35 +14,50 @@ class RiskRatingThresholdContainer extends Component<Props> {
       return null;
     }
 
+    console.log(riskRatingThresholds);
+
     return (
       <div className="RiskRatingLegend">
-        <h3>Risk Rating Legend</h3>
+        <h3>Risk Rating Matix</h3>
 
         <div className="table-responsive">
-          <table className="table table-sm">
+          <p className="impact-heading">Impact</p>
+
+          <table className="table table-sm table-bordered">
             <thead className="thead-light">
               <tr key="risk_rating_legend_header">
-                <th>Likelihood</th>
-                <th>Impact</th>
-                <th>Risk Rating</th>
+              {
+                riskRatingThresholds.tableHeader.map((headerText, index) => {
+                  return (
+                    <th key={index}>
+                      {headerText}
+                    </th>
+                  )
+                })
+              }
               </tr>
             </thead>
             <tbody>
-              {riskRatingThresholds.map((threshold, index): Array<RiskRatingThreshold> => {
-                return (
-                  <tr key={index+1}>
-                    <td>
-                      {threshold.likelihood}
-                    </td>
-                    <td>
-                      {threshold.impact}
-                    </td>
-                    <td style={{backgroundColor:'#' + threshold.color}}>
-                      {threshold.riskRating}
-                    </td>
-                  </tr>
-                );
-              })}
+              {
+                riskRatingThresholds.tableRows.map((row, rowIndex) => {
+                  return (
+                    <tr key={'row_' + rowIndex}>
+                      {
+                        row.map((column, columnIndex) => {
+                          return(
+                            <td
+                              key={'column_'+columnIndex}
+                              style={column.color ? {backgroundColor: column.color} : null}
+                            >
+                            {column.name}
+                            </td>
+                          )
+                        })
+                      }
+                    </tr>
+                  )
+                })
+              }
             </tbody>
           </table>
         </div>
