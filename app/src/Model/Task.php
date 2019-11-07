@@ -403,8 +403,6 @@ class Task extends DataObject implements ScaffoldingProvider
         return $thresholdData;
     }
 
-
-
     /**
      * @return array RiskRatings
      */
@@ -429,6 +427,45 @@ class Task extends DataObject implements ScaffoldingProvider
     }
 
     /**
+     * @return array RiskRatings matrix
+     */
+    public function getRiskRatingMatix()
+    {
+        $impactRatings = ImpactThreshold::get()->column('Name');
+        $likelihoods = array_column($this->getLikelihoodRatingsData(), 'name');
+        $riskRatings = $this->getRiskRatingsData();
+
+        $tableHeader = array_merge(['Likelihood'], $impactRatings);
+        $tableRows = [];
+
+        foreach ($likelihoods as $likelihood) {
+            $tableColumns = [];
+            $tableColumns[] = ['name' => $likelihood, 'color'=> '#ffffff'];
+
+            foreach ($impactRatings as $impact) {
+                $filterRiskRating = array_filter($riskRatings, function ($riskRating) use ($impact, $likelihood) {
+                    return $riskRating['impact'] == $impact && $riskRating['likelihood'] == $likelihood;
+                });
+
+                if ($filterRiskRating && $riskRating = array_pop($filterRiskRating)) {
+                    $tableColumns[] = [
+                        'name' => $riskRating['riskRating'],
+                        'color' => '#' . $riskRating['color'],
+                    ];
+                } else {
+                    $tableColumns[] = [
+                        'name' => '',
+                        'color' => '#ffffff',
+                    ];
+                }
+            }
+            $tableRows[] = $tableColumns;
+        }
+
+        return ['tableHeader' => $tableHeader, 'tableRows' =>  $tableRows];
+    }
+
+    /**$tableRows
      * @return string
      */
     public function getQuestionsDataJSON()
