@@ -99,7 +99,7 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
         $fields->addFieldToTab(
             'Root.Access',
             LiteralField::create(
-                'AlerIntro',
+                'AlertIntroAccess',
                 '<p class="message notice">Configure who can do what within the SDLT.</p>'
             ),
             'CanViewType'
@@ -110,7 +110,7 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
             'Root.Email',
             [
                 LiteralField::create(
-                    'AlerIntro',
+                    'AlertIntroEmail',
                     '<p class="message notice">Configure some aspects of how email is treated in the system.</p>'
                 ),
                 TextField::create(
@@ -148,25 +148,24 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
         $fields->addFieldsToTab(
             'Root.Alert',
             [
-              LiteralField::create(
-                  'AlerIntro',
-                  '<p class="message notice">Check the box below, to display a global
-                  banner-message along the top of each screen.</p>'
-              ),
-              CheckboxField::create(
-                  'AlertEnabled',
-                  'Alert Enabled'
-              ),
-              HtmlEditorField::create(
-                  'AlertMessage',
-                  'Alert Message'
-              )
-                ->setRows(5),
-              HtmlEditorField::create(
-                  'NoScriptAlertMessage',
-                  'Javascript disabled Alert Message'
-              )
-                ->setRows(5)
+                LiteralField::create(
+                    'AlertIntro',
+                    '<p class="message notice">Check the box below, to display '
+                    .'a global banner-message along the top of each screen.</p>'
+                ),
+                CheckboxField::create(
+                    'AlertEnabled',
+                    'Alert Enabled'
+                ),
+                HtmlEditorField::create(
+                    'AlertMessage',
+                    'Alert Message'
+                )
+                    ->setRows(5),
+                HtmlEditorField::create(
+                    'NoScriptAlertMessage',
+                    'Javascript disabled Alert Message'
+                )->setRows(5)
             ]
         );
 
