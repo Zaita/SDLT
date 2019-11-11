@@ -195,33 +195,38 @@ class ControlValidationAuditContainer extends Component<Props, State> {
     ];
 
     return(
-      <div className="my-0" key={controlKey}>
-        {
-          options.map((option, optionIndex) => {
-            return (
-              <label key={`optionlabel_${controlKey}_${optionIndex}`}>
-                <input
-                  type="radio"
-                  key={`radiobutton_${controlKey}_${optionIndex}`}
-                  name={controlKey}
-                  value={option.value}
-                  defaultChecked={control.selectedOption === option.value}
-                  onClick={() => this.props.dispatchUpdateControlValidationQuestionDataAction({
-                    "selectedOption": option.value,
-                    "controlID":control.id,
-                    "componentID":component.id,
-                    "productAspect":component.productAspect
-                })}
-                />
-                {option.label}
-              </label>
-            );
-          })
-        }
-        <label className="ml-2" key={control.id}>
-          <strong>{control.name}</strong>
-        </label>
-        <span className="control-description">{control.description ? `- ${control.description}`: ''}</span>
+      <div className="my-0 container row" key={controlKey}>
+        <div className="col-xs-2">
+          {
+            options.map((option, optionIndex) => {
+              return (
+                <label key={`optionlabel_${controlKey}_${optionIndex}`}>
+                  <input
+                    type="radio"
+                    key={`radiobutton_${controlKey}_${optionIndex}`}
+                    name={controlKey}
+                    value={option.value}
+                    defaultChecked={control.selectedOption === option.value}
+                    onClick={() => this.props.dispatchUpdateControlValidationQuestionDataAction({
+                      "selectedOption": option.value,
+                      "controlID":control.id,
+                      "componentID":component.id,
+                      "productAspect":component.productAspect
+                  })}
+                  />
+                  {option.label}
+                </label>
+              );
+            })
+          }
+        </div>
+        <div className="col-10">
+          <label key={control.id}>
+            <strong>{control.name}</strong>
+            <small className="text-muted">{control.description ? `- ${control.description}`: ''}</small>
+          </label>
+        </div>
+
 
       </div>
     );

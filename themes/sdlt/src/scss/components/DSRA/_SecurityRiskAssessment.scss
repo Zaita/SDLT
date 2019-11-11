@@ -46,16 +46,18 @@ $white-background: rgba(255, 255, 255, 0.7);
 
     .LikelihoodLegend,
     .ImapctLegend {
-      td:first-child {
-        width: 50%;
-      }
+        td:first-child {
+            width: 50%;
+        }
     }
 
     .RiskMatrix {
-      @extend .mx-0;
-      background-color: $white-background;
-      margin-bottom: 1rem;
-      padding: 20px;
+        @extend .mx-0;
+        background-color: $white-background;
+        margin-bottom: 1rem;
+        padding: 20px;
+        th:first-child{
+            width: 25%;
+        }
     }
-
 }
