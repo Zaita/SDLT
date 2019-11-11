@@ -41,6 +41,7 @@ class RiskAssessmentMatrixTableContainer extends Component<Props> {
           const rowData = {
             riskId: risk.riskId,
             riskName: productAspectIndex == 0 ? `${risk.riskName} (${risk.baseImpactScore})` : null,
+            riskDescription: productAspectIndex == 0 ? risk.description : null,
             components: productAspect.components,
             currentLikelihood: productAspect.currentLikelihood,
             currentImpact: productAspect.currentImpact,
@@ -55,6 +56,7 @@ class RiskAssessmentMatrixTableContainer extends Component<Props> {
         const rowData = {
           riskId: risk.riskId,
           riskName: `${risk.riskName} (${risk.baseImpactScore})`,
+          riskDescription: risk.description,
           components: risk.riskDetail.components,
           currentLikelihood: risk.riskDetail.currentLikelihood,
           currentImpact: risk.riskDetail.currentImpact,
@@ -71,7 +73,8 @@ class RiskAssessmentMatrixTableContainer extends Component<Props> {
     return (
       <tr key={productAspect + '_' + rowData.riskId}>
         <td>
-          {rowData.riskName}
+          <span style={{display:'block'}}>{rowData.riskName}</span>
+          <small className="text-muted">{rowData.riskDescription}</small>
         </td>
         {this.props.hasProductAspects && productAspect && (<td>{productAspect}</td>)}
         <td>

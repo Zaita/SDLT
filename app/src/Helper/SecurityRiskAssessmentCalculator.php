@@ -146,7 +146,7 @@ class SecurityRiskAssessmentCalculator
         $riskQuestionnaireSubmission = $this->getRiskQuestionnaireSubmission();
 
         if ($riskQuestionnaireSubmission) {
-            return json_decode($riskQuestionnaireSubmission->RiskResultData);
+            return json_decode($riskQuestionnaireSubmission->RiskResultData, true);
         }
 
         return null;
@@ -486,15 +486,25 @@ class SecurityRiskAssessmentCalculator
             $sraTaskDetail['hasProductAspects'] = true;
         }
 
+        $riskIDs = array_column($riskdata, 'riskID');
+        $riskInDB = Risk::get()->byIds($riskIDs)->toNestedArray();
+
         foreach ($riskdata as $risk) {
-            $out['riskId'] = $risk->riskID;
-            $out['riskName'] = $risk->riskName;
-            $out['baseImpactScore'] = (int) round($risk->score);
+            $index = array_search($risk['riskID'], array_column($riskInDB, 'ID'));
+
+            if ($index === false) {
+                continue;
+            }
+
+            $out['riskId'] = $risk['riskID'];
+            $out['riskName'] = $risk['riskName'];
+            $out['description'] = isset($riskInDB[$index]['Description']) ? $riskInDB[$index]['Description'] : '';
+            $out['baseImpactScore'] = (int) round($risk['score']);
 
             // foreach risk, query its set of control weights. This is a big performance hit
             $weights = ControlWeightSet::get()->filter(
                 [
-                    'RiskID' => $risk->riskID,
+                    'RiskID' => $risk['riskID'],
                     'SecurityControlID' => $controlIds
                 ]
             );
