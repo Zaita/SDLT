@@ -156,58 +156,29 @@ class Task extends DataObject implements ScaffoldingProvider
         $fields->removeByName([
             'TaskType',
             'RiskCalculation',
+            'RiskQuestionnaireDataSourceID',
+            'LikelihoodThresholds',
+            'RiskRatings',
+            'DefaultSecurityComponents',
+            'Questionnaires',
+            'AnswerActionFields'
         ]);
 
-        $fields->removeByName(['RiskQuestionnaireDataSourceID']);
         // If TaskType doesn't require Questions, hide the "Questions" tab
-        if ($this->isSelectionType() || $this->isSRAType()) {
-            // A "selection" type, has no Questions
-            $riskQuestionnaires = Task::get()->filter('TaskType', 'risk questionnaire');
-
-            if (count($riskQuestionnaires)) {
-                $fields->insertAfter(
-                    'Name',
-                    DropdownField::create(
-                        'RiskQuestionnaireDataSourceID',
-                        'Data source for risk questionnaire',
-                        $riskQuestionnaires
-                    )
-                );
-            } else {
-                $fields->insertAfter(
-                    'Name',
-                    LiteralField::create(
-                        'RiskQuestionnaireDataSourceID_Warning',
-                        sprintf(
-                            "<div class=\"alert alert-warning\">%s</div>",
-                            'Please create a risk questionnaire task before '
-                            .' creating a security risk assessment task'
-                        )
-                    )
-                );
-            }
+        if ($this->isSelectionType() || $this->isSRAType() || $this->isControlValidationAudit()) {
+            $fields->removeByName(['Questions']);
         } else {
             /* @var GridField $questions */
-            $questions = $fields->dataFieldByName('Questions');
+            $questionsGridField = $fields->dataFieldByName('Questions');
 
-            if ($questions) {
-                $config = $questions->getConfig();
+            if ($questionsGridField) {
+                $config = $questionsGridField->getConfig();
                 $config
                     ->addComponent(new GridFieldOrderableRows('SortOrder'))
                     ->removeComponentsByType(GridFieldAddExistingAutocompleter::class)
                     ->getComponentByType(GridFieldPaginator::class)
                     ->setItemsPerPage(250);
             }
-        }
-
-        if ($this->TaskType === 'risk questionnaire') {
-            // Restrict relations to risk-type Questionnaire records
-            $rqGrid = $fields->findOrMakeTab('Root.Questionnaires.Questionnaires');
-            $rqGrid->getConfig()->getComponentByType(GridFieldAddExistingAutocompleter::class)
-                ->setSearchList(Questionnaire::get()->each(function ($q) {
-                    return $q->isRiskType();
-                }))
-                ->setPlaceholderText('Find Risk Questionnaires by Name');
         }
 
         $fields->insertAfter(
@@ -255,6 +226,7 @@ class Task extends DataObject implements ScaffoldingProvider
             ]
         );
 
+        // add used on tab for task
         if ($this->getUsedOnData()->Count()) {
             $fields->addFieldToTab(
                 'Root.UsedOn',
@@ -270,8 +242,34 @@ class Task extends DataObject implements ScaffoldingProvider
             );
         }
 
-        $fields->removeByName(['LikelihoodThresholds', 'RiskRatings']);
+        // if task type is SRA then add dropdown field for "Data source for risk questionnaire"
+        // if no risk questionnaire task type exist then add warning message
         if ($this->isSRAType()) {
+            $riskQuestionnaires = Task::get()->filter('TaskType', 'risk questionnaire');
+
+            if (count($riskQuestionnaires)) {
+                $fields->insertAfter(
+                    'Name',
+                    DropdownField::create(
+                        'RiskQuestionnaireDataSourceID',
+                        'Data source for risk questionnaire',
+                        $riskQuestionnaires
+                    )
+                );
+            } else {
+                $fields->insertAfter(
+                    'Name',
+                    LiteralField::create(
+                        'RiskQuestionnaireDataSourceID_Warning',
+                        sprintf(
+                            "<div class=\"alert alert-warning\">%s</div>",
+                            'Please create a risk questionnaire task before '
+                            .' creating a security risk assessment task'
+                        )
+                    )
+                );
+            }
+
             $fields->addFieldsToTab('Root.LikelihoodThresholds', [
                 LiteralField::create(
                     'LikelihoodThresholdsNotice',
@@ -301,14 +299,15 @@ class Task extends DataObject implements ScaffoldingProvider
                     GridFieldConfig_RecordEditor::create()
                 )
             );
-        }
 
-        $fields->removeByName(['Questionnaires', 'AnswerActionFields']);
+            $fields->removeByName([
+                'TaskApproval',
+            ]);
+        }
 
         if ($this->isControlValidationAudit()) {
             $this->getCVA_CMSFields($fields);
         }
-
 
         return $fields;
     }

@@ -75,12 +75,10 @@ class ControlWeightSet extends DataObject
         $fields = parent::getCMSFields();
         $componentID = $this->SecurityComponentID || $this->SecurityControl()->getParentComponentID();
 
-        $fields->dataFieldByName('SecurityComponentID')
+        if ($componentID) {
+            $fields->dataFieldByName('SecurityComponentID')
             ->setValue($componentID)
             ->setDisabled(true);
-
-        if ($this->SecurityControlID) {
-            $fields->dataFieldByName('SecurityControlID')->setDisabled(true);
         }
 
         $fields->addFieldsToTab(
