@@ -85,7 +85,7 @@ class TaskStandaloneContainer extends Component<Props> {
       return null;
     }
 
-    const canUpdateAnswers = (taskSubmission.status === "in_progress");
+    const canUpdateAnswers = (taskSubmission.status === "in_progress" || taskSubmission.status === "start");
     const showEditButton = (taskSubmission.status === "complete");
 
     return (

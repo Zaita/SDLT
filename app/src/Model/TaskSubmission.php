@@ -1351,7 +1351,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
         // Any user with correct SecureToken can edit when answers are not locked
         if ($taskSubmission->SecureToken && @hash_equals($taskSubmission->SecureToken, $secureToken)) {
-            if ($taskSubmission->Status === TaskSubmission::STATUS_IN_PROGRESS) {
+            if ($taskSubmission->Status === TaskSubmission::STATUS_IN_PROGRESS || $taskSubmission->Status === TaskSubmission::STATUS_START) {
                 return true;
             }
             if ($taskSubmission->Status === TaskSubmission::STATUS_COMPLETE) {
