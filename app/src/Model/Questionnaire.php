@@ -31,7 +31,6 @@ use NZTA\SDLT\Helper\Utils;
 use NZTA\SDLT\Traits\SDLTRiskCalc;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\OptionsetField;
-use SilverStripe\Forms\NumericField;
 
 /**
  * Class Questionnaire
@@ -90,6 +89,7 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
      */
     private static $defaults = [
         'ExpireAfterDays' => 14,
+        'DoesSubmissionExpire' => 'Yes',
     ];
 
     /**
@@ -211,7 +211,9 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
                     'DoesSubmissionExpire',
                     'Should Submission Expire?',
                     $this->dbObject('DoesSubmissionExpire')->enumValues()
-                ),
+                )->setHasEmptyDefault(false)
+                ->setDescription('If this is not set, this value will default '
+                    .'to "Yes" with an expiry time for 14 days'),
 
                 $fields->dataFieldByName('ExpireAfterDays')
                     ->setTitle('Expiry Time (Days)')
@@ -279,6 +281,14 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     public function requireDefaultRecords()
     {
         parent::requireDefaultRecords();
+
+        //if any questionnaire has ExpireAfterDays set to 0, default to the expiry_days setting
+        foreach (self::get() as $questionnaire) {
+            if ($questionnaire->getField('ExpireAfterDays') == 0) {
+                $questionnaire->setField('ExpireAfterDays', $this->config()->expiry_days);
+                $questionnaire->write();
+            }
+        }
         $this->createDefaultSDLTMemberGroups();
     }
 
@@ -384,6 +394,13 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     public function onBeforeWrite()
     {
         parent::onBeforeWrite();
+
+        //if the default submission question is not set at all, default to Yes
+        //also set the default expire time in this case
+        if ($this->DoesSubmissionExpire === null) {
+            $this->DoesSubmissionExpire = 'Yes';
+            $this->ExpireAfterDays = $this->config()->expiry_days;
+        }
 
         $this->audit();
     }
