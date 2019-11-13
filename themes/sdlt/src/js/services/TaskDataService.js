@@ -35,6 +35,7 @@ query {
     Status
     Result
     LockAnswersWhenComplete
+    JiraKey
     QuestionnaireSubmission {
       ID
       UUID
@@ -96,6 +97,7 @@ query {
       taskType: toString(get(submissionJSONObject, "TaskType", "")),
       status: toString(get(submissionJSONObject, "Status", "")),
       result: toString(get(submissionJSONObject, "Result", "")),
+      JiraKey: toString(get(submissionJSONObject, "JiraKey", "")),
       submitter: UserParser.parseUserFromJSON(get(submissionJSONObject, "Submitter")),
       lockWhenComplete: Boolean(get(submissionJSONObject, "LockAnswersWhenComplete", false)),
       questionnaireSubmissionUUID: toString(get(submissionJSONObject, "QuestionnaireSubmission.UUID", "")),

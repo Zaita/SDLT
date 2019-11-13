@@ -21,7 +21,8 @@ type Props = {
   saveControls: () => void,
   extraButtons?: *,
   isStandaloneTask: boolean,
-  productAspects: Array<*>
+  productAspects: Array<*>,
+  JiraKey: taskSubmission.jiraKey
 };
 
 type State = {
@@ -29,7 +30,6 @@ type State = {
 };
 
 export default class ComponentSelection extends Component<Props, State> {
-
   constructor(props: *) {
     super(props);
     this.state = {
@@ -52,7 +52,10 @@ export default class ComponentSelection extends Component<Props, State> {
       isStandaloneTask
     } = {...this.props};
     const {jiraKey} = {...this.state};
-    const isGroupbyProductAspect = productAspects && productAspects.length > 0 && selectedComponents.length > 0;
+    const isGroupbyProductAspect =
+      productAspects &&
+      productAspects.length > 0 &&
+      selectedComponents.length > 0;
 
     return (
       <div className="ComponentSelection">
@@ -65,89 +68,123 @@ export default class ComponentSelection extends Component<Props, State> {
             addComponent={addComponent}
             productAspects={productAspects}
             componentTarget={componentTarget}
-          >
-          </LeftBar>
+          ></LeftBar>
 
           <div className="main-content">
-            <div className="heading">
-              Selected Components
-            </div>
+            <div className="heading">Selected Components</div>
             <div className="selected-components">
-              {isGroupbyProductAspect > 0 && productAspects.map ((productAspect, index) => {
-                return (
-                  <div key={index}>
-                    {ComponentSelectionUtil.doescomponentExistForProductAspect(productAspect, selectedComponents) &&
-                      <h4 key={index}>{productAspect}</h4>
-                    }
-                    {selectedComponents.map((component, index) => {
-                      const isDisable = component.hasOwnProperty('isSaved') && component.isSaved && componentTarget == "JIRA Cloud";
-                      if (component.productAspect === productAspect) {
-                        return (
-                          <ComponentInfo
-                            key={component.id + (component.productAspect ? `_${component.productAspect}`: "")}
-                            id={component.id}
-                            name={component.name}
-                            description={component.description}
-                            removeComponent={() => {
-                              removeComponent(component.id, component.productAspect);
-                            }}
-                            childControls={component.controls}
-                            isDisable={isDisable}
-                          />
-                        );
-                      }
-                    })}
-                  </div>
-                );
-              })}
+              {isGroupbyProductAspect > 0 &&
+                productAspects.map((productAspect, index) => {
+                  return (
+                    <div key={index}>
+                      {ComponentSelectionUtil.doescomponentExistForProductAspect(
+                        productAspect,
+                        selectedComponents
+                      ) && <h4 key={index}>{productAspect}</h4>}
+                      {selectedComponents.map((component, index) => {
+                        const isDisable =
+                          component.hasOwnProperty("isSaved") &&
+                          component.isSaved &&
+                          componentTarget == "JIRA Cloud";
+                        if (component.productAspect === productAspect) {
+                          return (
+                            <ComponentInfo
+                              key={
+                                component.id +
+                                (component.productAspect
+                                  ? `_${component.productAspect}`
+                                  : "")
+                              }
+                              id={component.id}
+                              name={component.name}
+                              description={component.description}
+                              removeComponent={() => {
+                                removeComponent(
+                                  component.id,
+                                  component.productAspect
+                                );
+                              }}
+                              childControls={component.controls}
+                              isDisable={isDisable}
+                            />
+                          );
+                        }
+                      })}
+                    </div>
+                  );
+                })}
 
-              {(productAspects === undefined || productAspects === ''|| productAspects.length === 0 ) && selectedComponents.map((component, index) => {
-                const isDisable = component.hasOwnProperty('isSaved') && component.isSaved && componentTarget == "JIRA Cloud";
-                return (
-                  <ComponentInfo
-                    key={component.id}
-                    id={component.id}
-                    name={component.name }
-                    description={component.description}
-                    removeComponent={() => {
-                      removeComponent(component.id, component.productAspect);
-                    }}
-                    childControls={component.controls}
-                    isDisable={isDisable}
-                  />
-                );
-              })}
+              {(productAspects === undefined ||
+                productAspects === "" ||
+                productAspects.length === 0) &&
+                selectedComponents.map((component, index) => {
+                  const isDisable =
+                    component.hasOwnProperty("isSaved") &&
+                    component.isSaved &&
+                    componentTarget == "JIRA Cloud";
+                  return (
+                    <ComponentInfo
+                      key={component.id}
+                      id={component.id}
+                      name={component.name}
+                      description={component.description}
+                      removeComponent={() => {
+                        removeComponent(component.id, component.productAspect);
+                      }}
+                      childControls={component.controls}
+                      isDisable={isDisable}
+                    />
+                  );
+                })}
             </div>
 
-            <div className="buttons">
-              {selectedComponents.length > 0 && componentTarget === "JIRA Cloud" && (
-                <React.Fragment>
-                  <input type="text" placeholder="JIRA Project Key" onChange={(event) => {
-                    const value = toString(event.target.value).trim();
-                    this.setState({jiraKey: value});
-                  }}/>
-                  <DarkButton title="CREATE JIRA TICKETS" classes={["mr-3"]} onClick={() => {
-                    createJIRATickets(jiraKey);
-                  }}/>
-                </React.Fragment>
-              )}
-              {componentTarget === "Local" && !isStandaloneTask && (
-                <LightButton title="SAVE CONTROLS" classes={["mr-3"]} onClick={() => {
-                  saveControls();
-                }}/>
-              )}
-              <LightButton title="COMPLETE WITHOUT SELECTION" classes={["mr-3"]} onClick={() => {
-                finishWithSelection();
-              }}/>
-
+            <div className="test">
+              <div className="buttons">
+                {selectedComponents.length > 0 &&
+                  componentTarget === "JIRA Cloud" && (
+                    <React.Fragment>
+                      <input
+                        type="text"
+                        placeholder="JIRA Project Key"
+                        onChange={event => {
+                          const value = toString(event.target.value).trim();
+                          this.setState({jiraKey: value});
+                        }}
+                      />
+                      <DarkButton
+                        title="CREATE JIRA TICKETS"
+                        classes={["mr-3"]}
+                        onClick={() => {
+                          createJIRATickets(jiraKey);
+                        }}
+                      />
+                    </React.Fragment>
+                  )}
+                {componentTarget === "Local" && !isStandaloneTask && (
+                  <LightButton
+                    title="SAVE CONTROLS"
+                    classes={["mr-3"]}
+                    onClick={() => {
+                      saveControls();
+                    }}
+                  />
+                )}
+                <LightButton
+                  title="COMPLETE WITHOUT SELECTION"
+                  classes={["mr-3"]}
+                  onClick={() => {
+                    finishWithSelection();
+                  }}
+                />
+              </div>
+                <div className="alert alert-danger">
+                  <h5>test</h5>
+                </div>
             </div>
           </div>
         </div>
 
-        <div className="extra-wrapper">
-          {extraButtons}
-        </div>
-
+        <div className="extra-wrapper">{extraButtons}</div>
       </div>
     );
   }
