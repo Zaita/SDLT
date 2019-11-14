@@ -31,9 +31,6 @@ use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 /**
  * Class SecurityControl
  *
- * @property string Name
- * @property string Description
- * @property SecurityComponent Component
  */
 class SecurityControl extends DataObject implements ScaffoldingProvider
 {
@@ -149,8 +146,7 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
                         'that is unique to a Control.</p>'
                     ),
                     $gridField
-                ])
-            );
+                ]));
         }
 
         return $fields;
@@ -163,11 +159,13 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
      */
     public function getParentComponentID()
     {
-        $req = Controller::curr()->getRequest();
-        $reqParts = explode('NZTA-SDLT-Model-SecurityComponent/item/', $req->getUrl());
+        if (Controller::has_curr()) {
+            $req = Controller::curr()->getRequest();
+            $reqParts = explode('NZTA-SDLT-Model-SecurityComponent/item/', $req->getUrl());
 
-        if (!empty($reqParts) && isset($reqParts[1])) {
-            return (int) strtok($reqParts[1], '/');
+            if (!empty($reqParts) && isset($reqParts[1])) {
+                return (int) strtok($reqParts[1], '/');
+            }
         }
 
         return 0;
