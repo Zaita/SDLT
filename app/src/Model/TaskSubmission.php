@@ -1550,21 +1550,12 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
                     $isRemoteTarget = $submission->Task()->isRemoteTarget();
 
-                    //Check if the JiraKey passed in is empty
-                    if ($isRemoteTarget && empty($ticketId)) {
-                        throw new Exception(sprintf('Please enter a Project Key'));
-                    }
-
                     // Do not permit the modification of a submission with the creation
                     // of a new ticket, if a different project key is passed-in.
                     if ($isRemoteTarget &&
                         $submission->JiraKey && $submission->JiraKey !== $ticketId) {
-                        throw new Exception(sprintf('Please enter the same JIRA Project Key: %s', $submission->JiraKey));
+                        throw new Exception(sprintf('Project key must be the same as: %s', $submission->JiraKey));
                     }
-
-                    // if ($isRemoteTarget && !$submission->JiraKey){
-                    //     throw new Exception(sprintf('The JIRA Project Key does not exist'));
-                    // }
 
                     $selectedComponents = json_decode(base64_decode($args['Components']), true);
                     $existingComponents = $submission->SelectedComponents();
@@ -1619,7 +1610,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                             $newComp->TaskSubmissionID = $submission->ID;
                             $newComp->write();
 
-                            // create ticket
+                            // crete ticket
                             if (!empty($ticketId) && $isRemoteTarget) {
 
                                 // create a new ticket for the selected component
@@ -2061,6 +2052,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                   'SecurityComponentID' => $selectedComponent->SecurityComponentID,
                   'TaskSubmissionSelectedComponentID' => $selectedComponent->ID
               ])->first();
+
             if (($localControls = $securityComponent->Controls()) && $ticket) {
                 $remoteControls =  $componentSelectionTask->issueTrackerService->getControlDetailsFromJiraTicket($ticket) ?: [];
 

@@ -37,7 +37,6 @@ export type TaskSubmission = {
   isTaskApprovalRequired: boolean,
   isCurrentUserAnApprover: boolean,
   productAspects: Array<ProductAspect>,
-  jiraKey: string,
 };
 
 export type SecurityRiskAssessment = {

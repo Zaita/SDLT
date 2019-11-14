@@ -1,84 +1,84 @@
 @import "../../variables";
 
 .ComponentSelection {
-    max-width: map_get($container-max-widths, xl);
-    margin: 0 auto 80px;
 
-    .main-wrapper {
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-start;
-        align-items: stretch;
-        margin-bottom: 1rem;
+  max-width: map_get($container-max-widths, xl);
+  margin: 0 auto 80px;
+
+  .main-wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: stretch;
+    margin-bottom: 1rem;
+  }
+
+  .extra-wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: stretch;
+  }
+
+  .LeftBar {
+    padding-right: 23px;
+    padding-bottom: 0;
+
+    .search {
+      font-size: 14px;
+      width: 100%;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+
+      i {
+        margin-right: 2px;
+        color: $blue;
+      }
+
+      input {
+        width: 100%;
+      }
     }
 
-    .extra-wrapper {
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-start;
-        align-items: stretch;
+    .items {
+      max-height: 800px;
+      overflow-y: auto;
+    }
+  }
+
+  .main-content {
+    background-color: $white;
+    width: 840px;
+    padding: 45px 45px 25px;
+    font-size: 14px;
+    color: $black;
+
+    .heading {
+      font-size: 24px;
+      color: $blue;
+      margin-bottom: 1.5rem;
+      font-weight: bold;
     }
 
-    .LeftBar {
-        padding-right: 23px;
-        padding-bottom: 0;
+    .selected-components {
+      max-height: 700px;
+      overflow-y: auto;
+      margin-bottom: 1.5rem;
 
-        .search {
-            font-size: 14px;
-            width: 100%;
-            margin-top: 0.5rem;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
+      @import "ComponentInfo";
 
-            i {
-                margin-right: 2px;
-                color: $blue;
-            }
-
-            input {
-                width: 100%;
-            }
-        }
-
-        .items {
-            max-height: 800px;
-            overflow-y: auto;
-        }
+      h4 {
+        font-weight: 600;
+        color: $blue;
+        font-size: 20px;
+        padding-bottom: 15px;
+      }
     }
 
-    .main-content {
-        background-color: $white;
-        width: 840px;
-        padding: 45px 45px 25px;
-        font-size: 14px;
-        color: $black;
-
-        .heading {
-            font-size: 24px;
-            color: $blue;
-            margin-bottom: 1.5rem;
-            font-weight: bold;
-        }
-
-        .selected-components {
-            max-height: 700px;
-            overflow-y: auto;
-            margin-bottom: 1.5rem;
-            @import "ComponentInfo";
-
-            h4 {
-                font-weight: 600;
-                color: $blue;
-                font-size: 20px;
-                padding-bottom: 15px;
-            }
-        }
-
-        .test {
-            .buttons {
-                display: flex;
-            }
-        }
+    .buttons {
+      display: flex;
     }
+  }
 }
