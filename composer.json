@@ -5,13 +5,13 @@
     "require": {
         "php": ">=7.2",
         "silverstripe/recipe-plugin": "^1.2",
-        "silverstripe/recipe-cms": "4.3.0@stable",
+        "silverstripe/recipe-cms": "^4@stable",
         "silverstripe/postgresql": "^2.1.0",
         "unclecheese/display-logic": "^2.0",
         "symbiote/silverstripe-gridfieldextensions": "^3.2",
         "symbiote/silverstripe-queuedjobs": "^4.3",
         "ramsey/uuid": "^3.8",
-        "catalyst/silverstripe-active-directory": "1.0.1",
+        "catalyst/silverstripe-active-directory": "^1.0.1",
         "symbiote/silverstripe-multivaluefield": "^5.0",
         "phptek/sentry": "^2.0",
         "tractorcow/silverstripe-colorpicker": "^4.0"
@@ -22,7 +22,6 @@
         "friendsofphp/php-cs-fixer": "^v2.13.1",
         "sensiolabs/security-checker": "^5.0.1",
         "squizlabs/php_codesniffer": "^3.3.2",
-        "lekoala/silverstripe-debugbar": "^2.0",
         "silverstripe/graphql-devtools": "^1.0@dev",
         "dnadesign/silverstripe-populate": "^2.0"
     },

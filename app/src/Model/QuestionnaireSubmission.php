@@ -55,14 +55,6 @@ use SilverStripe\Core\Injector\Injector;
 /**
  * Class Questionnaire
  *
- * @property string Name
- * @property string KeyInformation
- * @property string ApprovalLinkToken
- * @property string QuestionnaireStatus
- *
- * @method Questionnaire Questionnaire()
- * @method Member User()
- * @method HasManyList TaskSubmissions()
  */
 class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 {
@@ -87,8 +79,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      */
     private static $table_name = 'QuestionnaireSubmission';
 
+    // @codingStandardsIgnoreStart
     /**
      * @var array
+     *
      */
     private static $db = [
         'SubmitterName' => 'Varchar(255)',
@@ -120,6 +114,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'QuestionnaireLevelTaskIDs' => 'Varchar(255)',
         'RiskResultData' => 'Text',
     ];
+    // @codingStandardsIgnoreEnd
 
     /**
      * @var array
@@ -601,7 +596,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             'expired' => 'Expired'
         ];
 
-        return isset($mapping[$this->QuestionnaireStatus]) ? $mapping[$this->QuestionnaireStatus] : $this->QuestionnaireStatus;
+        return isset($mapping[$this->QuestionnaireStatus])
+            ? $mapping[$this->QuestionnaireStatus]
+            : $this->QuestionnaireStatus;
     }
 
     /**
@@ -934,7 +931,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 {
                     QuestionnaireValidation::is_user_logged_in();
 
-                    $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
+                    $questionnaireSubmission =
+                        QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
 
                     $questionnaireSubmission->doesQuestionnairBelongToCurrentUser();
 
@@ -969,12 +967,20 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                         if ($jsonDecodeAnswerData->answerType == "input") {
                             // validate input field data
-                            QuestionnaireValidation::validate_answer_input_data($jsonDecodeAnswerData->inputs, $questionnaireSubmission->QuestionnaireData, $args['QuestionID']);
+                            QuestionnaireValidation::validate_answer_input_data(
+                                $jsonDecodeAnswerData->inputs,
+                                $questionnaireSubmission->QuestionnaireData,
+                                $args['QuestionID']
+                            );
                         }
 
                         if ($jsonDecodeAnswerData->answerType == "action") {
                             //validate action field
-                            QuestionnaireValidation::validate_answer_action_data($jsonDecodeAnswerData->actions, $questionnaireSubmission->QuestionnaireData, $args['QuestionID']);
+                            QuestionnaireValidation::validate_answer_action_data(
+                                $jsonDecodeAnswerData->actions,
+                                $questionnaireSubmission->QuestionnaireData,
+                                $args['QuestionID']
+                            );
                         }
                     } while (false);
 
@@ -1065,7 +1071,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 {
                     QuestionnaireValidation::is_user_logged_in();
 
-                    $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
+                    $questionnaireSubmission =
+                        QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
 
                     $questionnaireSubmission->doesQuestionnairBelongToCurrentUser();
 
@@ -1143,7 +1150,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 {
                     QuestionnaireValidation::is_user_logged_in();
 
-                    $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
+                    $questionnaireSubmission =
+                        QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
 
                     $questionnaireSubmission->doesQuestionnairBelongToCurrentUser();
 
@@ -1192,18 +1200,23 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 {
                     QuestionnaireValidation::is_user_logged_in();
 
-                    $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
+                    $questionnaireSubmission =
+                        QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
 
                     $questionnaireSubmission->doesQuestionnairBelongToCurrentUser();
 
                     $questionnaireSubmission->QuestionnaireStatus = QuestionnaireSubmission::STATUS_AWAITING_SA_REVIEW;
 
                     if ($questionnaireSubmission->SecurityArchitectApprovalStatus == 'denied') {
-                        $questionnaireSubmission->QuestionnaireStatus = QuestionnaireSubmission::STATUS_WAITING_FOR_SA_APPROVAL;
+                        $questionnaireSubmission->QuestionnaireStatus =
+                            QuestionnaireSubmission::STATUS_WAITING_FOR_SA_APPROVAL;
                     }
 
                     if (!$questionnaireSubmission->IsEmailSentToSecurityArchitect) {
-                        $members = $questionnaireSubmission->getApprovalMembersListByGroup(UserGroupConstant::GROUP_CODE_SA);
+                        $members = $questionnaireSubmission
+                            ->getApprovalMembersListByGroup(
+                                UserGroupConstant::GROUP_CODE_SA
+                            );
 
                         if (!$members) {
                             throw new Exception('Please add member in Security architect group.');
@@ -1257,9 +1270,11 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 {
                     $member = QuestionnaireValidation::is_user_logged_in();
 
-                    $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
+                    $questionnaireSubmission =
+                        QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
 
-                    $questionnaireSubmission->QuestionnaireStatus = QuestionnaireSubmission::STATUS_WAITING_FOR_SA_APPROVAL;
+                    $questionnaireSubmission->QuestionnaireStatus =
+                        QuestionnaireSubmission::STATUS_WAITING_FOR_SA_APPROVAL;
 
                     $questionnaireSubmission->updateSecurityArchitectDetail($member, 'pending');
 
@@ -1309,9 +1324,13 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         $skipBoAndCisoApproval = $args['SkipBoAndCisoApproval'];
                     }
 
-                    $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
+                    $questionnaireSubmission =
+                        QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
 
-                    $questionnaireSubmission->updateQuestionnaireOnApproveAndDenyByGroup('approved', $skipBoAndCisoApproval);
+                    $questionnaireSubmission->updateQuestionnaireOnApproveAndDenyByGroup(
+                        'approved',
+                        $skipBoAndCisoApproval
+                    );
 
                     return $questionnaireSubmission;
                 }
@@ -1351,7 +1370,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 {
                     QuestionnaireValidation::is_user_logged_in();
 
-                    $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
+                    $questionnaireSubmission =
+                        QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
 
                     $skipBoAndCisoApproval = false;
 
@@ -1359,7 +1379,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         $skipBoAndCisoApproval = $args['SkipBoAndCisoApproval'];
                     }
 
-                    $questionnaireSubmission->updateQuestionnaireOnApproveAndDenyByGroup('denied', $skipBoAndCisoApproval);
+                    $questionnaireSubmission->updateQuestionnaireOnApproveAndDenyByGroup(
+                        'denied',
+                        $skipBoAndCisoApproval
+                    );
 
                     return $questionnaireSubmission;
                 }
@@ -1398,11 +1421,13 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 {
                     QuestionnaireValidation::is_user_logged_in();
 
-                    $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
+                    $questionnaireSubmission =
+                        QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
 
                     $secureToken = isset($args['SecureToken']) ? Convert::raw2sql($args['SecureToken']) : '';
 
-                    if (!empty($secureToken) && !hash_equals($questionnaireSubmission->ApprovalLinkToken, $secureToken)) {
+                    $tokenMatched = hash_equals($questionnaireSubmission->ApprovalLinkToken, $secureToken);
+                    if (!empty($secureToken) && !$tokenMatched) {
                         throw new Exception('Wrong secure token');
                     }
 
@@ -1445,11 +1470,13 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 {
                     QuestionnaireValidation::is_user_logged_in();
 
-                    $questionnaireSubmission = QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
+                    $questionnaireSubmission =
+                        QuestionnaireSubmission::validate_before_updating_questionnaire_submission($args['ID']);
 
                     $secureToken = isset($args['SecureToken']) ? Convert::raw2sql($args['SecureToken']) : '';
 
-                    if (!empty($secureToken) && !hash_equals($questionnaireSubmission->ApprovalLinkToken, $secureToken)) {
+                    $tokenMatched = hash_equals($questionnaireSubmission->ApprovalLinkToken, $secureToken);
+                    if (!empty($secureToken) && !$tokenMatched) {
                         throw new Exception('Wrong secure token');
                     }
 
@@ -1547,8 +1574,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $statusChange = [];
 
         foreach ($approvalDbFields as $approvalFieldName) {
-            if (
-                    $this->exists() &&
+            if ($this->exists() &&
                     $user &&
                     isset($changed[$approvalFieldName]) &&
                     $changed[$approvalFieldName]['before'] !== self::STATUS_IN_PROGRESS &&
@@ -1579,8 +1605,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $doAudit = false;
 
         foreach ($approvalDbFields as $approvalFieldName) {
-            if (
-                    $this->exists() &&
+            if ($this->exists() &&
                     in_array($this->$approvalFieldName, [self::STATUS_DENIED, self::STATUS_APPROVED]) && (
                         $this->isBusinessOwner() || (
                             $user && (
@@ -1595,7 +1620,12 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         }
 
         if ($doAudit) {
-            $msg = sprintf('"%s" was %s. (UUID: %s)', $this->Questionnaire()->Name, $this->$approvalFieldName, $this->UUID);
+            $msg = sprintf(
+                '"%s" was %s. (UUID: %s)',
+                $this->Questionnaire()->Name,
+                $this->$approvalFieldName,
+                $this->UUID
+            );
             $status = ($this->$approvalFieldName === self::STATUS_APPROVED) ? 'Approve' : 'Deny';
             $this->auditService->commit($status, $msg, $this, $userData);
         }
@@ -1628,7 +1658,12 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     public function getStartLink()
     {
         $hostname = $this->getHostname();
-        $link = Convert::html2raw($hostname. 'Security/login?BackURL='.rawurlencode('/#/questionnaire/submission/' . $this->UUID));
+        $link = Convert::html2raw(
+            $hostname
+            . 'Security/login?BackURL='
+            .rawurlencode('/#/questionnaire/submission/'
+            . $this->UUID)
+        );
         return $link;
     }
 
@@ -1638,7 +1673,12 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     public function getSummaryPageLink()
     {
         $hostname = $this->getHostname();
-        $link = Convert::html2raw($hostname. 'Security/login?BackURL='.rawurlencode('/#/questionnaire/summary/' . $this->UUID));
+        $link = Convert::html2raw(
+            $hostname
+            . 'Security/login?BackURL='
+            .rawurlencode('/#/questionnaire/summary/'
+            . $this->UUID)
+        );
         return $link;
     }
 
@@ -1700,7 +1740,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $member = Security::getCurrentUser();
 
         // update business owner details
-        $this->updateBusinessOwnerDetail($status, $member);
+        $this->updateBusinessOwnerDetail($member, $status);
 
         // if approve by business owner then change questionnaire status to approved
         // else denied and send email notification to the questionnaire submitter
@@ -1747,7 +1787,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
         // update SA member details
         if ($accessDetail['group'] == UserGroupConstant::GROUP_CODE_SA) {
-
             // update Security-Architect member details
             $this->updateSecurityArchitectDetail($member, $status);
 
@@ -1790,12 +1829,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $taskSubmission->write();
                 });
             }
-
             $this->write();
-        }
-
-        // update CISO member details
-        elseif ($accessDetail['group'] == UserGroupConstant::GROUP_CODE_CISO) {
+        } elseif ($accessDetail['group'] == UserGroupConstant::GROUP_CODE_CISO) {
+            // update CISO member details
             $this->updateCisoDetail($member, $status);
             $this->write();
         }
@@ -1826,10 +1862,11 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     /**
     * update approver (business-owner) details
     *
+    * @param Member $member Member account
     * @param string $status status
     * @return void
     */
-    public function updateBusinessOwnerDetail($status = null, $member)
+    public function updateBusinessOwnerDetail($member, $status = null)
     {
         $this->BusinessOwnerApproverID = $member->ID;
         $this->BusinessOwnerApprovalStatus = $status;
@@ -2128,7 +2165,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
      */
     public function isRequestFromBusinessOwner() : bool
     {
-        $req = Controller::curr() ? Controller::curr()->getRequest() : null;
+        $req = Controller::has_curr() ? Controller::curr()->getRequest() : null;
 
         if (!$req) {
             return false;
@@ -2141,6 +2178,11 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         return false;
     }
 
+    /**
+     * isBusinessOwnerEmailAddress
+     *
+     * @return boolean
+     */
     public function isBusinessOwnerEmailAddress() : bool
     {
         $member = Security::getCurrentUser();
@@ -2278,7 +2320,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                   "hasAccess" => true,
                   "message" => 'Yes, current SA user has access to assign to themself.',
                   "group" => $group
-              ];
+                ];
             }
 
             if (($this->isWaitingForSecurityArchitectApproval()) && ($this->isAssignedToCurrentSAUser())) {
@@ -2286,7 +2328,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                   "hasAccess" => true,
                   "message" => 'Yes, current SA user has access to approve and denied.',
                   "group" => $group
-              ];
+                ];
             } else {
                 return [
                     "hasAccess" => false,
