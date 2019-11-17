@@ -20,7 +20,7 @@ use SilverStripe\ORM\DataObject;
 
 class MockIssueTracker extends IssueTrackerSystem implements TestOnly
 {
-    public function call(string $endpoint, string $data) : string
+    public function call(string $endpoint, string $data = '', string $method = 'POST') : string
     {
         return '';
     }
