@@ -10,11 +10,13 @@ export function loadControlValidationAudit(args: {uuid: string, secureToken?: st
   const {uuid, secureToken} = {...args};
 
   return async (dispatch) => {
+    await dispatch({ type: ActionType.CVA.LOAD_CONTROL_VALIDATION_AUDIT_REQUEST});
+
     try {
-      // Clear data first
+      // Clear CVA data first from store
       await dispatch( {
-        type: ActionType.CVA.LOAD_CONTROL_VALIDATION_AUDIT,
-        payload: null, // TODO: make the data empty
+        type: ActionType.CVA.EMPTY_CONTROL_VALIDATION_AUDIT_DATA,
+        payload: null, // make the data empty
       });
 
       const payload = await ControlValidationAuditDataService.fetchControlValidationAuditTaskSubmission({
@@ -24,13 +26,14 @@ export function loadControlValidationAudit(args: {uuid: string, secureToken?: st
 
       // Save data in store
       const action = {
-        type: ActionType.CVA.LOAD_CONTROL_VALIDATION_AUDIT,
+        type: ActionType.CVA.LOAD_CONTROL_VALIDATION_AUDIT_SUCCESS,
         payload,
       };
 
       await dispatch(action);
     }
     catch (error) {
+      await dispatch({ type: LOAD_CONTROL_VALIDATION_AUDIT_FAILURE, error: error});
       ErrorUtil.displayError(error);
     }
   };

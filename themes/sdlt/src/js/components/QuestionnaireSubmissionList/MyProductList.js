@@ -16,7 +16,8 @@ const mapStateToProps = (state: RootState) => {
   return {
     currentUser: state.currentUserState.user,
     siteConfig: state.siteConfigState.siteConfig,
-    myProductList: state.questionnaireSubmissionListState.myProductList
+    myProductList: state.questionnaireSubmissionListState.myProductList,
+    loadingState: state.loadingState
   };
 };
 
@@ -34,7 +35,8 @@ type Props = {
   currentUser?: User | null,
   siteConfig?: SiteConfig | null,
   dispatchLoadDataAction?: () => void,
-  myProductList?: Array<QuestionnaireSubmissionListItem>
+  myProductList?: Array<QuestionnaireSubmissionListItem>,
+  loadingState: object<*>
 };
 
 const prettifyStatus = (status: string) => {
@@ -111,9 +113,14 @@ class MyProductList extends Component<Props> {
       currentUser,
       myProductList,
       siteConfig,
+      loadingState
     } = {...this.props};
 
     if (!currentUser || !myProductList || !siteConfig) {
+      return null;
+    }
+
+    if (loadingState['QUESTIONNAIRE/FETCH_MY_PRODUCT_LIST']) {
       return null;
     }
 
