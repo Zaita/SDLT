@@ -28,6 +28,7 @@ import RiskResultContainer from "../Common/RiskResultContainer";
 const mapStateToProps = (state: RootState) => {
   return {
     submissionState: state.questionnaireState.submissionState,
+    loadingState: state.loadingState
   };
 };
 
@@ -83,6 +84,7 @@ type reduxProps = {
   dispatchEditSubmissionAction: (submissionID: string) => void,
   approveQuestionnaireSubmissionFromBusinessOwner: (submissionID: string) => void,
   denyQuestionnaireSubmissionFromBusinessOwner: (submissionID: string) => void,
+  loadingState: object<*>
 };
 
 type Props = ownProps & reduxProps;
@@ -106,10 +108,22 @@ class SummaryContainer extends Component<Props, State> {
   }
 
   render() {
-    const {secureToken} = {...this.props};
-    const {location, title, user, submission, isCurrentUserApprover, isCurrentUserABusinessOwnerApprover, siteConfig} = {...this.props.submissionState};
+    const {secureToken, loadingState} = {...this.props};
+    const {
+      location,
+      title,
+      user,
+      submission,
+      isCurrentUserApprover,
+      isCurrentUserABusinessOwnerApprover,
+      siteConfig
+      } = {...this.props.submissionState};
 
     if (!user || !submission || !siteConfig) {
+      return null;
+    }
+
+    if (loadingState['QUESTIONNAIRE/LOAD_QUESTIONNAIRE_SUBMISSION_STATE']) {
       return null;
     }
 

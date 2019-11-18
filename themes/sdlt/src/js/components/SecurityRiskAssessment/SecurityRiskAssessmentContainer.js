@@ -95,6 +95,7 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
     const backButton = (
       <LightButton
         title={"BACK TO QUESTIONNAIRE SUMMARY"}
+        classes={["button ml-3"]}
         onClick={() => {
           URLUtil.redirectToQuestionnaireSummary(questionnaireSubmissionUUID, secureToken);
         }}
@@ -106,8 +107,7 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
     const finaliseButton = !isSRATaskFinalised && !isSiblingTaskPending
       ? (
         <DarkButton title="FINALISE"
-          classes={["button ml-2"]}
-
+          classes={["button ml-3"]}
           onClick={() => {
             this.props.dispatchFinaliseAction(uuid, secureToken, questionnaireSubmissionUUID);
           }}
@@ -136,7 +136,6 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
           <RiskRatingThresholdContainer
             riskRatingThresholds={sraData.riskRatingThresholds}
           />
-
 
           <div className="buttons">
             {backButton}

@@ -12,7 +12,7 @@ const defaultStartState: ControlValidationAuditState = {
 const isSelectedComponentExist = ComponentSelectionUtil.isSelectedComponentExist;
 
 export function controlValidationAuditState(state: ControlValidationAuditState = defaultStartState, action: *): ControlValidationAuditState {
-  if (action.type === ActionType.CVA.LOAD_CONTROL_VALIDATION_AUDIT) {
+  if (action.type === ActionType.CVA.LOAD_CONTROL_VALIDATION_AUDIT_SUCCESS) {
     let controlValidationAuditData = action.payload;
     let selectedComponents = [];
 
@@ -58,6 +58,16 @@ export function controlValidationAuditState(state: ControlValidationAuditState =
     return {
       ...state,
       cvaSelectedComponents: newCVATaskData
+    };
+  }
+
+  if (action.type === ActionType.CVA.EMPTY_CONTROL_VALIDATION_AUDIT_DATA) {
+    const controlValidationAuditData = action.payload;
+
+    return {
+      ...state,
+      controlValidationAuditData: controlValidationAuditData,
+      cvaSelectedComponents: []
     };
   }
 
