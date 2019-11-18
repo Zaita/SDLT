@@ -10,7 +10,7 @@ export class Loading extends Component {
       <div>
         <div className="loading-spinner-page-overlay">
           <div className="loading-spinner">
-            <Icon spin name="spinner" /> Loading
+            <Icon spin name="spinner" /> Loading...
           </div>
         </div>
       </div>

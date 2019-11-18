@@ -199,6 +199,8 @@ export function saveSelectedComponents(jiraKey: string): ThunkAction {
       return;
     }
 
+    await dispatch({ type: ActionType.TASK.SAVE_SELECTED_COMPONENT_REQUEST});
+
     const components = rootState.componentSelectionState.selectedComponents.map((component) => {
       return {
         SecurityComponentID : component.id,
@@ -215,7 +217,9 @@ export function saveSelectedComponents(jiraKey: string): ThunkAction {
         csrfToken: await CSRFTokenService.getCSRFToken()
       });
       await dispatch(completeTaskSubmission());
+      await dispatch({ type: ActionType.TASK.SAVE_SELECTED_COMPONENT_SUCCESS});
     } catch(error) {
+      await dispatch({ type: ActionType.TASK.SAVE_SELECTED_COMPONENT_FAILURE});
       ErrorUtil.displayError(error);
     }
   };

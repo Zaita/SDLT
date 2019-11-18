@@ -108,7 +108,7 @@ class Summary extends Component<Props> {
       return (
         <div className="Summary">
           <h3>
-            Submission has not been complete...
+            Questionnaire Submission has not been completed...
           </h3>
         </div>
       );
