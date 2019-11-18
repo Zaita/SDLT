@@ -69,11 +69,13 @@ export function loadQuestionnaireSubmissionState(submissionHash: string, secureT
 
   return async (dispatch) => {
     // TODO: maybe dispatch a global loading action
+    await dispatch({type: ActionType.QUESTIONNAIRE.LOAD_QUESTIONNAIRE_SUBMISSION_STATE_REQUEST});
     try {
       const data = await QuestionnaireDataService.fetchSubmissionData(submissionHash, secureToken);
       dispatch(loadQuestionnaireSubmissionStateFinished(data));
     } catch (error) {
       // TODO: maybe dispatch a global error action
+      await dispatch({ type: ActionType.QUESTIONNAIRE.LOAD_QUESTIONNAIRE_SUBMISSION_STATE_FAILURE, error: error});
       alert(error);
     }
   };
@@ -81,7 +83,7 @@ export function loadQuestionnaireSubmissionState(submissionHash: string, secureT
 
 export function loadQuestionnaireSubmissionStateFinished(payload: QuestionnaireSubmissionState): LoadQuestionnaireSubmissionAction {
   return {
-    type: ActionType.QUESTIONNAIRE.LOAD_QUESTIONNAIRE_SUBMISSION_STATE,
+    type: ActionType.QUESTIONNAIRE.LOAD_QUESTIONNAIRE_SUBMISSION_STATE_SUCCESS,
     payload
   }
 }
@@ -332,11 +334,21 @@ export function loadMySubmissionList(): ThunkAction {
     if (!user) {
       return;
     }
-    const data = await QuestionnaireDataService.fetchQuestionnaireSubmissionList(user.id, 'my_submission_list');
-    dispatch({
-      type: ActionType.QUESTIONNAIRE.FETCH_MY_SUBMISSION_LIST,
-      payload: data
-    });
+    await dispatch({ type: ActionType.QUESTIONNAIRE.FETCH_MY_SUBMISSION_LIST_REQUEST});
+
+    try {
+      // Call re sync with jira data api
+      const data = await QuestionnaireDataService.fetchQuestionnaireSubmissionList(user.id, 'my_submission_list');
+
+      dispatch({
+        type: ActionType.QUESTIONNAIRE.FETCH_MY_SUBMISSION_LIST_SUCCESS,
+        payload: data
+      });
+    }
+    catch (error) {
+      await dispatch({ type: ActionType.QUESTIONNAIRE.FETCH_MY_SUBMISSION_LIST_FAILURE, error: error});
+      ErrorUtil.displayError(error);
+    }
   };
 }
 
@@ -348,11 +360,22 @@ export function loadAwaitingApprovalList(): ThunkAction {
     if (!user) {
       return;
     }
-    const data = await QuestionnaireDataService.fetchQuestionnaireSubmissionList(user.id, 'awaiting_approval_list');
-    dispatch({
-      type: ActionType.QUESTIONNAIRE.FETCH_AWAITING_APPROVAL_LIST,
-      payload: data
-    });
+
+    await dispatch({ type: ActionType.QUESTIONNAIRE.FETCH_AWAITING_APPROVAL_LIST_REQUEST});
+
+    try {
+      // Call re sync with jira data api
+      const data = await QuestionnaireDataService.fetchQuestionnaireSubmissionList(user.id, 'awaiting_approval_list');
+
+      dispatch({
+        type: ActionType.QUESTIONNAIRE.FETCH_AWAITING_APPROVAL_LIST_SUCCESS,
+        payload: data
+      });
+    }
+    catch (error) {
+      await dispatch({ type: ActionType.QUESTIONNAIRE.FETCH_AWAITING_APPROVAL_LIST_FAILURE, error: error});
+      ErrorUtil.displayError(error);
+    }
   };
 }
 
@@ -363,11 +386,23 @@ export function loadMyProductList(): ThunkAction {
     if (!user) {
       return;
     }
-    const data = await QuestionnaireDataService.fetchQuestionnaireSubmissionList(user.id, 'my_product_list');
-    dispatch({
-      type: ActionType.QUESTIONNAIRE.FETCH_MY_PRODUCT_LIST,
-      payload: data
-    });
+
+    await dispatch({ type: ActionType.QUESTIONNAIRE.FETCH_MY_PRODUCT_LIST_REQUEST});
+
+    try {
+      // Call re sync with jira data api
+      const data = await QuestionnaireDataService.fetchQuestionnaireSubmissionList(user.id, 'my_product_list');
+
+      dispatch({
+        type: ActionType.QUESTIONNAIRE.FETCH_MY_PRODUCT_LIST_SUCCESS,
+        payload: data
+      });
+    }
+    catch (error) {
+      await dispatch({ type: ActionType.QUESTIONNAIRE.FETCH_MY_PRODUCT_LIST_FAILURE, error: error});
+      ErrorUtil.displayError(error);
+    }
+
   };
 }
 

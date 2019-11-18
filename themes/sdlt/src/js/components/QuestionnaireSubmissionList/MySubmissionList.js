@@ -16,7 +16,8 @@ const mapStateToProps = (state: RootState) => {
   return {
     currentUser: state.currentUserState.user,
     siteConfig: state.siteConfigState.siteConfig,
-    mySubmissionList: state.questionnaireSubmissionListState.mySubmissionList
+    mySubmissionList: state.questionnaireSubmissionListState.mySubmissionList,
+    loadingState: state.loadingState
   };
 };
 
@@ -34,7 +35,8 @@ type Props = {
   currentUser?: User | null,
   siteConfig?: SiteConfig | null,
   dispatchLoadDataAction?: () => void,
-  mySubmissionList?: Array<QuestionnaireSubmissionListItem>
+  mySubmissionList?: Array<QuestionnaireSubmissionListItem>,
+  loadingState: object<*>
 };
 
 const prettifyStatus = (status: string) => {
@@ -116,9 +118,14 @@ class MySubmissionList extends Component<Props> {
       currentUser,
       mySubmissionList,
       siteConfig,
+      loadingState,
     } = {...this.props};
 
     if (!currentUser || !mySubmissionList || !siteConfig) {
+      return null;
+    }
+
+    if (loadingState['QUESTIONNAIRE/FETCH_MY_SUBMISSION_LIST']) {
       return null;
     }
 

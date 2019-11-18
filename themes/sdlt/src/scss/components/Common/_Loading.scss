@@ -1,7 +1,7 @@
 @import "../../variables";
 
 .loading-spinner-page-overlay {
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(0, 0, 0, 0.5);
   position: fixed;
   z-index: 99;
   top: 0;
@@ -18,8 +18,7 @@
   top: 48%;
   left: 50%;
   margin-left: -40px;
-  color: #000;
-  background-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
   .fa-spinner {
     font-size: 23px;
     position: relative;
