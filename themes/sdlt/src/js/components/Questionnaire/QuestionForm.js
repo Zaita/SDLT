@@ -214,11 +214,10 @@ class QuestionForm extends Component<Props> {
 
                             return (
                               <div key={index}>
-                                <span>
+                                <label>
                                   <Field type="radio" name={id} value={option.value} className={"radio"} checked={checked} />
-                                  <label>{option.label}</label>
-                                </span>
-
+                                  {option.label}
+                                </label>
                               </div>
                             );
                           })
@@ -241,11 +240,11 @@ class QuestionForm extends Component<Props> {
 
                             return (
                               <div key={index}>
-                                <span>
+                                <label>
                                   <input
                                   type="checkbox"
                                   name={id}
-                                  className={"radio"}
+                                  className={"checkbox"}
                                   checked={checked}
                                   onChange={(event) => {
                                     if (event.target.checked) {
@@ -256,8 +255,8 @@ class QuestionForm extends Component<Props> {
                                     setFieldValue(id, JSON.stringify(groupCheckboxValueArr));
                                   }}
                                   />
-                                  <label>{option.label}</label>
-                                </span>
+                                  {option.label}
+                                </label>
                               </div>
                             );
                           })
