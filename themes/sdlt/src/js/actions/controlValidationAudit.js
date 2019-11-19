@@ -33,7 +33,7 @@ export function loadControlValidationAudit(args: {uuid: string, secureToken?: st
       await dispatch(action);
     }
     catch (error) {
-      await dispatch({ type: LOAD_CONTROL_VALIDATION_AUDIT_FAILURE, error: error});
+      await dispatch({type: ActionType.CVA.LOAD_CONTROL_VALIDATION_AUDIT_FAILURE, error: error});
       ErrorUtil.displayError(error);
     }
   };
@@ -98,7 +98,7 @@ export function reSyncWithJira (uuid: string) : ThunkAction {
       await dispatch(action);
     }
     catch (error) {
-      await dispatch({ type: RE_SYNC_WITH_JIRA_FAILURE, error: error});
+      await dispatch({ type: ActionType.CVA.RE_SYNC_WITH_JIRA_FAILURE, error: error});
       ErrorUtil.displayError(error);
     }
   }

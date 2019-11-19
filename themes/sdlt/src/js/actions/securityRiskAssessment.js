@@ -7,6 +7,7 @@ export function loadSecurityRiskAssessment(args: {uuid: string, secureToken?: st
   const {uuid, secureToken} = {...args};
 
   return async (dispatch) => {
+    await dispatch({ type: ActionType.SRA.LOAD_SECURITY_RISK_ASSESSMENT_REQUEST});
     try {
       const payload = await SecurityRiskAssessmentTaskDataService.fetchSecurityRiskAssessmentTasK({
         uuid,
@@ -14,13 +15,14 @@ export function loadSecurityRiskAssessment(args: {uuid: string, secureToken?: st
       });
 
       const action = {
-        type: ActionType.SRA.LOAD_SECURITY_RISK_ASSESSMENT,
+        type: ActionType.SRA.LOAD_SECURITY_RISK_ASSESSMENT_SUCCESS,
         payload,
       };
 
       await dispatch(action);
     }
     catch (error) {
+      await dispatch({type: ActionType.SRA.LOAD_SECURITY_RISK_ASSESSMENT_FAILURE, error: error});
       ErrorUtil.displayError(error);
     }
   };
