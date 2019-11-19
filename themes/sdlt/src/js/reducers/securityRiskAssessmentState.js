@@ -11,7 +11,7 @@ const defaultStartState: SecurityRiskAssessmentState = {
 
 export function securityRiskAssessmentState(state: SecurityRiskAssessmentState = defaultStartState, action: *): SecurityRiskAssessmentState {
 
-  if (action.type === ActionType.SRA.LOAD_SECURITY_RISK_ASSESSMENT) {
+  if (action.type === ActionType.SRA.LOAD_SECURITY_RISK_ASSESSMENT_SUCCESS) {
     return {
       ...state,
       securityRiskAssessmentData: action.payload
