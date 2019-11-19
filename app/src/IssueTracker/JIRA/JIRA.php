@@ -16,6 +16,7 @@ use GuzzleHttp\Client;
 use NZTA\SDLT\IssueTracker\IssueTrackerSystem;
 use SilverStripe\ORM\DataObject;
 use NZTA\SDLT\Model\SecurityComponent;
+use GuzzleHttp\Exception\RequestException;
 
 /**
  * JIRA class makes calls to the cloud/back-office ticketing application for adding tasks,
@@ -76,23 +77,38 @@ class JIRA extends IssueTrackerSystem
      */
     private function doPost(string $endpoint, string $data) : \GuzzleHttp\Psr7\Response
     {
-        return $this->client->request('POST', $endpoint, [
-            'auth' => [
-                $this->username,
-                $this->api_key
-            ],
-            'body' => $data,
-            'headers' => [
-                'Accept'     => 'application/json',
-                'Content-Type' => 'application/json',
-            ]
-        ]);
+        try {
+            $response =  $this->client->request('POST', $endpoint, [
+                'auth' => [
+                    $this->username,
+                    $this->api_key
+                ],
+                'body' => $data,
+                'headers' => [
+                    'Accept'     => 'application/json',
+                    'Content-Type' => 'application/json',
+                ]
+            ]);
+            return $response;
+        } catch (RequestException $exception) {
+            $response = $exception->getResponse();
+            $statuscode = $response->getStatusCode();
+            $jsonContent = (string) $response->getBody();
+            $content = json_decode($jsonContent, true);
+
+            if (isset($content['errors']['project']) && $statuscode == 400) {
+                throw new \Exception("The JIRA Project Key does not exist. Please enter a valid JIRA Project Key.");
+            } else {
+                throw new \Exception($exception->getMessage());
+            }
+        }
     }
 
     /**
      * Shortcut method to make a POST request.
      *
      * @param  string $endpoint  JIRA endpoint
+     *
      * @return GuzzleHttp\Psr7\Response
      */
     private function doGet(string $endpoint) : \GuzzleHttp\Psr7\Response
