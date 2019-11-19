@@ -1550,11 +1550,18 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
                     $isRemoteTarget = $submission->Task()->isRemoteTarget();
 
-                    // Do not permit the modification of a submission with the creation
-                    // of a new ticket, if a different project key is passed-in.
-                    if ($isRemoteTarget &&
-                        $submission->JiraKey && $submission->JiraKey !== $ticketId) {
-                        throw new Exception(sprintf('Project key must be the same as: %s', $submission->JiraKey));
+                    // check if taget is remote
+                    if ($isRemoteTarget) {
+                        // check for the empty ticket
+                        if(empty($ticketId)) {
+                            throw new Exception('Please enter a Project Key.');
+                        }
+
+                        // Do not permit the modification of a submission with the creation
+                        // of a new ticket, if a different project key is passed-in.
+                        if ($submission->JiraKey && $submission->JiraKey !== $ticketId) {
+                            throw new Exception(sprintf('Project key must be the same as: %s', $submission->JiraKey));
+                        }
                     }
 
                     $selectedComponents = json_decode(base64_decode($args['Components']), true);
@@ -1593,17 +1600,23 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                         }
                     }
 
-                    // first save JIRA project key for the task submission
-                    if (!empty($ticketId) && $isRemoteTarget && !empty($newTicketComponents)) {
-                        $submission->JiraKey = $ticketId;
-                        $submission->write();
-                    }
+                    $createJiraTicket = !empty($ticketId) && $isRemoteTarget;
 
                     // add the component
                     foreach ($newTicketComponents as $newTicketComponent) {
                         $securityComponent = SecurityComponent::get_by_id(Convert::raw2sql($newTicketComponent['SecurityComponentID']));
 
                         if ($securityComponent) {
+                            $jiraLink = '';
+                            if ($createJiraTicket) {
+                                $jiraLink = $submission->issueTrackerService->addTask(// <-- Makes an API call
+                                    $ticketId,
+                                    $securityComponent,
+                                    'Task',
+                                    $newTicketComponent['ProductAspect']
+                                );
+                            }
+
                             $newComp = SelectedComponent::create();
                             $newComp->ProductAspect = $newTicketComponent['ProductAspect'];
                             $newComp->SecurityComponentID = $newTicketComponent['SecurityComponentID'];
@@ -1611,24 +1624,23 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                             $newComp->write();
 
                             // crete ticket
-                            if (!empty($ticketId) && $isRemoteTarget) {
-
+                            if ($createJiraTicket) {
                                 // create a new ticket for the selected component
                                 $jiraTicket = JiraTicket::create();
                                 $jiraTicket->JiraKey = $ticketId;
-                                $link = $submission->issueTrackerService->addTask(// <-- Makes an API call
-                                    $jiraTicket->JiraKey,
-                                    $securityComponent,
-                                    'Task',
-                                    $newTicketComponent['ProductAspect']
-                                );
-                                $jiraTicket->TicketLink = $link;
+                                $jiraTicket->TicketLink = $jiraLink;
                                 $jiraTicket->SecurityComponentID = $newComp->SecurityComponentID;
                                 $jiraTicket->TaskSubmissionID = $newComp->TaskSubmissionID;
                                 $jiraTicket->TaskSubmissionSelectedComponentID = $newComp->ID;
                                 $jiraTicket->write();
                             }
                         }
+                    }
+
+                    // save JIRA project key for the task submission
+                    if ($createJiraTicket && !empty($newTicketComponents)) {
+                        $submission->JiraKey = $ticketId;
+                        $submission->write();
                     }
 
                     return $submission;
