@@ -15,6 +15,7 @@ namespace NZTA\SDLT\Model;
 
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\DropdownField;
 
 /**
  * This record allows multiple {@link Risk} records to be related to many
@@ -73,6 +74,36 @@ class ControlWeightSet extends DataObject
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
+
+
+        $fields->removeByName([
+            'RiskID',
+            'SecurityComponentID',
+            'SecurityControlID'
+        ]);
+
+        $fields->addFieldsToTab(
+            'Root.Main',
+            [
+                DropdownField::create(
+                    'RiskID',
+                    'Risk',
+                    Risk::get()->sort('Name ASC')->map('ID', 'Name')
+                )->setEmptyString(' '),
+                DropdownField::create(
+                    'SecurityComponentID',
+                    'Security Component',
+                    SecurityComponent::get()->sort('Name ASC')->map('ID', 'Name')
+                )->setEmptyString(' '),
+                DropdownField::create(
+                    'SecurityControlID',
+                    'Security Control',
+                    SecurityControl::get()->sort('Name ASC')->map('ID', 'Name')
+                )->setEmptyString(' ')
+            ],
+            'Likelihood'
+        );
+
         $componentID = $this->SecurityComponentID || $this->SecurityControl()->getParentComponentID();
 
         if ($componentID) {
@@ -80,16 +111,6 @@ class ControlWeightSet extends DataObject
             ->setValue($componentID)
             ->setDisabled(true);
         }
-
-        $fields->addFieldsToTab(
-            'Root.Main',
-            [
-                $fields->dataFieldByName('RiskID'),
-                $fields->dataFieldByName('SecurityComponentID'),
-                $fields->dataFieldByName('SecurityControlID'),
-            ],
-            'Likelihood'
-        );
 
         return $fields;
     }
