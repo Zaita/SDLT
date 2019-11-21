@@ -153,6 +153,46 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     ];
 
     /**
+     * Defines a default list of filters for the search context
+     * @var array
+     */
+    private static $searchable_fields = [
+        'Questionnaire.Name',
+        'Questionnaire.Type',
+        'ProductName',
+        'SubmitterName',
+        'SubmitterEmail',
+        'QuestionnaireStatus',
+        'CisoApprovalStatus',
+        'BusinessOwnerApprovalStatus',
+        'SecurityArchitectApprovalStatus',
+        'UUID',
+        'Created'
+    ];
+
+    /**
+     * @return string
+     */
+    public function getQuestionnaireName()
+    {
+        $questionnaire = $this->Questionnaire();
+
+        if (!$questionnaire->exists()) {
+            return "";
+        }
+
+        return $questionnaire->Name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getQuestionnaireType()
+    {
+        return FormField::name_to_label($this->Questionnaire()->Type ?? 'Questionnaire');
+    }
+
+    /**
      * Default sort ordering
      *
      * @var array
@@ -563,22 +603,6 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         }
 
         return $actions;
-    }
-
-    /**
-     * @return string
-     */
-    public function getQuestionnaireName()
-    {
-        return $this->Questionnaire()->Name;
-    }
-
-    /**
-     * @return string
-     */
-    public function getQuestionnaireType()
-    {
-        return FormField::name_to_label($this->Questionnaire()->Type ?? 'Questionnaire');
     }
 
     /**
