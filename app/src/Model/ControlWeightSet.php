@@ -82,6 +82,12 @@ class ControlWeightSet extends DataObject
             'SecurityControlID'
         ]);
 
+        $componentID = $this->SecurityComponentID;
+
+        if (!$componentID) {
+            $componentID = $this->SecurityControl()->getParentComponentID();
+        }
+
         $fields->addFieldsToTab(
             'Root.Main',
             [
@@ -103,8 +109,6 @@ class ControlWeightSet extends DataObject
             ],
             'Likelihood'
         );
-
-        $componentID = $this->SecurityComponentID || $this->SecurityControl()->getParentComponentID();
 
         if ($componentID) {
             $fields->dataFieldByName('SecurityComponentID')
