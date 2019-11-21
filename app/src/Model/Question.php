@@ -292,11 +292,17 @@ class Question extends DataObject implements ScaffoldingProvider
      * @param string $answerData             Answers
      * @param int    $submissionID           Questionnaire submission id
      * @param string $questionnaireLevelTask Questinnaire level task
+     * @param string $secureToken            When task is completed by vendor
+     * @param string $type                   qs = Questinnaire Submission / ts =Task Submission
      * @return void
      */
-    public static function create_task_submissions_according_to_answers($questionData, $answerData, $submissionID, $questionnaireLevelTask = '') : void
+    public static function create_task_submissions_according_to_answers($questionData, $answerData, $submissionID, $questionnaireLevelTask = '', $secureToken = '', $type = 'qs') : void
     {
         $member = Security::getCurrentUser();
+
+        if (!$member && $secureToken && $type = 'ts') {
+            $member = TaskSubmission::get_by_id($submissionID)->Submitter();
+        }
 
         if (!$member) {
             throw new Exception('Member does not exist.');
@@ -320,7 +326,9 @@ class Question extends DataObject implements ScaffoldingProvider
                 isset($question['AnswerActionFields']) &&
                 count($question['AnswerActionFields']) &&
                 isset($answers[$questionID]['isApplicable']) &&
+                $answers[$questionID]['isApplicable'] &&
                 isset($answers[$questionID]['hasAnswer']) &&
+                $answers[$questionID]['hasAnswer'] &&
                 isset($answers[$questionID]['answerType']) &&
                 $answers[$questionID]['answerType'] == "action"
             ) {
