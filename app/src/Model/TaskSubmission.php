@@ -902,6 +902,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                         $member,
                         $secureToken
                     );
+
                     if (!$canEdit) {
                         throw new GraphQLAuthFailure();
                     }
@@ -928,7 +929,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     Question::create_task_submissions_according_to_answers (
                         $submission->QuestionnaireData,
                         $submission->AnswerData,
-                        $submission->QuestionnaireSubmissionID
+                        $submission->QuestionnaireSubmissionID,
+                        '',
+                        $secureToken,
+                        'ts'
                     );
 
                     $submission->write();
@@ -1394,6 +1398,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     {
         $user = Security::getCurrentUser();
 
+        if (!$user) {
+            $user = $this->Submitter();
+        }
+
         $userData = '';
 
         if ($user) {
@@ -1431,18 +1439,23 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         }
 
         // audit log: for task submission approval by approval group member
-        $hasAccess = $user && $user->Groups()->filter('Code', $this->ApprovalGroup()->Code)->exists();
+        $hasAccess = $user || $user->Groups()->filter('Code', $this->ApprovalGroup()->Code)->exists();
         $doAudit = $this->exists() && $hasAccess;
         if ($doAudit && isset($changed['Status']) &&
-            in_array($changed['Status']['after'], ['approved', 'denied'])) {
+            in_array($changed['Status']['after'], ['approved', 'denied', 'complete'])) {
               $msg = sprintf(
                   '"%s" was %s. (UUID: %s)',
                   $this->Task()->Name,
-                  $changed['Status']['after'],
+                  $changed['Status']['after'] !== 'complete' ?:  'completed',
                   $this->UUID
               );
 
-              $status = ($changed['Status']['after'] === 'approved') ? 'Approve' : 'Deny';
+              if ($changed['Status']['after'] == 'complete') {
+                  $status = $changed['Status']['after'] = 'Complete';
+              } else {
+                  $status = ($changed['Status']['after'] === 'approved') ? 'Approve' : 'Deny';
+              }
+
               $this->auditService->commit($status, $msg, $this, $userData);
         }
     }
