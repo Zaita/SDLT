@@ -455,11 +455,9 @@ class SecurityRiskAssessmentCalculator
 
         $cvaTaskData = $this->getCVATaskResult();
 
-        if (!$cvaTaskData) {
-            return $sraTaskDetail;
-        }
+        $sraTaskDetail = $this->getRisksAndComponentsAndControlsforSra($cvaTaskData, $riskData);
 
-        return $sraTaskDetail = $this->getRisksAndComponentsAndControlsforSra($cvaTaskData, $riskData);
+        return $sraTaskDetail;
     }
 
     /**
@@ -474,7 +472,7 @@ class SecurityRiskAssessmentCalculator
         $sraTaskDetail = [];
         $out = [];
 
-        $controlIds = $this->getSelectedControlIDsFromCVATask();
+        $controlIds = $cvaTaskData ? $this->getSelectedControlIDsFromCVATask() : [];
         $sraTask = $this->getSRATaskSubmission();
         $sraTaskID = $sraTask->Task()->ID;
         $productAspectList = $this->getProductAspectList();
@@ -501,52 +499,58 @@ class SecurityRiskAssessmentCalculator
             $out['description'] = isset($riskInDB[$index]['Description']) ? $riskInDB[$index]['Description'] : '';
             $out['baseImpactScore'] = (int) round($risk['score']);
 
-            // foreach risk, query its set of control weights. This is a big performance hit
-            $weights = ControlWeightSet::get()->filter(
-                [
-                    'RiskID' => $risk['riskID'],
-                    'SecurityControlID' => $controlIds
-                ]
-            );
-
-            $controlRiskWeights = [];
-
-            foreach ($weights as $weight) {
-                //index with selected control
-                //add Impact, Likelihood, ImpactPenalty, LikelihoodPenalty
-                $controlRiskWeights[$weight->SecurityControlID] = [
-                    'I' => $weight->Impact,
-                    'L' => $weight->Likelihood,
-                    'IP' => $weight->ImpactPenalty,
-                    'LP' => $weight->LikelihoodPenalty,
-                    'CID' => $weight->SecurityComponentID
-                ];
-            }
-
             $components = [];
 
-            foreach ($cvaTaskData as $component) {
-                $components[] = $this->updateComponentDetails(
-                    $component,
-                    $controlRiskWeights
+            // foreach risk, query its set of control weights. This is a big performance hit
+            if (!empty($controlIds) && $cvaTaskData) {
+                $weights = ControlWeightSet::get()->filter(
+                    [
+                        'RiskID' => $risk['riskID'],
+                        'SecurityControlID' => $controlIds
+                    ]
                 );
+
+                $controlRiskWeights = [];
+
+                foreach ($weights as $weight) {
+                    //index with selected control
+                    //add Impact, Likelihood, ImpactPenalty, LikelihoodPenalty
+                    $controlRiskWeights[$weight->SecurityControlID] = [
+                        'I' => $weight->Impact,
+                        'L' => $weight->Likelihood,
+                        'IP' => $weight->ImpactPenalty,
+                        'LP' => $weight->LikelihoodPenalty,
+                        'CID' => $weight->SecurityComponentID
+                    ];
+                }
+
+                foreach ($cvaTaskData as $component) {
+                    $components[] = $this->updateComponentDetails(
+                        $component,
+                        $controlRiskWeights
+                    );
+                }
             }
 
             if ($sraTaskDetail['hasProductAspects']) {
                 $riskdetailsforProductAspect = [];
 
                 foreach ($productAspectList as $productAspect) {
-                    $filteredComponents = array_filter($components, function ($component) use ($productAspect) {
-                        return $component['productAspect'] == $productAspect;
-                    });
+                    $productAspectComponents = [];
 
-                    if (empty($filteredComponents)) {
-                        continue;
+                    if (!empty($components)) {
+                        $filteredComponents = array_filter($components, function ($component) use ($productAspect) {
+                            return $component['productAspect'] == $productAspect;
+                        });
+
+                        if (empty($filteredComponents)) {
+                            continue;
+                        }
+
+                        // we need to do this trick to start array index from 0
+                        // so that we will get the array after json decode in the frontend
+                        $productAspectComponents = array_merge([], $filteredComponents);
                     }
-
-                    // we need to do this trick to start array index from 0
-                    // so that we will get the array after json decode in the frontend
-                    $productAspectComponents = array_merge([], $filteredComponents);
 
                     $riskComponentdetails = $this->getRiskComponentDetails(
                         $productAspectComponents,

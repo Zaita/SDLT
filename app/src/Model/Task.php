@@ -164,6 +164,13 @@ class Task extends DataObject implements ScaffoldingProvider
             'AnswerActionFields'
         ]);
 
+        $fields->insertAfter(
+            'Name',
+            $typeField
+            ->setEmptyString('-- Select One --')
+            ->setSource(Utils::pretty_source($this, 'TaskType'))
+        );
+
         // If TaskType doesn't require Questions, hide the "Questions" tab
         if ($this->isSelectionType() || $this->isSRAType() || $this->isControlValidationAudit()) {
             $fields->removeByName(['Questions']);
@@ -180,13 +187,6 @@ class Task extends DataObject implements ScaffoldingProvider
                     ->setItemsPerPage(250);
             }
         }
-
-        $fields->insertAfter(
-            'Name',
-            $typeField
-            ->setEmptyString('-- Select One --')
-            ->setSource(Utils::pretty_source($this, 'TaskType'))
-        );
 
         $fields->insertAfter(
             'TaskType',
