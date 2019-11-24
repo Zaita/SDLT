@@ -4,6 +4,7 @@ import toString from "lodash/toString";
 import SecurityComponentParser from "../utils/SecurityComponentParser";
 import {DEFAULT_NETWORK_ERROR} from "../constants/errors";
 import TaskParser from "../utils/TaskParser";
+import type {CVATaskSubmission} from "../types/CVATaskSubmission";
 
 export default class ControlValidationAuditDataService {
   static async fetchControlValidationAuditTaskSubmission(args: { uuid: string, secureToken?: string }): Promise<TaskSubmission> {
@@ -25,6 +26,7 @@ query {
     CVATaskData
     ProductAspects
     CVATaskDataSource
+    Status
     Submitter {
       ID
     }
@@ -46,8 +48,9 @@ query {
 
     const components = jsonArray.length > 0 ? SecurityComponentParser.parseCVAFromJSONObject(jsonArray) : jsonArray;
 
-    const data: TaskSubmission = {
+    const data: CVATaskSubmission = {
       id: toString(get(submissionJSONObject, "ID", "")),
+      status: toString(get(submissionJSONObject, "Status", "")),
       uuid: toString(get(submissionJSONObject, "UUID", "")),
       questionnaireSubmissionUUID: toString(get(submissionJSONObject, "QuestionnaireSubmission.UUID", "")),
       taskName: toString(get(submissionJSONObject, "TaskName", "")),

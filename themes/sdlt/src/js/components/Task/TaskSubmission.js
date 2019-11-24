@@ -13,6 +13,7 @@ import pdfIcon from "../../../img/icons/pdf.svg";
 import PDFUtil from "../../utils/PDFUtil";
 import RiskResultContainer from "../Common/RiskResultContainer";
 import SecurityRiskAssessmentUtil from "../../utils/SecurityRiskAssessmentUtil";
+import {SubmissionExpired} from "../Common/SubmissionExpired";
 
 type Props = {
   taskSubmission: TaskSubmissionType,
@@ -45,17 +46,6 @@ class TaskSubmission extends Component<Props> {
     let body = (
       <AnswersPreview questions={taskSubmission.questions}/>
     );
-
-    if(taskSubmission.status === 'expired'){
-      body = (
-        <div className="container">
-          <div className="alert alert-danger">
-            The submission you are attempting to view does not exist or has expired.
-            Please follow <a href="/">this link</a> to the homepage where you can create a new submission.
-          </div>
-        </div>
-      );
-    }
 
     if (canUpdateAnswers) {
       body = (
@@ -113,19 +103,30 @@ class TaskSubmission extends Component<Props> {
 
     return (
       <div className="TaskSubmission">
-        {taskSubmission.taskType === 'risk questionnaire' && isSRATaskFinalised ? SecurityRiskAssessmentUtil.getSraIsFinalisedAlert() : false}
-        {result}
-        {body}
-        {riskResult}
-        <div className="buttons">
-          {editButton}
-          {pdfButton}
-          {backButton}
-          <div>
-            {approveButton}
-            {denyButton}
-          </div>
-        </div>
+        {taskSubmission.status === 'expired' && <SubmissionExpired/>}
+        {
+          taskSubmission.status !== 'expired' && (
+            <div>
+              {
+                taskSubmission.taskType === 'risk questionnaire' &&
+                isSRATaskFinalised ? SecurityRiskAssessmentUtil.getSraIsFinalisedAlert() : false
+              }
+              {result}
+              {body}
+              {riskResult}
+
+                  <div className="buttons">
+                  {editButton}
+                  {pdfButton}
+                  {backButton}
+                  <div>
+                    {approveButton}
+                    {denyButton}
+                  </div>
+                </div>
+            </div>
+          )
+        }
       </div>
     );
   }
