@@ -36,7 +36,7 @@ export function startState(state: QuestionnaireStartState = defaultStartState, a
 }
 
 export function submissionState(state: QuestionnaireSubmissionState = defaultSubmissionState, action: *) {
-  if (action.type === ActionType.QUESTIONNAIRE.LOAD_QUESTIONNAIRE_SUBMISSION_STATE) {
+  if (action.type === ActionType.QUESTIONNAIRE.LOAD_QUESTIONNAIRE_SUBMISSION_STATE_SUCCESS) {
     return action.payload;
   }
 

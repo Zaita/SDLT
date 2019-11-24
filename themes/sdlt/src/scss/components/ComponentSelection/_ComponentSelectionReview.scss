@@ -17,5 +17,29 @@
       font-weight: 600;
       color: $blue;
     }
+    h5 {
+      font-weight: 600;
+      color: $blue;
+      font-size: 18px;
+    }
+  }
+
+  .buttons {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: stretch;
+      margin-top: 25px;
+
+      div {
+          display: flex;
+          flex-direction: row;
+          justify-content: flex-start;
+          align-items: stretch;
+      }
+
+      .BaseButton {
+          margin-right: 16px;
+      }
   }
 }

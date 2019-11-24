@@ -6,6 +6,7 @@ import get from "lodash/get";
 import toString from "lodash/toString";
 import compact from "lodash/compact";
 import {DEFAULT_NETWORK_ERROR} from "../constants/errors";
+import SecurityComponentParser from "../utils/SecurityComponentParser"
 
 export default class SecurityComponentDataService {
 
@@ -16,6 +17,11 @@ query {
     ID
     Name
     Description
+    Controls {
+        ID
+        Name
+        Description
+    }
   }
 }`;
     const responseJSONObject = await GraphQLRequestHelper.request({query});
@@ -25,10 +31,7 @@ query {
     }
 
     const components = jsonArray.map((jsonObject) => {
-      const id = toString(get(jsonObject, "ID", ""));
-      const name = toString(get(jsonObject, "Name", ""));
-      const description = toString(get(jsonObject, "Description", ""));
-      return {id, name, description};
+      return SecurityComponentParser.parseFromJSONObject(jsonObject);
     });
 
     return components;

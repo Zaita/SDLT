@@ -22,10 +22,6 @@ use SilverStripe\Security\Security;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\LiteralField;
-use SilverStripe\Forms\NumericField;
-use SilverStripe\ORM\FieldType\DBInt;
-use SilverStripe\Forms\FieldGroup;
-use SilverStripe\Forms\GridField\GridFieldDetailForm;
 
 /**
  * Class SecurityComponent
@@ -57,6 +53,21 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider
     ];
 
     /**
+     * Belongs_many_many relationship
+     * @var array
+     */
+    private static $has_many = [
+        'SelectedComponent' => SelectedComponent::class,
+    ];
+
+    /**
+     * @var array
+     */
+    private static $belongs_many_many = [
+        'DefaultsForCVATask' => Task::class
+    ];
+
+    /**
      * @param SchemaScaffolder $scaffolder The scaffolder
      * @return SchemaScaffolder
      */
@@ -70,11 +81,19 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider
                 'Description',
             ]);
 
+        // Provide relations
+        $typeScaffolder
+            ->nestedQuery('Controls')
+            ->setUsePagination(false)
+            ->end();
+
         $typeScaffolder
             ->operation(SchemaScaffolder::READ)
             ->setName('readSecurityComponents')
             ->setUsePagination(false)
             ->end();
+
+        return $typeScaffolder;
     }
 
     /**
@@ -89,47 +108,45 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * Generate a checklist of security controls in JIRA format
+     * Generate the body of a ticket in e.g. JIRA, to be pushed to its REST API.
      *
-     * @return string
+     * @see {@link IssueTrackerTicket} and {@link IssueTrackerSystem}.
+     * @return IssueTrackerTicket
      */
-    public function getChecklist()
+    public function getTicket()
     {
-        $controls = $this->Controls();
-        $list = '';
-        foreach ($controls as $control) {
-            $intro =
-            $list .= sprintf("\t* *(x) %s*\n\t\t%s\n", $control->Name, $control->Description);
+        $issue = $this->issueTrackerService->issue();
+        $list = [];
+
+        foreach ($this->Controls() as $control) {
+            /** Manually inject the {@link Control}'s ID for later reconciliation */
+            $title = sprintf('%s (#%d)', $control->Name, $control->ID);
+            $list[] = [$title, $control->Description];
         }
-        return $list;
+
+        $issue->setListItems($list, true);
+
+        return $issue;
     }
 
     /**
-     * Generate a JIRA instruction panel with a title and background colour
+     * Will be exercised when value is null.
      *
-     * @param string $introTitle defaults to 'Instruction'
-     * @param string $bgColor    hexadecimal RGB colour, defaults to FFFFCE
      * @return string
      */
-    public function getIntro($introTitle = 'Instruction', $bgColor = "FFFFCE")
+    public function getName() : string
     {
-        return sprintf(
-            "{panel:title=(on) %s|bgColor=#%s}%s{panel}\t\n*%s*\n",
-            $introTitle,
-            $bgColor,
-            $this->Description,
-            $this->Name
-        );
+        return (string) $this->getField('Name');
     }
 
     /**
-     * Generate an instruction panel followed by a checklist
+     * Will be exercised when value is null.
      *
      * @return string
      */
-    public function getJIRABody()
+    public function getDescription() : string
     {
-        return $this->getIntro() . $this->getChecklist();
+        return (string) $this->getField('Description');
     }
 
     /**
@@ -158,7 +175,9 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider
             .' the panel at the top of the JIRA story.');
 
         $fields->addFieldsToTab('Root.Main', [$name, $description]);
-        $fields->addFieldToTab('Root.Controls', $instructions);
+        $fields->addFieldToTab('Root.Controls', $instructions, 'Controls');
+
+        $fields->removeByName(['SelectedComponent', 'DefaultsForCVATask']);
 
         return $fields;
     }

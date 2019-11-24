@@ -11,6 +11,11 @@ import URLUtil from "../../utils/URLUtil";
 import SubmissionDataUtil from "../../utils/SubmissionDataUtil";
 import type {User} from "../../types/User";
 import RiskResultContainer from "../Common/RiskResultContainer";
+import {
+  DEFAULT_SRA_UNFINISHED_TASKS_MESSAGE
+} from "../../constants/values";
+import SecurityRiskAssessmentUtil from "../../utils/SecurityRiskAssessmentUtil";
+import {SubmissionExpired} from "../Common/SubmissionExpired";
 
 type Props = {
   submission: Submission | null,
@@ -59,6 +64,41 @@ class Summary extends Component<Props> {
     };
   }
 
+  unfinishedTaskSubmissionMessage()
+  {
+    const taskSubmissions = this.props.submission.taskSubmissions;
+    let unfinishedMessage = '';
+
+    const filteredTask = taskSubmissions.filter((taskSubmission)=> {
+      return taskSubmission.taskType === 'risk questionnaire'
+    });
+
+    if (filteredTask.length > 0) {
+      const riskQuestionnaireTask = filteredTask[0];
+      const isRQCompleted = (riskQuestionnaireTask.status === 'complete' || riskQuestionnaireTask.status == "approved");
+      if(riskQuestionnaireTask && !isRQCompleted) {
+        unfinishedMessage = `Please complete "${riskQuestionnaireTask.taskName}" to see the Security Risk Assessment`;
+      }
+    }
+
+    return unfinishedMessage;
+  }
+
+  hasSelectableComponents(sub)
+  {
+    let taskSubmissions = sub.taskSubmissions,
+      hasSelectableComponents = false;
+
+    taskSubmissions.forEach((submission, index) => {
+      let isComponentSelection = (submission.taskType === 'selection');
+      if(isComponentSelection) {
+        hasSelectableComponents = true;
+      }
+    });
+
+    return hasSelectableComponents;
+  }
+
   render() {
     const {submission, viewAs, user} = {...this.props};
     if (!submission) {
@@ -69,9 +109,15 @@ class Summary extends Component<Props> {
       return (
         <div className="Summary">
           <h3>
-            Submission has not been complete...
+            Questionnaire Submission has not been completed...
           </h3>
         </div>
+      );
+    }
+
+    if (submission.status === "expired") {
+      return (
+        <SubmissionExpired/>
       );
     }
 
@@ -86,6 +132,7 @@ class Summary extends Component<Props> {
       </div>
     );
   }
+
   renderSubmitterInfo(submission: Submission) {
     const submitter = submission.submitter;
 
@@ -102,20 +149,30 @@ class Summary extends Component<Props> {
 
   renderTasks(submission: Submission) {
     const taskSubmissions = submission.taskSubmissions;
+    const isSRATaskFinalised = SecurityRiskAssessmentUtil.isSRATaskFinalised(submission.taskSubmissions);
+
     if (taskSubmissions.length === 0) {
       return null;
     }
 
+    const unfinshedRQTaskMessage = this.unfinishedTaskSubmissionMessage() ? (
+      <div className="alert alert-warning">{this.unfinishedTaskSubmissionMessage()}</div>
+    ) : null;
 
     return (
       <div className="tasks">
         <h3>Tasks</h3>
+        {unfinshedRQTaskMessage}
+        {isSRATaskFinalised ? SecurityRiskAssessmentUtil.getSraIsFinalisedAlert() : null}
 
         {taskSubmissions.map(({uuid, taskName, taskType, status, approver}) => {
           let taskNameAndStatus = taskName + ' (' + prettifyStatus(status) + ')';
 
           if (status === "start") {
             taskNameAndStatus = taskName + ' (Please complete me)';
+            if(taskType === 'security risk assessment') {
+              taskNameAndStatus = taskName;
+            }
           }
 
           if ((status === "approved" || status === "denied") && approver.name) {
@@ -123,9 +180,8 @@ class Summary extends Component<Props> {
           }
 
           const {token} = {...this.props};
-          return (
-            <div key={uuid}>
-              <button className={"btn btn-link"} onClick={(event: Event) => {
+          const button = (
+            <button className={"btn btn-link"} onClick={(event: Event) => {
                 if (taskType === "selection") {
                   URLUtil.redirectToComponentSelectionSubmission(uuid, token);
                   return;
@@ -134,10 +190,20 @@ class Summary extends Component<Props> {
                   URLUtil.redirectToSecurityRiskAssessment(uuid, token);
                   return;
                 }
+
+                if (taskType === "control validation audit") {
+                  URLUtil.redirectToControlValidationAudit(uuid, token);
+                  return;
+                }
                 URLUtil.redirectToTaskSubmission(uuid, token);
               }}>
                 {taskNameAndStatus}
-              </button>
+            </button>
+          );
+
+          return (
+            <div key={uuid}>
+              {unfinshedRQTaskMessage && taskType === 'security risk assessment' ? null : button}
             </div>
           );
         })}

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * This file contains the "Questionnaire" class.
  *
@@ -31,14 +30,10 @@ use NZTA\SDLT\ModelAdmin\QuestionnaireAdmin;
 use NZTA\SDLT\Helper\Utils;
 use NZTA\SDLT\Traits\SDLTRiskCalc;
 use SilverStripe\Forms\CheckboxField;
+use SilverStripe\Forms\OptionsetField;
 
 /**
  * Class Questionnaire
- *
- * @property string Name
- * @property string KeyInformation
- *
- * @method HasManyList Questions
  *
  * This class represents multiple "kinds" of questionnaire.
  *
@@ -67,6 +62,16 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     private static $table_name = 'Questionnaire';
 
     /**
+     * @var integer
+     */
+    private static $expiry_days = 14;
+
+    /**
+     * @var integer
+     */
+    private static $min_expiry_days = 5;
+
+    /**
      * @var array
      */
     private static $db = [
@@ -74,7 +79,17 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
         'KeyInformation' => 'HTMLText',
         'Type' => "Enum('Questionnaire,RiskQuestionnaire')",
         'RiskCalculation' => "Enum('NztaApproxRepresentation,Maximum')",
-        'ApprovalIsNotRequired' => 'Boolean'
+        'ApprovalIsNotRequired' => 'Boolean',
+        'DoesSubmissionExpire' => "Enum('No,Yes', 'Yes')",
+        'ExpireAfterDays' => 'Int',
+    ];
+
+    /**
+     * @var array
+     */
+    private static $defaults = [
+        'ExpireAfterDays' => 14,
+        'DoesSubmissionExpire' => 'Yes',
     ];
 
     /**
@@ -150,25 +165,29 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
             $pageConfig->setItemsPerPage(250);
         }
 
-        $fields->insertAfter('Name', $typeField
-            ->setEmptyString('-- Select One --')
-            ->setSource(Utils::pretty_source($this, 'Type'))
+        $fields->insertAfter(
+            'Name',
+            $typeField
+                ->setEmptyString('-- Select One --')
+                ->setSource(Utils::pretty_source($this, 'Type'))
         );
 
-        $fields->insertAfter('Type', $riskField
-            ->setEmptyString('-- Select One --')
-            ->setSource(Utils::pretty_source($this, 'RiskCalculation'))
-            ->setDescription(''
-                . 'Select the most appropriate formula with which to perform'
-                . ' risk calculations.'
-            )
+        $fields->insertAfter(
+            'Type',
+            $riskField
+                ->setEmptyString('-- Select One --')
+                ->setSource(Utils::pretty_source($this, 'RiskCalculation'))
+                ->setDescription(
+                    ''
+                    . 'Select the most appropriate formula with which to perform'
+                    . ' risk calculations.'
+                )
                 ->displayIf('Type')
                 ->isEqualTo('RiskQuestionnaire')
                 ->end()
         );
 
-        if($this->isRiskType()) {
-            // flag this pillar as not requiring any approvals and not sending approval email if no tasks is generated/spawned by the use
+        if ($this->isRiskType()) {
             $fields->addFieldToTab(
                 'Root.Main',
                 CheckboxField::create(
@@ -182,6 +201,34 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
         } else {
             $fields->removeByName('ApprovalIsNotRequired');
         }
+
+        $fields->removeByName(['DoesSubmissionExpire']);
+
+        $fields->addFieldsToTab(
+            'Root.Main',
+            [
+                OptionsetField::create(
+                    'DoesSubmissionExpire',
+                    'Should Submission Expire?',
+                    $this->dbObject('DoesSubmissionExpire')->enumValues()
+                )->setHasEmptyDefault(false)
+                ->setDescription('If this is not set, this value will default '
+                    .'to "Yes" with an expiry time for 14 days'),
+
+                $fields->dataFieldByName('ExpireAfterDays')
+                    ->setTitle('Expiry Time (Days)')
+                    ->setAttribute('min', $this->config()->min_expiry_days)
+                    ->setDescription(
+                        'If this is not set, submissions will auto-expire in '
+                        .$this->config()->expiry_days
+                        .' days.'
+                    )
+                    ->displayIf('DoesSubmissionExpire')
+                    ->isEqualTo('Yes')
+                    ->end()
+            ],
+            'ApprovalIsNotRequired'
+        );
 
         return $fields;
     }
@@ -234,6 +281,14 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     public function requireDefaultRecords()
     {
         parent::requireDefaultRecords();
+
+        //if any questionnaire has ExpireAfterDays set to 0, default to the expiry_days setting
+        foreach (self::get() as $questionnaire) {
+            if ($questionnaire->getField('ExpireAfterDays') == 0) {
+                $questionnaire->setField('ExpireAfterDays', $this->config()->expiry_days);
+                $questionnaire->write();
+            }
+        }
         $this->createDefaultSDLTMemberGroups();
     }
 
@@ -318,6 +373,20 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     }
 
     /**
+     * @return Int
+     */
+    public function getExpireAfterDays() : int
+    {
+        $value = (int) $this->getField('ExpireAfterDays');
+
+        if (!$value || $value < $this->config()->min_expiry_days) {
+            $this->setField('ExpireAfterDays', $this->config()->expiry_days);
+        }
+
+        return (int) $this->getField('ExpireAfterDays');
+    }
+
+    /**
      * Deal with pre-write processes.
      *
      * @return void
@@ -325,6 +394,13 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     public function onBeforeWrite()
     {
         parent::onBeforeWrite();
+
+        //if the default submission question is not set at all, default to Yes
+        //also set the default expire time in this case
+        if ($this->DoesSubmissionExpire === null) {
+            $this->DoesSubmissionExpire = 'Yes';
+            $this->ExpireAfterDays = $this->config()->expiry_days;
+        }
 
         $this->audit();
     }
@@ -377,13 +453,14 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
 
     /**
      * get current object link in model admin
-     *
+     * @param string $action action name
      * @return string
      */
     public function getLink($action = 'edit')
     {
         $admin = QuestionnaireAdmin::create();
-        return $admin->Link('NZTA-SDLT-Model-Questionnaire/EditForm/field/NZTA-SDLT-Model-Questionnaire/item/' . $this->ID . '/' . $action);
+        return $admin->Link('NZTA-SDLT-Model-Questionnaire/EditForm/field/NZTA-SDLT-Model-Questionnaire/item/'
+        . $this->ID . '/' . $action);
     }
 
     /**
@@ -393,12 +470,28 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     {
         $result = parent::validate();
 
+        $changedFields = $this->getChangedFields();
+
         if (!$this->Name) {
             $result->addError('Please add a questionnnaire name.');
-        } else if (!$this->Type) {
+        } elseif (!$this->Type) {
             $result->addError('Please select a questionnnaire type.');
-        } else if ($this->Type === 'RiskQuestionnaire' && !$this->RiskCalculation) {
+        } elseif ($this->Type === 'RiskQuestionnaire' && !$this->RiskCalculation) {
             $result->addError('Please select a risk-calculation type.');
+        }
+
+        if (isset($changedFields['ExpireAfterDays']['after'])) {
+            $newExpireAfterDays = $changedFields['ExpireAfterDays']['after'];
+            $doesSubmissionExpire = ($this->DoesSubmissionExpire === 'Yes');
+            $newValueIsInvalid = $newExpireAfterDays < $this->config()->min_expiry_days;
+
+            if ($doesSubmissionExpire && $newValueIsInvalid) {
+                $result->addError(
+                    'Expiry time should be greater than '
+                    . $this->config()->min_expiry_days
+                    . ' days.'
+                );
+            }
         }
 
         return $result;

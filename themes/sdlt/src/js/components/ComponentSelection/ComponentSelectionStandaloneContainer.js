@@ -7,8 +7,9 @@ import {Dispatch} from "redux";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import type {User} from "../../types/User";
+import type {SiteConfig} from "../../types/SiteConfig";
 import {loadCurrentUser} from "../../actions/user";
-import {loadSiteTitle} from "../../actions/siteConfig";
+import {loadSiteConfig} from "../../actions/siteConfig";
 import type {JiraTicket, SecurityComponent} from "../../types/SecurityComponent";
 import ComponentSelection from "./ComponentSelection";
 import {
@@ -23,7 +24,7 @@ import DarkButton from "../Button/DarkButton";
 
 const mapStateToProps = (state: RootState) => {
   return {
-    siteTitle: state.siteConfigState.siteTitle,
+    siteConfig: state.siteConfigState.siteConfig,
     currentUser: state.currentUserState.user,
     availableComponents: state.componentSelectionState.availableComponents,
     selectedComponents: state.componentSelectionState.selectedComponents,
@@ -36,7 +37,7 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
   return {
     dispatchLoadDataAction() {
       dispatch(loadCurrentUser());
-      dispatch(loadSiteTitle());
+      dispatch(loadSiteConfig());
       dispatch(loadAvailableComponents())
     },
     dispatchAddComponentAction(id: string) {
@@ -51,8 +52,13 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
   };
 };
 
-type Props = {
-  siteTitle?: string,
+type OwnProps = {
+  taskId: string,
+  componentTarget: string,
+}
+
+type ReduxProps = {
+  siteConfig?: SiteConfig | null,
   currentUser?: User | null,
   availableComponents?: Array<SecurityComponent>,
   selectedComponents?: Array<SecurityComponent>,
@@ -64,6 +70,8 @@ type Props = {
   dispatchRemoveComponentAction?: (id: string) => void,
 }
 
+type Props = OwnProps & ReduxProps;
+
 class ComponentSelectionStandaloneContainer extends Component<Props> {
 
   componentDidMount() {
@@ -73,7 +81,7 @@ class ComponentSelectionStandaloneContainer extends Component<Props> {
 
   render() {
     const {
-      siteTitle,
+      siteConfig,
       currentUser,
       availableComponents,
       selectedComponents,
@@ -81,10 +89,11 @@ class ComponentSelectionStandaloneContainer extends Component<Props> {
       dispatchRemoveComponentAction,
       dispatchCreateJIRATicketsAction,
       viewMode,
-      jiraTickets
+      jiraTickets,
+      componentTarget
     } = {...this.props};
 
-    if (!currentUser) {
+    if (!currentUser || !siteConfig) {
       return null;
     }
 
@@ -95,6 +104,8 @@ class ComponentSelectionStandaloneContainer extends Component<Props> {
           <ComponentSelection
             availableComponents={availableComponents}
             selectedComponents={selectedComponents}
+            componentTarget={componentTarget}
+            isStandaloneTask={true}
             createJIRATickets={(jiraKey) => {
               dispatchCreateJIRATicketsAction(jiraKey);
             }}
@@ -125,9 +136,14 @@ class ComponentSelectionStandaloneContainer extends Component<Props> {
 
     return (
       <div className="ComponentSelectionContainer">
-        <Header title="Component Selection" subtitle={siteTitle} username={currentUser.name}/>
+        <Header
+          title="Component Selection"
+          subtitle={siteConfig.siteTitle}
+          logopath={siteConfig.logoPath}
+          username={currentUser.name}
+        />
         {body}
-        <Footer/>
+        <Footer footerCopyrightText={siteConfig.footerCopyrightText}/>
       </div>
     );
   }

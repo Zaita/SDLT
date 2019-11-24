@@ -11,14 +11,17 @@ import type {Task, TaskSubmission} from "../types/Task";
 import ErrorUtil from "../utils/ErrorUtil";
 import type {
   LoadTaskSubmissionAction,
-  MarkQuestionsNotApplicableInTaskSubmissionAction, MoveToQuestionInTaskSubmissionAction,
+  MarkQuestionsNotApplicableInTaskSubmissionAction,
+  MoveToQuestionInTaskSubmissionAction,
   PutDataInTaskSubmissionAction,
 } from "./ActionType";
+import {loadSelectedComponents} from "./componentSelection";
 import type {User} from "../types/User";
 import type {RootState} from "../store/RootState";
+import URLUtil from "../utils/URLUtil";
 
-export function loadTaskSubmission(args: {uuid: string, secureToken?: string}): ThunkAction {
-  const {uuid, secureToken} = {...args};
+export function loadTaskSubmission(args: {uuid: string, secureToken?: string, type?: string}): ThunkAction {
+  const {uuid, secureToken, type} = {...args};
 
   return async (dispatch) => {
     try {
@@ -30,7 +33,12 @@ export function loadTaskSubmission(args: {uuid: string, secureToken?: string}): 
         type: ActionType.TASK.LOAD_TASK_SUBMISSION,
         payload,
       };
+
       await dispatch(action);
+
+      if (type === "componentSelection") {
+        await dispatch(loadSelectedComponents(payload));
+      }
     }
     catch (error) {
       ErrorUtil.displayError(error);
@@ -163,6 +171,26 @@ export function saveAnsweredQuestionInTaskSubmission(
   };
 }
 
+/**
+ * Obtain selected security controls from rootState and save to task submission
+ *
+ * @param {*} selectedControls
+ */
+export function saveCVASelectedControls(selectedControls: object): ThunkAction {
+  return async (dispatch, getState) => {
+    const rootState: RootState = getState();
+    const taskSubmission = rootState.taskSubmissionState.taskSubmission;
+    if (!taskSubmission) {
+      return;
+    }
+
+    //@TODO: Complete graphql submission endpoint
+  }
+}
+
+/**
+ * Deals to both "JIRA Cloud" (remote) and SDLT (local) component submissions.
+ */
 export function saveSelectedComponents(jiraKey: string): ThunkAction {
   return async (dispatch, getState) => {
     const rootState: RootState = getState();
@@ -171,19 +199,27 @@ export function saveSelectedComponents(jiraKey: string): ThunkAction {
       return;
     }
 
-    const componentIDs = rootState.componentSelectionState.selectedComponents.map((component) => {
-      return component.id
+    await dispatch({ type: ActionType.TASK.SAVE_SELECTED_COMPONENT_REQUEST});
+
+    const components = rootState.componentSelectionState.selectedComponents.map((component) => {
+      return {
+        SecurityComponentID : component.id,
+        ProductAspect: component.productAspect,
+        TaskSubmissionID: taskSubmission.id
+      }
     });
 
     try {
       await TaskDataService.updateTaskSubmissionWithSelectedComponents({
         jiraKey,
-        componentIDs,
+        components,
         uuid: taskSubmission.uuid,
         csrfToken: await CSRFTokenService.getCSRFToken()
       });
       await dispatch(completeTaskSubmission());
+      await dispatch({ type: ActionType.TASK.SAVE_SELECTED_COMPONENT_SUCCESS});
     } catch(error) {
+      await dispatch({ type: ActionType.TASK.SAVE_SELECTED_COMPONENT_FAILURE});
       ErrorUtil.displayError(error);
     }
   };
@@ -192,9 +228,11 @@ export function saveSelectedComponents(jiraKey: string): ThunkAction {
 export function completeTaskSubmission(args: {
   secureToken?: string,
   bypassNetwork?: boolean,
-  result?: string
+  result?: string,
+  taskSubmissionUUID?: string | null,
+  questionnaireUUID?: string | null,
 } = {}): ThunkAction {
-  const {secureToken, bypassNetwork, result} = {...args};
+  const {secureToken, bypassNetwork, result, taskSubmissionUUID, questionnaireUUID} = {...args};
 
   return async (dispatch, getState) => {
     const getTaskSubmission = () => {
@@ -206,13 +244,16 @@ export function completeTaskSubmission(args: {
         const csrfToken = await CSRFTokenService.getCSRFToken();
 
         const {uuid} = await TaskDataService.completeTaskSubmission({
-          uuid: getTaskSubmission().uuid,
+          uuid: (taskSubmissionUUID === undefined) ? getTaskSubmission().uuid : taskSubmissionUUID,
           result: result || "",
           secureToken: secureToken,
           csrfToken
         });
 
         await dispatch(loadTaskSubmission({uuid, secureToken}));
+        if(questionnaireUUID !== undefined) {
+          URLUtil.redirectToQuestionnaireSummary(questionnaireUUID, secureToken)
+        }
       } catch (error) {
         ErrorUtil.displayError(error);
       }
@@ -277,9 +318,10 @@ export function moveToPreviousQuestionInTaskSubmission(
 export function editCompletedTaskSubmission(
   args: {
     secureToken?: string,
-    bypassNetwork?: boolean
+    bypassNetwork?: boolean,
+    type?: string,
   } = {}): ThunkAction {
-  const {secureToken, bypassNetwork} = {...args};
+  const {secureToken, bypassNetwork, type} = {...args};
 
   return async (dispatch, getState) => {
     const taskSubmission: TaskSubmission = getState().taskSubmissionState.taskSubmission;
@@ -295,6 +337,11 @@ export function editCompletedTaskSubmission(
           secureToken: secureToken,
         });
         await dispatch(loadTaskSubmission({uuid, secureToken}));
+
+        if (type === "componentSelection") {
+          await dispatch(loadSelectedComponents(taskSubmission));
+        }
+
       } catch (error) {
         ErrorUtil.displayError(error);
       }

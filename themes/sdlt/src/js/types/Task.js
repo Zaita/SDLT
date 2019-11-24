@@ -35,7 +35,8 @@ export type TaskSubmission = {
   approver: User,
   lockWhenComplete: boolean,
   isTaskApprovalRequired: boolean,
-  isCurrentUserAnApprover: boolean
+  isCurrentUserAnApprover: boolean,
+  productAspects: Array<ProductAspect>,
 };
 
 export type SecurityRiskAssessment = {
@@ -46,8 +47,20 @@ export type SecurityRiskAssessment = {
 };
 
 export type LikelihoodThreshold = {
-  value: string,
+  value: number,
   operator: string,
   colour: string,
   name:string
+}
+
+export type ProductAspect = {
+  id: string,
+  uuid: value
+};
+
+export type RiskRatingThreshold = {
+  riskRating: string
+  colour: string,
+  likelihood: string,
+  impact: string
 }

@@ -5,7 +5,8 @@ import uniq from "lodash/uniq";
 import type {
   AddSelectedComponentAction,
   LoadAvailableComponentsAction,
-  RemoveSelectedComponentAction
+  RemoveSelectedComponentAction,
+  LoadSelectedComponentsAction
 } from "./ActionType";
 import ActionType from "./ActionType";
 import type {RootState} from "../store/RootState";
@@ -36,21 +37,21 @@ export function loadAvailableComponents(): ThunkAction {
   };
 }
 
-export function addSelectedComponent(id: string): ThunkAction {
+export function addSelectedComponent(id: string, productAspect: string): ThunkAction {
   return async (dispatch) => {
     const action: AddSelectedComponentAction = {
       type: ActionType.COMPONENT_SELECTION.ADD_SELECTED_COMPONENT,
-      payload: id
+      payload: {"id": id, "productAspect": productAspect}
     };
     await dispatch(action);
   }
 }
 
-export function removeSelectedComponent(id: string): ThunkAction {
+export function removeSelectedComponent(id: string, productAspect: string): ThunkAction {
   return async (dispatch) => {
     const action: RemoveSelectedComponentAction = {
       type: ActionType.COMPONENT_SELECTION.REMOVE_SELECTED_COMPONENT,
-      payload: id
+      payload: {"id": id, "productAspect": productAspect}
     };
     await dispatch(action);
   }
@@ -97,6 +98,23 @@ export function setJiraTickets(tickets: Array<JiraTicket>): ThunkAction {
     const action: SetJiraTicketsAction = {
       type: ActionType.COMPONENT_SELECTION.SET_JIRA_TICKETS,
       payload: tickets
+    };
+    await dispatch(action);
+  };
+}
+
+export function loadSelectedComponents(taskSubmission): ThunkAction {
+  const selectedComponents = taskSubmission.selectedComponents;
+
+  const savedComponent = selectedComponents.map((component) => {
+    component.isSaved = true;
+    return component;
+  });
+
+  return async (dispatch) => {
+    const action: LoadSelectedComponentsAction = {
+      type: ActionType.COMPONENT_SELECTION.LOAD_SELECTED_COMPONENTS,
+      payload: savedComponent
     };
     await dispatch(action);
   };

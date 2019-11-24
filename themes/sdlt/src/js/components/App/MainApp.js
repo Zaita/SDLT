@@ -1,6 +1,7 @@
 // @flow
 
 import React, {Component} from "react";
+import {connect} from "react-redux";
 import {Route, Switch} from "react-router-dom";
 import HomeContainer from "../Home/HomeContainer";
 import StartContainer from "../Questionnaire/StartContainer";
@@ -14,13 +15,32 @@ import ComponentSelectionContainer from "../ComponentSelection/ComponentSelectio
 import MySubmissionList from "../QuestionnaireSubmissionList/MySubmissionList";
 import AwaitingApprovalList from "../QuestionnaireSubmissionList/AwaitingApprovalList";
 import MyProductList from "../QuestionnaireSubmissionList/MyProductList";
-import SecurityRiskAssessmentContainer from "../SecurityRiskAssessment/SecurityRiskAssessmentContainer.js"
+import SecurityRiskAssessmentContainer from "../SecurityRiskAssessment/SecurityRiskAssessmentContainer.js";
+import ControlValidationAuditContainer from "../ControlValidationAudit/ControlValidationAuditContainer.js";
 import {parse} from "query-string";
+import { Loading } from "../Common/Loading.js";
+import { withRouter } from 'react-router-dom';
+import _ from "lodash";
+
+const mapStateToProps = (state: RootState) => {
+  return {
+    loading: _.chain(state.loadingState).values().some(val => val).value()
+  };
+};
+
+const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
+  return {};
+};
+
+type Props = {
+  loading: boolean
+};
 
 class MainApp extends Component<*> {
   render() {
     return (
       <div>
+        {this.props.loading && <Loading/>}
         <main>
           <Switch>
             <Route exact path='/'>
@@ -97,10 +117,22 @@ class MainApp extends Component<*> {
                 );
               }}
             </Route>
-            <Route path='/component-selection/standalone'>
-              <div className="gray-bg">
-                <ComponentSelectionStandaloneContainer/>
-              </div>
+            <Route path='/component-selection/standalone/:taskId'>
+              {({match, location}) => {
+                let componentTarget = '';
+                if (location.search) {
+                  const queryString = parse(location.search);
+                  componentTarget = queryString.componentTarget;
+                }
+                return (
+                  <div className="gray-bg">
+                    <ComponentSelectionStandaloneContainer
+                    taskId={match.params.taskId}
+                    componentTarget={componentTarget}
+                    />
+                  </div>
+                );
+              }}
             </Route>
             <Route path='/component-selection/submission/:uuid'>
               {({match, location}) => {
@@ -112,6 +144,21 @@ class MainApp extends Component<*> {
                 return (
                   <div className="gray-bg">
                     <ComponentSelectionContainer uuid={match.params.uuid} secureToken={secureToken}/>
+                  </div>
+                );
+              }}
+            </Route>
+
+            <Route path='/control-validation-audit/submission/:uuid'>
+              {({match, location}) => {
+                let secureToken = '';
+                if (location.search) {
+                  const queryString = parse(location.search);
+                  secureToken = queryString.token;
+                }
+                return (
+                  <div className="gray-bg">
+                    <ControlValidationAuditContainer uuid={match.params.uuid} secureToken={secureToken}/>
                   </div>
                 );
               }}
@@ -162,9 +209,12 @@ class MainApp extends Component<*> {
           </Switch>
         </main>
       </div>
-
     );
   }
 }
-
-export default MainApp;
+export default withRouter(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps,
+  )(MainApp)
+);

@@ -25,16 +25,22 @@ use SilverStripe\Forms\GridField\GridFieldEditButton;
 use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
+use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
+use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 
 /**
  * Class SecurityControl
  *
- * @property string Name
- * @property string Description
- * @property SecurityComponent Component
  */
-class SecurityControl extends DataObject
+class SecurityControl extends DataObject implements ScaffoldingProvider
 {
+    /**
+     * @var string
+     */
+    const CTL_STATUS_1 = 'Realised';
+    const CTL_STATUS_2 = 'Intended';
+    const CTL_STATUS_3 = 'Not Applicable';
+
     /**
      * @var string
      */
@@ -45,7 +51,7 @@ class SecurityControl extends DataObject
      */
     private static $db = [
         'Name' => 'Varchar(255)',
-        'Description' => 'Text',
+        'Description' => 'Text'
     ];
 
     /**
@@ -61,6 +67,24 @@ class SecurityControl extends DataObject
     private static $belongs_many_many = [
         'SecurityComponent' => SecurityComponent::class
     ];
+
+    /**
+     * @param SchemaScaffolder $scaffolder Scaffolder
+     * @return SchemaScaffolder
+     */
+    public function provideGraphQLScaffolding(SchemaScaffolder $scaffolder)
+    {
+        // Provide entity type
+        $typeScaffolder = $scaffolder
+            ->type(self::class)
+            ->addFields([
+                'ID',
+                'Name',
+                'Description',
+            ]);
+
+        return $typeScaffolder;
+    }
 
     /**
      * @return FieldList
@@ -122,8 +146,7 @@ class SecurityControl extends DataObject
                         'that is unique to a Control.</p>'
                     ),
                     $gridField
-                ])
-            );
+                ]));
         }
 
         return $fields;
@@ -136,11 +159,13 @@ class SecurityControl extends DataObject
      */
     public function getParentComponentID()
     {
-        $req = Controller::curr()->getRequest();
-        $reqParts = explode('NZTA-SDLT-Model-SecurityComponent/item/', $req->getUrl());
+        if (Controller::has_curr()) {
+            $req = Controller::curr()->getRequest();
+            $reqParts = explode('NZTA-SDLT-Model-SecurityComponent/item/', $req->getUrl());
 
-        if (!empty($reqParts) && isset($reqParts[1])) {
-            return (int) strtok($reqParts[1], '/');
+            if (!empty($reqParts) && isset($reqParts[1])) {
+                return (int) strtok($reqParts[1], '/');
+            }
         }
 
         return 0;

@@ -18,6 +18,7 @@ import type {Question} from "../../types/Questionnaire";
 const mapStateToProps = (state: RootState) => {
   return {
     submissionState: state.questionnaireState.submissionState,
+    loadingState: state.loadingState
   };
 };
 
@@ -44,6 +45,7 @@ type reduxProps = {
   dispatchLoadSubmissionAction: (submissionHash: string) => void,
   dispatchSaveAnsweredQuestionAction: (answeredQuestion: Question) => void,
   dispatchMoveToPreviousQuestionAction: (targetQuestion: Question) => void,
+  loadingState: object<*>
 };
 
 type Props = ownProps & reduxProps;
@@ -56,23 +58,27 @@ class QuestionnaireContainer extends Component<Props> {
   }
 
   render() {
-    const {dispatchSaveAnsweredQuestionAction, dispatchMoveToPreviousQuestionAction} = {...this.props};
-    const {title, siteTitle, user, submission} = {...this.props.submissionState};
+    const {dispatchSaveAnsweredQuestionAction, dispatchMoveToPreviousQuestionAction, loadingState} = {...this.props};
+    const {title, siteConfig, user, submission} = {...this.props.submissionState};
 
-    if (!user || !submission) {
+    if (!user || !submission || !siteConfig) {
+      return null;
+    }
+
+    if (loadingState['QUESTIONNAIRE/LOAD_QUESTIONNAIRE_SUBMISSION_STATE']) {
       return null;
     }
 
     if (submission.status !== "in_progress") {
       return (
         <div className="QuestionnaireContainer">
-          <Header title={title} subtitle={siteTitle} username={user.name}/>
-          <div className="Questionnaire">
-            <h1>
+          <Header title={title} subtitle={siteConfig.siteTitle} username={user.name} logopath={siteConfig.logoPath}/>
+          <div className="questionnaire-message">
+            <h3>
               The questionnaire is not in progress...
-            </h1>
+            </h3>
           </div>
-          <Footer/>
+          <Footer footerCopyrightText={siteConfig.footerCopyrightText}/>
         </div>
       );
     }
@@ -80,8 +86,7 @@ class QuestionnaireContainer extends Component<Props> {
 
     return (
       <div className="QuestionnaireContainer">
-        <Header title={title} subtitle={siteTitle} username={user.name} />
-
+        <Header title={title} subtitle={siteConfig.siteTitle} logopath={siteConfig.logoPath} username={user.name} />
         <Questionnaire
           questions={submission.questions}
           saveAnsweredQuestion={(answeredQuestion) => {
@@ -91,8 +96,7 @@ class QuestionnaireContainer extends Component<Props> {
             dispatchMoveToPreviousQuestionAction(targetQuestion);
           }}
         />
-
-        <Footer/>
+        <Footer footerCopyrightText={siteConfig.footerCopyrightText}/>
       </div>
     );
   }

@@ -4,23 +4,23 @@ NZTA\SDLT\Model\ImpactThreshold:
     Value: 10
     Colour: 'FFFFFF'
     Operator: '<='
+  minor:
+    Name: 'Minor'
+    Value: 40
+    Colour: 'CCCCCC'
+    Operator: '<'
   moderate:
     Name: 'Moderate'
-    Value: 50
-    Colour: 'CCCCCC'
-    Operator: '>'
+    Value: 75
+    Colour: 'FFCC00'
+    Operator: '<'
   severe:
     Name: 'Severe'
-    Value: 100
+    Value: 90
     Colour: 'FFCC00'
-    Operator: '>'
-  severe:
-    Name: 'Severe'
-    Value: 200
-    Colour: 'FFCC00'
-    Operator: '>'
-  catastrophic:
-    Name: 'Catastrophic'
-    Value: 201
+    Operator: '<'
+  extreme:
+    Name: 'Extreme'
+    Value: 90
     Colour: 'FFCC00'
     Operator: '>='

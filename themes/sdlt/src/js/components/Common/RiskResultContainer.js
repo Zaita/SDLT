@@ -1,4 +1,5 @@
 // @flow
+// this file is used on both Risk questionnaire and task
 import React, {Component} from "react";
 import type {RiskResult} from "../../types/Questionnaire";
 

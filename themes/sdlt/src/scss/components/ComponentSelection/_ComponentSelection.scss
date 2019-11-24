@@ -25,9 +25,10 @@
     padding-bottom: 0;
 
     .search {
-      font-size: 18px;
-      max-width: 100%;
+      font-size: 14px;
+      width: 100%;
       margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
       display: flex;
       align-items: center;
 
@@ -56,9 +57,9 @@
 
     .heading {
       font-size: 24px;
-      font-weight: 300;
       color: $blue;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
+      font-weight: bold;
     }
 
     .selected-components {
@@ -67,6 +68,13 @@
       margin-bottom: 1.5rem;
 
       @import "ComponentInfo";
+
+      h4 {
+        font-weight: 600;
+        color: $blue;
+        font-size: 20px;
+        padding-bottom: 15px;
+      }
     }
 
     .buttons {

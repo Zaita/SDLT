@@ -14,34 +14,37 @@
 namespace NZTA\SDLT\Model;
 
 use GraphQL\Type\Definition\ResolveInfo;
+use NZTA\SDLT\Form\GridField\GridFieldCustomEditAction;
 use NZTA\SDLT\GraphQL\GraphQLAuthFailure;
-use SilverStripe\Core\Convert;
+use NZTA\SDLT\Helper\Utils;
+use NZTA\SDLT\ModelAdmin\QuestionnaireAdmin;
+use NZTA\SDLT\Model\LikelihoodThreshold;
+use NZTA\SDLT\Model\RiskRating;
+use NZTA\SDLT\Model\TaskSubmission;
+use NZTA\SDLT\Traits\SDLTModelPermissions;
+use NZTA\SDLT\Traits\SDLTRiskCalc;
+use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
+use SilverStripe\Forms\GridField\GridFieldConfig_Base;
+use SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor;
+use SilverStripe\Forms\GridField\GridFieldDataColumns;
+use SilverStripe\Forms\GridField\GridFieldPaginator;
+use SilverStripe\Forms\GridField\GridField_ActionMenu;
+use SilverStripe\Forms\ListboxField;
+use SilverStripe\Forms\LiteralField;
 use SilverStripe\GraphQL\OperationResolver;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\HasManyList;
 use SilverStripe\Security\Group;
 use SilverStripe\Security\Security;
-use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
-use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
-use SilverStripe\Forms\GridField\GridFieldPaginator;
-use NZTA\SDLT\Traits\SDLTModelPermissions;
-use SilverStripe\ORM\ArrayList;
-use SilverStripe\Forms\GridField\GridFieldConfig_Base;
-use SilverStripe\Forms\GridField\GridField_ActionMenu;
-use SilverStripe\Forms\GridField\GridField;
-use SilverStripe\Forms\GridField\GridFieldDataColumns;
-use NZTA\SDLT\Form\GridField\GridFieldCustomEditAction;
-use NZTA\SDLT\ModelAdmin\QuestionnaireAdmin;
-use SilverStripe\Forms\LiteralField;
 use SilverStripe\View\ArrayData;
-use NZTA\SDLT\Helper\Utils;
-use NZTA\SDLT\Traits\SDLTRiskCalc;
-use NZTA\SDLT\Model\TaskSubmission;
-use NZTA\SDLT\Model\LikelihoodThreshold;
-use NZTA\SDLT\Model\RiskRating;
+use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
+use SilverStripe\Core\Convert;
 
 /**
  * Class Task
@@ -71,17 +74,22 @@ class Task extends DataObject implements ScaffoldingProvider
         'Name' => 'Varchar(255)',
         'DisplayOnHomePage'=> 'Boolean',
         'KeyInformation' => 'HTMLText',
-        'TaskType' => 'Enum(array("questionnaire", "selection", "risk questionnaire", "security risk assessment"))',
+        'TaskType' => 'Enum(array("questionnaire", "selection", "risk questionnaire", "security risk assessment", "control validation audit"))',
         'LockAnswersWhenComplete' => 'Boolean',
         'IsApprovalRequired' => 'Boolean',
         'RiskCalculation' => "Enum('NztaApproxRepresentation,Maximum')",
+        'ComponentTarget' => "Enum('JIRA Cloud,Local')",
     ];
 
     /**
      * @var array
      */
     private static $has_one = [
-        'ApprovalGroup' => Group::class
+        'ApprovalGroup' => Group::class,
+
+        //this is a task of type "risk questionnaire" to grab question data from
+        //it must be filtered to RiskQuestionnaires only, and is required
+        'RiskQuestionnaireDataSource' => Task::class
     ];
 
     /**
@@ -100,6 +108,13 @@ class Task extends DataObject implements ScaffoldingProvider
     private static $belongs_many_many = [
         'Questionnaires' => Questionnaire::class,
         'AnswerActionFields' => AnswerActionField::class
+    ];
+
+    /**
+     * @var array
+     */
+    private static $many_many = [
+        'DefaultSecurityComponents' => SecurityComponent::class
     ];
 
     /**
@@ -141,18 +156,30 @@ class Task extends DataObject implements ScaffoldingProvider
         $fields->removeByName([
             'TaskType',
             'RiskCalculation',
+            'RiskQuestionnaireDataSourceID',
+            'LikelihoodThresholds',
+            'RiskRatings',
+            'DefaultSecurityComponents',
+            'Questionnaires',
+            'AnswerActionFields'
         ]);
 
+        $fields->insertAfter(
+            'Name',
+            $typeField
+            ->setEmptyString('-- Select One --')
+            ->setSource(Utils::pretty_source($this, 'TaskType'))
+        );
+
         // If TaskType doesn't require Questions, hide the "Questions" tab
-        if ($this->isSelectionType() || $this->isSRAType()) {
-            // A "selection" type, has no Questions
-            $fields->removeByName('Questions');
+        if ($this->isSelectionType() || $this->isSRAType() || $this->isControlValidationAudit()) {
+            $fields->removeByName(['Questions']);
         } else {
             /* @var GridField $questions */
-            $questions = $fields->dataFieldByName('Questions');
+            $questionsGridField = $fields->dataFieldByName('Questions');
 
-            if ($questions) {
-                $config = $questions->getConfig();
+            if ($questionsGridField) {
+                $config = $questionsGridField->getConfig();
                 $config
                     ->addComponent(new GridFieldOrderableRows('SortOrder'))
                     ->removeComponentsByType(GridFieldAddExistingAutocompleter::class)
@@ -161,31 +188,30 @@ class Task extends DataObject implements ScaffoldingProvider
             }
         }
 
-        if ($this->TaskType === 'risk questionnaire') {
-            // Restrict relations to risk-type Questionnaire records
-            $rqGrid = $fields->findOrMakeTab('Root.Questionnaires.Questionnaires');
-            $rqGrid->getConfig()->getComponentByType(GridFieldAddExistingAutocompleter::class)
-                ->setSearchList(Questionnaire::get()->each(function ($q) {
-                    return $q->isRiskType();
-                }))
-                ->setPlaceholderText('Find Risk Questionnaires by Name');
-        }
-
-        $fields->insertAfter('Name', $typeField
-            ->setEmptyString('-- Select One --')
-            ->setSource(Utils::pretty_source($this, 'TaskType'))
-        );
-
-        $fields->insertAfter('TaskType', $riskField
+        $fields->insertAfter(
+            'TaskType',
+            $riskField
             ->setEmptyString('-- Select One --')
             ->setSource(Utils::pretty_source($this, 'RiskCalculation'))
-            ->setDescription(''
+            ->setDescription(
+                ''
                 . 'Select the most appropriate formula with which to perform'
                 . ' risk calculations.'
             )
                 ->displayIf('TaskType')
                 ->isEqualTo('risk questionnaire')
                 ->end()
+        );
+
+        $fields->insertAfter(
+            'TaskType',
+            DropdownField::create('ComponentTarget', 'Target')
+            ->setEmptyString('-- Select One --')
+            ->setSource(Utils::pretty_source($this, 'ComponentTarget'))
+            ->setDescription('Select the most appropriate target for selections.')
+            ->displayIf('TaskType')
+            ->isEqualTo('selection')
+            ->end()
         );
 
         $fields->addFieldsToTab(
@@ -200,11 +226,12 @@ class Task extends DataObject implements ScaffoldingProvider
             ]
         );
 
+        // add used on tab for task
         if ($this->getUsedOnData()->Count()) {
-          $fields->addFieldToTab(
-              'Root.UsedOn',
-              $this->getUsedOnGridField()
-          );
+            $fields->addFieldToTab(
+                'Root.UsedOn',
+                $this->getUsedOnGridField()
+            );
         } else {
             $fields->addFieldToTab(
                 'Root.UsedOn',
@@ -215,20 +242,72 @@ class Task extends DataObject implements ScaffoldingProvider
             );
         }
 
-        if (!$this->isSRAType()) {
-            $fields->removeByName(['LikelihoodThresholds', 'RiskRatings']);
-        } else {
-            $fields->dataFieldByName('LikelihoodThresholds')
-                ->getConfig()
-                ->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
-            $fields->dataFieldByName('RiskRatings')
-                ->setTitle('Risk Rating Matrix')
-                ->getConfig()
-                ->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
-            $fields->findTab('Root.RiskRatings')->setTitle('Risk Rating Matrix');
+        // if task type is SRA then add dropdown field for "Data source for risk questionnaire"
+        // if no risk questionnaire task type exist then add warning message
+        if ($this->isSRAType()) {
+            $riskQuestionnaires = Task::get()->filter('TaskType', 'risk questionnaire');
+
+            if (count($riskQuestionnaires)) {
+                $fields->insertAfter(
+                    'Name',
+                    DropdownField::create(
+                        'RiskQuestionnaireDataSourceID',
+                        'Data source for risk questionnaire',
+                        $riskQuestionnaires
+                    )
+                );
+            } else {
+                $fields->insertAfter(
+                    'Name',
+                    LiteralField::create(
+                        'RiskQuestionnaireDataSourceID_Warning',
+                        sprintf(
+                            "<div class=\"alert alert-warning\">%s</div>",
+                            'Please create a risk questionnaire task before '
+                            .' creating a security risk assessment task'
+                        )
+                    )
+                );
+            }
+
+            $fields->addFieldsToTab('Root.LikelihoodThresholds', [
+                LiteralField::create(
+                    'LikelihoodThresholdsNotice',
+                    sprintf(
+                        "<div class=\"alert alert-warning\">%s</div>",
+                        'The thresholds entered here are sorted by value in '
+                        . 'ascending order. The frontend matrix table performs'
+                        . ' a lookup starting with the top-most item and makes '
+                        . 'its way down the list. The first threshold which '
+                        . 'meets the conditions is displayed on the page.'
+                    )
+                ),
+                $likelihoodThresholdsField = GridField::create(
+                    'LikelihoodThresholds',
+                    'Likelihood Thresholds',
+                    $this->LikelihoodThresholds(),
+                    GridFieldConfig_RecordEditor::create()
+                )
+            ]);
+
+            $fields->addFieldToTab(
+                'Root.RiskRatingsMatrix',
+                GridField::create(
+                    'RiskRatings',
+                    'Risk Rating Matrix',
+                    $this->RiskRatings(),
+                    GridFieldConfig_RecordEditor::create()
+                )
+            );
+
+            $fields->removeByName([
+                'TaskApproval',
+            ]);
         }
 
-        $fields->removeByName(['Questionnaires', 'AnswerActionFields']);
+        if ($this->isControlValidationAudit()) {
+            $this->getCVA_CMSFields($fields);
+        }
 
         return $fields;
     }
@@ -274,7 +353,15 @@ class Task extends DataObject implements ScaffoldingProvider
      */
     public function getQuestionsData()
     {
-        $questions = $this->Questions();
+        $questions = null;
+        if ($this->isSRAType()) {
+            //RiskQuestionnaireDataSourceID
+            $questionnaire = $this->RiskQuestionnaireDataSource();
+            $questions = $questionnaire->Questions();
+        } else {
+            $questions = $this->Questions();
+        }
+
         $questionsData = [];
 
         foreach ($questions as $question) {
@@ -303,12 +390,12 @@ class Task extends DataObject implements ScaffoldingProvider
 
         $thresholdData = [];
 
-        foreach ($this->LikelihoodThresholds() as $threshold) {
+        foreach ($this->LikelihoodThresholds()->sort('Value ASC, Operator ASC') as $threshold) {
             $thresholdData[] = [
-                'Name' => $threshold->Name,
-                'Value' => $threshold->Value,
-                'Colour' => $threshold->Colour,
-                'Operator' => $threshold->Operator,
+                'name' => $threshold->Name,
+                'value' => $threshold->Value,
+                'color' => $threshold->Colour,
+                'operator' => $threshold->Operator,
             ];
         }
 
@@ -316,6 +403,68 @@ class Task extends DataObject implements ScaffoldingProvider
     }
 
     /**
+     * @return array RiskRatings
+     */
+    public function getRiskRatingsData()
+    {
+        if (!$this->isSRAType()) {
+            return [];
+        }
+
+        $thresholdData = [];
+
+        foreach ($this->RiskRatings() as $threshold) {
+            $thresholdData[] = [
+                'riskRating' => $threshold->RiskRating,
+                'impact' => $threshold->Impact,
+                'color' => $threshold->Colour,
+                'likelihood' => $threshold->Likelihood()->Name,
+            ];
+        }
+
+        return $thresholdData;
+    }
+
+    /**
+     * @return array RiskRatings matrix
+     */
+    public function getRiskRatingMatix()
+    {
+        $impactRatings = ImpactThreshold::get()->column('Name');
+        $likelihoods = array_column($this->getLikelihoodRatingsData(), 'name');
+        $riskRatings = $this->getRiskRatingsData();
+
+        $tableHeader = array_merge(['Likelihood'], $impactRatings);
+        $tableRows = [];
+
+        foreach ($likelihoods as $likelihood) {
+            $tableColumns = [];
+            $tableColumns[] = ['name' => $likelihood, 'color'=> '#ffffff'];
+
+            foreach ($impactRatings as $impact) {
+                $filterRiskRating = array_filter($riskRatings, function ($riskRating) use ($impact, $likelihood) {
+                    return $riskRating['impact'] == $impact && $riskRating['likelihood'] == $likelihood;
+                });
+
+                if ($filterRiskRating && $riskRating = array_pop($filterRiskRating)) {
+                    $tableColumns[] = [
+                        'name' => $riskRating['riskRating'],
+                        'color' => '#' . $riskRating['color'],
+                    ];
+                } else {
+                    $tableColumns[] = [
+                        'name' => '',
+                        'color' => '#ffffff',
+                    ];
+                }
+            }
+            $tableRows[] = $tableColumns;
+        }
+
+        return ['tableHeader' => $tableHeader, 'tableRows' =>  $tableRows];
+    }
+
+    /**$tableRows
      * @return string
      */
     public function getQuestionsDataJSON()
@@ -336,7 +485,8 @@ class Task extends DataObject implements ScaffoldingProvider
                 'ID',
                 'Name',
                 'TaskType',
-                'QuestionsDataJSON'
+                'QuestionsDataJSON',
+                'ComponentTarget'
             ]);
 
         $typeScaffolder
@@ -365,7 +515,7 @@ class Task extends DataObject implements ScaffoldingProvider
                     return $task;
                 }
             })
-            ->end();
+             ->end();
     }
 
     /**
@@ -400,6 +550,26 @@ class Task extends DataObject implements ScaffoldingProvider
     public function isStandalone() : bool
     {
         return (bool) $this->DisplayOnHomePage;
+    }
+
+    /**
+     * Is this task classified as a "Component Selection" task?
+     *
+     * @return boolean
+     */
+    public function isComponentSelection() : bool
+    {
+        return $this->TaskType === 'selection';
+    }
+
+    /**
+     * Is this task classified as a "Control validation audit" task?
+     *
+     * @return boolean
+     */
+    public function isControlValidationAudit() : bool
+    {
+        return $this->TaskType === 'control validation audit';
     }
 
     /**
@@ -494,10 +664,12 @@ class Task extends DataObject implements ScaffoldingProvider
 
         if ($this->IsApprovalRequired && !$this->ApprovalGroup()->exists()) {
             $result->addError('Please select Approval group.');
-        } else if (!$this->TaskType) {
+        } elseif (!$this->TaskType) {
             $result->addError('Please select a task type.');
-        } else if ($this->TaskType === 'risk questionnaire' && !$this->RiskCalculation) {
+        } elseif ($this->TaskType === 'risk questionnaire' && !$this->RiskCalculation) {
             $result->addError('Please select a risk-calculation.');
+        } elseif ($this->ID && $this->isSRAType() && !$this->RiskQuestionnaireDataSourceID) {
+            $result->addError('Please select a data source for the risk questionnaire.');
         }
 
         return $result;
@@ -548,11 +720,70 @@ class Task extends DataObject implements ScaffoldingProvider
     /**
      * get current object link in model admin
      *
+     * @param string $action action type edit/add/delete
      * @return string
      */
     public function getLink($action = 'edit')
     {
         $admin = QuestionnaireAdmin::create();
-        return $admin->Link('NZTA-SDLT-Model-Task/EditForm/field/NZTA-SDLT-Model-Task/item/' . $this->ID . '/' . $action);
+        return $admin->Link('NZTA-SDLT-Model-Task/EditForm/field/NZTA-SDLT-Model-Task/item/'
+            . $this->ID . '/' . $action);
+    }
+
+
+    /**
+     * check target is remote (JIRA Cloud)
+     *
+     * @return Boolean
+     */
+    public function isRemoteTarget() : bool
+    {
+        return $this->ComponentTarget !== "Local";
+    }
+
+    /**
+     * Update CMS Fields specific to the control validation audit task
+     * At some point this should be moved into the getCMSFields method of a
+     * separate subclass of Task
+     *
+     *
+     * @param [type] $fields FieldList obtained from getCMSFields
+     * @return FieldList a modified version of $fields, passed in via parameter
+     */
+    public function getCVA_CMSFields($fields)
+    {
+        //remove fields not required for CVA task
+        $fields->removeByName([
+            'Questions',
+            'SubmissionEmails',
+            'IsApprovalRequired',
+            'ApprovalGroupID',
+            'DisplayOnHomePage',
+            'KeyInformation',
+            'LockAnswersWhenComplete',
+            'TaskApproval',
+            'DefaultSecurityComponents'
+        ]);
+
+        if ($this->ID) {
+            $fields->addFieldToTab(
+                'Root.Main',
+                ListboxField::create(
+                    'DefaultSecurityComponents',
+                    'Default Security Components',
+                    SecurityComponent::get()
+                )->setDescription(
+                    'If no component selection task is configured, these default'
+                    . ' security components will be selected for the security'
+                    . ' risk assessment task. They will appear as selected'
+                    . ' components in the task submission.'
+                    . '<br/><br/><strong>Note: </strong>'
+                    . 'The selected components of the component selection task'
+                    . ' will always override the default components specified'
+                    . ' here.'
+                )
+            );
+        }
+        return $fields;
     }
 }

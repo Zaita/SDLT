@@ -18,7 +18,6 @@ use GraphQL\Type\Definition\ResolveInfo;
 use NZTA\SDLT\Constant\UserGroupConstant;
 use NZTA\SDLT\GraphQL\GraphQLAuthFailure;
 use Ramsey\Uuid\Uuid;
-use SilverStripe\Forms\DatetimeField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ResolverInterface;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
@@ -35,16 +34,18 @@ use Symbiote\QueuedJobs\Services\QueuedJobService;
 use NZTA\SDLT\Job\SendTaskSubmissionEmailJob;
 use NZTA\SDLT\Job\SendTaskApprovalLinkEmailJob;
 use SilverStripe\Forms\TextField;
-use NZTA\SDLT\Helper\JIRA;
 use NZTA\SDLT\Model\JiraTicket;
 use SilverStripe\Security\Group;
 use NZTA\SDLT\Traits\SDLTRiskSubmission;
+use NZTA\SDLT\Helper\SecurityRiskAssessmentCalculator;
 use SilverStripe\Forms\HeaderField;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\ToggleCompositeField;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
+use SilverStripe\Forms\GridField\GridFieldAddNewButton;
 
 /**
  * Class TaskSubmission
@@ -80,6 +81,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     const STATUS_APPROVED = 'approved';
     const STATUS_DENIED = 'denied';
     const STATUS_WAITING_FOR_APPROVAL = 'waiting_for_approval';
+    const STATUS_EXPIRED = 'expired';
 
     /**
      * @var string
@@ -87,12 +89,22 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     private static $table_name = 'TaskSubmission';
 
     /**
+     * @var string
+     */
+    private $cvaTaskDataSource;
+
+    /**
+     * @var string
+     */
+    private $securityRiskAssessmentData = '';
+
+    /**
      * @var array
      */
     private static $db = [
         'QuestionnaireData' => 'Text', // store in JSON format
         'AnswerData' => 'Text', // store in JSON format
-        'Status' => 'Enum(array("start", "in_progress", "complete", "waiting_for_approval", "approved", "denied", "invalid"))',
+        'Status' => 'Enum(array("start", "in_progress", "complete", "waiting_for_approval", "approved", "denied", "invalid", "expired"))',
         'UUID' => 'Varchar(255)',
         'Result' => 'Varchar(255)',
         'SecureToken' => 'Varchar(64)',
@@ -104,7 +116,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         'IsApprovalRequired' => 'Boolean',
         'IsTaskApprovalLinkSent' => 'Boolean',
         'RiskResultData' => 'Text',
-        'LikelihoodRatings' => 'Text',
+        'CVATaskData' => 'Text',
     ];
 
     /**
@@ -122,14 +134,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      * @var array
      */
     private static $has_many = [
-        'JiraTickets' => JiraTicket::class
-    ];
-
-    /**
-     * @var array
-     */
-    private static $many_many = [
-        'SelectedComponents' => SecurityComponent::class,
+        'JiraTickets' => JiraTicket::class,
+        'SelectedComponents' => SelectedComponent::class,
     ];
 
     /**
@@ -162,6 +168,14 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
+     * @return string
+     */
+    public function getProductAspects()
+    {
+        return $this->QuestionnaireSubmission()->getProductAspects();
+    }
+
+    /**
      * Don't allow to delete records
      *
      * @param Member|null $member member
@@ -190,10 +204,69 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     public function getTaskType()
     {
         $task = $this->Task();
+
         if (!$task->exists()) {
             return "";
         }
+
         return $task->TaskType;
+    }
+
+    /**
+     * @return string
+     */
+    public function getComponentTarget()
+    {
+        $task = $this->Task();
+
+        if (!$task->exists()) {
+            return "";
+        }
+
+        return $task->ComponentTarget;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCVATaskDataSource() : string
+    {
+        if (!$this->cvaTaskDataSource) {
+            $this->setCVATaskDataSource();
+        }
+
+        return $this->cvaTaskDataSource;
+    }
+
+    /**
+     * @return string
+     */
+    public function setCVATaskDataSource($dataSource = 'DefaultComponent') {
+        $this->cvaTaskDataSource = $dataSource;
+    }
+
+    /**
+     * Get Security Risk Assessment Data
+     *
+     * @return string
+     */
+    public function getSecurityRiskAssessmentData()
+    {
+        return $this->securityRiskAssessmentData;
+    }
+
+    /**
+     * @return string
+     */
+    public function calculateSecurityRiskAssessmentData()
+    {
+        if ($this->TaskType === 'security risk assessment') {
+            $sraCalculator = SecurityRiskAssessmentCalculator::create(
+                $this->QuestionnaireSubmission()
+            );
+
+            $this->securityRiskAssessmentData = json_encode($sraCalculator->getSRATaskdetails());
+        }
     }
 
     /**
@@ -244,7 +317,6 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
           'SubmitterID',
           'TaskApproverID'
         ]);
-
 
         $fields->addFieldsToTab(
             'Root.TaskSubmissionData',
@@ -302,7 +374,6 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         if ($approvalGroup = $this->ApprovalGroup()) {
             $taskApproverList = $approvalGroup->Members() ? $approvalGroup->Members()->map('ID', 'Name') : $taskApproverList;
         }
-
         $fields->addFieldsToTab(
             'Root.TaskSubmitter',
             [
@@ -334,11 +405,23 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             'Status'
         );
 
+        $selectedComponentGrid = $fields->dataFieldByName('SelectedComponents');
+
+        if ($selectedComponentGrid) {
+            $config = $selectedComponentGrid->getConfig();
+            $config->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
+            $config->getComponentByType(GridFieldAddNewButton::class)->setButtonName('Add New Component');
+        }
+
         if (!$this->Task()->isRiskType()) {
             $fields->removeByName('RiskResultData');
         }
 
         $fields->removeByName('QuestionnaireSubmissionID');
+
+        if ($this->Task()->isControlValidationAudit()) {
+            $this->getCVA_CMSFields($fields);
+        }
 
         return $fields;
     }
@@ -359,6 +442,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         $this->provideGraphQLScaffoldingForReadTaskSubmission($dataObjectScaffolder);
         $this->provideGraphQLScaffoldingForUpdateTaskSubmissionStatusToApproved($scaffolder);
         $this->provideGraphQLScaffoldingForUpdateTaskSubmissionStatusToDenied($scaffolder);
+        $this->provideGraphQLScaffoldingForUpdateControlValidationAuditTaskSubmission($scaffolder);
+        $this->provideGraphQLScaffoldingtoReSyncWithJira($scaffolder);
     }
 
     /**
@@ -386,11 +471,49 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'IsTaskApprovalRequired',
                 'IsCurrentUserAnApprover',
                 'RiskResultData',
-                'LikelihoodRatings',
+                'ComponentTarget',
+                'ProductAspects',
+                //you would be forgiven for thinking this returns a TaskSubmission
+                //it doesn't. It returns the RiskResultData instead.
+                'RiskAssessmentTaskSubmission',
+                'CVATaskData',
+                'CVATaskDataSource',
+                'SecurityRiskAssessmentData',
             ]);
 
         $dataObjectScaffolder
             ->nestedQuery('SelectedComponents')
+            ->setResolver(new class implements ResolverInterface {
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
+                 * @throws Exception
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    $selectedComponent = $object->SelectedComponents();
+                    $productAspect = json_decode($object->ProductAspects);
+
+                    if (!empty($productAspect)) {
+                      return $selectedComponent = $selectedComponent->filter([
+                            'ProductAspect' => $productAspect
+                        ]);
+                    }
+
+                    if (empty($productAspect)) {
+                      return $selectedComponent = $selectedComponent->filter([
+                            'ProductAspect' => null
+                        ]);
+                    }
+                    return $selectedComponent;
+                }
+            })
             ->setUsePagination(false)
             ->end();
 
@@ -515,9 +638,6 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         $taskSubmission->Status = TaskSubmission::STATUS_START;
         $taskSubmission->LockAnswersWhenComplete = $task->LockAnswersWhenComplete;
 
-        $likelihoodRatingData = $task->getLikelihoodRatingsData();
-        $taskSubmission->LikelihoodRatings = json_encode($likelihoodRatingData);
-
         $taskSubmission->write();
 
         // after create the task questionnaire, please send a start page link
@@ -632,6 +752,119 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
+     * change task submission status to in-progress and re-load the data from JIRA\
+     *
+     * @param SchemaScaffolder $scaffolder The scaffolder of the schema
+     * @return void
+     */
+    public function provideGraphQLScaffoldingtoReSyncWithJira(SchemaScaffolder $scaffolder) {
+      $scaffolder
+          ->mutation('reSyncWithJira', TaskSubmission::class)
+          ->addArgs([
+              'UUID' => 'String!'
+          ])
+          ->setResolver(new class implements ResolverInterface {
+              /**
+               * Invoked by the Executor class to resolve this mutation / query
+               * @see Executor
+               *
+               * @param mixed       $object  object
+               * @param array       $args    args
+               * @param mixed       $context context
+               * @param ResolveInfo $info    info
+               * @throws GraphQLAuthFailure
+               * @return mixed
+               */
+              public function resolve($object, array $args, $context, ResolveInfo $info)
+              {
+                  $member = Security::getCurrentUser();
+                  $uuid = Convert::raw2sql($args['UUID']);
+                  $submission = TaskSubmission::get_task_submission_by_uuid($uuid);
+                  $canEdit = TaskSubmission::can_edit_task_submission(
+                      $submission,
+                      $member,
+                      ''
+                  );
+                  if (!$canEdit) {
+                      throw new GraphQLAuthFailure();
+                  }
+
+                  $submission->Status = TaskSubmission::STATUS_IN_PROGRESS;
+                  $submission->write();
+
+                  if ($submission->TaskType === 'control validation audit') {
+                      $siblingComponentSelectionTask = $submission->getSiblingTaskSubmissionsByType('selection');
+
+                      if (empty($data->CVATaskData)) {
+                          $submission->CVATaskData = $submission->getDataforCVATask($siblingComponentSelectionTask);
+                      }
+                  }
+                  return $submission;
+              }
+          })
+          ->end();
+    }
+
+    /**
+     * @param SchemaScaffolder $scaffolder The scaffolder of the schema
+     * @return void
+     */
+    private function provideGraphQLScaffoldingForUpdateControlValidationAuditTaskSubmission(SchemaScaffolder $scaffolder)
+    {
+      $scaffolder
+        ->mutation('updateControlValidationAuditTaskSubmission', TaskSubmission::class)
+        ->addArgs([
+            'UUID' => 'String!',
+            'CVATaskData' => 'String'
+        ])
+        ->setResolver(new class implements ResolverInterface {
+            /**
+             * Invoked by the Executor class to resolve this mutation / query
+             * @see Executor
+             *
+             * @param mixed       $object  object
+             * @param array       $args    args
+             * @param mixed       $context context
+             * @param ResolveInfo $info    info
+             * @throws GraphQLAuthFailure
+             * @return mixed
+             */
+            public function resolve($object, array $args, $context, ResolveInfo $info)
+            {
+                $member = Security::getCurrentUser();
+                $uuid = Convert::raw2sql($args['UUID']);
+                $submission = TaskSubmission::get_task_submission_by_uuid($uuid);
+                $canEdit = TaskSubmission::can_edit_task_submission(
+                    $submission,
+                    $member,
+                    ''
+                );
+                if (!$canEdit) {
+                    throw new GraphQLAuthFailure();
+                }
+                $submission->CompletedAt = date('Y-m-d H:i:s');
+                $submission->CVATaskData = base64_decode($args['CVATaskData']);
+
+                // set Submitter IP Address
+                if ($_SERVER['REMOTE_ADDR']) {
+                    $submission->SubmitterIPAddress = Convert::raw2sql($_SERVER['REMOTE_ADDR']);
+                }
+
+                $submission->Status = TaskSubmission::STATUS_COMPLETE;
+
+                // if task approval requires then set status to waiting for approval
+                if ($submission->IsTaskApprovalRequired) {
+                    $submission->setStatusToWatingforApproval();
+                }
+
+                $submission->write();
+                return $submission;
+            }
+        })
+        ->end();
+    }
+
+    /**
      * @param SchemaScaffolder $scaffolder The scaffolder of the schema
      * @return void
      */
@@ -669,6 +902,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                         $member,
                         $secureToken
                     );
+
                     if (!$canEdit) {
                         throw new GraphQLAuthFailure();
                     }
@@ -676,23 +910,9 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     $submission->Status = TaskSubmission::STATUS_COMPLETE;
                     $submission->RiskResultData = $submission->getRiskResultBasedOnAnswer();
 
+                    // if task approval requires then set status to waiting for approval
                     if ($submission->IsTaskApprovalRequired) {
-                        $submission->Status = TaskSubmission::STATUS_WAITING_FOR_APPROVAL;
-
-                        if (!$submission->IsTaskApprovalLinkSent) {
-                            $members = $submission->approvalGroupMembers();
-                            $submission->IsTaskApprovalLinkSent = 1;
-
-                            // send approval link email to the approver group
-                            if ($members->exists()) {
-                                $qs = QueuedJobService::create();
-
-                                $qs->queueJob(
-                                    new SendTaskApprovalLinkEmailJob($submission, $members),
-                                    date('Y-m-d H:i:s', time() + 30)
-                                );
-                            }
-                        }
+                        $submission->setStatusToWatingforApproval();
                     }
 
                     if ($_SERVER['REMOTE_ADDR']) {
@@ -705,11 +925,14 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                         $submission->Result = trim($args['Result']);
                     }
 
-                    // create tasks for task submission
+                    // create another tasks form task submission based on task submission's answer
                     Question::create_task_submissions_according_to_answers (
                         $submission->QuestionnaireData,
                         $submission->AnswerData,
-                        $submission->QuestionnaireSubmissionID
+                        $submission->QuestionnaireSubmissionID,
+                        '',
+                        $secureToken,
+                        'ts'
                     );
 
                     $submission->write();
@@ -718,6 +941,31 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 }
             })
             ->end();
+    }
+
+    /**
+     * set task submission status to waitig for approval
+     * and send emai lto the approver
+     * @return void
+     */
+    public function setStatusToWatingforApproval() : void
+    {
+        $this->Status = TaskSubmission::STATUS_WAITING_FOR_APPROVAL;
+
+        if (!$this->IsTaskApprovalLinkSent) {
+            $members = $this->approvalGroupMembers();
+            $this->IsTaskApprovalLinkSent = 1;
+
+            // send approval link email to the approver group
+            if ($members->exists()) {
+                $qs = QueuedJobService::create();
+
+                $qs->queueJob(
+                    new SendTaskApprovalLinkEmailJob($this, $members),
+                    date('Y-m-d H:i:s', time() + 30)
+                );
+            }
+        }
     }
 
     /**
@@ -766,6 +1014,15 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     $submission->SubmitterIPAddress = null;
                     $submission->CompletedAt = null;
                     $submission->Result = null;
+
+                    // if task type is component selection, then delete
+                    // it's sibling CSV task data
+                    if ($submission->TaskType === 'selection' &&
+                        $siblingCVATask = $submission->getSiblingTaskSubmissionsByType("control validation audit")) {
+                        $siblingCVATask->CVATaskData = '';
+                        $siblingCVATask->Status = TaskSubmission::STATUS_START;
+                        $siblingCVATask->write();
+                    }
                     $submission->write();
 
                     return $submission;
@@ -825,6 +1082,26 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
                     if (!$canView) {
                         throw new GraphQLAuthFailure();
+                    }
+
+                    $data->ProductAspects = $data->QuestionnaireSubmission()->getProductAspects();
+
+                    if ($data->TaskType === 'security risk assessment') {
+                        $data->SecurityRiskAssessmentData = $data->calculateSecurityRiskAssessmentData();
+                    }
+
+                    if ($data->TaskType === 'control validation audit') {
+                        $siblingComponentSelectionTask = $data->getSiblingTaskSubmissionsByType('selection');
+
+                        if ($siblingComponentSelectionTask) {
+                            $data->setCVATaskDataSource ($siblingComponentSelectionTask->ComponentTarget);
+                        } else {
+                            $data->setCVATaskDataSource ();
+                        }
+
+                        if (empty($data->CVATaskData)) {
+                            $data->CVATaskData = $data->getDataforCVATask($siblingComponentSelectionTask);
+                        }
                     }
 
                     return $data;
@@ -1078,7 +1355,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
         // Any user with correct SecureToken can edit when answers are not locked
         if ($taskSubmission->SecureToken && @hash_equals($taskSubmission->SecureToken, $secureToken)) {
-            if ($taskSubmission->Status === TaskSubmission::STATUS_IN_PROGRESS) {
+            if ($taskSubmission->Status === TaskSubmission::STATUS_IN_PROGRESS || $taskSubmission->Status === TaskSubmission::STATUS_START) {
                 return true;
             }
             if ($taskSubmission->Status === TaskSubmission::STATUS_COMPLETE) {
@@ -1121,6 +1398,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     {
         $user = Security::getCurrentUser();
 
+        if (!$user) {
+            $user = $this->Submitter();
+        }
+
         $userData = '';
 
         if ($user) {
@@ -1158,18 +1439,23 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         }
 
         // audit log: for task submission approval by approval group member
-        $hasAccess = $user && $user->Groups()->filter('Code', $this->ApprovalGroup()->Code)->exists();
+        $hasAccess = $user || $user->Groups()->filter('Code', $this->ApprovalGroup()->Code)->exists();
         $doAudit = $this->exists() && $hasAccess;
         if ($doAudit && isset($changed['Status']) &&
-            in_array($changed['Status']['after'], ['approved', 'denied'])) {
+            in_array($changed['Status']['after'], ['approved', 'denied', 'complete'])) {
               $msg = sprintf(
                   '"%s" was %s. (UUID: %s)',
                   $this->Task()->Name,
-                  $changed['Status']['after'],
+                  $changed['Status']['after'] !== 'complete' ?:  'completed',
                   $this->UUID
               );
 
-              $status = ($changed['Status']['after'] === 'approved') ? 'Approve' : 'Deny';
+              if ($changed['Status']['after'] == 'complete') {
+                  $status = $changed['Status']['after'] = 'Complete';
+              } else {
+                  $status = ($changed['Status']['after'] === 'approved') ? 'Approve' : 'Deny';
+              }
+
               $this->auditService->commit($status, $msg, $this, $userData);
         }
     }
@@ -1189,7 +1475,12 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         if ($this->Task()->TaskType == 'selection') {
             return "#/component-selection/submission/{$this->UUID}";
         }
-
+        if ($this->TaskType == 'control validation audit') {
+            return "#/control-validation-audit/submission/{$this->UUID}";
+        }
+        if ($this->TaskType == 'security risk assessment') {
+            return "#/security-risk-assessment/submission/{$this->UUID}";
+        }
         return '#/task/submission/' . $this->UUID;
     }
 
@@ -1231,7 +1522,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * @param SchemaScaffolder $scaffolder scaffolder
+     * This is used by f/e logic for task submissions of _both_ ticket ("JIRA Cloud")
+     * and "Local" types. It will create local records for selected components.
+     *
+     * @param  SchemaScaffolder $scaffolder scaffolder
      * @return void
      */
     private function provideGraphQLScaffoldingForUpdateTaskSubmissionWithSelectedComponents(SchemaScaffolder $scaffolder)
@@ -1240,8 +1534,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             ->mutation('updateTaskSubmissionWithSelectedComponents', TaskSubmission::class)
             ->addArgs([
                 'UUID' => 'String!',
-                'ComponentIDs' => 'String!',
-                'JiraKey' => 'String!'
+                'Components' => 'String!',
+                'JiraKey' => 'String?' // "Local" targets will pass an empty string in the f/e
             ])
             ->setResolver(new class implements ResolverInterface {
                 /**
@@ -1261,46 +1555,167 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     $submission = TaskSubmission::get()
                         ->filter(['UUID' => Convert::raw2sql($args['UUID'])])
                         ->first();
+
                     if (!$submission || !$submission->exists()) {
-                        throw new Exception('Task submission with the given UUID can not be found');
+                        throw new Exception('Task submission with the given UUID cannot be found');
                     }
 
-                    $componentIDs = json_decode(base64_decode($args['ComponentIDs']), true);
+                    // Component Selection Tasks with a "Local" ComponentTarget
+                    // do not "go to JIRA"...
+                    $ticketId = Convert::raw2sql($args['JiraKey'] ?? '');
 
-                    $components = [];
-                    $submission->SelectedComponents()->removeAll();
-                    foreach ($componentIDs as $componentID) {
-                        $component = SecurityComponent::get_by_id(Convert::raw2sql($componentID));
-                        if ($component) {
-                            $components[] = $component;
-                            $submission->SelectedComponents()->add($component);
+                    $isRemoteTarget = $submission->Task()->isRemoteTarget();
+
+                    // check if taget is remote
+                    if ($isRemoteTarget) {
+                        // check for the empty ticket
+                        if(empty($ticketId)) {
+                            throw new Exception('Please enter a Project Key.');
+                        }
+
+                        // Do not permit the modification of a submission with the creation
+                        // of a new ticket, if a different project key is passed-in.
+                        if ($submission->JiraKey && $submission->JiraKey !== $ticketId) {
+                            throw new Exception(sprintf('Project key must be the same as: %s', $submission->JiraKey));
                         }
                     }
 
-                    if (!$components) {
-                        throw new Exception('No components have been selected');
+                    $selectedComponents = json_decode(base64_decode($args['Components']), true);
+                    $existingComponents = $submission->SelectedComponents();
+
+                    /** Prevent multiple ticket creation */
+                    $newTicketComponents = TaskSubmission::get_component_diff(
+                        $selectedComponents,
+                        $existingComponents->toNestedArray(),
+                        'add'
+                    );
+
+                    $removedComponentdetails = TaskSubmission::get_component_diff(
+                       $existingComponents->toNestedArray(),
+                       $selectedComponents,
+                       'remove'
+                    );
+
+                    // remove the component
+                    foreach ($removedComponentdetails as $removedComponent) {
+                        $filterArray = [
+                            'SecurityComponentID' => $removedComponent['SecurityComponentID']
+                        ];
+
+                        if (!empty($removedComponent['ProductAspect'])){
+                            $filterArray = [
+                                'SecurityComponentID' => $removedComponent['SecurityComponentID'],
+                                'ProductAspect' => $removedComponent['ProductAspect']
+                            ];
+                        }
+
+                        $existingComponent = $existingComponents->filter($filterArray)->first();
+
+                        if ($existingComponent) {
+                            $existingComponent->delete();
+                        }
                     }
 
-                    $submission->JiraKey = Convert::raw2sql($args['JiraKey']);
-                    $submission->write();
+                    $createJiraTicket = !empty($ticketId) && $isRemoteTarget;
 
-                    foreach ($components as $component) {
-                        $jiraTicket = JiraTicket::create();
-                        $jiraTicket->JiraKey = Convert::raw2sql($args['JiraKey']);
-                        $link = JIRA::create()->addTask(
-                            $jiraTicket->JiraKey,
-                            $component->Name,
-                            $component->getJIRABody()
-                        );
-                        $jiraTicket->TicketLink = $link;
-                        $jiraTicket->write();
-                        $submission->JiraTickets()->add($jiraTicket);
+                    // add the component
+                    foreach ($newTicketComponents as $newTicketComponent) {
+                        $securityComponent = SecurityComponent::get_by_id(Convert::raw2sql($newTicketComponent['SecurityComponentID']));
+
+                        if ($securityComponent) {
+                            $jiraLink = '';
+                            if ($createJiraTicket) {
+                                $jiraLink = $submission->issueTrackerService->addTask(// <-- Makes an API call
+                                    $ticketId,
+                                    $securityComponent,
+                                    'Task',
+                                    $newTicketComponent['ProductAspect']
+                                );
+                            }
+
+                            $newComp = SelectedComponent::create();
+                            $newComp->ProductAspect = $newTicketComponent['ProductAspect'];
+                            $newComp->SecurityComponentID = $newTicketComponent['SecurityComponentID'];
+                            $newComp->TaskSubmissionID = $submission->ID;
+                            $newComp->write();
+
+                            // crete ticket
+                            if ($createJiraTicket) {
+                                // create a new ticket for the selected component
+                                $jiraTicket = JiraTicket::create();
+                                $jiraTicket->JiraKey = $ticketId;
+                                $jiraTicket->TicketLink = $jiraLink;
+                                $jiraTicket->SecurityComponentID = $newComp->SecurityComponentID;
+                                $jiraTicket->TaskSubmissionID = $newComp->TaskSubmissionID;
+                                $jiraTicket->TaskSubmissionSelectedComponentID = $newComp->ID;
+                                $jiraTicket->write();
+                            }
+                        }
+                    }
+
+                    // save JIRA project key for the task submission
+                    if ($createJiraTicket && !empty($newTicketComponents)) {
+                        $submission->JiraKey = $ticketId;
+                        $submission->write();
                     }
 
                     return $submission;
                 }
             })
             ->end();
+    }
+
+    /**
+     * get component different for remove and add component
+     *
+     * @param array  $primaryArray   array 1
+     * @param array  $secondaryArray array 2
+     * @param string $type           add/remove
+     * @return array
+     */
+    public static function get_component_diff(array $primaryArray, array $secondaryArray, string $type) : array
+    {
+        $returnArray = [];
+
+        if (empty($primaryArray))
+        {
+            return $returnArray;
+        }
+
+        foreach ($primaryArray as $primaryComponent) {
+            $doesComponentExist = array_filter($secondaryArray, function ($secondaryComponent) use ($primaryComponent, $type) {
+                $primaryProductAspect = isset($primaryComponent['ProductAspect']) ? $primaryComponent['ProductAspect']: '';
+                $secondaryProductAspect = isset($secondaryComponent['ProductAspect']) ? $secondaryComponent['ProductAspect']: '';
+
+                if (empty($primaryProductAspect) && empty($secondaryProductAspect)) {
+                    return (int)$secondaryComponent['SecurityComponentID'] === (int)$primaryComponent['SecurityComponentID'];
+                }
+
+                if (!empty($primaryProductAspect) && $type === 'add' && empty($secondaryProductAspect)) {
+                    return [];
+                }
+
+                if (empty($primaryProductAspect) && $type === 'remove' && !empty($secondaryProductAspect)) {
+                    return [];
+                }
+
+                if (!empty($primaryProductAspect) && !empty($secondaryProductAspect)) {
+                    return (
+                        (int)$secondaryComponent['SecurityComponentID'] === (int)$primaryComponent['SecurityComponentID'] &&
+                        (string)$secondaryProductAspect === (string)$primaryProductAspect
+                    );
+                }
+            });
+
+            if (empty($doesComponentExist)) {
+                $returnArray[] = [
+                    'SecurityComponentID' => $primaryComponent['SecurityComponentID'],
+                    'ProductAspect' => isset($primaryComponent['ProductAspect']) ? $primaryComponent['ProductAspect'] : '' ,
+                ];
+            }
+        }
+
+        return $returnArray;
     }
 
     /**
@@ -1471,6 +1886,277 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
+     * Get all sibling task submissions from the parent
+     * This list will include the current task submission
+     *
+     * @return DataList | null
+     */
+    public function getSiblingTaskSubmissions()
+    {
+        $qs = $this->QuestionnaireSubmission();
+        if ($qs && $qs->exists()) {
+            return $qs->TaskSubmissions();
+        }
+
+        return null;
+    }
+
+    /**
+     * Get sibling task submissions by type from the parent
+     * This list will include the current task submission
+     *
+     * @return DataList | null
+     */
+    public function getSiblingTaskSubmissionsByType($type)
+    {
+        $siblingTasks = $this->getSiblingTaskSubmissions();
+
+        if ($siblingTasks && $siblingTasks->Count() && ($taskByType = $siblingTasks->find('Task.TaskType', $type))) {
+            return $taskByType;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get sibling task submissions status by type
+     *
+     * @param Dataonject $siblingTask sibling task
+     * @return bool
+     */
+    public function isSiblingTaskCompleted($siblingTask) : bool
+    {
+        if ($siblingTask) {
+            return ($siblingTask->Status === self::STATUS_COMPLETE ||
+            $siblingTask->Status === self::STATUS_APPROVED);
+        }
+
+        return false;
+    }
+
+    /**
+     * Find a risk assessment questionnaire task amongst the siblings of this
+     * task submission, and return its risk result data.
+     *
+     * For reasons that escape the developer, GraphQL will not return this
+     * TaskSubmission object as an object. It's cast to a string instead.
+     * It will not return anything at all unless this specific name is used.
+     * Thus, we use this getter to get the submission, and return an actual
+     * string of data that we need (the RiskResultData, in this case)
+     *
+     * If you think you could use an alternative getter method here, like
+     * getRiskResultDataFromTaskSubmission and call this getter, that doesn't
+     * work either.
+     *
+     * @return string it's always a string, even if you want an object. it might
+     *                also be null, if there aren't any other siblings
+     */
+    public function getRiskAssessmentTaskSubmission()
+    {
+        $siblings = $this->getSiblingTaskSubmissions();
+        if ($siblings && $siblings->Count()) {
+            $task = $siblings->find('Task.TaskType', 'risk questionnaire');
+
+            //we should actually return a task here, but GraphQL has other ideas
+            //returning the object will cast it to a string, so grab something
+            //useful and return that instead.
+            return $task->RiskResultData;
+        }
+
+        return null;
+    }
+
+    /**
+     * @param DataObject $siblingTask sibling component selection task
+     *
+     * @return string
+     */
+    public function getDataforCVATask($siblingTask) : string
+    {
+        $selectedComponent = [];
+
+        // if there is no sibling component selection task, then return default component od CVA task
+        if (empty($siblingTask)) {
+          return json_encode($this->getDefaultComponentsFromCVATask());
+        }
+
+        $isSiblingTaskCompleted = $this->isSiblingTaskCompleted($siblingTask);
+
+        // if sibling component selection task exist and component target is "Local"
+        if ($isSiblingTaskCompleted && $siblingTask->ComponentTarget == "Local") {
+            $selectedComponent = $this->getSelectedComponentForLocal($siblingTask);
+        }
+
+        if ($isSiblingTaskCompleted && $siblingTask->ComponentTarget == "JIRA Cloud") {
+            $selectedComponent = $this->getSelectedComponentForJiraCloud($siblingTask);
+        }
+
+        return json_encode($selectedComponent);
+    }
+
+    /**
+     * get the selected component from the "component selection" task
+     * when target type is "Local".
+     *
+     * @param DataObject $componentSelectionTask component selection task
+     *
+     * @return array
+     */
+    public function getSelectedComponentForLocal($componentSelectionTask) : array
+    {
+        $out = [];
+
+        if (!$componentSelectionTask) {
+            return $out;
+        }
+
+        $selectedComponents = $componentSelectionTask->SelectedComponents();
+
+        if (!$selectedComponents) {
+            return $out;
+        }
+
+        foreach ($selectedComponents as $comp) {
+            $controls = [];
+
+            if (!$comp->SecurityComponentID) {
+                continue;
+            }
+
+            foreach($comp->SecurityComponent()->Controls() as $ctrl) {
+                $controls[] = [
+                    'id' => $ctrl->ID,
+                    'name' => $ctrl->Name,
+                    'description' => $ctrl->Description,
+                    'selectedOption' => SecurityControl::CTL_STATUS_2
+                ];
+            }
+
+            $out[] = [
+                'id' => $comp->SecurityComponent()->ID,
+                'name' => $comp->SecurityComponent()->Name,
+                'productAspect' => $comp->ProductAspect,
+                'controls' => $controls
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * get the selected component from the "component selection" task
+     * when target type is "JIRA Cloud"
+     *
+     * @param DataObject $componentSelectionTask component selection task
+     *
+     * @return array
+     */
+    public function getSelectedComponentForJiraCloud($componentSelectionTask) : array
+    {
+        $out = [];
+
+        if (!$componentSelectionTask) {
+            return $out;
+        }
+
+        $selectedComponents = $componentSelectionTask->SelectedComponents();
+
+        if (!$selectedComponents) {
+            return $out;
+        }
+
+        foreach ($selectedComponents as $selectedComponent) {
+            $securityComponent = $selectedComponent->SecurityComponent();
+
+            if (!$securityComponent) {
+                continue;
+            }
+
+            $controls = [];
+            // get JiraTicket details
+            $ticket = JiraTicket::get()
+              ->filter([
+                  'TaskSubmissionID' => $selectedComponent->TaskSubmissionID,
+                  'SecurityComponentID' => $selectedComponent->SecurityComponentID,
+                  'TaskSubmissionSelectedComponentID' => $selectedComponent->ID
+              ])->first();
+
+            if (($localControls = $securityComponent->Controls()) && $ticket) {
+                $remoteControls =  $componentSelectionTask->issueTrackerService->getControlDetailsFromJiraTicket($ticket) ?: [];
+
+                foreach ($localControls as $localControl) {
+                    $doesControlExist = [];
+                    $doesControlExist = array_filter($remoteControls, function ($remoteControl) use ($localControl) {
+                        return (int)$remoteControl['ID'] === (int)$localControl->ID;
+                    });
+
+                    if (!empty($remoteControl = array_pop($doesControlExist))) {
+                        $controls[] = [
+                            'id' => $localControl->ID,
+                            'name' => $localControl->Name,
+                            'selectedOption' => $remoteControl['SelectedOption']
+                        ];
+                    }
+                }
+            }
+
+            $out[] = [
+                'id' => $securityComponent->ID,
+                'name' => $securityComponent->Name,
+                'productAspect' => $selectedComponent->ProductAspect,
+                'jiraTicketLink' => $ticket ? $ticket->TicketLink : '',
+                'controls' => $controls
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * When no component selection task is available, we show default components
+     * from the CVA task amongst the siblings of this task submission. These
+     * default components are configured on the CVA task itself
+     *
+     * @return array
+     */
+    public function getDefaultComponentsFromCVATask() : array
+    {
+        $out = [];
+
+        if ($this->TaskType !== 'control validation audit') {
+            return $out;
+        }
+
+        $selectedComponents = $this->Task()->DefaultSecurityComponents();
+
+        if (!$selectedComponents) {
+            return $out;
+        }
+
+        foreach ($selectedComponents as $comp) {
+            $controls = [];
+
+            foreach ($comp->Controls() as $ctrl) {
+                $controls[] = [
+                    'id' => $ctrl->ID,
+                    'name' => $ctrl->Name,
+                    'selectedOption' => SecurityControl::CTL_STATUS_2,
+                    'description' => $ctrl->Description,
+                ];
+            }
+
+            $out[] = [
+                'id' => $comp->ID,
+                'name' => $comp->Name,
+                'productAspect' => $comp->ProductAspect,
+                'controls' => $controls
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
      * Get the current hostname or an alternate one from the SiteConfig
      *
      * @return string
@@ -1484,5 +2170,40 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         }
 
         return $hostname;
+    }
+
+    /**
+     * Update CMS Fields specific to the control validation audit task
+     * submission. At some point this should be moved into the getCMSFields
+     * method of a separate subclass of Task
+     *
+     * @param [type] $fields FieldList obtained from getCMSFields
+     * @return FieldList a modified version of $fields, passed in via parameter
+     */
+    public function getCVA_CMSFields($fields) {
+        $fields->removeByName([
+            'QuestionData',
+            'AnswerData',
+            'QuestionnaireDataToggle',
+            'AnswerDataToggle',
+            'CVATaskData',
+            'EmailRelativeLinkToTask',
+            'JiraKey',
+            'JiraTickets',
+            'SelectedComponents',
+            'ResultToggle',
+            'Result'
+        ]);
+        $fields->addFieldToTab(
+            'Root.TaskSubmissionData',
+            ToggleCompositeField::create(
+                'CVATaskDataToggle',
+                'CVA Task Data',
+                [
+                    TextareaField::create('CVATaskData')
+                ]
+            )
+        );
+        return $fields;
     }
 }

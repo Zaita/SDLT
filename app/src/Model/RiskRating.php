@@ -86,7 +86,10 @@ class RiskRating extends DataObject
             DropdownField::create(
                 'LikelihoodID',
                 'Likelihood',
-                LikelihoodThreshold::get()->map()->toArray()
+                LikelihoodThreshold::get()
+                    ->filter('TaskID', $this->TaskID)
+                    ->map()
+                    ->toArray()
             ),
             ColorField::create(
                 'Colour',
@@ -115,5 +118,31 @@ class RiskRating extends DataObject
         }
 
         return $result;
+    }
+
+    /**
+     * match impact-rating, likelihood and task-id, return it.
+     *
+     * @param string $likelihood current calcuted likehood
+     * @param string $impact     current calcuted impact
+     * @param int    $taskID     current Security Risk Assessment task id
+     * @return mixed null|RiskRating An instance of {@link RiskRating}
+     *                               if a match is found, or null otherwise.
+     */
+    public static function match($likelihood, $impact, $taskID)
+    {
+        $threshold = RiskRating::get()
+            ->filter([
+                'Impact' => $impact,
+                'Likelihood.Name' => $likelihood,
+                'TaskID' => $taskID
+            ])
+            ->first();
+
+        if (!$threshold) {
+            return null;
+        }
+
+        return $threshold;
     }
 }
