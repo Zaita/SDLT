@@ -15,6 +15,7 @@ import {
   DEFAULT_SRA_UNFINISHED_TASKS_MESSAGE
 } from "../../constants/values";
 import SecurityRiskAssessmentUtil from "../../utils/SecurityRiskAssessmentUtil";
+import {SubmissionExpired} from "../Common/SubmissionExpired";
 
 type Props = {
   submission: Submission | null,
@@ -113,16 +114,13 @@ class Summary extends Component<Props> {
         </div>
       );
     }
+
     if (submission.status === "expired") {
       return (
-        <div className="container">
-          <div className="alert alert-danger">
-            The submission you are attempting to view does not exist or has expired.
-            Please follow <a href="/">this link</a> to the homepage where you can create a new submission.
-          </div>
-        </div>
+        <SubmissionExpired/>
       );
     }
+
     return (
       <div className="Summary">
         {this.renderSubmitterInfo(submission)}

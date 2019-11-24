@@ -25,6 +25,7 @@ query {
         TaskType
       }
     }
+    Status
     SecurityRiskAssessmentData
   }
 }`;
@@ -40,6 +41,7 @@ query {
     const data: TaskSubmission = {
       uuid: submissionJSONObject && submissionJSONObject.UUID ? submissionJSONObject.UUID : '',
       taskName: toString(get(submissionJSONObject, "TaskName", "")),
+      status: toString(get(submissionJSONObject, "Status", "")),
       questionnaireSubmissionUUID: toString(get(submissionJSONObject, "QuestionnaireSubmission.UUID", "")),
       taskSubmissions: TaskParser.parseAlltaskSubmissionforQuestionnaire(submissionJSONObject),
       sraData: securityRiskAssessmentData

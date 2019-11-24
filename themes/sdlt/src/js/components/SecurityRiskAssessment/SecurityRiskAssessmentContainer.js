@@ -27,6 +27,7 @@ import {loadSiteConfig} from "../../actions/siteConfig";
 import type {SiteConfig} from "../../types/SiteConfig";
 import type {ImapctThreshold} from "../../types/ImapctThreshold";
 import SecurityRiskAssessmentUtil from "../../utils/SecurityRiskAssessmentUtil";
+import {SubmissionExpired} from "../Common/SubmissionExpired";
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -87,7 +88,8 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
       taskName,
       questionnaireSubmissionUUID,
       taskSubmissions,
-      sraData
+      sraData,
+      status
     } = {...securityRiskAssessmentData};
 
     const isSRATaskFinalised = SecurityRiskAssessmentUtil.isSRATaskFinalised(taskSubmissions);
@@ -117,32 +119,37 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
 
     return (
       <div className="SecurityRiskAssessmentContainer">
+
         <Header title={securityRiskAssessmentData.taskName} subtitle={siteConfig.siteTitle} username={currentUser.name} logopath={siteConfig.logoPath} />
 
-        <div className="SecurityRiskAssessmentResult">
-          {isSRATaskFinalised ? SecurityRiskAssessmentUtil.getSraIsFinalisedAlert() : false}
+        {securityRiskAssessmentData.status === 'expired' && <SubmissionExpired/>}
+        {
+          securityRiskAssessmentData.status !== 'expired' && (
+            <div className="SecurityRiskAssessmentResult">
+              {isSRATaskFinalised ? SecurityRiskAssessmentUtil.getSraIsFinalisedAlert() : false}
 
-          <RiskAssessmentMatrixTableContainer
-            calculatedSRAData={sraData.calculatedSRAData}
-            hasProductAspects={sraData.hasProductAspects}
-          />
+              <RiskAssessmentMatrixTableContainer
+                calculatedSRAData={sraData.calculatedSRAData}
+                hasProductAspects={sraData.hasProductAspects}
+              />
 
-          <LikelihoodLegendContainer
-            likelihoodThresholds={sraData.likelihoodThresholds}
-          />
+              <LikelihoodLegendContainer
+                likelihoodThresholds={sraData.likelihoodThresholds}
+              />
 
-          <ImpactThresholdContainer impactThresholds={impactThresholdData} />
+              <ImpactThresholdContainer impactThresholds={impactThresholdData} />
 
-          <RiskRatingThresholdContainer
-            riskRatingThresholds={sraData.riskRatingThresholds}
-          />
+              <RiskRatingThresholdContainer
+                riskRatingThresholds={sraData.riskRatingThresholds}
+              />
 
-          <div className="buttons">
-            {backButton}
-            {finaliseButton}
-          </div>
-
-        </div>
+              <div className="buttons">
+                {backButton}
+                {finaliseButton}
+              </div>
+            </div>
+          )
+        }
         <Footer footerCopyrightText={siteConfig.footerCopyrightText}/>
       </div>
     )

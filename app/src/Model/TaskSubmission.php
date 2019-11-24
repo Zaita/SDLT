@@ -1478,6 +1478,9 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         if ($this->TaskType == 'control validation audit') {
             return "#/control-validation-audit/submission/{$this->UUID}";
         }
+        if ($this->TaskType == 'security risk assessment') {
+            return "#/security-risk-assessment/submission/{$this->UUID}";
+        }
         return '#/task/submission/' . $this->UUID;
     }
 

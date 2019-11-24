@@ -34,6 +34,7 @@ import {
 import SecurityRiskAssessmentUtil from "../../utils/SecurityRiskAssessmentUtil";
 import {loadSiteConfig} from "../../actions/siteConfig";
 import type {SiteConfig} from "../../types/SiteConfig";
+import {SubmissionExpired} from "../Common/SubmissionExpired";
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -298,20 +299,28 @@ class ControlValidationAuditContainer extends Component<Props, State> {
           logopath={siteConfig.logoPath}
         />
 
-        <div className="ControlValidationAuditResult" key="0">
-          <div className="ControlValidationAuditForm"  key="component_validation_questions">
-            <h3>Have These Controls Been Implemented?</h3>
-            {isSRATaskFinalised ? SecurityRiskAssessmentUtil.getSraIsFinalisedAlert() : false}
-            {this.renderCVAQuestionsForm()}
-          </div>
-          <div className="buttons" key="component_validation_buttons">
-            <div>
-              {submitButton}
-              {reSync}
-              {backButton}
+        {
+          controlValidationAuditData.status === 'expired' && <SubmissionExpired/>
+        }
+
+        {
+          controlValidationAuditData.status !== 'expired' && (
+            <div className="ControlValidationAuditResult" key="0">
+              <div className="ControlValidationAuditForm"  key="component_validation_questions">
+                <h3>Have These Controls Been Implemented?</h3>
+                {isSRATaskFinalised ? SecurityRiskAssessmentUtil.getSraIsFinalisedAlert() : false}
+                {this.renderCVAQuestionsForm()}
+              </div>
+              <div className="buttons" key="component_validation_buttons">
+                <div>
+                  {submitButton}
+                  {reSync}
+                  {backButton}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          )
+        }
 
         <Footer footerCopyrightText={siteConfig.footerCopyrightText}/>
       </div>
