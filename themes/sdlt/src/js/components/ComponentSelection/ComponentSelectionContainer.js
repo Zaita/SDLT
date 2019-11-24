@@ -32,6 +32,7 @@ import editIcon from "../../../img/icons/edit.svg";
 import LightButton from "../Button/LightButton";
 import SecurityRiskAssessmentUtil from "../../utils/SecurityRiskAssessmentUtil";
 import {loadSiteConfig} from "../../actions/siteConfig";
+import {SubmissionExpired} from "../Common/SubmissionExpired";
 
 type OwnProps = {
   uuid: string,
@@ -191,6 +192,10 @@ class ComponentSelectionContainer extends Component<Props> {
           />
           </div>
         );
+        break;
+        case "expired":
+          body = (<SubmissionExpired/>);
+        break;
     }
 
     return (
