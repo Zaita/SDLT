@@ -8,6 +8,7 @@ export type CVATaskSubmission = {
   questionnaireSubmissionUUID: string,
   submitterID: string,
   componentTarget: string,
+  status: string
 };
 
 export type CVASelectedComponents = {
