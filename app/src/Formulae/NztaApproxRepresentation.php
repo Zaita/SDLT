@@ -64,19 +64,25 @@ class NztaApproxRepresentation extends RiskFormula
      * Return the average value of an array of numbers of any kind.
      *
      * Note: Average is calculated with the removal of the highest weighting.
+     * if single value then return 0
      *
      * @return mixed int|float
      */
     public function mean()
     {
         $weights = self::normalise();
+        $count = count($weights);
+
+        if ($count == 0) {
+            return 0;
+        }
+
         $sum = array_sum($weights);
 
         if ($sum === 0) {
             return 0;
         }
 
-        $count = count($weights);
         return ($count > 0)
                 ? number_format($sum / $count, self::PRECISION)
                 : 0;
@@ -90,27 +96,22 @@ class NztaApproxRepresentation extends RiskFormula
      * If no median is found, the laws of mathematics have been violated.
      *
      * Note: Median is calculated with the removal of the highest weighting.
+     * if single value then return 0
      *
      * @return mixed int|float
      */
     public function median()
     {
-        sort($this->weightings);
-        $origTotal = count($this->weightings);
+        $weights = self::normalise();
+        $count = count($weights);
 
-        if (!$origTotal) {
+        if ($count == 0) {
             return 0;
         }
 
-        if ($origTotal === 1) {
-            return end($this->weightings);
-        }
+        $middle = floor(($count - 1) / 2);
 
-        $weights = self::normalise();
-        $total = count($weights);
-        $middle = floor(($total - 1) / 2);
-
-        if ($total % 2) {
+        if ($count % 2) {
             return $weights[$middle];
         }
 

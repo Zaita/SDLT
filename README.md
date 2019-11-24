@@ -1,31 +1,50 @@
 # NZTA Software Development Lifecycle Tool
-(project description here)
 
-## Installation
-(todo)
+The SDLT is software that supports, and expedites I.T. security professionals as part of the change approval process within their organisation.
 
-## To install active directory please run below command in YourName project root directory
- composer require catalyst/silverstripe-active-directory
+## Requirements
 
-## Please add below code in the composer.json file of your project
+The SDLT is written in ReactJS and PHP and built on the [SilverStripe](https://silverstripe.org) framework. As such, in order to install the software you will need access to a dedicated LAMP, LEMP or similar environment. Refer to the official [Server Requirements Documentation](https://docs.silverstripe.org/en/4/getting_started/server_requirements/) to help you spec a suitable configuration for your SDLT.
+
+### Infrasructure
+
+* See the [Server Requirements Documentation](https://docs.silverstripe.org/en/4/getting_started/server_requirements/) but Apache httpd or Nginx on a Linux distribution e.g. Ubuntu is typical
+* See the [Server Requirements Documentation](https://docs.silverstripe.org/en/4/getting_started/server_requirements/) but MySQL or MariaDB will work. PostgreSQL may work, but is untested. (You will need to alter the project's `.env` file to suit)
+* A minimal `.env` file. (You can adapt the one provided at the root of this codebase)
+* Test the setup by running: `./vendor/bin/sake dev/build` (CLI) or pointing a GUI browser at: https://my-sdlt.dept.govt.nz/dev/build.
+
+### Data Import
+
+The codebase comes with a data-importer which will configure most of what you will need to get up and running with the tool.
+
+* On the CLI or within the browser run: dev/tasks/SetupSDLTDataTask
+* Login to the SilverStripe admin area to verify these data, by using the `SS_DEFAULT_ADMIN_XXX` vars below at: `https://my-sdlt.dept.govt.nz/admin/?showloginform=1` (This skips the default Active Directory authentication for now)
+
+### Customisation:
+
+* The frontend is a REACT application whose application logic, templates and CSS are found in the: "themes/sdlt" directory
+* To add further calculation algorithms to appear in "Risk Questionnaire" Tasks, developers will need to subclass `app/src/Formulae/RiskFormula.php` (See app/src/Formulae/\NztaApproxRepresentation.php and its tests as an example).
+
+### Config
+
+Rename the `.env.example` file included with the project to `.env` and ensure it is in the project-root with r+x permissions by your webserver's user. You'll need to change the dummy entries for the environment variables within the file, to suit your own environment.
+
+In order to protect the entire project behind an authentication screen, run the following task:
+
 ```
-"repositories": [
-    {
-        "type": "vcs",
-        "url": "git@gitlab.catalyst.net.nz:SilverStripe/silverstripe-active-directory.git"
-    }
-],
+./vendor/bin/sake dev/tasks/HydrateCustomConfig
 ```
 
-## Configuration and Personalisation
-* To change the title please add below code in app/lang/en.yml file
+### Tests
+
+To run the suite ("dev" environments only - see the .env file example below):
+
 ```
-en:
-  Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator:
-    TITLE: 'Change your title text please'
+./vendor/bin/phpunit
 ```
 
-A default set of questionnaires, tasks, pillars, questions, and answers has been created and distributed in CSV format. You can use this to populate your database as a starting point, then tailor the existing set for your own needs.  Run `vendor/bin/sake dev/tasks/NZTA-SDLT-Tasks-SetupSDLTDataTask` if you want to use this data. Note that this set of information does _not_ include questionnaire emails, which need to be set up for each installation.
+### Setting up Azure Active Directory
 
-#### Adding new administrators setup
-When using the Active Directory module, all users that are intended to use this system must first log into SilverStripe via AD so that SilverStripe can automatically create an account for them. On their first successful login, a Member account containing their first name, surname, email address, and unique Member Identifier will be created in the Security section of the CMS. This account *will not*, and *must not*, have any privileges until an existing Administrator adds them to the appropriate group. Attempts to create the accounts beforehand will result in an error. Once a group is assigned, these users will be able to log in with their Active Directory accounts.
+This application normally uses SilverStripe's default authentication system (username and password). It can optionally be configured to support Azure's Active Directory service or any provider that supports OAuth2. 
+
+Instructions for configuring SDLT to work with Azure and other OAuth providers can be found here: https://github.com/NZTA/SDLT/wiki/Installing-Active-Directory

@@ -47,7 +47,7 @@ class StartContainer extends Component<Props> {
   }
 
   render() {
-    const {title, subtitle, keyInformation, user} = {...this.props.startState};
+    const {title, siteConfig, keyInformation, user} = {...this.props.startState};
     const {questionnaireID, dispatchCreateInProgressSubmissionAction} = {...this.props};
 
     if(!user) {
@@ -56,7 +56,7 @@ class StartContainer extends Component<Props> {
 
     return (
       <div className="StartContainer">
-        <Header title={title} subtitle={subtitle} username={user.name}/>
+        <Header title={title} subtitle={siteConfig.siteTitle} username={user.name} logopath={siteConfig.logoPath}/>
 
         <Start keyInformation={keyInformation}
                user={user}
@@ -64,7 +64,7 @@ class StartContainer extends Component<Props> {
                  dispatchCreateInProgressSubmissionAction(questionnaireID);
                }}/>
 
-        <Footer/>
+        <Footer footerCopyrightText={siteConfig.footerCopyrightText}/>
       </div>
     );
   }

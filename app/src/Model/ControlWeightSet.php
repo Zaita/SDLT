@@ -15,6 +15,7 @@ namespace NZTA\SDLT\Model;
 
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\DropdownField;
 
 /**
  * This record allows multiple {@link Risk} records to be related to many
@@ -74,26 +75,46 @@ class ControlWeightSet extends DataObject
     {
         $fields = parent::getCMSFields();
 
-        if (($componentID = $this->SecurityComponentID) ||
-            ($componentID = $this->SecurityControl()->getParentComponentID())) {
-                $fields->dataFieldByName('SecurityComponentID')
-                    ->setValue($componentID)
-                    ->setDisabled(true);
-        }
 
-        if ($this->SecurityControlID) {
-            $fields->dataFieldByName('SecurityControlID')->setDisabled(true);
+        $fields->removeByName([
+            'RiskID',
+            'SecurityComponentID',
+            'SecurityControlID'
+        ]);
+
+        $componentID = $this->SecurityComponentID;
+
+        if (!$componentID) {
+            $componentID = $this->SecurityControl()->getParentComponentID();
         }
 
         $fields->addFieldsToTab(
             'Root.Main',
             [
-                $fields->dataFieldByName('RiskID'),
-                $fields->dataFieldByName('SecurityComponentID'),
-                $fields->dataFieldByName('SecurityControlID'),
+                DropdownField::create(
+                    'RiskID',
+                    'Risk',
+                    Risk::get()->sort('Name ASC')->map('ID', 'Name')
+                )->setEmptyString(' '),
+                DropdownField::create(
+                    'SecurityComponentID',
+                    'Security Component',
+                    SecurityComponent::get()->sort('Name ASC')->map('ID', 'Name')
+                )->setEmptyString(' '),
+                DropdownField::create(
+                    'SecurityControlID',
+                    'Security Control',
+                    SecurityControl::get()->sort('Name ASC')->map('ID', 'Name')
+                )->setEmptyString(' ')
             ],
             'Likelihood'
         );
+
+        if ($componentID) {
+            $fields->dataFieldByName('SecurityComponentID')
+            ->setValue($componentID)
+            ->setDisabled(true);
+        }
 
         return $fields;
     }
@@ -107,7 +128,7 @@ class ControlWeightSet extends DataObject
     {
         parent::onBeforeWrite();
 
-        if (!$this->ID) {
+        if (!$this->ID && !$this->SecurityComponentID) {
             $this->SecurityComponentID = $this->SecurityControl()
                 ->getParentComponentID();
         }
@@ -140,17 +161,19 @@ class ControlWeightSet extends DataObject
             $result->addError('Please select a Risk for this Control.');
         }
 
-        if ($this->RiskID) {
-            $controlRisks = self::get()
-              ->filter([
-                  'SecurityControlID' => $this->SecurityControlID,
-                  'RiskID' => $this->RiskID,
-                  'SecurityComponentID' => $this->SecurityComponentID,
-              ])->exclude('ID', $this->ID);
+        if (!$this->SecurityComponentID) {
+            $this->SecurityComponentID = $this->SecurityControl()->getParentComponentID();
+        }
 
-            if ($controlRisks->count()) {
-                $result->addError('Please select a unique Risk for this Control.');
-            }
+        $controlRisks = self::get()
+            ->filter([
+                'SecurityControlID' => $this->SecurityControlID,
+                'RiskID' => $this->RiskID,
+                'SecurityComponentID' => $this->SecurityComponentID,
+            ])->exclude('ID', $this->ID);
+
+        if ($controlRisks->count()) {
+            $result->addError('Please select a unique Risk for this Control.');
         }
 
         return $result;

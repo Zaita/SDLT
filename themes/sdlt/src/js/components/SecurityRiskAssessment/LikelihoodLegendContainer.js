@@ -10,7 +10,7 @@ class LikelihoodLegendContainer extends Component<Props> {
   render() {
     const {likelihoodThresholds} = {...this.props};
 
-    if (likelihoodThresholds.length === 0) {
+    if(!likelihoodThresholds || likelihoodThresholds.length === 0) {
       return null;
     }
 
@@ -19,7 +19,7 @@ class LikelihoodLegendContainer extends Component<Props> {
         <h3>Likelihood Legend</h3>
 
         <div className="table-responsive">
-          <table className="table">
+          <table className="table table-sm">
             <thead className="thead-light">
               <tr key="likelihood_legend_header">
                 <th>Threshold</th>
@@ -33,7 +33,7 @@ class LikelihoodLegendContainer extends Component<Props> {
                     <td>
                       {likelihoodThreshold.operator + likelihoodThreshold.value}
                     </td>
-                    <td style={{color:'#' + likelihoodThreshold.colour}}>
+                    <td style={{backgroundColor:'#' + likelihoodThreshold.color}}>
                       {likelihoodThreshold.name}
                     </td>
                   </tr>

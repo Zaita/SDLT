@@ -67,7 +67,7 @@ export type Submission = {
   },
   taskSubmissions: Array<TaskSubmissionDisplay>,
   isApprovalOverrideBySecurityArchitect: boolean,
-  productName: string
+  productName: string,
   riskResults: Array<RiskResult>,
 };
 

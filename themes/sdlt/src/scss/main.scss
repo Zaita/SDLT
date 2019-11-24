@@ -12,31 +12,35 @@ body {
 
 // Include all styles for the main app (based on React.js)
 #main-app, #business-owner-app, #vendor-app {
-
-    main {
-        .gray-bg {
-            background-color: $gray-200;
-        }
-
-        @import "components/Header/Header";
-        @import "components/Footer/Footer";
-        @import "components/Home/Home";
-        @import "components/Quesionnaire/Start";
-        @import "components/Quesionnaire/Questionnaire";
-        @import "components/Quesionnaire/Review";
-        @import "components/Quesionnaire/Summary";
-        @import "components/Quesionnaire/AnswerPreview";
-        @import "components/LeftBar/LeftBar";
-        @import "components/Quesionnaire/TaskSubmission";
-        @import "components/Button/BaseButton";
-        @import "components/Button/LightButton";
-        @import "components/Button/DarkButton";
-        @import "components/Button/HeaderButton";
-        @import "components/ComponentSelection/ComponentSelection";
-        @import "components/ComponentSelection/ComponentSelectionReview";
-        @import "components/Common/RiskResult";
-        @import "components/DSRA/SecurityRiskAssessment";
+  @import "components/Common/Loading";
+  main {
+    .gray-bg {
+        background-color: $gray-200;
     }
+
+    @import "components/Header/Header";
+    @import "components/Footer/Footer";
+    @import "components/Home/Home";
+    @import "components/Quesionnaire/Start";
+    @import "components/Quesionnaire/Questionnaire";
+    @import "components/Quesionnaire/Review";
+    @import "components/Quesionnaire/Summary";
+    @import "components/Quesionnaire/AnswerPreview";
+    @import "components/LeftBar/LeftBar";
+    @import "components/Quesionnaire/TaskSubmission";
+    @import "components/Button/BaseButton";
+    @import "components/Button/LightButton";
+    @import "components/Button/DarkButton";
+    @import "components/Button/HeaderButton";
+    @import "components/ComponentSelection/ComponentSelection";
+    @import "components/ComponentSelection/ComponentSelectionReview";
+    @import "components/ComponentSelection/ComponentInfo";
+    @import "components/ComponentSelection/ControlInfo";
+    @import "components/Common/RiskResult";
+    @import "components/Common/Loading";
+    @import "components/DSRA/SecurityRiskAssessment";
+    @import "components/DSRA/ControlValidationAudit";
+  }
 }
 
 // Include all styles for other layout (SilverStripe templates)

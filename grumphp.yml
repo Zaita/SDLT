@@ -28,7 +28,6 @@ parameters:
         - "localhost"
         - ".dev"
         - ".local"
-        - "cat-it"
         - "phpinfo"
         - "<<<<"
         - "===="

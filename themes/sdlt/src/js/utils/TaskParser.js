@@ -12,7 +12,7 @@ export default class TaskParser {
   static parseFromJSONObject(jsonObject: *): Task {
     const id = toString(get(jsonObject, "ID", ""));
     const name = toString(get(jsonObject, "Name", ""));
-
+    const componentTarget = toString(get(jsonObject, "ComponentTarget", ""));
     let type = toString(get(jsonObject, "TaskType", ""));
     switch (type) {
       case "questionnaire":
@@ -31,7 +31,7 @@ export default class TaskParser {
       });
     }
 
-    return {id, name, type, questions};
+    return {id, name, type, componentTarget, questions};
   }
 
   static parseLikelihoodJSONObject(likelihoodJSON: string | Object): LikelihoodThreshold {
@@ -49,5 +49,28 @@ export default class TaskParser {
     }
 
     return [];
+  }
+
+  static parseAlltaskSubmissionforQuestionnaire(tsObject) {
+    if (!tsObject) {
+      return [];
+    }
+    const taskSubmissions = get(tsObject, "QuestionnaireSubmission.TaskSubmissions", "")
+
+    if(get(tsObject, "Submission.TaskType", "") === 'questionnaire') {
+      return [];
+    }
+
+    if (!taskSubmissions) {
+      return [];
+    }
+
+    return taskSubmissions.map((taskSubmission) => {
+      return {
+        uuid: toString(get(taskSubmission, "UUID")),
+        taskType: toString(get(taskSubmission, "TaskType")),
+        status: toString(get(taskSubmission, "Status"))
+      }
+    });
   }
 }

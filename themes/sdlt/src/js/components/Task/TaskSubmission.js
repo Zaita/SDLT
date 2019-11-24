@@ -12,6 +12,9 @@ import DarkButton from "../Button/DarkButton";
 import pdfIcon from "../../../img/icons/pdf.svg";
 import PDFUtil from "../../utils/PDFUtil";
 import RiskResultContainer from "../Common/RiskResultContainer";
+import SecurityRiskAssessmentUtil from "../../utils/SecurityRiskAssessmentUtil";
+import {SubmissionExpired} from "../Common/SubmissionExpired";
+
 type Props = {
   taskSubmission: TaskSubmissionType,
   saveAnsweredQuestion: (answeredQuestion: Question) => void,
@@ -63,11 +66,17 @@ class TaskSubmission extends Component<Props> {
       />
     ) : null;
 
-    const editButton = showEditButton ? (
-      <LightButton title={"EDIT ANSWERS"} onClick={editAnswers} iconImage={editIcon}/>
+    const isSRATaskFinalised = taskSubmission.taskType === 'risk questionnaire' && SecurityRiskAssessmentUtil.isSRATaskFinalised(taskSubmission.siblingSubmissions);
+
+    const editButton = showEditButton && !isSRATaskFinalised ? (
+      <LightButton
+        title="EDIT ANSWERS"
+        onClick={editAnswers}
+        iconImage={editIcon}
+      />
     ) : null;
 
-    const pdfButton = (
+    const pdfButton = (taskSubmission.status === 'expired') ? null : (
       <LightButton title={"DOWNLOAD PDF"} iconImage={pdfIcon} onClick={() => this.downloadPdf()}/>
     );
 
@@ -94,18 +103,30 @@ class TaskSubmission extends Component<Props> {
 
     return (
       <div className="TaskSubmission">
-        {result}
-        {body}
-        {riskResult}
-        <div className="buttons">
-          {editButton}
-          {pdfButton}
-          {backButton}
-          <div>
-            {approveButton}
-            {denyButton}
-          </div>
-        </div>
+        {taskSubmission.status === 'expired' && <SubmissionExpired/>}
+        {
+          taskSubmission.status !== 'expired' && (
+            <div>
+              {
+                taskSubmission.taskType === 'risk questionnaire' &&
+                isSRATaskFinalised ? SecurityRiskAssessmentUtil.getSraIsFinalisedAlert() : false
+              }
+              {result}
+              {body}
+              {riskResult}
+
+                  <div className="buttons">
+                  {editButton}
+                  {pdfButton}
+                  {backButton}
+                  <div>
+                    {approveButton}
+                    {denyButton}
+                  </div>
+                </div>
+            </div>
+          )
+        }
       </div>
     );
   }
@@ -114,11 +135,11 @@ class TaskSubmission extends Component<Props> {
   downloadPdf() {
     const {
       taskSubmission,
-      siteTitle,
-      currentUser
+      currentUser,
+      siteConfig
     } = {...this.props};
 
-    if (!taskSubmission) {
+    if (!taskSubmission && !siteConfig && !currentUser) {
       return;
     }
 
@@ -126,7 +147,7 @@ class TaskSubmission extends Component<Props> {
       questions: taskSubmission.questions,
       submitter: taskSubmission.submitter.email ? taskSubmission.submitter : currentUser,
       questionnaireTitle: taskSubmission.taskName,
-      siteTitle: siteTitle,
+      siteConfig: siteConfig,
       result: taskSubmission.result,
       riskResults: taskSubmission.riskResults,
     });

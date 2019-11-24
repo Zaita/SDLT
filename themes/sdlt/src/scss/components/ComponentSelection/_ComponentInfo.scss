@@ -2,7 +2,7 @@
 
 .ComponentInfo {
   h3 {
-    font-size: 18px;
+    font-size: 16px;
     color: $blue;
     font-weight: 600;
 
@@ -12,7 +12,14 @@
     }
   }
 
-  p {
+  .control-heading {
     font-size: 16px;
+    font-weight: 600;
+    padding: 0 0 15px 30px;
+  }
+
+  p {
+    font-size: 14px;
+    padding-left: 30px;
   }
 }

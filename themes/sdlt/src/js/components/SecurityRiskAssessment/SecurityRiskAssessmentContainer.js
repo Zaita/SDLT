@@ -7,21 +7,34 @@ import {Dispatch} from "redux";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import {loadCurrentUser} from "../../actions/user";
-import {loadSiteTitle} from "../../actions/siteConfig";
-import LikelihoodLegendContainer from "../Common/LikelihoodLegendContainer";
+import LikelihoodLegendContainer from "./LikelihoodLegendContainer";
+import ImpactThresholdContainer from "./ImpactThresholdContainer";
+import RiskAssessmentMatrixTableContainer from "./RiskAssessmentMatrixTableContainer";
+import RiskRatingThresholdContainer from "./RiskRatingThresholdContainer";
 import type {User} from "../../types/User";
 import {
-  loadSecurityRiskAssessment
+  loadSecurityRiskAssessment,
+  loadImapctThreshold
 } from "../../actions/securityRiskAssessment";
+import {
+  completeTaskSubmission
+} from "../../actions/task";
 import type {SecurityRiskAssessment} from "../../types/Task";
 import URLUtil from "../../utils/URLUtil";
+import LightButton from "../Button/LightButton";
 import DarkButton from "../Button/DarkButton";
+import {loadSiteConfig} from "../../actions/siteConfig";
+import type {SiteConfig} from "../../types/SiteConfig";
+import type {ImapctThreshold} from "../../types/ImapctThreshold";
+import SecurityRiskAssessmentUtil from "../../utils/SecurityRiskAssessmentUtil";
+import {SubmissionExpired} from "../Common/SubmissionExpired";
 
 const mapStateToProps = (state: RootState) => {
   return {
-    siteTitle: state.siteConfigState.siteTitle,
+    siteConfig: state.siteConfigState.siteConfig,
     currentUser: state.currentUserState.user,
-    securityRiskAssessmentData: state.securityRiskAssessmentState.securityRiskAssessmentData
+    securityRiskAssessmentData: state.securityRiskAssessmentState.securityRiskAssessmentData,
+    impactThresholdData: state.securityRiskAssessmentState.impactThresholdData
   };
 };
 
@@ -29,8 +42,12 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
   return {
     dispatchLoadDataAction(uuid: string, secureToken: string) {
       dispatch(loadCurrentUser());
-      dispatch(loadSiteTitle());
+      dispatch(loadSiteConfig());
       dispatch(loadSecurityRiskAssessment({uuid, secureToken}));
+      dispatch(loadImapctThreshold());
+    },
+    dispatchFinaliseAction(uuid: string, secureToken?: string | null, questionnaireUUID) {
+      dispatch(completeTaskSubmission({'taskSubmissionUUID': uuid, 'secureToken': secureToken, 'questionnaireUUID': questionnaireUUID}));
     }
   };
 };
@@ -38,10 +55,12 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
 type Props = {
   uuid: string,
   secureToken: string,
-  siteTitle?: string,
+  siteConfig?: SiteConfig | null,
   currentUser?: User | null,
+  impactThresholdData?: Array<ImapctThreshold> | null,
   securityRiskAssessmentData?: SecurityRiskAssessment | null,
   dispatchLoadDataAction?: (uuid: string, secureToken: string) => void,
+  dispatchFinaliseAction?: (uuid: string, secureToken: string) => void,
 };
 
 class SecurityRiskAssessmentContainer extends Component<Props> {
@@ -50,37 +69,88 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
     dispatchLoadDataAction(uuid, secureToken);
   }
 
+
   render() {
     const {
-      siteTitle,
+      siteConfig,
       currentUser,
       securityRiskAssessmentData,
-      secureToken
+      secureToken,
+      impactThresholdData
     } = {...this.props};
 
-    if (!currentUser || !siteTitle || !securityRiskAssessmentData) {
+    if (!currentUser || !siteConfig || !securityRiskAssessmentData) {
       return null;
     }
 
+    const {
+      uuid,
+      taskName,
+      questionnaireSubmissionUUID,
+      taskSubmissions,
+      sraData,
+      status
+    } = {...securityRiskAssessmentData};
+
+    const isSRATaskFinalised = SecurityRiskAssessmentUtil.isSRATaskFinalised(taskSubmissions);
+
     const backButton = (
-      <DarkButton
+      <LightButton
         title={"BACK TO QUESTIONNAIRE SUMMARY"}
+        classes={["button ml-3"]}
         onClick={() => {
-          URLUtil.redirectToQuestionnaireSummary(securityRiskAssessmentData.questionnaireSubmissionUUID, secureToken);
+          URLUtil.redirectToQuestionnaireSummary(questionnaireSubmissionUUID, secureToken);
         }}
       />
     );
 
+    const isSiblingTaskPending = SecurityRiskAssessmentUtil.isSiblingTaskPending(taskSubmissions);
+
+    const finaliseButton = !isSRATaskFinalised && !isSiblingTaskPending
+      ? (
+        <DarkButton title="FINALISE"
+          classes={["button ml-3"]}
+          onClick={() => {
+            this.props.dispatchFinaliseAction(uuid, secureToken, questionnaireSubmissionUUID);
+          }}
+        />
+      )
+      : null;
+
     return (
       <div className="SecurityRiskAssessmentContainer">
-        <Header title={securityRiskAssessmentData.taskName} subtitle={siteTitle} username={currentUser.name}/>
-        <div className="SecurityRiskAssessmentResult">
-          <LikelihoodLegendContainer likelihoodThresholds={securityRiskAssessmentData.likelihoodRatings} />
-          <div className="buttons">
-            {backButton}
-          </div>
-        </div>
-        <Footer/>
+
+        <Header title={securityRiskAssessmentData.taskName} subtitle={siteConfig.siteTitle} username={currentUser.name} logopath={siteConfig.logoPath} />
+
+        {securityRiskAssessmentData.status === 'expired' && <SubmissionExpired/>}
+        {
+          securityRiskAssessmentData.status !== 'expired' && (
+            <div className="SecurityRiskAssessmentResult">
+              {isSRATaskFinalised ? SecurityRiskAssessmentUtil.getSraIsFinalisedAlert() : false}
+
+              <RiskAssessmentMatrixTableContainer
+                calculatedSRAData={sraData.calculatedSRAData}
+                hasProductAspects={sraData.hasProductAspects}
+              />
+
+              <LikelihoodLegendContainer
+                likelihoodThresholds={sraData.likelihoodThresholds}
+              />
+
+              <ImpactThresholdContainer impactThresholds={impactThresholdData} />
+
+              <RiskRatingThresholdContainer
+                riskRatingThresholds={sraData.riskRatingThresholds}
+              />
+
+              <div className="buttons">
+                {backButton}
+                {finaliseButton}
+              </div>
+            </div>
+          )
+        }
+        <Footer footerCopyrightText={siteConfig.footerCopyrightText}/>
       </div>
     )
   }

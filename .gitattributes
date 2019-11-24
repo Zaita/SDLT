@@ -2,7 +2,7 @@
 # Review .gitignore also. If files are not in VCS, then deploy tools will ignore these too
 /.gitattributes export-ignore
 /.editorconfig export-ignore
-/.gitlab-ci.yml edxport ignore
+/.gitlab-ci.yml export ignore
 /.git-completion.sh export-ignore
 /.packages export-ignore
 /.phpexts.json export-ignore

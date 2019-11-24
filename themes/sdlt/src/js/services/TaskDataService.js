@@ -39,6 +39,11 @@ query {
       ID
       UUID
       QuestionnaireStatus
+      TaskSubmissions {
+        UUID
+        Status
+        TaskType
+      }
     }
     Submitter {
       ID
@@ -52,8 +57,17 @@ query {
     AnswerData
     SelectedComponents {
       ID
-      Name
-      Description
+      ProductAspect
+      SecurityComponent {
+        ID
+        Name
+        Description
+        Controls {
+          ID
+          Name
+          Description
+        }
+      }
     }
     JiraTickets {
       ID
@@ -63,11 +77,14 @@ query {
     IsTaskApprovalRequired
     IsCurrentUserAnApprover
     RiskResultData
+    ComponentTarget
+    ProductAspects
   }
 }`;
 
     const responseJSONObject = await GraphQLRequestHelper.request({query});
     const submissionJSONObject = get(responseJSONObject, "data.readTaskSubmission.0", null);
+
     if (!submissionJSONObject) {
       throw DEFAULT_NETWORK_ERROR;
     }
@@ -92,9 +109,11 @@ query {
       jiraTickets: JiraTicketParser.parseFromJSONArray(get(submissionJSONObject, "JiraTickets", [])),
       isCurrentUserAnApprover:  _.get(submissionJSONObject, "IsCurrentUserAnApprover", "false") === "true",
       isTaskApprovalRequired: get(submissionJSONObject, "IsTaskApprovalRequired", false) === "true",
-      riskResults: _.has(submissionJSONObject, 'RiskResultData') ? JSON.parse(_.get(submissionJSONObject, "RiskResultData", "[]")) : "[]"
+      riskResults: _.has(submissionJSONObject, 'RiskResultData') ? JSON.parse(_.get(submissionJSONObject, "RiskResultData", "[]")) : "[]",
+      productAspects:  _.has(submissionJSONObject, 'ProductAspects') ? JSON.parse(_.get(submissionJSONObject, "ProductAspects", [])) : [],
+      componentTarget: toString(get(submissionJSONObject, "ComponentTarget", "")),
+      siblingSubmissions: TaskParser.parseAlltaskSubmissionforQuestionnaire(submissionJSONObject)
     };
-
     return data;
   }
 
@@ -202,17 +221,16 @@ query {
     args: {
       uuid: string,
       csrfToken: string,
-      componentIDs: Array<string>,
+      components: Array,
       jiraKey: string
     }
   ): Promise<{ uuid: string }> {
-    const {uuid, csrfToken, componentIDs, jiraKey} = {...args};
-
+    const {uuid, csrfToken, components, jiraKey} = {...args};
     const query = `
 mutation {
  updateTaskSubmissionWithSelectedComponents(
  UUID: "${uuid}",
- ComponentIDs: "${window.btoa(JSON.stringify(componentIDs))}",
+ Components: "${window.btoa(JSON.stringify(components))}",
  JiraKey: "${jiraKey}"
  ) {
    UUID

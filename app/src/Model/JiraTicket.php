@@ -20,7 +20,6 @@ use SilverStripe\GraphQL\OperationResolver;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\DataObject;
-use NZTA\SDLT\Helper\JIRA;
 
 /**
  * Class JiraTicket
@@ -48,7 +47,9 @@ class JiraTicket extends DataObject implements ScaffoldingProvider
      * @var array
      */
     private static $has_one = [
-        'TaskSubmission' => TaskSubmission::class
+        'TaskSubmission' => TaskSubmission::class,
+        'SecurityComponent' => SecurityComponent::class,
+        'TaskSubmissionSelectedComponent' => SelectedComponent::class,
     ];
 
     /**
@@ -101,18 +102,38 @@ class JiraTicket extends DataObject implements ScaffoldingProvider
 
                     $jiraTicket = JiraTicket::create();
                     $jiraTicket->JiraKey = Convert::raw2sql($args['JiraKey']);
-                    $link = JIRA::create()->addTask(
+                    $link = $jiraTicket->issueTrackerService->addTask( // <-- Makes an API call
                         $jiraTicket->JiraKey,
-                        $component->Name,
-                        $component->getJIRABody()
+                        $component
                     );
                     $jiraTicket->TicketLink = $link;
                     $jiraTicket->write();
-
 
                     return $jiraTicket;
                 }
             })
             ->end();
+    }
+
+    /**
+     * @return string
+     */
+    public function getJiraTicketID()
+    {
+        $ticketID = '';
+
+        if (!$this->TicketLink) {
+            return $ticketID;
+        }
+
+        $ticketParts = explode('/', $this->TicketLink);
+
+        if (empty($ticketParts)) {
+            return $ticketID;
+        }
+
+        $ticketID = trim(array_pop($ticketParts));
+
+        return $ticketID;
     }
 }

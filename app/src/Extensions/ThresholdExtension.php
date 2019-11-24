@@ -20,6 +20,7 @@ use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\ORM\FieldType\DBInt;
 use TractorCow\Colorpicker\Color;
 use TractorCow\Colorpicker\Forms\ColorField;
 
@@ -36,7 +37,7 @@ class ThresholdExtension extends DataExtension
      */
     private static $db = [
         'Name' => DBVarchar::class,
-        'Value' => DBVarchar::class,
+        'Value' => DBInt::class,
         'Colour' => Color::class,
         'Operator' => DBVarchar::class,
     ];
@@ -68,8 +69,18 @@ class ThresholdExtension extends DataExtension
     {
         return DBField::create_field(
             DBHTMLText::class,
-            sprintf('<div style="width:30px;height:30px;background:#%s;"></div>', $this->owner->Colour)
+            sprintf('<div style="width:30px;height:30px;background:%s;"></div>', $this->getHexColour())
         );
+    }
+
+    /**
+     * Get hexadecimal colour with # prefix
+     *
+     * @return string
+     */
+    public function getHexColour()
+    {
+        return sprintf("#%s", $this->owner->Colour);
     }
 
     /**

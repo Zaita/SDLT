@@ -6,16 +6,14 @@ import type {AnswerAction, AnswerInput, Question} from "../types/Questionnaire";
 import React from "react";
 import StringUtil from "./StringUtil";
 import _ from "lodash";
-import headingImage from "../../img/PDF/heading.jpg";
-import footerImage from "../../img/PDF/footer.jpg";
 import type {User} from "../types/User";
 import moment from "moment";
+import SiteConfigParser from "../utils/SiteConfigParser";
 
 type GeneratePDFArgument = {
   questions: Array<Question>,
   submitter: User,
-  questionnaireTitle: string,
-  siteTitle: string
+  questionnaireTitle: string
 }
 
 async function getImageDataByBlob(blob: Blob): Promise<string> {
@@ -29,7 +27,7 @@ async function getImageDataByBlob(blob: Blob): Promise<string> {
 }
 
 async function getImageDataByURL(imageURL: string) {
-  const response = await fetch(imageURL);
+  const response = await fetch(imageURL || fallback);
   const blob = await response.blob();
   const data = await getImageDataByBlob(blob);
   return data;
@@ -38,7 +36,7 @@ async function getImageDataByURL(imageURL: string) {
 export default class PDFUtil {
 
   static async generatePDF(args: GeneratePDFArgument) {
-    const {questions, submitter, questionnaireTitle, siteTitle, result, riskResults} = {...args};
+    const {questions, submitter, questionnaireTitle, siteConfig, result, riskResults} = {...args};
 
     const defaultFontSize = 12;
     const content = [];
@@ -74,9 +72,8 @@ export default class PDFUtil {
     const {vfs} = vfsFonts.pdfMake;
     pdfMake.vfs = vfs;
 
-
-    // Heading image
-    const headingImageData = await getImageDataByURL(headingImage);
+    // Header image
+    const headingImageData = await getImageDataByURL(siteConfig.pdfHeaderImageLink);
 
     content.push({
       image: headingImageData,
@@ -93,7 +90,7 @@ export default class PDFUtil {
 
     // Site title
     content.push({
-      text: siteTitle,
+      text: siteConfig.siteTitle,
       style: "siteTitle",
       margin: [0, 0, 0, defaultFontSize * 2],
     });
@@ -231,9 +228,6 @@ export default class PDFUtil {
       }
     });
 
-    // Footer
-    const footerImageData = await getImageDataByURL(footerImage);
-
     if(typeof riskResults === 'object' && riskResults.length > 0) {
       let results = [
         [
@@ -270,6 +264,9 @@ export default class PDFUtil {
       });
     }
 
+    // Footer image
+    const footerImageData = await getImageDataByURL(siteConfig.pdfFooterImageLink);
+
     content.push({
       image: footerImageData,
       width: 500,
@@ -279,7 +276,7 @@ export default class PDFUtil {
     try {
       await pdfMake.createPdf({info, content, styles, defaultStyle}).download(info.title);
     } catch {
-      alert("Can't download PDF, please disable AdBlock!");
+      alert("Unable to generate your PDF. Maybe you have a browser Ad-Block extension enabled?");
     }
 
   }
