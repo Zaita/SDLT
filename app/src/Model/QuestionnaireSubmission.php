@@ -182,7 +182,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'title' => 'Submitter Name'
             ],
             'SubmitterEmail' => [
-                'filter' => 'ExactMatchFilter',
+                'filter' => 'PartialMatchFilter',
                 'title' => 'Submitter Email'
             ],
             'QuestionnaireStatus' => [
@@ -2536,9 +2536,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
           */
         if (!($job && $job->ID)) {
             $nextJob = Injector::inst()->create(CheckSubmissionExpiredJob::class);
-
             singleton(QueuedJobService::class)->queueJob($nextJob, date('Y-m-d H:i:s', strtotime("tomorrow 0:27:30")));
-
         }
     }
 }
