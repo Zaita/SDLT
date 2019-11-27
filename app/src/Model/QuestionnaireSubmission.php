@@ -174,7 +174,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     ->setEmptyString('(Any)')
             ],
             'ProductName' => [
-                'filter' => 'ExactMatchFilter',
+                'filter' => 'PartialMatchFilter',
                 'title' => 'Product Name',
             ],
             'SubmitterName' => [
@@ -202,7 +202,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'title' => 'Security Architect Approval Status'
             ],
             'UUID' => [
-                'filter' => 'ExactMatchFilter',
+                'filter' => 'PartialMatchFilter',
                 'title' => 'UUID'
             ],
             'Created'=> [
@@ -2537,7 +2537,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         if (!($job && $job->ID)) {
             $nextJob = Injector::inst()->create(CheckSubmissionExpiredJob::class);
 
-            +(QueuedJobService::class)->queueJob($nextJob, date('Y-m-d H:i:s', strtotime("tomorrow 0:27:30")));
+            singleton(QueuedJobService::class)->queueJob($nextJob, date('Y-m-d H:i:s', strtotime("tomorrow 0:27:30")));
+
         }
     }
 }
