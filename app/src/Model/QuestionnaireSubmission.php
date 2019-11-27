@@ -51,9 +51,10 @@ use SilverStripe\SiteConfig\SiteConfig;
 use NZTA\SDLT\Traits\SDLTSubmissionJson;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Forms\DateField;
 
 /**
- * Class Questionnaire
+ * Class QuestionnaireSubmission
  *
  */
 class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
@@ -153,22 +154,64 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     ];
 
     /**
-     * Defines a default list of filters for the search context
+     * Defines a customised list of filters for the search context
      * @var array
      */
-    private static $searchable_fields = [
-        'Questionnaire.Name',
-        'Questionnaire.Type',
-        'ProductName',
-        'SubmitterName',
-        'SubmitterEmail',
-        'QuestionnaireStatus',
-        'CisoApprovalStatus',
-        'BusinessOwnerApprovalStatus',
-        'SecurityArchitectApprovalStatus',
-        'UUID',
-        'Created'
-    ];
+    public function searchableFields()
+    {
+        $questionnaireType = singleton(Questionnaire::class)->dbObject('Type')->enumValues();
+
+        return [
+            'Questionnaire.Name' => [
+                'filter' => 'PartialMatchFilter',
+                'title' => 'Questionnaire Name',
+            ],
+            'Questionnaire.Type' => [
+                'filter' => 'ExactMatchFilter',
+                'title' => 'Questionnaire Type',
+                'field' => DropdownField::create('QuestionnaireType')
+                    ->setSource($questionnaireType)
+                    ->setEmptyString('(Any)')
+            ],
+            'ProductName' => [
+                'filter' => 'ExactMatchFilter',
+                'title' => 'Product Name',
+            ],
+            'SubmitterName' => [
+                'filter' => 'PartialMatchFilter',
+                'title' => 'Submitter Name'
+            ],
+            'SubmitterEmail' => [
+                'filter' => 'ExactMatchFilter',
+                'title' => 'Submitter Email'
+            ],
+            'QuestionnaireStatus' => [
+                'filter' => 'ExactMatchFilter',
+                'title' => 'Questionnaire Status'
+            ],
+            'CisoApprovalStatus' => [
+                'filter' => 'ExactMatchFilter',
+                'title' => 'Ciso Approval Status'
+            ],
+            'BusinessOwnerApprovalStatus' => [
+                'filter' => 'ExactMatchFilter',
+                'title' => 'Business Owner Approval Status'
+            ],
+            'SecurityArchitectApprovalStatus' => [
+                'filter' => 'ExactMatchFilter',
+                'title' => 'Security Architect Approval Status'
+            ],
+            'UUID' => [
+                'filter' => 'ExactMatchFilter',
+                'title' => 'UUID'
+            ],
+            'Created'=> [
+                'filter' => 'PartialMatchFilter',
+                'title' => 'Created Date',
+                'field' => DateField::create('Created')
+            ]
+        ];
+    }
 
     /**
      * @return string
@@ -2493,7 +2536,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
           */
         if (!($job && $job->ID)) {
             $nextJob = Injector::inst()->create(CheckSubmissionExpiredJob::class);
-            singleton(QueuedJobService::class)->queueJob($nextJob, date('Y-m-d H:i:s', strtotime("tomorrow 0:27:30")));
+
+            +(QueuedJobService::class)->queueJob($nextJob, date('Y-m-d H:i:s', strtotime("tomorrow 0:27:30")));
         }
     }
 }
