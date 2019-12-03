@@ -127,8 +127,6 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
      */
     public function searchableFields()
     {
-        $questionnaireType = singleton(Questionnaire::class)->dbObject('Type')->enumValues();
-
         return [
             'Name' => [
                 'filter' => 'PartialMatchFilter',
