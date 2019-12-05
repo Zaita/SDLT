@@ -17,7 +17,6 @@ use Exception;
 use GraphQL\Type\Definition\ResolveInfo;
 use NZTA\SDLT\Constant\UserGroupConstant;
 use NZTA\SDLT\GraphQL\GraphQLAuthFailure;
-use NZTA\SDLT\Job\SendApprovedNotificationEmailJob;
 use SilverStripe\GraphQL\OperationResolver;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ResolverInterface;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
@@ -33,6 +32,7 @@ use NZTA\SDLT\Job\SendStartLinkEmailJob;
 use NZTA\SDLT\Job\SendSummaryPageLinkEmailJob;
 use NZTA\SDLT\Job\SendApprovalLinkEmailJob;
 use NZTA\SDLT\Job\SendDeniedNotificationEmailJob;
+use NZTA\SDLT\Job\SendApprovedNotificationEmailJob;
 use NZTA\SDLT\Job\CheckSubmissionExpiredJob;
 use Silverstripe\Control\Director;
 use SilverStripe\Core\Convert;
@@ -155,7 +155,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
     /**
      * Defines a customised list of filters for the search context
-     * @var array
+     * @return array
      */
     public function searchableFields()
     {
@@ -1295,7 +1295,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         $qs = QueuedJobService::create();
 
                         $qs->queueJob(
-                            new CheckSubmissionExpiredJob($questionnaireSubmission, $members),
+                            new SendApprovalLinkEmailJob($questionnaireSubmission, $members),
                             date('Y-m-d H:i:s', time() + 90)
                         );
                     }
