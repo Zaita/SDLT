@@ -1879,6 +1879,12 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $this->CisoApprovalStatus = self::STATUS_NOT_REQUIRED;
                     $this->BusinessOwnerApprovalStatus = self::STATUS_NOT_REQUIRED;
 
+                    // handle if there is no business owner question field exist in the questionnaire
+                    // or if $this->BusinessOwnerEmailAddress is null then convert that into empty string
+                    if (!$this->BusinessOwnerEmailAddress || is_null($this->BusinessOwnerEmailAddress)) {
+                        $this->BusinessOwnerEmailAddress = '';
+                    }
+
                     // send approved email notification to the user (submitter)
                     $queuedJobService = QueuedJobService::create();
                     $queuedJobService->queueJob(
