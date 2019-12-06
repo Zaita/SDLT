@@ -122,6 +122,24 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     ];
 
     /**
+     * Defines a customised list of filters for the search context
+     * @return array
+     */
+    public function searchableFields()
+    {
+        return [
+            'Name' => [
+                'filter' => 'PartialMatchFilter',
+                'title' => 'Name',
+            ],
+            'Type' => [
+                'filter' => 'ExactMatchFilter',
+                'title' => 'Type'
+            ]
+        ];
+    }
+
+    /**
      * Legacy questionnaires will not have a "Type" field for display in e.g.
      * $summary_fields.
      *
