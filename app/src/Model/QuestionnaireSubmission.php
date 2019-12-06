@@ -17,7 +17,6 @@ use Exception;
 use GraphQL\Type\Definition\ResolveInfo;
 use NZTA\SDLT\Constant\UserGroupConstant;
 use NZTA\SDLT\GraphQL\GraphQLAuthFailure;
-use NZTA\SDLT\Job\SendApprovedNotificationEmailJob;
 use SilverStripe\GraphQL\OperationResolver;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ResolverInterface;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
@@ -33,6 +32,7 @@ use NZTA\SDLT\Job\SendStartLinkEmailJob;
 use NZTA\SDLT\Job\SendSummaryPageLinkEmailJob;
 use NZTA\SDLT\Job\SendApprovalLinkEmailJob;
 use NZTA\SDLT\Job\SendDeniedNotificationEmailJob;
+use NZTA\SDLT\Job\SendApprovedNotificationEmailJob;
 use NZTA\SDLT\Job\CheckSubmissionExpiredJob;
 use Silverstripe\Control\Director;
 use SilverStripe\Core\Convert;
@@ -51,9 +51,10 @@ use SilverStripe\SiteConfig\SiteConfig;
 use NZTA\SDLT\Traits\SDLTSubmissionJson;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Forms\DateField;
 
 /**
- * Class Questionnaire
+ * Class QuestionnaireSubmission
  *
  */
 class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
@@ -153,22 +154,64 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
     ];
 
     /**
-     * Defines a default list of filters for the search context
-     * @var array
+     * Defines a customised list of filters for the search context
+     * @return array
      */
-    private static $searchable_fields = [
-        'Questionnaire.Name',
-        'Questionnaire.Type',
-        'ProductName',
-        'SubmitterName',
-        'SubmitterEmail',
-        'QuestionnaireStatus',
-        'CisoApprovalStatus',
-        'BusinessOwnerApprovalStatus',
-        'SecurityArchitectApprovalStatus',
-        'UUID',
-        'Created'
-    ];
+    public function searchableFields()
+    {
+        $questionnaireType = singleton(Questionnaire::class)->dbObject('Type')->enumValues();
+
+        return [
+            'Questionnaire.Name' => [
+                'filter' => 'PartialMatchFilter',
+                'title' => 'Questionnaire Name',
+            ],
+            'Questionnaire.Type' => [
+                'filter' => 'ExactMatchFilter',
+                'title' => 'Questionnaire Type',
+                'field' => DropdownField::create('QuestionnaireType')
+                    ->setSource($questionnaireType)
+                    ->setEmptyString('(Any)')
+            ],
+            'ProductName' => [
+                'filter' => 'PartialMatchFilter',
+                'title' => 'Product Name',
+            ],
+            'SubmitterName' => [
+                'filter' => 'PartialMatchFilter',
+                'title' => 'Submitter Name'
+            ],
+            'SubmitterEmail' => [
+                'filter' => 'PartialMatchFilter',
+                'title' => 'Submitter Email'
+            ],
+            'QuestionnaireStatus' => [
+                'filter' => 'ExactMatchFilter',
+                'title' => 'Questionnaire Status'
+            ],
+            'CisoApprovalStatus' => [
+                'filter' => 'ExactMatchFilter',
+                'title' => 'Ciso Approval Status'
+            ],
+            'BusinessOwnerApprovalStatus' => [
+                'filter' => 'ExactMatchFilter',
+                'title' => 'Business Owner Approval Status'
+            ],
+            'SecurityArchitectApprovalStatus' => [
+                'filter' => 'ExactMatchFilter',
+                'title' => 'Security Architect Approval Status'
+            ],
+            'UUID' => [
+                'filter' => 'PartialMatchFilter',
+                'title' => 'UUID'
+            ],
+            'Created'=> [
+                'filter' => 'PartialMatchFilter',
+                'title' => 'Created Date',
+                'field' => DateField::create('Created')
+            ]
+        ];
+    }
 
     /**
      * @return string
@@ -1252,7 +1295,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         $qs = QueuedJobService::create();
 
                         $qs->queueJob(
-                            new CheckSubmissionExpiredJob($questionnaireSubmission, $members),
+                            new SendApprovalLinkEmailJob($questionnaireSubmission, $members),
                             date('Y-m-d H:i:s', time() + 90)
                         );
                     }
@@ -1835,6 +1878,12 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     $this->CisoApprovalStatus = self::STATUS_NOT_REQUIRED;
                     $this->BusinessOwnerApprovalStatus = self::STATUS_NOT_REQUIRED;
+
+                    // handle if there is no business owner question field exist in the questionnaire
+                    // or if $this->BusinessOwnerEmailAddress is null then convert that into empty string
+                    if (!$this->BusinessOwnerEmailAddress || is_null($this->BusinessOwnerEmailAddress)) {
+                        $this->BusinessOwnerEmailAddress = '';
+                    }
 
                     // send approved email notification to the user (submitter)
                     $queuedJobService = QueuedJobService::create();
