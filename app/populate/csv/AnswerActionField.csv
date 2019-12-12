@@ -1,618 +1,621 @@
-ID,ClassName,Label,ActionType,Message,TaskID,GotoID,QuestionID,SortOrder,Result
-1,NZTA\SDLT\Model\AnswerActionField,Yes,message,"<p>If this product has already gone through a proof of concept or trial, please contact the security architects (security.architects@example.govt.nz) for next steps. They will be able to provide information on why this product was never adopted after the previous POC/Trial.</p><p>&nbsp;</p><p>If this product is currently in a POC/Trial and you wish to get an extension. Please email the security architects (security.architects@example.co.nz) to discuss this. Please ensure there is clear justification for the extension to this POC/Trial. If there is not, it is recommended that you start through the SaaS questionnaire to get the product officially certified.</p>",0,1,2,0,
-2,NZTA\SDLT\Model\AnswerActionField,No,goto,<p>asdasd</p>,0,4,2,0,
-3,NZTA\SDLT\Model\AnswerActionField,Yes,message,"<p>Moving an existing proof of concept or trial to production requires appropriate security assurance to be completed. Please fill out the <a class=""ss-broken"" href=""/#/questionnaire/start/2"">SaaS Questionnaire</a>.</p>",0,0,3,0,
-4,NZTA\SDLT\Model\AnswerActionField,No,continue,<p>Moving an existing proof of concept or trial to production requires appropriate security assurance to be completed. Please fill out the Product Questionnaire.</p>,0,0,3,0,
-5,NZTA\SDLT\Model\AnswerActionField,Yes,message,"<p>This product may have already gone through the required security assurance processes. Please contact the security architects (security.architects@example.govt.nz) to check.</p><p>&nbsp;</p><p>If you know for certain that this product has been previously cleared, or used within the agency. Then, this product would have been previously certified for use by the security team. No further security assurance processes are required. Please engage the Change Advisory Board (CAB) to use this product.</p>",0,1,4,0,
-6,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,4,0,
-7,NZTA\SDLT\Model\AnswerActionField,Yes,message,"<p>Products developed by/for the Agency are not candidates for a proof of concept or trial.&nbsp;</p><p>&nbsp;</p><p>If the Agency will consume this product as a hosted service by one of our vendors (e.g. Unisys), then please complete the Software as a Service questionnaire.</p><p>&nbsp;</p><p>If the Agency is going to deploy this product within our own on-prem or cloud infrastructure, then please complete the Solution Delivery questionnaire.</p>",0,1,5,0,
-8,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,1,5,0,
-9,NZTA\SDLT\Model\AnswerActionField,Continue,continue,,0,0,8,0,
-10,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,1,9,0,
-11,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,1,9,0,
-12,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,1,10,0,
-13,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,1,10,0,
-14,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,0,11,0,
-15,NZTA\SDLT\Model\AnswerActionField,No,goto,,0,74,11,0,
-16,NZTA\SDLT\Model\AnswerActionField,Continue,continue,,0,0,12,0,
-17,NZTA\SDLT\Model\AnswerActionField,Continue,continue,,0,0,13,0,
-18,NZTA\SDLT\Model\AnswerActionField,Continue,continue,,0,0,14,0,
-19,NZTA\SDLT\Model\AnswerActionField,Continue,continue,,0,0,15,0,
-20,NZTA\SDLT\Model\AnswerActionField,Continue,continue,,0,0,16,0,
-21,NZTA\SDLT\Model\AnswerActionField,Continue,continue,,0,0,17,0,
-22,NZTA\SDLT\Model\AnswerActionField,Yes,message,"<p>This product may have already gone through the required security assurance processes. Please contact the security architects (security.architects@example.govt.nz) to check.</p><p>&nbsp;</p><p>If you know for certain that this product has been previously cleared, or used within the agency. Then, this product would have been previously certified for use by the security team. No further security assurance processes are required. Please engage the Change Advisory Board (CAB) to use this product.</p>",0,22,23,0,
-23,NZTA\SDLT\Model\AnswerActionField,No,continue,,4,28,23,0,
-24,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,4,22,29,0,
-25,NZTA\SDLT\Model\AnswerActionField,No,goto,,0,35,29,0,
-26,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,46,28,30,0,
-27,NZTA\SDLT\Model\AnswerActionField,No,goto,,0,35,30,0,
-28,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,17,28,35,0,
-29,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,22,35,0,
-30,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,4,0,37,0,
-31,NZTA\SDLT\Model\AnswerActionField,No,goto,,0,39,37,0,
-32,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,40,28,41,0,
-33,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,28,41,0,
-34,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,38,32,42,0,
-35,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,38,32,44,0,
-36,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,32,44,0,
-37,NZTA\SDLT\Model\AnswerActionField,Yes,finish,,0,0,43,0,
-38,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,43,0,
-39,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,0,45,0,
-40,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,45,0,
-41,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,0,46,0,
-42,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,46,0,
-43,NZTA\SDLT\Model\AnswerActionField,Yes - Sensitive Classification,finish,,0,0,47,0,
-44,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,0,49,0,
-45,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,47,0,
-46,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,49,0,
-47,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,8,0,51,0,
-48,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,51,0,
-49,NZTA\SDLT\Model\AnswerActionField,Yes,finish,,0,0,50,0,
-50,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,12,413,52,0,
-51,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,50,0,
-52,NZTA\SDLT\Model\AnswerActionField,No,goto,,0,413,52,0,
-53,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,0,53,0,
-54,NZTA\SDLT\Model\AnswerActionField,No,goto,,0,202,53,0,
-55,NZTA\SDLT\Model\AnswerActionField,Yes,finish,,0,0,55,0,
-56,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,55,0,
-57,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,56,42,0,
-58,NZTA\SDLT\Model\AnswerActionField,Yes,finish,,0,0,57,0,
-59,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,57,0,
-60,NZTA\SDLT\Model\AnswerActionField,Yes,finish,,0,0,58,0,
-61,NZTA\SDLT\Model\AnswerActionField,No,finish,,0,0,58,0,
-62,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,29,59,60,0,
-63,NZTA\SDLT\Model\AnswerActionField,No,goto,,0,65,60,0,
-64,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,0,61,0,
-65,NZTA\SDLT\Model\AnswerActionField,No,continue,,5,59,61,0,
-66,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,8,0,64,0,
-67,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,64,0,
-68,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,38,59,65,0,
-69,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,65,0,
-70,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,38,59,66,0,
-71,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,66,0,
-72,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,40,59,67,0,
-73,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,67,0,
-74,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,0,68,0,
-75,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,189,68,0,
-76,NZTA\SDLT\Model\AnswerActionField,Yes,finish,<p>The use of Sensitive information is limited within the Agency. The primary indicator is if the release of information could put a person in danger. This would include things like records of people who have commit infraction/compliance mistakes etc.</p>,0,0,77,0,Classification: Sensitive
-77,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,77,0,
-78,NZTA\SDLT\Model\AnswerActionField,Yes,finish,"<p>If this information can be disclosed to the public without consequence then it is considered ""Public Data"". The relevant classification for this is ""Unclassified"".</p>",0,76,78,0,Classification: In-Confidence
-79,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,78,0,
-80,NZTA\SDLT\Model\AnswerActionField,Yes,finish,"<p>We're asking the same question from multiple angles to make sure the person answering doesn't misinterpret the intention. They may think it's ok to email to media, but not be disclosed publicly..Even though the end result is identical.</p>",0,0,79,0,Classification: Unclassified
-81,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,79,0,
-82,NZTA\SDLT\Model\AnswerActionField,Finish,finish,"<p>This one might need revisions. But arguably, anything that can be accessed without authentication is something we're not protecting..So by it's nature unclassified? I'm not too sure on this one.</p>",0,76,80,0,Classification: Unclassified
-83,NZTA\SDLT\Model\AnswerActionField,No,finish,,0,0,0,0,Classification: In-Confidence
-84,NZTA\SDLT\Model\AnswerActionField,Start,continue,,0,0,89,0,
-85,NZTA\SDLT\Model\AnswerActionField,Ok,finish,,6,109,90,0,
-86,NZTA\SDLT\Model\AnswerActionField,Ok,continue,,7,109,91,0,
-87,NZTA\SDLT\Model\AnswerActionField,Yes,finish,,0,0,92,0,
-88,NZTA\SDLT\Model\AnswerActionField,Yes,finish,,0,0,93,0,
-89,NZTA\SDLT\Model\AnswerActionField,Yes,finish,,0,0,94,0,
-90,NZTA\SDLT\Model\AnswerActionField,Yes,finish,,0,0,97,0,High Risk
-91,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,97,0,
-92,NZTA\SDLT\Model\AnswerActionField,Yes,finish,,0,0,98,0,High Risk
-93,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,98,0,
-94,NZTA\SDLT\Model\AnswerActionField,Yes,finish,,0,0,99,0,High Risk
-95,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,99,0,
-96,NZTA\SDLT\Model\AnswerActionField,Yes,finish,,0,0,100,0,Medium Risk
-97,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,100,0,
-98,NZTA\SDLT\Model\AnswerActionField,Yes,finish,,0,0,101,0,Medium Risk
-99,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,101,0,
-100,NZTA\SDLT\Model\AnswerActionField,Yes,finish,,0,0,102,0,Medium Risk
-101,NZTA\SDLT\Model\AnswerActionField,No,finish,,0,0,102,0,Low Risk
-102,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,0,106,0,
-103,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,0,106,0,
-104,NZTA\SDLT\Model\AnswerActionField,Yes,message,<p><span>Products developed by/for the Agency are not candidates for a software-as-a-service approval. Please fill out the&nbsp;</span>Product questionnaire</p>,0,22,24,0,
-105,NZTA\SDLT\Model\AnswerActionField,No,continue,,5,22,24,0,
-106,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,75,109,0,
-107,NZTA\SDLT\Model\AnswerActionField,No,goto,,0,111,109,0,
-108,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,75,111,0,
-109,NZTA\SDLT\Model\AnswerActionField,No,goto,,0,113,111,0,
-110,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,75,113,0,
-112,NZTA\SDLT\Model\AnswerActionField,No,goto,,0,91,113,0,
-113,NZTA\SDLT\Model\AnswerActionField,Yes,finish,,0,115,115,0,Classification: In-Confidence
-114,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,115,115,0,
-115,NZTA\SDLT\Model\AnswerActionField,Yes,finish,,0,116,116,0,Classification: In-Confidence
-116,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,116,116,0,
-117,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,109,0,0,
-118,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,109,0,0,
-119,NZTA\SDLT\Model\AnswerActionField,I Confirm,finish,,0,117,117,0,
-120,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,117,117,0,
-121,NZTA\SDLT\Model\AnswerActionField,I Confirm,finish,,0,118,118,0,
-122,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,118,118,0,
-123,NZTA\SDLT\Model\AnswerActionField,I Confirm,finish,,0,119,119,0,
-124,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,119,119,0,
-125,NZTA\SDLT\Model\AnswerActionField,Yes and Finish,finish,,5,120,120,0,
-126,NZTA\SDLT\Model\AnswerActionField,Yes and Continue,continue,,5,120,120,0,
-127,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,120,120,0,
-128,NZTA\SDLT\Model\AnswerActionField,Create and Finish,finish,,4,28,121,0,
-129,NZTA\SDLT\Model\AnswerActionField,Create and Continue,continue,,4,28,121,0,
-130,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,28,121,0,
-131,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,95,122,0,
-132,NZTA\SDLT\Model\AnswerActionField,No,goto,,0,95,122,0,
-133,NZTA\SDLT\Model\AnswerActionField,Finish,finish,,0,124,125,0,
-134,NZTA\SDLT\Model\AnswerActionField,I Confirm,finish,,0,126,126,0,
-135,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,126,126,0,
-136,NZTA\SDLT\Model\AnswerActionField,Start,continue,,0,124,124,0,
-137,NZTA\SDLT\Model\AnswerActionField,Yes and Finish,finish,,8,28,127,0,
-138,NZTA\SDLT\Model\AnswerActionField,Yes and Continue,continue,,8,28,127,0,
-139,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,28,127,0,
-140,NZTA\SDLT\Model\AnswerActionField,Controls have not been implemented,continue,,0,128,128,0,
-141,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,137,137,0,
-142,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,137,137,0,
-143,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,139,139,0,
-144,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,139,139,0,
-145,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,140,140,0,
-146,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,140,140,0,
-147,NZTA\SDLT\Model\AnswerActionField,Yes and Finish,finish,,13,28,142,0,
-148,NZTA\SDLT\Model\AnswerActionField,Yes and Continue,continue,,13,28,142,0,
-149,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,28,142,0,
-150,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,13,144,161,0,
-151,NZTA\SDLT\Model\AnswerActionField,No,finish,,0,144,161,0,No PIA Required
-152,NZTA\SDLT\Model\AnswerActionField,Low,continue,,0,144,162,0,
-153,NZTA\SDLT\Model\AnswerActionField,Medium,continue,,0,144,162,0,
-154,NZTA\SDLT\Model\AnswerActionField,High,continue,,0,144,162,0,
-155,NZTA\SDLT\Model\AnswerActionField,Low,continue,,0,144,163,0,
-156,NZTA\SDLT\Model\AnswerActionField,Medium,continue,,0,144,163,0,
-157,NZTA\SDLT\Model\AnswerActionField,High,continue,,0,144,163,0,
-158,NZTA\SDLT\Model\AnswerActionField,Low,continue,,0,144,164,0,
-159,NZTA\SDLT\Model\AnswerActionField,Medium,continue,,0,144,164,0,
-160,NZTA\SDLT\Model\AnswerActionField,High,continue,,0,144,164,0,
-161,NZTA\SDLT\Model\AnswerActionField,Low,continue,,0,144,165,0,
-162,NZTA\SDLT\Model\AnswerActionField,Medium,continue,,0,144,165,0,
-163,NZTA\SDLT\Model\AnswerActionField,High,continue,,0,144,165,0,
-164,NZTA\SDLT\Model\AnswerActionField,Low,continue,,0,144,166,0,
-165,NZTA\SDLT\Model\AnswerActionField,Medium,continue,,0,144,166,0,
-166,NZTA\SDLT\Model\AnswerActionField,High,continue,,0,144,166,0,
-167,NZTA\SDLT\Model\AnswerActionField,Finish,finish,,0,144,167,0,
-168,NZTA\SDLT\Model\AnswerActionField,Software as a Service,continue,,0,169,169,0,
-169,NZTA\SDLT\Model\AnswerActionField,Agency Controlled,continue,,0,169,169,0,
-170,NZTA\SDLT\Model\AnswerActionField,Proof of Concept,continue,,0,170,170,0,
-171,NZTA\SDLT\Model\AnswerActionField,Software/Product Trial,continue,,0,170,170,0,
-172,NZTA\SDLT\Model\AnswerActionField,Finish,continue,,0,172,172,0,
-173,NZTA\SDLT\Model\AnswerActionField,Yes,finish,,12,32,173,0,
-174,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,173,173,0,
-175,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,28,174,174,0,
-176,NZTA\SDLT\Model\AnswerActionField,No,continue,,28,174,174,0,
-177,NZTA\SDLT\Model\AnswerActionField,Finish,continue,,0,175,175,0,
-178,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,177,177,0,
-179,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,177,177,0,
-180,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,17,178,178,0,
-181,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,178,178,0,
-182,NZTA\SDLT\Model\AnswerActionField,Yes,goto,,0,174,180,0,
-183,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,180,180,0,
-184,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,182,182,0,
-185,NZTA\SDLT\Model\AnswerActionField,No,goto,,0,29,182,0,
-186,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,186,186,0,
-187,NZTA\SDLT\Model\AnswerActionField,No,goto,,4,67,186,0,
-188,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,188,0,
-189,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,189,189,0,
-190,NZTA\SDLT\Model\AnswerActionField,No,goto,,0,190,189,0,
-191,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,45,191,192,0,
-192,NZTA\SDLT\Model\AnswerActionField,No,continue,,44,191,192,0,
-193,NZTA\SDLT\Model\AnswerActionField,Yes,finish,,0,193,193,0,
-194,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,193,193,0,
-195,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,194,194,0,
-196,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,194,194,0,
-197,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,195,195,0,
-198,NZTA\SDLT\Model\AnswerActionField,No,goto,,0,51,195,0,
-199,NZTA\SDLT\Model\AnswerActionField,Don't know classification,goto,,4,198,196,0,
-200,NZTA\SDLT\Model\AnswerActionField,Same classification as existing,continue,,0,196,196,0,
-201,NZTA\SDLT\Model\AnswerActionField,I know new classification,continue,,0,196,196,0,
-202,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,198,198,0,
-203,NZTA\SDLT\Model\AnswerActionField,No,goto,,0,200,198,0,
-204,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,199,199,0,
-205,NZTA\SDLT\Model\AnswerActionField,No,continue,,40,199,199,0,
-206,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,200,200,0,
-207,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,200,200,0,
-208,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,201,201,0,
-209,NZTA\SDLT\Model\AnswerActionField,No,continue,,5,201,201,0,
-210,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,11,203,203,0,
-211,NZTA\SDLT\Model\AnswerActionField,No,continue,,44,203,203,0,
-212,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,188,0,
-213,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,204,0,
-214,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,204,0,
-215,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,205,0,
-216,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,205,0,
-217,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,206,0,
-218,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,206,0,
-219,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,207,0,
-220,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,207,0,
-221,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,208,0,
-222,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,208,0,
-223,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,209,0,
-224,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,209,0,
-225,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,210,0,
-226,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,210,0,
-227,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,211,0,
-228,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,211,0,
-229,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,212,0,
-230,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,212,0,
-231,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,213,0,
-232,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,213,0,
-233,NZTA\SDLT\Model\AnswerActionField,Not Applicable,continue,,0,188,213,0,
-234,NZTA\SDLT\Model\AnswerActionField,Not Applicable,continue,,0,188,212,0,
-235,NZTA\SDLT\Model\AnswerActionField,Not Applicable,continue,,0,188,211,0,
-236,NZTA\SDLT\Model\AnswerActionField,Not Applicable,continue,,0,188,210,0,
-237,NZTA\SDLT\Model\AnswerActionField,Not Applicable,continue,,0,188,209,0,
-238,NZTA\SDLT\Model\AnswerActionField,Not Applicable,continue,,0,188,208,0,
-239,NZTA\SDLT\Model\AnswerActionField,Not Applicable,continue,,0,188,207,0,
-240,NZTA\SDLT\Model\AnswerActionField,Not Applicable,continue,,0,188,206,0,
-241,NZTA\SDLT\Model\AnswerActionField,Not Applicable,continue,,0,188,205,0,
-242,NZTA\SDLT\Model\AnswerActionField,Not Applicable,continue,,0,188,204,0,
-243,NZTA\SDLT\Model\AnswerActionField,Not Applicable,continue,,0,188,188,0,
-244,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,214,0,
-245,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,214,0,
-246,NZTA\SDLT\Model\AnswerActionField,Not Applicable,continue,,0,188,214,0,
-247,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,215,0,
-248,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,215,0,
-249,NZTA\SDLT\Model\AnswerActionField,Not Applicable,continue,,0,188,215,0,
-250,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,216,0,
-251,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,216,0,
-252,NZTA\SDLT\Model\AnswerActionField,Not Applicable,continue,,0,188,216,0,
-253,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,217,0,
-254,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,217,0,
-255,NZTA\SDLT\Model\AnswerActionField,Not Applicable,continue,,0,188,217,0,
-256,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,218,0,
-257,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,218,0,
-258,NZTA\SDLT\Model\AnswerActionField,Not Applicable,continue,,0,188,218,0,
-259,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,219,0,
-260,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,219,0,
-261,NZTA\SDLT\Model\AnswerActionField,Not Applicable,continue,,0,188,219,0,
-262,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,220,0,
-263,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,220,0,
-264,NZTA\SDLT\Model\AnswerActionField,Not Applicable,continue,,0,188,220,0,
-265,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,221,0,
-266,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,221,0,
-267,NZTA\SDLT\Model\AnswerActionField,Not Applicable,continue,,0,188,221,0,
-268,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,222,0,
-269,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,222,0,
-270,NZTA\SDLT\Model\AnswerActionField,I Don't Know,continue,,0,188,222,0,
-271,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,223,0,
-272,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,223,0,
-273,NZTA\SDLT\Model\AnswerActionField,I Don't Know,continue,,0,188,223,0,
-274,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,188,224,0,
-275,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,188,224,0,
-276,NZTA\SDLT\Model\AnswerActionField,I Don't Know,continue,,0,188,224,0,
-277,NZTA\SDLT\Model\AnswerActionField,Start,continue,,0,225,225,0,
-278,NZTA\SDLT\Model\AnswerActionField,Yes - Other(s),continue,,0,226,226,2,
-279,NZTA\SDLT\Model\AnswerActionField,No,goto,,0,232,226,3,
-280,NZTA\SDLT\Model\AnswerActionField,Yes,goto,,0,226,229,0,
-281,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,106,229,0,
-282,NZTA\SDLT\Model\AnswerActionField,Yes,goto,,0,226,230,0,
-283,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,230,230,0,
-284,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,231,231,0,
-285,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,231,231,0,
-286,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,233,233,0,
-287,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,233,233,0,
-288,NZTA\SDLT\Model\AnswerActionField,Yes - Court Order,continue,,0,234,234,1,
-289,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,234,234,4,
-290,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,234,235,0,
-291,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,234,235,0,
-292,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,236,236,0,
-293,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,236,236,0,
-294,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,238,238,0,
-295,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,238,238,0,
-296,NZTA\SDLT\Model\AnswerActionField,Negotiate Contracts,continue,,0,240,240,0,
-297,NZTA\SDLT\Model\AnswerActionField,Standard Terms of Service,continue,,0,240,240,0,
-298,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,241,241,0,
-299,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,241,241,0,
-300,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,242,242,0,
-301,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,242,242,0,
-302,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,243,243,0,
-303,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,243,243,0,
-304,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,244,244,0,
-305,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,244,244,0,
-306,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,245,245,0,
-307,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,245,245,0,
-308,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,246,246,0,
-309,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,246,246,0,
-310,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,247,247,0,
-311,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,247,247,0,
-312,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,248,248,0,
-313,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,248,248,0,
-314,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,249,249,0,
-315,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,249,249,0,
-316,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,250,250,0,
-317,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,250,250,0,
-318,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,251,251,0,
-319,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,251,251,0,
-320,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,252,252,0,
-321,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,252,252,0,
-322,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,253,253,0,
-323,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,253,253,0,
-324,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,254,254,0,
-325,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,254,254,0,
-326,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,255,255,0,
-327,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,255,255,0,
-328,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,256,256,0,
-329,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,256,256,0,
-330,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,257,257,0,
-331,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,257,257,0,
-332,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,257,258,0,
-333,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,257,258,0,
-334,NZTA\SDLT\Model\AnswerActionField,Controls have been implemented,continue,,0,128,128,0,
-335,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,259,259,0,
-336,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,259,259,0,
-337,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,260,260,0,
-338,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,260,260,0,
-339,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,261,261,0,
-340,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,261,261,0,
-341,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,262,262,0,
-342,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,262,262,0,
-343,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,263,263,0,
-344,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,263,263,0,
-345,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,264,264,0,
-346,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,264,264,0,
-347,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,265,265,0,
-348,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,265,265,0,
-349,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,266,266,0,
-350,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,266,266,0,
-351,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,267,267,0,
-352,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,267,267,0,
-353,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,268,268,0,
-354,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,268,268,0,
-355,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,269,269,0,
-356,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,269,269,0,
-357,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,270,270,0,
-358,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,270,270,0,
-359,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,271,271,0,
-360,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,271,271,0,
-361,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,272,272,0,
-362,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,272,272,0,
-363,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,273,273,0,
-364,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,273,273,0,
-365,NZTA\SDLT\Model\AnswerActionField,Agency,continue,,0,274,274,0,
-366,NZTA\SDLT\Model\AnswerActionField,Your Organisation,continue,,0,274,274,0,
-367,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,275,275,0,
-368,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,275,275,0,
-369,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,276,276,0,
-370,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,276,276,0,
-371,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,277,277,0,
-372,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,277,277,0,
-373,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,278,278,0,
-374,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,278,278,0,
-375,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,279,279,0,
-376,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,279,279,0,
-377,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,280,280,0,
-378,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,280,280,0,
-379,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,281,281,0,
-380,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,281,281,0,
-381,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,282,282,0,
-382,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,282,282,0,
-383,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,283,283,0,
-384,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,283,283,0,
-385,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,284,284,0,
-386,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,284,284,0,
-387,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,285,285,0,
-388,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,285,285,0,
-389,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,286,286,0,
-390,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,286,286,0,
-391,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,287,287,0,
-392,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,287,287,0,
-393,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,289,289,0,
-394,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,289,289,0,
-395,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,292,292,0,
-396,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,292,292,0,
-397,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,293,293,0,
-398,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,293,293,0,
-399,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,294,294,0,
-400,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,294,294,0,
-401,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,295,295,0,
-402,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,295,295,0,
-403,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,296,296,0,
-404,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,296,296,0,
-405,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,297,297,0,
-406,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,297,297,0,
-407,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,298,298,0,
-408,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,298,298,0,
-409,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,299,299,0,
-410,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,299,299,0,
-411,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,300,300,0,
-412,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,300,300,0,
-413,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,301,301,0,
-414,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,301,301,0,
-415,NZTA\SDLT\Model\AnswerActionField,Data Recovery,continue,,0,302,302,0,
-416,NZTA\SDLT\Model\AnswerActionField,Service Restoration Only,continue,,0,302,302,0,
-417,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,303,303,0,
-418,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,303,303,0,
-419,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,305,305,0,
-420,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,305,305,0,
-421,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,307,307,0,
-422,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,307,307,0,
-423,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,308,308,0,
-424,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,308,308,0,
-425,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,309,309,0,
-426,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,309,309,0,
-427,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,310,310,0,
-428,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,310,310,0,
-429,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,311,311,0,
-430,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,311,311,0,
-431,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,312,312,0,
-432,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,312,312,0,
-433,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,313,313,0,
-434,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,313,313,0,
-435,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,314,314,0,
-436,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,314,314,0,
-437,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,315,315,0,
-438,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,315,315,0,
-439,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,316,316,0,
-440,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,316,316,0,
-441,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,317,317,0,
-442,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,317,317,0,
-443,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,318,318,0,
-444,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,318,318,0,
-445,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,319,319,0,
-446,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,319,319,0,
-447,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,320,320,0,
-448,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,320,320,0,
-449,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,321,321,0,
-450,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,321,321,0,
-451,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,322,322,0,
-452,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,322,322,0,
-453,NZTA\SDLT\Model\AnswerActionField,"I Understand, Let's Start",continue,,0,323,323,0,
-454,NZTA\SDLT\Model\AnswerActionField,Yes - Amazon/Microsoft/Google,goto,,0,228,226,1,
-455,NZTA\SDLT\Model\AnswerActionField,Yes - Government Request,continue,,0,323,234,2,
-456,NZTA\SDLT\Model\AnswerActionField,Yes - Both,continue,,0,323,234,3,
-457,NZTA\SDLT\Model\AnswerActionField,We don't know,continue,,0,323,235,0,
-458,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,323,324,0,
-459,NZTA\SDLT\Model\AnswerActionField,No,goto,,0,240,324,0,
-460,NZTA\SDLT\Model\AnswerActionField," I Understand, Let's Start",continue,,0,325,326,0,
-461,NZTA\SDLT\Model\AnswerActionField,"I Understand, Let's Start",continue,,0,327,327,0,
-462,NZTA\SDLT\Model\AnswerActionField,"I Understand, Let's Start",continue,,0,328,328,0,
-463,NZTA\SDLT\Model\AnswerActionField,"I Understand, Let's Start",continue,,0,329,329,0,
-464,NZTA\SDLT\Model\AnswerActionField,"I Understand, Let's Start",continue,,0,330,330,0,
-465,NZTA\SDLT\Model\AnswerActionField,"I Understand, Let's Start",continue,,0,331,331,0,
-466,NZTA\SDLT\Model\AnswerActionField,"I Understand, Let's Start",continue,,0,332,332,0,
-467,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,333,336,0,
-468,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,333,336,0,
-469,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,333,337,0,
-470,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,333,337,0,
-471,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,344,344,0,
-472,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,344,344,0,
-473,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,349,349,0,
-474,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,349,349,0,
-475,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,350,350,0,
-476,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,350,350,0,
-477,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,351,351,0,
-478,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,351,351,0,
-479,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,352,352,0,
-480,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,352,352,0,
-481,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,353,353,0,
-482,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,353,353,0,
-483,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,354,354,0,
-484,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,354,354,0,
-485,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,356,356,0,
-486,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,356,356,0,
-487,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,357,357,0,
-488,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,357,357,0,
-489,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,358,358,0,
-490,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,358,358,0,
-491,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,359,359,0,
-492,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,359,359,0,
-493,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,360,360,0,
-494,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,360,360,0,
-495,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,361,361,0,
-496,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,361,361,0,
-497,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,362,362,0,
-498,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,362,362,0,
-499,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,363,363,0,
-500,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,363,363,0,
-501,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,364,364,0,
-502,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,364,364,0,
-503,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,365,365,0,
-504,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,365,365,0,
-505,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,366,366,0,
-506,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,366,366,0,
-507,NZTA\SDLT\Model\AnswerActionField,Not Applicable,continue,,0,366,366,0,
-508,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,367,367,0,
-509,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,367,367,0,
-510,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,368,368,0,
-511,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,368,368,0,
-512,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,369,369,0,
-513,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,369,369,0,
-514,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,370,370,0,
-515,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,370,370,0,
-516,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,371,371,0,
-517,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,371,371,0,
-518,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,372,372,0,
-519,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,372,372,0,
-520,NZTA\SDLT\Model\AnswerActionField,The Agency,continue,,0,373,373,0,
-521,NZTA\SDLT\Model\AnswerActionField,The Vendor,continue,,0,373,373,0,
-522,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,374,374,0,
-523,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,374,374,0,
-524,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,375,375,0,
-525,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,375,375,0,
-526,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,376,376,0,
-527,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,376,376,0,
-528,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,378,378,0,
-529,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,378,378,0,
-530,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,379,379,0,
-531,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,379,379,0,
-532,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,380,380,0,
-533,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,380,380,0,
-534,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,381,381,0,
-535,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,381,381,0,
-536,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,382,382,0,
-537,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,382,382,0,
-538,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,383,383,0,
-539,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,383,383,0,
-540,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,384,384,0,
-541,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,384,384,0,
-542,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,385,385,0,
-543,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,385,385,0,
-544,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,386,386,0,
-545,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,386,386,0,
-546,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,387,387,0,
-547,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,387,387,0,
-548,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,388,388,0,
-549,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,388,388,0,
-550,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,389,389,0,
-551,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,389,389,0,
-552,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,390,390,0,
-553,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,390,390,0,
-554,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,391,391,0,
-555,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,391,391,0,
-556,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,392,392,0,
-557,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,392,392,0,
-558,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,393,393,0,
-559,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,393,393,0,
-560,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,394,394,0,
-561,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,394,394,0,
-562,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,395,395,0,
-563,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,395,395,0,
-564,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,397,397,0,
-565,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,397,397,0,
-566,NZTA\SDLT\Model\AnswerActionField,"I Understand, Let's Start!",continue,,0,398,398,0,
-567,NZTA\SDLT\Model\AnswerActionField,Ok,continue,,42,397,400,0,
-568,NZTA\SDLT\Model\AnswerActionField,Ok,continue,,28,401,401,0,
-569,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,402,402,0,
-570,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,402,402,0,
-571,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,403,403,0,
-572,NZTA\SDLT\Model\AnswerActionField,No,goto,,0,65,403,0,
-573,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,0,404,404,0,
-574,NZTA\SDLT\Model\AnswerActionField,No,continue,,5,404,404,0,
-575,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,43,405,405,0,
-576,NZTA\SDLT\Model\AnswerActionField,No,goto,,0,403,405,0,
-577,NZTA\SDLT\Model\AnswerActionField,"I Understand, Let's Start!",continue,,0,406,406,0,
-578,NZTA\SDLT\Model\AnswerActionField,"I Understand, Let's Start",continue,,0,408,408,0,
-579,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,43,410,410,0,
-580,NZTA\SDLT\Model\AnswerActionField,No,goto,,0,200,410,0,
-581,NZTA\SDLT\Model\AnswerActionField,"I Understand, Let's Start",continue,,12,411,411,0,
-582,NZTA\SDLT\Model\AnswerActionField,Finish,finish,,11,411,412,0,
-583,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,28,413,413,0,
-584,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,413,413,0,
-585,NZTA\SDLT\Model\AnswerActionField,"I Understand, Let's Start!",continue,,0,414,414,0,
-586,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,43,420,420,0,
-587,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,420,420,0,
-588,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,43,421,421,0,
-589,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,421,421,0,
-590,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,43,422,422,0,
-591,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,422,422,0,
-592,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,43,423,423,0,
-593,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,423,423,0,
-594,NZTA\SDLT\Model\AnswerActionField,I Don't Know,continue,,28,32,413,0,
-595,NZTA\SDLT\Model\AnswerActionField,Yes,goto,,0,201,424,0,
-596,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,424,424,0,
-597,NZTA\SDLT\Model\AnswerActionField,Yes,continue,,5,425,425,0,
-598,NZTA\SDLT\Model\AnswerActionField,No,continue,,5,425,425,0,
-599,NZTA\SDLT\Model\AnswerActionField,I Don't Know,continue,,5,425,425,0,
-600,NZTA\SDLT\Model\AnswerActionField,"I Understand, Let's Start!",continue,,0,426,426,0,
-601,NZTA\SDLT\Model\AnswerActionField,Yes,message,"<p>Yes, you will need to make a submission through the SDLT.</p><p>&nbsp;</p><p>To run a Proof of Concept at the Agency, you will need to complete the SDLT ""Proof of Concept"" questionnaire.</p>",0,430,430,0,
-602,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,430,430,0,
-603,NZTA\SDLT\Model\AnswerActionField,Yes,message,"<p>Yes, you will need to make a submission through the SDLT.</p><p>&nbsp;</p><p>To run a Software Trial at the Agency, you will need to complete the SDLT ""Product Trial"" questionnaire.</p>",0,430,431,0,
-604,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,430,431,0,
-605,NZTA\SDLT\Model\AnswerActionField,Yes,message,"<p>Yes, you will need to make a submission through the SDLT.</p><p>&nbsp;</p><p>To run a Proof of Concept at the Agency, you will need to complete the SDLT ""Software as a Service"" questionnaire. Even if you are using another product by an existing vendor, you will need to complete the SDLT. This is because many products were adopted before formal Government security assurance processes were implemented. On-going refreshes and replacements of products will need to go through formal security assurance.</p>",0,430,432,0,
-606,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,430,432,0,
-607,NZTA\SDLT\Model\AnswerActionField,Yes,message,"<p>No, you do not need to make a submission through the SDLT.</p><p>&nbsp;</p><p>The SDLT does not handle operational infrastructural changes. Please send your request through to the Agencies Service Desk.</p>",0,430,428,0,
-608,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,430,428,0,
-609,NZTA\SDLT\Model\AnswerActionField,Yes,message,"<p>No, you do not need to make a submission through the SDLT.</p><p>&nbsp;</p><p>The SDLT does not handle operational infrastructural changes. Please send your request through to the Agencies Service Desk.</p>",0,430,429,0,
-610,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,430,429,0,
-611,NZTA\SDLT\Model\AnswerActionField,No,continue,"<p>No, you do not need to make a submission through the SDLT.</p><p>&nbsp;</p><p>The SDLT does not handle operational infrastructural changes. Please send your request through to the Agencies Service Desk.</p>",0,430,434,2,
-612,NZTA\SDLT\Model\AnswerActionField,Yes,message,"<p>No, you do not need to make a submission through the SDLT.</p><p>&nbsp;</p><p>The SDLT does not handle operational infrastructural changes. Please send your request through to the Agencies Service Desk.</p>",0,430,434,1,
-613,NZTA\SDLT\Model\AnswerActionField,Yes,message,"<p>No, you do not need to make a submission through the SDLT.</p><p>&nbsp;</p><p>The SDLT does not handle operational infrastructural changes. Please send your request through to the Agencies Service Desk.</p>",0,430,435,0,
-614,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,430,435,0,
-615,NZTA\SDLT\Model\AnswerActionField,Yes,message,"<p>Yes, you will need to make a submission through the SDLT.</p><p>&nbsp;</p><p>To make a change to Software at the Agency, you will need to complete the SDLT ""Technical Change"" questionnaire.</p>",0,430,433,0,
-616,NZTA\SDLT\Model\AnswerActionField,No,continue,,0,430,433,0,
-617,NZTA\SDLT\Model\AnswerActionField,Yes,message,"<p>Yes, you will need to make a submission through the SDLT.</p><p>&nbsp;</p><p>To go-live with a project at the Agency, you will need to complete the SDLT ""Solution Delivery Assessment"" questionnaire.</p>",0,430,436,0,
-618,NZTA\SDLT\Model\AnswerActionField,No,message,"<p>No, you do not need to make a submission through the SDLT.</p><p>&nbsp;</p><p>We've been unable to determine the nature of your work. If you're still unsure about this, please email the security architects (security.architects@example.govt.nz) with a description of your work so it can be assessed.</p>",0,430,436,0,
+"ID","ClassName","Label","ActionType","Message","TaskID","GotoID","QuestionID","SortOrder","Result"
+"1","NZTA\\SDLT\\Model\\AnswerActionField","Yes","message","<p>If this product has already gone through a proof of concept or trial, please contact the security architects (security.architects@example.govt.nz) for next steps. They will be able to provide information on why this product was never adopted after the previous POC/Trial.</p><p>&nbsp;</p><p>If this product is currently in a POC/Trial and you wish to get an extension. Please email the security architects (security.architects@example.co.nz) to discuss this. Please ensure there is clear justification for the extension to this POC/Trial. If there is not, it is recommended that you start through the SaaS questionnaire to get the product officially certified.</p>","0","1","2","0",""
+"2","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","<p>asdasd</p>","0","4","2","0",""
+"3","NZTA\\SDLT\\Model\\AnswerActionField","Yes","message","<p>Moving an existing proof of concept or trial to production requires appropriate security assurance to be completed. Please fill out the <a class=\"ss-broken\" href=\"/#/questionnaire/start/2\">SaaS Questionnaire</a>.</p>","0","0","3","0",""
+"4","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","<p>Moving an existing proof of concept or trial to production requires appropriate security assurance to be completed. Please fill out the Product Questionnaire.</p>","0","0","3","0",""
+"5","NZTA\\SDLT\\Model\\AnswerActionField","Yes","message","<p>This product may have already gone through the required security assurance processes. Please contact the security architects (security.architects@example.govt.nz) to check.</p><p>&nbsp;</p><p>If you know for certain that this product has been previously cleared, or used within the agency. Then, this product would have been previously certified for use by the security team. No further security assurance processes are required. Please engage the Change Advisory Board (CAB) to use this product.</p>","0","1","4","0",""
+"6","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","4","0",""
+"7","NZTA\\SDLT\\Model\\AnswerActionField","Yes","message","<p>Products developed by/for the Agency are not candidates for a proof of concept or trial.&nbsp;</p><p>&nbsp;</p><p>If the Agency will consume this product as a hosted service by one of our vendors (e.g. Unisys), then please complete the Software as a Service questionnaire.</p><p>&nbsp;</p><p>If the Agency is going to deploy this product within our own on-prem or cloud infrastructure, then please complete the Solution Delivery questionnaire.</p>","0","1","5","0",""
+"8","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","1","5","0",""
+"9","NZTA\\SDLT\\Model\\AnswerActionField","Continue","continue","","0","0","8","0",""
+"10","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","1","9","0",""
+"11","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","1","9","0",""
+"12","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","1","10","0",""
+"13","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","1","10","0",""
+"14","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","0","11","0",""
+"15","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","0","74","11","0",""
+"16","NZTA\\SDLT\\Model\\AnswerActionField","Continue","continue","","0","0","12","0",""
+"17","NZTA\\SDLT\\Model\\AnswerActionField","Continue","continue","","0","0","13","0",""
+"18","NZTA\\SDLT\\Model\\AnswerActionField","Continue","continue","","0","0","14","0",""
+"19","NZTA\\SDLT\\Model\\AnswerActionField","Continue","continue","","0","0","15","0",""
+"20","NZTA\\SDLT\\Model\\AnswerActionField","Continue","continue","","0","0","16","0",""
+"21","NZTA\\SDLT\\Model\\AnswerActionField","Continue","continue","","0","0","17","0",""
+"22","NZTA\\SDLT\\Model\\AnswerActionField","Yes","message","<p>This product may have already gone through the required security assurance processes. Please contact the security architects (security.architects@example.govt.nz) to check.</p><p>&nbsp;</p><p>If you know for certain that this product has been previously cleared, or used within the agency. Then, this product would have been previously certified for use by the security team. No further security assurance processes are required. Please engage the Change Advisory Board (CAB) to use this product.</p>","0","22","23","0",""
+"23","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","28","23","0",""
+"24","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","22","29","0",""
+"25","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","0","35","29","0",""
+"26","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","46","28","30","0",""
+"27","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","0","35","30","0",""
+"28","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","17","28","35","0",""
+"29","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","22","35","0",""
+"30","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","22","37","0",""
+"31","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","0","39","37","0",""
+"32","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","40","28","41","0",""
+"33","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","28","41","0",""
+"34","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","38","32","42","0",""
+"35","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","38","32","44","0",""
+"36","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","32","44","0",""
+"37","NZTA\\SDLT\\Model\\AnswerActionField","Yes","finish","","0","0","43","0",""
+"38","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","43","0",""
+"39","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","0","45","0",""
+"40","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","45","0",""
+"41","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","0","46","0",""
+"42","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","46","0",""
+"43","NZTA\\SDLT\\Model\\AnswerActionField","Yes - Sensitive Classification","finish","","0","0","47","0",""
+"44","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","0","49","0",""
+"45","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","47","0",""
+"46","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","49","0",""
+"47","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","8","32","51","0",""
+"48","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","51","0",""
+"49","NZTA\\SDLT\\Model\\AnswerActionField","Yes","finish","","0","0","50","0",""
+"50","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","413","52","0",""
+"51","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","50","0",""
+"52","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","0","413","52","0",""
+"53","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","0","53","0",""
+"54","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","0","202","53","0",""
+"55","NZTA\\SDLT\\Model\\AnswerActionField","Yes","finish","","0","0","55","0",""
+"56","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","55","0",""
+"57","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","56","42","0",""
+"58","NZTA\\SDLT\\Model\\AnswerActionField","Yes","finish","","0","0","57","0",""
+"59","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","57","0",""
+"60","NZTA\\SDLT\\Model\\AnswerActionField","Yes","finish","","0","0","58","0",""
+"61","NZTA\\SDLT\\Model\\AnswerActionField","No","finish","","0","0","58","0",""
+"62","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","29","59","60","0",""
+"63","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","0","65","60","0",""
+"64","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","0","61","0",""
+"65","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","5","59","61","0",""
+"66","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","8","191","64","0",""
+"67","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","64","0",""
+"68","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","38","59","65","0",""
+"69","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","65","0",""
+"70","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","38","59","66","0",""
+"71","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","66","0",""
+"72","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","40","59","67","0",""
+"73","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","67","0",""
+"74","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","0","68","0",""
+"75","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","189","68","0",""
+"76","NZTA\\SDLT\\Model\\AnswerActionField","Yes","finish","<p>The use of Sensitive information is limited within the Agency. The primary indicator is if the release of information could put a person in danger. This would include things like records of people who have commit infraction/compliance mistakes etc.</p>","0","0","77","0","Classification: Sensitive"
+"77","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","77","0",""
+"78","NZTA\\SDLT\\Model\\AnswerActionField","Yes","finish","<p>If this information can be disclosed to the public without consequence then it is considered \"Public Data\". The relevant classification for this is \"Unclassified\".</p>","0","76","78","0","Classification: In-Confidence"
+"79","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","78","0",""
+"80","NZTA\\SDLT\\Model\\AnswerActionField","Yes","finish","<p>We're asking the same question from multiple angles to make sure the person answering doesn't misinterpret the intention. They may think it's ok to email to media, but not be disclosed publicly..Even though the end result is identical.</p>","0","0","79","0","Classification: Unclassified"
+"81","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","79","0",""
+"82","NZTA\\SDLT\\Model\\AnswerActionField","Finish","finish","<p>This one might need revisions. But arguably, anything that can be accessed without authentication is something we're not protecting..So by it's nature unclassified? I'm not too sure on this one.</p>","0","76","80","0","Classification: Unclassified"
+"83","NZTA\\SDLT\\Model\\AnswerActionField","No","finish","","0","0","0","0","Classification: In-Confidence"
+"84","NZTA\\SDLT\\Model\\AnswerActionField","Start","continue","","0","0","89","0",""
+"85","NZTA\\SDLT\\Model\\AnswerActionField","Ok","finish","","6","109","90","0",""
+"86","NZTA\\SDLT\\Model\\AnswerActionField","Ok","continue","","7","109","91","0",""
+"87","NZTA\\SDLT\\Model\\AnswerActionField","Yes","finish","","0","0","92","0",""
+"88","NZTA\\SDLT\\Model\\AnswerActionField","Yes","finish","","0","0","93","0",""
+"89","NZTA\\SDLT\\Model\\AnswerActionField","Yes","finish","","0","0","94","0",""
+"90","NZTA\\SDLT\\Model\\AnswerActionField","Yes","finish","","0","0","97","0","High Risk"
+"91","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","97","0",""
+"92","NZTA\\SDLT\\Model\\AnswerActionField","Yes","finish","","0","0","98","0","High Risk"
+"93","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","98","0",""
+"94","NZTA\\SDLT\\Model\\AnswerActionField","Yes","finish","","0","0","99","0","High Risk"
+"95","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","99","0",""
+"96","NZTA\\SDLT\\Model\\AnswerActionField","Yes","finish","","0","0","100","0","Medium Risk"
+"97","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","100","0",""
+"98","NZTA\\SDLT\\Model\\AnswerActionField","Yes","finish","","0","0","101","0","Medium Risk"
+"99","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","101","0",""
+"100","NZTA\\SDLT\\Model\\AnswerActionField","Yes","finish","","0","0","102","0","Medium Risk"
+"101","NZTA\\SDLT\\Model\\AnswerActionField","No","finish","","0","0","102","0","Low Risk"
+"102","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","0","106","0",""
+"103","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","0","106","0",""
+"104","NZTA\\SDLT\\Model\\AnswerActionField","Yes","message","<p><span>Products developed by/for the Agency are not candidates for a software-as-a-service approval. Please fill out the&nbsp;</span>Product questionnaire</p>","0","22","24","0",""
+"105","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","5","22","24","0",""
+"106","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","75","109","0",""
+"107","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","0","111","109","0",""
+"108","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","75","111","0",""
+"109","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","0","113","111","0",""
+"110","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","75","113","0",""
+"112","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","0","91","113","0",""
+"113","NZTA\\SDLT\\Model\\AnswerActionField","Yes","finish","","0","115","115","0","Classification: In-Confidence"
+"114","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","115","115","0",""
+"115","NZTA\\SDLT\\Model\\AnswerActionField","Yes","finish","","0","116","116","0","Classification: In-Confidence"
+"116","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","116","116","0",""
+"117","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","109","0","0",""
+"118","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","109","0","0",""
+"119","NZTA\\SDLT\\Model\\AnswerActionField","I Confirm","finish","","0","117","117","0",""
+"120","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","117","117","0",""
+"121","NZTA\\SDLT\\Model\\AnswerActionField","I Confirm","finish","","0","118","118","0",""
+"122","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","118","118","0",""
+"123","NZTA\\SDLT\\Model\\AnswerActionField","I Confirm","finish","","0","119","119","0",""
+"124","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","119","119","0",""
+"125","NZTA\\SDLT\\Model\\AnswerActionField","Yes and Finish","finish","","5","120","120","0",""
+"126","NZTA\\SDLT\\Model\\AnswerActionField","Yes and Continue","continue","","5","120","120","0",""
+"127","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","120","120","0",""
+"128","NZTA\\SDLT\\Model\\AnswerActionField","Create and Finish","finish","","4","28","121","0",""
+"129","NZTA\\SDLT\\Model\\AnswerActionField","Create and Continue","continue","","4","28","121","0",""
+"130","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","28","121","0",""
+"131","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","95","122","0",""
+"132","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","0","95","122","0",""
+"133","NZTA\\SDLT\\Model\\AnswerActionField","Finish","finish","","0","124","125","0",""
+"134","NZTA\\SDLT\\Model\\AnswerActionField","I Confirm","finish","","0","126","126","0",""
+"135","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","126","126","0",""
+"136","NZTA\\SDLT\\Model\\AnswerActionField","Start","continue","","0","124","124","0",""
+"137","NZTA\\SDLT\\Model\\AnswerActionField","Yes and Finish","finish","","8","28","127","0",""
+"138","NZTA\\SDLT\\Model\\AnswerActionField","Yes and Continue","continue","","8","28","127","0",""
+"139","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","28","127","0",""
+"140","NZTA\\SDLT\\Model\\AnswerActionField","Controls have not been implemented","continue","","0","128","128","0",""
+"141","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","137","137","0",""
+"142","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","137","137","0",""
+"143","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","139","139","0",""
+"144","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","139","139","0",""
+"145","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","140","140","0",""
+"146","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","140","140","0",""
+"147","NZTA\\SDLT\\Model\\AnswerActionField","Yes and Finish","finish","","13","28","142","0",""
+"148","NZTA\\SDLT\\Model\\AnswerActionField","Yes and Continue","continue","","13","28","142","0",""
+"149","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","28","142","0",""
+"150","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","13","144","161","0",""
+"151","NZTA\\SDLT\\Model\\AnswerActionField","No","finish","","0","144","161","0","No PIA Required"
+"152","NZTA\\SDLT\\Model\\AnswerActionField","Low","continue","","0","144","162","0",""
+"153","NZTA\\SDLT\\Model\\AnswerActionField","Medium","continue","","0","144","162","0",""
+"154","NZTA\\SDLT\\Model\\AnswerActionField","High","continue","","0","144","162","0",""
+"155","NZTA\\SDLT\\Model\\AnswerActionField","Low","continue","","0","144","163","0",""
+"156","NZTA\\SDLT\\Model\\AnswerActionField","Medium","continue","","0","144","163","0",""
+"157","NZTA\\SDLT\\Model\\AnswerActionField","High","continue","","0","144","163","0",""
+"158","NZTA\\SDLT\\Model\\AnswerActionField","Low","continue","","0","144","164","0",""
+"159","NZTA\\SDLT\\Model\\AnswerActionField","Medium","continue","","0","144","164","0",""
+"160","NZTA\\SDLT\\Model\\AnswerActionField","High","continue","","0","144","164","0",""
+"161","NZTA\\SDLT\\Model\\AnswerActionField","Low","continue","","0","144","165","0",""
+"162","NZTA\\SDLT\\Model\\AnswerActionField","Medium","continue","","0","144","165","0",""
+"163","NZTA\\SDLT\\Model\\AnswerActionField","High","continue","","0","144","165","0",""
+"164","NZTA\\SDLT\\Model\\AnswerActionField","Low","continue","","0","144","166","0",""
+"165","NZTA\\SDLT\\Model\\AnswerActionField","Medium","continue","","0","144","166","0",""
+"166","NZTA\\SDLT\\Model\\AnswerActionField","High","continue","","0","144","166","0",""
+"167","NZTA\\SDLT\\Model\\AnswerActionField","Finish","finish","","0","144","167","0",""
+"168","NZTA\\SDLT\\Model\\AnswerActionField","Software as a Service","continue","","0","169","169","0",""
+"169","NZTA\\SDLT\\Model\\AnswerActionField","Agency Controlled","continue","","0","169","169","0",""
+"170","NZTA\\SDLT\\Model\\AnswerActionField","Proof of Concept","continue","","0","170","170","0",""
+"171","NZTA\\SDLT\\Model\\AnswerActionField","Software/Product Trial","continue","","0","170","170","0",""
+"172","NZTA\\SDLT\\Model\\AnswerActionField","Finish","continue","","0","172","172","0",""
+"173","NZTA\\SDLT\\Model\\AnswerActionField","Yes","finish","","12","32","173","0",""
+"174","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","173","173","0",""
+"175","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","28","174","174","0",""
+"176","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","28","174","174","0",""
+"177","NZTA\\SDLT\\Model\\AnswerActionField","Finish","continue","","0","175","175","0",""
+"178","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","177","177","0",""
+"179","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","177","177","0",""
+"180","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","17","178","178","0",""
+"181","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","178","178","0",""
+"182","NZTA\\SDLT\\Model\\AnswerActionField","Yes","goto","","0","174","180","0",""
+"183","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","180","180","0",""
+"184","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","182","182","0",""
+"185","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","0","29","182","0",""
+"186","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","186","186","0",""
+"187","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","4","67","186","0",""
+"188","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","188","0",""
+"189","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","189","189","0",""
+"190","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","0","190","189","0",""
+"191","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","45","191","192","0",""
+"192","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","44","191","192","0",""
+"193","NZTA\\SDLT\\Model\\AnswerActionField","Yes","finish","","0","193","193","0",""
+"194","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","193","193","0",""
+"195","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","194","194","0",""
+"196","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","194","194","0",""
+"197","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","195","195","0",""
+"198","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","0","51","195","0",""
+"199","NZTA\\SDLT\\Model\\AnswerActionField","Don't know classification","goto","","4","198","196","0",""
+"200","NZTA\\SDLT\\Model\\AnswerActionField","Same classification as existing","continue","","0","196","196","0",""
+"201","NZTA\\SDLT\\Model\\AnswerActionField","I know new classification","continue","","0","196","196","0",""
+"202","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","198","198","0",""
+"203","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","0","200","198","0",""
+"204","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","199","199","0",""
+"205","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","40","199","199","0",""
+"206","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","200","200","0",""
+"207","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","0","51","200","0",""
+"208","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","201","201","0",""
+"209","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","5","201","201","0",""
+"210","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","11","203","203","0",""
+"211","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","44","203","203","0",""
+"212","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","188","0",""
+"213","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","204","0",""
+"214","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","204","0",""
+"215","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","205","0",""
+"216","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","205","0",""
+"217","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","206","0",""
+"218","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","206","0",""
+"219","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","207","0",""
+"220","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","207","0",""
+"221","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","208","0",""
+"222","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","208","0",""
+"223","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","209","0",""
+"224","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","209","0",""
+"225","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","210","0",""
+"226","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","210","0",""
+"227","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","211","0",""
+"228","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","211","0",""
+"229","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","212","0",""
+"230","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","212","0",""
+"231","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","213","0",""
+"232","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","213","0",""
+"233","NZTA\\SDLT\\Model\\AnswerActionField","Not Applicable","continue","","0","188","213","0",""
+"234","NZTA\\SDLT\\Model\\AnswerActionField","Not Applicable","continue","","0","188","212","0",""
+"235","NZTA\\SDLT\\Model\\AnswerActionField","Not Applicable","continue","","0","188","211","0",""
+"236","NZTA\\SDLT\\Model\\AnswerActionField","Not Applicable","continue","","0","188","210","0",""
+"237","NZTA\\SDLT\\Model\\AnswerActionField","Not Applicable","continue","","0","188","209","0",""
+"238","NZTA\\SDLT\\Model\\AnswerActionField","Not Applicable","continue","","0","188","208","0",""
+"239","NZTA\\SDLT\\Model\\AnswerActionField","Not Applicable","continue","","0","188","207","0",""
+"240","NZTA\\SDLT\\Model\\AnswerActionField","Not Applicable","continue","","0","188","206","0",""
+"241","NZTA\\SDLT\\Model\\AnswerActionField","Not Applicable","continue","","0","188","205","0",""
+"242","NZTA\\SDLT\\Model\\AnswerActionField","Not Applicable","continue","","0","188","204","0",""
+"243","NZTA\\SDLT\\Model\\AnswerActionField","Not Applicable","continue","","0","188","188","0",""
+"244","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","214","0",""
+"245","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","214","0",""
+"246","NZTA\\SDLT\\Model\\AnswerActionField","Not Applicable","continue","","0","188","214","0",""
+"247","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","215","0",""
+"248","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","215","0",""
+"249","NZTA\\SDLT\\Model\\AnswerActionField","Not Applicable","continue","","0","188","215","0",""
+"250","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","216","0",""
+"251","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","216","0",""
+"252","NZTA\\SDLT\\Model\\AnswerActionField","Not Applicable","continue","","0","188","216","0",""
+"253","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","217","0",""
+"254","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","217","0",""
+"255","NZTA\\SDLT\\Model\\AnswerActionField","Not Applicable","continue","","0","188","217","0",""
+"256","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","218","0",""
+"257","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","218","0",""
+"258","NZTA\\SDLT\\Model\\AnswerActionField","Not Applicable","continue","","0","188","218","0",""
+"259","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","219","0",""
+"260","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","219","0",""
+"261","NZTA\\SDLT\\Model\\AnswerActionField","Not Applicable","continue","","0","188","219","0",""
+"262","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","220","0",""
+"263","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","220","0",""
+"264","NZTA\\SDLT\\Model\\AnswerActionField","Not Applicable","continue","","0","188","220","0",""
+"265","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","221","0",""
+"266","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","221","0",""
+"267","NZTA\\SDLT\\Model\\AnswerActionField","Not Applicable","continue","","0","188","221","0",""
+"268","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","222","0",""
+"269","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","222","0",""
+"270","NZTA\\SDLT\\Model\\AnswerActionField","I Don't Know","continue","","0","188","222","0",""
+"271","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","223","0",""
+"272","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","223","0",""
+"273","NZTA\\SDLT\\Model\\AnswerActionField","I Don't Know","continue","","0","188","223","0",""
+"274","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","188","224","0",""
+"275","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","188","224","0",""
+"276","NZTA\\SDLT\\Model\\AnswerActionField","I Don't Know","continue","","0","188","224","0",""
+"277","NZTA\\SDLT\\Model\\AnswerActionField","Start","continue","","0","225","225","0",""
+"278","NZTA\\SDLT\\Model\\AnswerActionField","Yes - Other(s)","continue","","0","226","226","2",""
+"279","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","0","232","226","3",""
+"280","NZTA\\SDLT\\Model\\AnswerActionField","Yes","goto","","0","226","229","0",""
+"281","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","106","229","0",""
+"282","NZTA\\SDLT\\Model\\AnswerActionField","Yes","goto","","0","226","230","0",""
+"283","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","230","230","0",""
+"284","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","231","231","0",""
+"285","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","231","231","0",""
+"286","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","233","233","0",""
+"287","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","233","233","0",""
+"288","NZTA\\SDLT\\Model\\AnswerActionField","Yes - Court Order","continue","","0","234","234","1",""
+"289","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","234","234","4",""
+"290","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","234","235","0",""
+"291","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","234","235","0",""
+"292","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","236","236","0",""
+"293","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","236","236","0",""
+"294","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","238","238","0",""
+"295","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","238","238","0",""
+"296","NZTA\\SDLT\\Model\\AnswerActionField","Negotiate Contracts","continue","","0","240","240","0",""
+"297","NZTA\\SDLT\\Model\\AnswerActionField","Standard Terms of Service","continue","","0","240","240","0",""
+"298","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","241","241","0",""
+"299","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","241","241","0",""
+"300","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","242","242","0",""
+"301","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","242","242","0",""
+"302","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","243","243","0",""
+"303","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","243","243","0",""
+"304","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","244","244","0",""
+"305","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","244","244","0",""
+"306","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","245","245","0",""
+"307","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","245","245","0",""
+"308","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","246","246","0",""
+"309","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","246","246","0",""
+"310","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","247","247","0",""
+"311","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","247","247","0",""
+"312","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","248","248","0",""
+"313","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","248","248","0",""
+"314","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","249","249","0",""
+"315","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","249","249","0",""
+"316","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","250","250","0",""
+"317","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","250","250","0",""
+"318","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","251","251","0",""
+"319","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","251","251","0",""
+"320","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","252","252","0",""
+"321","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","252","252","0",""
+"322","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","253","253","0",""
+"323","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","253","253","0",""
+"324","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","254","254","0",""
+"325","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","254","254","0",""
+"326","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","255","255","0",""
+"327","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","255","255","0",""
+"328","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","256","256","0",""
+"329","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","256","256","0",""
+"330","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","257","257","0",""
+"331","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","257","257","0",""
+"332","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","257","258","0",""
+"333","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","257","258","0",""
+"334","NZTA\\SDLT\\Model\\AnswerActionField","Controls have been implemented","continue","","0","128","128","0",""
+"335","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","259","259","0",""
+"336","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","259","259","0",""
+"337","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","260","260","0",""
+"338","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","260","260","0",""
+"339","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","261","261","0",""
+"340","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","261","261","0",""
+"341","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","262","262","0",""
+"342","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","262","262","0",""
+"343","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","263","263","0",""
+"344","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","263","263","0",""
+"345","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","264","264","0",""
+"346","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","264","264","0",""
+"347","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","265","265","0",""
+"348","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","265","265","0",""
+"349","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","266","266","0",""
+"350","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","266","266","0",""
+"351","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","267","267","0",""
+"352","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","267","267","0",""
+"353","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","268","268","0",""
+"354","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","268","268","0",""
+"355","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","269","269","0",""
+"356","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","269","269","0",""
+"357","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","270","270","0",""
+"358","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","270","270","0",""
+"359","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","271","271","0",""
+"360","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","271","271","0",""
+"361","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","272","272","0",""
+"362","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","272","272","0",""
+"363","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","273","273","0",""
+"364","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","273","273","0",""
+"365","NZTA\\SDLT\\Model\\AnswerActionField","NZTA","continue","","0","274","274","0",""
+"366","NZTA\\SDLT\\Model\\AnswerActionField","Your Organisation","continue","","0","274","274","0",""
+"367","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","275","275","0",""
+"368","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","275","275","0",""
+"369","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","276","276","0",""
+"370","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","276","276","0",""
+"371","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","277","277","0",""
+"372","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","277","277","0",""
+"373","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","278","278","0",""
+"374","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","278","278","0",""
+"375","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","279","279","0",""
+"376","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","279","279","0",""
+"377","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","280","280","0",""
+"378","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","280","280","0",""
+"379","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","281","281","0",""
+"380","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","281","281","0",""
+"381","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","282","282","0",""
+"382","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","282","282","0",""
+"383","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","283","283","0",""
+"384","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","283","283","0",""
+"385","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","284","284","0",""
+"386","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","284","284","0",""
+"387","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","285","285","0",""
+"388","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","285","285","0",""
+"389","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","286","286","0",""
+"390","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","286","286","0",""
+"391","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","287","287","0",""
+"392","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","287","287","0",""
+"393","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","289","289","0",""
+"394","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","289","289","0",""
+"395","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","292","292","0",""
+"396","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","292","292","0",""
+"397","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","293","293","0",""
+"398","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","293","293","0",""
+"399","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","294","294","0",""
+"400","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","294","294","0",""
+"401","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","295","295","0",""
+"402","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","295","295","0",""
+"403","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","296","296","0",""
+"404","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","296","296","0",""
+"405","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","297","297","0",""
+"406","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","297","297","0",""
+"407","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","298","298","0",""
+"408","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","298","298","0",""
+"409","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","299","299","0",""
+"410","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","299","299","0",""
+"411","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","300","300","0",""
+"412","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","300","300","0",""
+"413","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","301","301","0",""
+"414","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","301","301","0",""
+"415","NZTA\\SDLT\\Model\\AnswerActionField","Data Recovery","continue","","0","302","302","0",""
+"416","NZTA\\SDLT\\Model\\AnswerActionField","Service Restoration Only","continue","","0","302","302","0",""
+"417","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","303","303","0",""
+"418","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","303","303","0",""
+"419","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","305","305","0",""
+"420","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","305","305","0",""
+"421","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","307","307","0",""
+"422","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","307","307","0",""
+"423","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","308","308","0",""
+"424","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","308","308","0",""
+"425","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","309","309","0",""
+"426","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","309","309","0",""
+"427","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","310","310","0",""
+"428","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","310","310","0",""
+"429","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","311","311","0",""
+"430","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","311","311","0",""
+"431","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","312","312","0",""
+"432","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","312","312","0",""
+"433","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","313","313","0",""
+"434","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","313","313","0",""
+"435","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","314","314","0",""
+"436","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","314","314","0",""
+"437","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","315","315","0",""
+"438","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","315","315","0",""
+"439","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","316","316","0",""
+"440","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","316","316","0",""
+"441","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","317","317","0",""
+"442","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","317","317","0",""
+"443","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","318","318","0",""
+"444","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","318","318","0",""
+"445","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","319","319","0",""
+"446","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","319","319","0",""
+"447","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","320","320","0",""
+"448","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","320","320","0",""
+"449","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","321","321","0",""
+"450","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","321","321","0",""
+"451","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","322","322","0",""
+"452","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","322","322","0",""
+"453","NZTA\\SDLT\\Model\\AnswerActionField","I Understand, Let's Start","continue","","0","323","323","0",""
+"454","NZTA\\SDLT\\Model\\AnswerActionField","Yes - Amazon/Microsoft/Google","goto","","0","228","226","1",""
+"455","NZTA\\SDLT\\Model\\AnswerActionField","Yes - Government Request","continue","","0","323","234","2",""
+"456","NZTA\\SDLT\\Model\\AnswerActionField","Yes - Both","continue","","0","323","234","3",""
+"457","NZTA\\SDLT\\Model\\AnswerActionField","We don't know","continue","","0","323","235","0",""
+"458","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","323","324","0",""
+"459","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","0","240","324","0",""
+"460","NZTA\\SDLT\\Model\\AnswerActionField"," I Understand, Let's Start","continue","","0","325","326","0",""
+"461","NZTA\\SDLT\\Model\\AnswerActionField","I Understand, Let's Start","continue","","0","327","327","0",""
+"462","NZTA\\SDLT\\Model\\AnswerActionField","I Understand, Let's Start","continue","","0","328","328","0",""
+"463","NZTA\\SDLT\\Model\\AnswerActionField","I Understand, Let's Start","continue","","0","329","329","0",""
+"464","NZTA\\SDLT\\Model\\AnswerActionField","I Understand, Let's Start","continue","","0","330","330","0",""
+"465","NZTA\\SDLT\\Model\\AnswerActionField","I Understand, Let's Start","continue","","0","331","331","0",""
+"466","NZTA\\SDLT\\Model\\AnswerActionField","I Understand, Let's Start","continue","","0","332","332","0",""
+"467","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","333","336","0",""
+"468","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","333","336","0",""
+"469","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","333","337","0",""
+"470","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","333","337","0",""
+"471","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","344","344","0",""
+"472","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","344","344","0",""
+"473","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","349","349","0",""
+"474","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","349","349","0",""
+"475","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","350","350","0",""
+"476","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","350","350","0",""
+"477","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","351","351","0",""
+"478","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","351","351","0",""
+"479","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","352","352","0",""
+"480","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","352","352","0",""
+"481","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","353","353","0",""
+"482","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","353","353","0",""
+"483","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","354","354","0",""
+"484","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","354","354","0",""
+"485","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","356","356","0",""
+"486","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","356","356","0",""
+"487","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","357","357","0",""
+"488","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","357","357","0",""
+"489","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","358","358","0",""
+"490","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","358","358","0",""
+"491","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","359","359","0",""
+"492","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","359","359","0",""
+"493","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","360","360","0",""
+"494","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","360","360","0",""
+"495","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","361","361","0",""
+"496","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","361","361","0",""
+"497","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","362","362","0",""
+"498","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","362","362","0",""
+"499","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","363","363","0",""
+"500","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","363","363","0",""
+"501","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","364","364","0",""
+"502","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","364","364","0",""
+"503","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","365","365","0",""
+"504","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","365","365","0",""
+"505","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","366","366","0",""
+"506","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","366","366","0",""
+"507","NZTA\\SDLT\\Model\\AnswerActionField","Not Applicable","continue","","0","366","366","0",""
+"508","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","367","367","0",""
+"509","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","367","367","0",""
+"510","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","368","368","0",""
+"511","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","368","368","0",""
+"512","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","369","369","0",""
+"513","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","369","369","0",""
+"514","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","370","370","0",""
+"515","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","370","370","0",""
+"516","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","371","371","0",""
+"517","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","371","371","0",""
+"518","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","372","372","0",""
+"519","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","372","372","0",""
+"520","NZTA\\SDLT\\Model\\AnswerActionField","The Agency","continue","","0","373","373","0",""
+"521","NZTA\\SDLT\\Model\\AnswerActionField","The Vendor","continue","","0","373","373","0",""
+"522","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","374","374","0",""
+"523","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","374","374","0",""
+"524","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","375","375","0",""
+"525","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","375","375","0",""
+"526","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","376","376","0",""
+"527","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","376","376","0",""
+"528","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","378","378","0",""
+"529","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","378","378","0",""
+"530","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","379","379","0",""
+"531","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","379","379","0",""
+"532","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","380","380","0",""
+"533","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","380","380","0",""
+"534","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","381","381","0",""
+"535","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","381","381","0",""
+"536","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","382","382","0",""
+"537","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","382","382","0",""
+"538","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","383","383","0",""
+"539","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","383","383","0",""
+"540","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","384","384","0",""
+"541","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","384","384","0",""
+"542","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","385","385","0",""
+"543","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","385","385","0",""
+"544","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","386","386","0",""
+"545","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","386","386","0",""
+"546","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","387","387","0",""
+"547","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","387","387","0",""
+"548","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","388","388","0",""
+"549","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","388","388","0",""
+"550","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","389","389","0",""
+"551","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","389","389","0",""
+"552","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","390","390","0",""
+"553","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","390","390","0",""
+"554","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","391","391","0",""
+"555","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","391","391","0",""
+"556","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","392","392","0",""
+"557","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","392","392","0",""
+"558","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","393","393","0",""
+"559","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","393","393","0",""
+"560","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","394","394","0",""
+"561","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","394","394","0",""
+"562","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","395","395","0",""
+"563","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","395","395","0",""
+"564","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","397","397","0",""
+"565","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","397","397","0",""
+"566","NZTA\\SDLT\\Model\\AnswerActionField","I Understand, Let's Start!","continue","","0","398","398","0",""
+"567","NZTA\\SDLT\\Model\\AnswerActionField","Ok","continue","","42","397","400","0",""
+"568","NZTA\\SDLT\\Model\\AnswerActionField","Ok","continue","","28","401","401","0",""
+"569","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","402","402","0",""
+"570","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","402","402","0",""
+"571","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","403","403","0",""
+"572","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","0","65","403","0",""
+"573","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","0","404","404","0",""
+"574","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","5","404","404","0",""
+"575","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","43","405","405","0",""
+"576","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","0","403","405","0",""
+"577","NZTA\\SDLT\\Model\\AnswerActionField","I Understand, Let's Start!","continue","","0","406","406","0",""
+"578","NZTA\\SDLT\\Model\\AnswerActionField","I Understand, Let's Start","continue","","0","408","408","0",""
+"579","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","43","410","410","0",""
+"580","NZTA\\SDLT\\Model\\AnswerActionField","No","goto","","0","200","410","0",""
+"581","NZTA\\SDLT\\Model\\AnswerActionField","I Understand, Let's Start","continue","","12","411","411","0",""
+"582","NZTA\\SDLT\\Model\\AnswerActionField","Finish","finish","","11","411","412","0",""
+"583","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","28","413","413","0",""
+"584","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","413","413","0",""
+"585","NZTA\\SDLT\\Model\\AnswerActionField","I Understand, Let's Start!","continue","","0","414","414","0",""
+"586","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","43","420","420","0",""
+"587","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","420","420","0",""
+"588","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","43","421","421","0",""
+"589","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","421","421","0",""
+"590","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","43","422","422","0",""
+"591","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","422","422","0",""
+"592","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","43","423","423","0",""
+"593","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","423","423","0",""
+"594","NZTA\\SDLT\\Model\\AnswerActionField","I Don't Know","continue","","28","32","413","0",""
+"595","NZTA\\SDLT\\Model\\AnswerActionField","Yes","goto","","0","201","424","0",""
+"596","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","424","424","0",""
+"597","NZTA\\SDLT\\Model\\AnswerActionField","Yes","continue","","5","425","425","0",""
+"598","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","5","425","425","0",""
+"599","NZTA\\SDLT\\Model\\AnswerActionField","I Don't Know","continue","","5","425","425","0",""
+"600","NZTA\\SDLT\\Model\\AnswerActionField","I Understand, Let's Start!","continue","","0","426","426","0",""
+"601","NZTA\\SDLT\\Model\\AnswerActionField","Yes","message","<p>Yes, you will need to make a submission through the SDLT.</p><p>&nbsp;</p><p>To run a Proof of Concept at the Agency, you will need to complete the SDLT \"Proof of Concept\" questionnaire.</p>","0","430","430","0",""
+"602","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","430","430","0",""
+"603","NZTA\\SDLT\\Model\\AnswerActionField","Yes","message","<p>Yes, you will need to make a submission through the SDLT.</p><p>&nbsp;</p><p>To run a Software Trial at the Agency, you will need to complete the SDLT \"Product Trial\" questionnaire.</p>","0","430","431","0",""
+"604","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","430","431","0",""
+"605","NZTA\\SDLT\\Model\\AnswerActionField","Yes","message","<p>Yes, you will need to make a submission through the SDLT.</p><p>&nbsp;</p><p>To run a Proof of Concept at the Agency, you will need to complete the SDLT \"Software as a Service\" questionnaire. Even if you are using another product by an existing vendor, you will need to complete the SDLT. This is because many products were adopted before formal Government security assurance processes were implemented. On-going refreshes and replacements of products will need to go through formal security assurance.</p>","0","430","432","0",""
+"606","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","430","432","0",""
+"607","NZTA\\SDLT\\Model\\AnswerActionField","Yes","message","<p>No, you do not need to make a submission through the SDLT.</p><p>&nbsp;</p><p>The SDLT does not handle operational infrastructural changes. Please send your request through to the Agencies Service Desk.</p>","0","430","428","0",""
+"608","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","430","428","0",""
+"609","NZTA\\SDLT\\Model\\AnswerActionField","Yes","message","<p>No, you do not need to make a submission through the SDLT.</p><p>&nbsp;</p><p>The SDLT does not handle operational infrastructural changes. Please send your request through to the Agencies Service Desk.</p>","0","430","429","0",""
+"610","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","430","429","0",""
+"611","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","<p>No, you do not need to make a submission through the SDLT.</p><p>&nbsp;</p><p>The SDLT does not handle operational infrastructural changes. Please send your request through to the Agencies Service Desk.</p>","0","430","434","2",""
+"612","NZTA\\SDLT\\Model\\AnswerActionField","Yes","message","<p>No, you do not need to make a submission through the SDLT.</p><p>&nbsp;</p><p>The SDLT does not handle operational infrastructural changes. Please send your request through to the Agencies Service Desk.</p>","0","430","434","1",""
+"613","NZTA\\SDLT\\Model\\AnswerActionField","Yes","message","<p>No, you do not need to make a submission through the SDLT.</p><p>&nbsp;</p><p>The SDLT does not handle operational infrastructural changes. Please send your request through to the Agencies Service Desk.</p>","0","430","435","0",""
+"614","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","430","435","0",""
+"615","NZTA\\SDLT\\Model\\AnswerActionField","Yes","message","<p>Yes, you will need to make a submission through the SDLT.</p><p>&nbsp;</p><p>To make a change to Software at the Agency, you will need to complete the SDLT \"Technical Change\" questionnaire.</p>","0","430","433","0",""
+"616","NZTA\\SDLT\\Model\\AnswerActionField","No","continue","","0","430","433","0",""
+"617","NZTA\\SDLT\\Model\\AnswerActionField","Yes","message","<p>Yes, you will need to make a submission through the SDLT.</p><p>&nbsp;</p><p>To go-live with a project at the Agency, you will need to complete the SDLT \"Solution Delivery Assessment\" questionnaire.</p>","0","430","436","0",""
+"618","NZTA\\SDLT\\Model\\AnswerActionField","No","message","<p>No, you do not need to make a submission through the SDLT.</p><p>&nbsp;</p><p>We've been unable to determine the nature of your work. If you're still unsure about this, please email the security architects (security.architects@example.govt.nz) with a description of your work so it can be assessed.</p>","0","430","436","0",""
+"619","NZTA\\SDLT\\Model\\AnswerActionField","Go","continue","","0","396","438","0",""
+"620","NZTA\\SDLT\\Model\\AnswerActionField","I Understand, Let's Start","continue","","0","441","441","0",""
+"621","NZTA\\SDLT\\Model\\AnswerActionField","I Understand, Let's Start!","continue","","0","443","443","0",""

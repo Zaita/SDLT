@@ -1,0 +1,6 @@
+"ID","ClassName","Name","Value","Colour","Operator","TaskID"
+"1","NZTA\\SDLT\\Model\\LikelihoodThreshold","Rare","2","00ab00","<","49"
+"2","NZTA\\SDLT\\Model\\LikelihoodThreshold","Unlikely","5","00ab00","<","49"
+"3","NZTA\\SDLT\\Model\\LikelihoodThreshold","Possible","11","ba8500","<","49"
+"4","NZTA\\SDLT\\Model\\LikelihoodThreshold","Likely","21","ff0000","<","49"
+"5","NZTA\\SDLT\\Model\\LikelihoodThreshold","Almost Certain","20","803232",">=","49"

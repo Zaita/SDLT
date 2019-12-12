@@ -8,7 +8,7 @@ SilverStripe\Core\Injector\Injector:
      username: '`JIRA_USERNAME`'
      api_key: '`JIRA_API_KEY`'
      atlassian_instance: '`JIRA_ATLASSIAN_INSTANCE`'
-     ticket_info_email: 'security.architects@nzta.govt.nz'
+     ticket_info_email: 'security.architects@example.govt.nz'
 
 NZTA\SDLT\IssueTracker\IssueTrackerSystem:
   provider: NZTA\SDLT\IssueTracker\JIRA\JIRA

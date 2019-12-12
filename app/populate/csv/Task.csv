@@ -1,22 +1,25 @@
-ID,ClassName,Name,DisplayOnHomePage,QuestionnaireID,KeyInformation,TaskType,LockAnswersWhenComplete
-4,NZTA\SDLT\Model\Task,Information Classification,1,0,<p>Test</p>,questionnaire,0
-5,NZTA\SDLT\Model\Task,GCIO 105,0,0,,questionnaire,0
-6,NZTA\SDLT\Model\Task,GCIO 105 Vendor,0,0,,questionnaire,0
-7,NZTA\SDLT\Model\Task,GCIO 105 Agency,0,0,,questionnaire,0
-8,NZTA\SDLT\Model\Task,Penetration Test,1,0,,questionnaire,0
-10,NZTA\SDLT\Model\Task,Initial Risk Assessment,0,0,,questionnaire,0
-11,NZTA\SDLT\Model\Task,Controls Validation Audit - JIRA,0,0,,questionnaire,0
-12,NZTA\SDLT\Model\Task,Component Selection,0,0,,selection,0
-13,NZTA\SDLT\Model\Task,Privacy Impact Assessment,1,0,<p>Test</p>,questionnaire,0
-15,NZTA\SDLT\Model\Task,Privacy Threshold Assessment,0,0,,questionnaire,0
-17,NZTA\SDLT\Model\Task,Third-Party PCI-DSS,0,0,,questionnaire,0
-28,NZTA\SDLT\Model\Task,Security Risk Assessment,0,0,,questionnaire,0
-38,NZTA\SDLT\Model\Task,PCI-DSS Assessment,0,0,,questionnaire,0
-40,NZTA\SDLT\Model\Task,Privacy Threshold Assessment Link,0,0,,questionnaire,0
-41,NZTA\SDLT\Model\Task,Enhanced 105,0,0,,questionnaire,0
-42,NZTA\SDLT\Model\Task,Certification and Accreditation Report,0,0,,questionnaire,0
-43,NZTA\SDLT\Model\Task,Information and Data Management Assessment,0,0,,questionnaire,0
-44,NZTA\SDLT\Model\Task,Control Validation Audit,0,0,,questionnaire,0
-45,NZTA\SDLT\Model\Task,JIRA Project Management,0,0,,questionnaire,0
-46,NZTA\SDLT\Model\Task,SaaS Penetration Test,0,0,,questionnaire,0
-48,NZTA\SDLT\Model\Task,Do I need the SDLT?,0,0,,questionnaire,0
+"ID","ClassName","Name","DisplayOnHomePage","QuestionnaireID","KeyInformation","TaskType","LockAnswersWhenComplete","RiskQuestionnaireDataSourceID"
+"4","NZTA\\SDLT\\Model\\Task","Information Classification","1","0","<p>Test</p>","questionnaire","0","0"
+"5","NZTA\\SDLT\\Model\\Task","GCIO 105","0","0","","questionnaire","0","0"
+"6","NZTA\\SDLT\\Model\\Task","GCIO 105 Vendor","0","0","","questionnaire","0","0"
+"7","NZTA\\SDLT\\Model\\Task","GCIO 105 Agency","0","0","","questionnaire","0","0"
+"8","NZTA\\SDLT\\Model\\Task","Penetration Test","1","0","","questionnaire","0","0"
+"10","NZTA\\SDLT\\Model\\Task","Initial Risk Assessment (Deprecated)","0","0","","questionnaire","0","0"
+"11","NZTA\\SDLT\\Model\\Task","Controls Validation Audit - JIRA","0","0","","questionnaire","0","0"
+"12","NZTA\\SDLT\\Model\\Task","Component Selection","0","0","","selection","0","0"
+"13","NZTA\\SDLT\\Model\\Task","Privacy Impact Assessment","1","0","<p>Test</p>","questionnaire","0","0"
+"15","NZTA\\SDLT\\Model\\Task","Privacy Threshold Assessment","0","0","","questionnaire","0","0"
+"17","NZTA\\SDLT\\Model\\Task","Third-Party PCI-DSS","0","0","","questionnaire","0","0"
+"28","NZTA\\SDLT\\Model\\Task","Security Risk Assessment Link","0","0","","questionnaire","0","0"
+"38","NZTA\\SDLT\\Model\\Task","PCI-DSS Assessment","0","0","","questionnaire","0","0"
+"40","NZTA\\SDLT\\Model\\Task","Privacy Threshold Assessment Link","0","0","","questionnaire","0","0"
+"41","NZTA\\SDLT\\Model\\Task","Enhanced 105","0","0","","questionnaire","0","0"
+"42","NZTA\\SDLT\\Model\\Task","Certification and Accreditation Report","0","0","","questionnaire","0","0"
+"43","NZTA\\SDLT\\Model\\Task","Information and Data Management Assessment","0","0","","questionnaire","0","0"
+"44","NZTA\\SDLT\\Model\\Task","Control Validation Audit","0","0","","questionnaire","0","0"
+"45","NZTA\\SDLT\\Model\\Task","JIRA Project Management","0","0","","questionnaire","0","0"
+"46","NZTA\\SDLT\\Model\\Task","SaaS Penetration Test","0","0","","questionnaire","0","0"
+"48","NZTA\\SDLT\\Model\\Task","Do I need the SDLT?","0","0","","questionnaire","0","0"
+"49","NZTA\\SDLT\\Model\\Task","Security Risk Assessment","0","0","","security risk assessment","0","0"
+"50","NZTA\\SDLT\\Model\\Task","Initial Risk Assessment","0","0","<p>This is the task to generate the base impact rating for our digital security risk assessment.</p>","risk questionnaire","0","0"
+"51","NZTA\\SDLT\\Model\\Task","Risk Impact Assessment (Beta)","0","0","<p>This questionnaire calculates the base impact risk score for project/feature deliveries.</p>","risk questionnaire","0","0"
