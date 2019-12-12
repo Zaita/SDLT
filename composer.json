@@ -25,12 +25,12 @@
         "silverstripe/graphql-devtools": "^1.0@dev",
         "dnadesign/silverstripe-populate": "^2.0"
     },
-    "repositories": [
-        {
+    "repositories": {
+        "catalyst/silverstripe-active-directory": {
             "type": "vcs",
             "url": "git@gitlab.catalyst.net.nz:SilverStripe/silverstripe-active-directory.git"
         }
-    ],
+    },
     "extra": {
         "project-files-installed": [
             "app/.htaccess",
