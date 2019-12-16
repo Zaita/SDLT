@@ -144,7 +144,7 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
                 UploadField::create('HomePageBackgroundImage', 'Home Page Background Image')
                     ->setDescription('This is the background image shown on the home-screen.'),
                 UploadField::create('FavIcon', 'FavIcon')
-                    ->setDescription('This is the site favIcon shown on front-end browser tabs.
+                    ->setDescription('This is the site favicon shown on front-end browser tabs.
                     Require: .ico format, dimensions of 16x16, 32x32, or 48x48.')
                     ->setAllowedExtensions(['ico']),
             ]
