@@ -56,6 +56,7 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
         'HomePageBackgroundImage' => Image::class,
         'QuestionnairePdfHeaderImage' => Image::class,
         'QuestionnairePdfFooterImage' => Image::class,
+        'FavIcon' => Image::class,
     ];
 
     /**
@@ -70,6 +71,7 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
         'HomePageBackgroundImage',
         'QuestionnairePdfHeaderImage',
         'QuestionnairePdfFooterImage',
+        'FavIcon',
     ];
 
     /**
@@ -141,6 +143,10 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
                     ->setDescription('This is the background image shown on the login screen.'),
                 UploadField::create('HomePageBackgroundImage', 'Home Page Background Image')
                     ->setDescription('This is the background image shown on the home-screen.'),
+                UploadField::create('FavIcon', 'FavIcon')
+                    ->setDescription('This is the site favIcon shown on front-end browser tabs.
+                    Require: .ico format, dimensions of 16x16, 32x32, or 48x48.')
+                    ->setAllowedExtensions(['ico']),
             ]
         );
 
@@ -238,7 +244,6 @@ class SDLTSiteConfigExtension extends DataExtension implements ScaffoldingProvid
             $this->owner->AlternateHostnameForEmail = trim($this->owner->AlternateHostnameForEmail);
             //also strip / just in case it's there.
             $this->owner->AlternateHostnameForEmail = rtrim($this->owner->AlternateHostnameForEmail, '/');
-
             //we're now guaranteed to have a URL without a trailing slash so if we add one now it's consistently present
             $this->owner->AlternateHostnameForEmail .= '/';
         }
