@@ -23,6 +23,7 @@ use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 use NZTA\SDLT\Traits\SDLTModelPermissions;
+
 /**
  * Class AnswerActionField
  *
@@ -57,7 +58,7 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
         'Message' => 'HTMLText',
         'SortOrder' => 'Int',
         'Result' => 'Varchar(255)',
-        'IsApprovalForTaskRequired' => 'Boolean',
+        'IsApprovalForTaskRequired' => 'Boolean', // only when task's action
     ];
 
     /**
@@ -74,7 +75,7 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
     private static $summary_fields = [
         'Label',
         'ActionType',
-        'ActionDescription',
+        'ActionDescription' => "Action Description",
         'TaskNames' => 'Tasks'
     ];
 
@@ -192,7 +193,7 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
     {
         $result = parent::validate();
 
-        if($this->IsApprovalForTaskRequired && $this->Question()->Task()->exists() &&
+        if ($this->IsApprovalForTaskRequired && $this->Question()->Task()->exists() &&
             !$this->Question()->Task()->ApprovalGroup()->exists()) {
             $result->addError('Please first select an approval group on the task level.');
         }
@@ -200,8 +201,42 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
         return $result;
     }
 
+    /**
+     * get task name
+     *
+     * @return string
+     */
     public function getTaskNames()
     {
         return $this->Tasks() ? implode(", ", $this->Tasks()->column('Name')) : '';
+    }
+
+    /**
+     * create action field from json import
+     *
+     * @param object $actionFieldJson input field json object
+     * @return DataObject
+     */
+    public static function create_record_from_json($actionFieldJson)
+    {
+        $obj = self::create();
+
+        $obj->Label = $actionFieldJson->label;
+        $obj->ActionType = $actionFieldJson->actionType ?? 'continue';
+        $obj->Message = $actionFieldJson->message ?? '';
+        $obj->Result = $actionFieldJson->result ?? '';
+        $obj->IsApprovalForTaskRequired = $actionFieldJson->isApprovalForTaskRequired ?? false;
+
+        // add task with action
+        if (property_exists($actionFieldJson, "tasks") && !empty($tasks = $actionFieldJson->tasks)) {
+            foreach ($tasks as $task) {
+                $dbTask = Task::find_or_make_by_name($task->name);
+                $obj->Tasks()->add($dbTask);
+            }
+        }
+
+        $obj->write();
+
+        return $obj;
     }
 }

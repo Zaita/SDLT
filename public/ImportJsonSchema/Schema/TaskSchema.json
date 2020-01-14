@@ -1,0 +1,127 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Questionnaire and RiskQuestionnaire type Task Import",
+  "type": "object",
+  "properties": {
+    "task": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string"},
+        "keyInformation": {"type": "string"},
+        "taskType": {
+          "type": "string",
+          "enum": ["questionnaire", "risk questionnaire"]
+        },
+        "lockAnswersWhenComplete": {"type": "boolean"},
+        "isApprovalRequired": {"type": "boolean"},
+        "riskCalculation": {
+          "type": "string",
+          "enum": ["NztaApproxRepresentation", "Maximum"]
+        },
+        "approvalGroupName": {"type": "string"},
+        "questions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {"type": "string"},
+              "question": {"type": "string"},
+              "description": {"type": "string"},
+              "answerFieldType": {
+                "type": "string",
+                "enum": ["input", "action"]
+              },
+              "answerInputFields": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "label": {"type": "string"},
+                    "inputType": {
+                      "type": "string",
+                      "enum": ["text", "email", "textarea", "product aspects", "date", "url", "multiple-choice: single selection", "multiple-choice: multiple selection"]
+                    },
+                    "required": {"type": "boolean"},
+                    "minLength": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "maxLength": {
+                      "type": "number",
+                      "maximum": 4096
+                    },
+                    "placeHolder": {"type": "string"},
+                    "isBusinessOwner": {"type": "boolean"},
+                    "isProductName": {"type": "boolean"},
+                    "multiChoiceSingleAnswerDefault": {"type": "string"},
+                    "multiChoiceMultipleAnswerDefault": {"type": "string"},
+                    "answerSelections": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "label": {"type": "string"},
+                          "value": {"tpe": "string"},
+                          "risks":{
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": {"type": "string"},
+                                "weight": {
+                                  "type": "number",
+                                  "minimum": 0
+                                }
+                              },
+                              "required": ["name", "weight"]
+                            },
+                            "uniqueItems": true
+                          }
+                        },
+                        "required": ["label", "value"]
+                      }
+                    }
+                  },
+                  "required": ["label", "inputType"]
+                }
+              },
+              "answerActionFields": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "label": {"type": "string"},
+                    "actionType": {
+                      "type": "string",
+                      "enum": ["continue", "goto", "message", "product aspects", "finish"]
+                    },
+                    "message": {"type": "string"},
+                    "result": {"type": "string"},
+                    "isApprovalForTaskRequired": {"type": "boolean"},
+                    "gotoQuestionTitle": {"type": "string"},
+                    "tasks": {
+                      "type": "array",
+                      "uniqueItems": true,
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {"type": "string"}
+                        },
+                        "required": ["name"]
+                      }
+                    }
+                  },
+                  "required": ["label", "actionType"]
+                }
+              }
+            },
+            "required": ["title", "question", "answerFieldType"]
+          }
+        }
+      },
+      "required": [ "name", "taskType", "questions"]
+    }
+  },
+  "required": ["task"]
+}
