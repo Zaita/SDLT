@@ -13,6 +13,7 @@
 
 namespace NZTA\SDLT\Traits;
 
+use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Security\Security;
 use SilverStripe\Forms\HiddenField;
 use SilverStripe\Forms\FileField;
@@ -25,6 +26,22 @@ use SilverStripe\Forms\CheckboxField;
 
 trait SDLTAdminCommon
 {
+    use Configurable;
+
+    /**
+     * Default location of task schema, allow dev to override for alternative schema
+     *
+     * @var string
+     */
+    private static $json_schema_task = '/app/src/ImportJsonSchema/Schema/TaskSchema.json';
+
+     /**
+     * Default location of questionnaire schema, allow dev to override for alternative schema
+     *
+     * @var string
+     */
+    private static $json_schema_questionnaire = '/app/src/ImportJsonSchema/Schema/QuestionnaireSchema.json';
+
     /**
      * @var array
      */
@@ -186,10 +203,12 @@ trait SDLTAdminCommon
 
         switch ($this->ImportClass) {
             case 'Questionnaire':
-                $schemaJson = file_get_contents("ImportJsonSchema/Schema/QuestionnaireSchema.json");
+                $pathToSchema = BASE_PATH . $this->config()->json_schema_questionnaire;
+                $schemaJson = file_get_contents($pathToSchema);
                 break;
             case 'Task':
-                $schemaJson = file_get_contents("ImportJsonSchema/Schema/TaskSchema.json");
+                $pathToSchema = BASE_PATH . $this->config()->json_schema_task;
+                $schemaJson = file_get_contents($pathToSchema);
                 break;
         }
 
