@@ -338,7 +338,6 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
 
         // traverse question's input fields
         foreach ($inputFields as $inputField) {
-
             // if input type isn't MultiChoiceAnswer (radio/checkbox)
             // then continue for next input field
             if (!isset($inputField['MultiChoiceAnswer']) ||
@@ -387,5 +386,39 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         }
 
         return $selectedOptionRisks;
+    }
+
+    /**
+     * create input field from json import
+     *
+     * @param object $inputFieldJson input field json object
+     * @return DataObject
+     */
+    public static function create_record_from_json($inputFieldJson)
+    {
+        $obj = self::create();
+
+        $obj->Label = $inputFieldJson->label;
+        $obj->InputType = $inputFieldJson->inputType ?? 'text';
+        $obj->Required = $inputFieldJson->required ?? false;
+        $obj->MinLength = $inputFieldJson->minLength ?? 0;
+        $obj->MaxLength = $inputFieldJson->maxLength ?? 4096;
+        $obj->PlaceHolder = $inputFieldJson->placeHolder ?? '';
+        $obj->IsBusinessOwner = $inputFieldJson->isBusinessOwner ?? false;
+        $obj->IsProductName = $inputFieldJson->isProductName ?? false;
+        $obj->MultiChoiceSingleAnswerDefault = $inputFieldJson->multiChoiceSingleAnswerDefault ?? '';
+        $obj->MultiChoiceMultipleAnswerDefault = $inputFieldJson->multiChoiceMultipleAnswerDefault ?? '';
+
+        // if field type is multi select (radio or checkobox) then add option field
+        if (property_exists($inputFieldJson, "answerSelections") && !empty($selections = $inputFieldJson->answerSelections)) {
+            foreach ($selections as $selection) {
+                $dbSelection = MultiChoiceAnswerSelection::create_record_from_json($selection);
+                $obj->AnswerSelections()->add($dbSelection);
+            }
+        }
+
+        $obj->write();
+
+        return $obj;
     }
 }

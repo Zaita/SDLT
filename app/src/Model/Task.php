@@ -40,11 +40,15 @@ use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\HasManyList;
-use SilverStripe\Security\Group;
-use SilverStripe\Security\Security;
 use SilverStripe\View\ArrayData;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 use SilverStripe\Core\Convert;
+use NZTA\SDLT\Extension\GroupExtension;
+use SilverStripe\Security\Group;
+use SilverStripe\Security\Security;
+use SilverStripe\Security\Member;
+use SilverStripe\Security\Permission;
+use SilverStripe\Security\PermissionProvider;
 
 /**
  * Class Task
@@ -57,7 +61,7 @@ use SilverStripe\Core\Convert;
  *
  * @method HasManyList Questions()
  */
-class Task extends DataObject implements ScaffoldingProvider
+class Task extends DataObject implements ScaffoldingProvider, PermissionProvider
 {
     use SDLTModelPermissions;
     use SDLTRiskCalc;
@@ -78,7 +82,7 @@ class Task extends DataObject implements ScaffoldingProvider
         'LockAnswersWhenComplete' => 'Boolean',
         'IsApprovalRequired' => 'Boolean',
         'RiskCalculation' => "Enum('NztaApproxRepresentation,Maximum')",
-        'ComponentTarget' => "Enum('JIRA Cloud,Local')",
+        'ComponentTarget' => "Enum('JIRA Cloud,Local')", // when task type is SRA
     ];
 
     /**
@@ -86,7 +90,6 @@ class Task extends DataObject implements ScaffoldingProvider
      */
     private static $has_one = [
         'ApprovalGroup' => Group::class,
-
         //this is a task of type "risk questionnaire" to grab question data from
         //it must be filtered to RiskQuestionnaires only, and is required
         'RiskQuestionnaireDataSource' => Task::class
@@ -98,8 +101,8 @@ class Task extends DataObject implements ScaffoldingProvider
     private static $has_many = [
         'Questions' => Question::class,
         'SubmissionEmails' => TaskSubmissionEmail::class,
-        'LikelihoodThresholds' => LikelihoodThreshold::class,
-        'RiskRatings' => RiskRating::class,
+        'LikelihoodThresholds' => LikelihoodThreshold::class, // when task type is SRA
+        'RiskRatings' => RiskRating::class, // when task type is SRA
     ];
 
     /**
@@ -785,5 +788,172 @@ class Task extends DataObject implements ScaffoldingProvider
             );
         }
         return $fields;
+    }
+
+    /**
+     * find or create a new task from the given name string
+     *
+     * @param string $name name of the task
+     * @return DataObject
+     */
+    public static function find_or_make_by_name($name)
+    {
+        $taskInDB = Task::get()->filter([
+            'Name' => $name
+        ])->first();
+
+        // if task doesn't exist with the given name then create one.
+        if (empty($taskInDB)) {
+            $newTask = Task::create();
+            $newTask->Name = $name;
+            $newTask->TaskType = "questionnaire";
+            $taskInDB = $newTask->write();
+        }
+
+        return $taskInDB;
+    }
+
+    /**
+     * create questionnaire from json import
+     * @param object  $incomingJson questionnaire json object
+     * @param boolean $overwrite    overwrite the existing questionnaire
+     * @return void
+     */
+    public static function create_record_from_json($incomingJson, $overwrite = false)
+    {
+        $taskJson = $incomingJson->task;
+        $obj = '';
+
+        if ($overwrite) {
+            $obj = self::get_by_name($taskJson->name);
+            if (!empty($obj)) {
+                $obj->Questions()->removeAll();
+            }
+        }
+
+        // if overwrite is false or obj doesn't exist with the same name then create a new object
+        if (empty($obj)) {
+            $obj = self::create();
+        }
+
+        $obj->Name = $taskJson->name ?? '';
+        $obj->TaskType = $taskJson->taskType ?? 'questionnaire';
+        $obj->KeyInformation =$taskJson->keyInformation ?? '';
+        $obj->RiskCalculation = $taskJson->riskCalculation ?? 'NztaApproxRepresentation';
+        $obj->LockAnswersWhenComplete = $taskJson->lockAnswersWhenComplete ?? false;
+        $obj->IsApprovalRequired = $taskJson->isApprovalRequired ?? false;
+
+        // add approval group if "approvalGroupName" key exist in the incoming json
+        if (property_exists($taskJson, "approvalGroupTitle") &&
+            !empty($approvalGroupTitle = $taskJson->approvalGroupTitle)) {
+            $dbGroup = GroupExtension::find_or_make_by_name($approvalGroupTitle);
+            $obj->ApprovalGroupID = $dbGroup->ID;
+        }
+
+        // add questions
+        if (property_exists($taskJson, "questions") && !empty($questions = $taskJson->questions)) {
+            foreach ($questions as $question) {
+                $newQuestion = Question::create_record_from_json($question);
+                $obj->Questions()->add($newQuestion);
+            }
+
+            // update action field if ActionType is goto, once all questions are added in db
+            foreach ($questions as $question) {
+                // find the current question by question title
+                $questionInDB = $obj
+                    ->Questions()
+                    ->filter([
+                        "Title" => $question->title
+                    ])->first();
+
+                if (property_exists($question, "answerActionFields") &&
+                    !empty($answerActionFields = $question->answerActionFields)) {
+                    foreach ($answerActionFields as $actionField) {
+                        if ($actionField->actionType == "goto") {
+                            // find the goto question by question title for action
+                            $questionGotoInDB = $obj
+                                ->Questions()
+                                ->filter([
+                                    "Title" => $actionField->gotoQuestionTitle,
+                                    "AnswerFieldType" => $question->answerFieldType // type = action
+                                ])->first();
+
+                            // find the current action field
+                            $actionFieldInDB = $questionInDB
+                                ->AnswerActionFields()
+                                ->filter([
+                                    "Label" => $actionField->label,
+                                    "ActionType" => $actionField->actionType // type = goto
+                                ])->first();
+
+                            // update action field relationship in db record
+                            if ($questionGotoInDB && $actionFieldInDB) {
+                                $actionFieldInDB->GotoID = $questionGotoInDB->ID;
+                                $actionFieldInDB->write();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // add questionnaire level task
+        if (property_exists($taskJson, "tasks") && !empty($tasks = $taskJson->tasks)) {
+            foreach ($tasks as $task) {
+                $dbTask = Task::find_or_make_by_name($task->name);
+                $obj->Tasks()->add($dbTask);
+            }
+        }
+
+        // add action-type goto relationship with question
+        $obj->write();
+    }
+
+    /**
+     * get task by name
+     *
+     * @param string $taskName task name
+     * @return object|null
+     */
+    public static function get_by_name($taskName)
+    {
+        $task = Task::get()
+            ->filter(['Name' => $taskName])
+            ->first();
+
+        return $task;
+    }
+
+    /**
+     * permission-provider to import task
+     *
+     * @return array
+     */
+    public function providePermissions()
+    {
+        return [
+            'IMPORT_TASK' => 'Allow user to import Task'
+        ];
+    }
+
+    /**
+     * Only ADMIN users and user with import permission should be able to import task.
+     *
+     * @param Member $member to check the permission of
+     * @return boolean
+     */
+    public function canImport($member = null)
+    {
+        if (!$member) {
+            $member = Member::currentUser();
+        }
+
+        // checkMember(<Member>, [<at-least-one-match>])
+        $canImport = Permission::checkMember($member, [
+            'ADMIN',
+            'IMPORT_TASK'
+        ]);
+
+        return $canImport;
     }
 }

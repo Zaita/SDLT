@@ -20,6 +20,7 @@ use SilverStripe\Forms\Form;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig_RelationEditor;
 use SilverStripe\Forms\GridField\GridFieldViewButton;
+use NZTA\SDLT\Traits\SDLTAdminCommon;
 
 /**
  * Class SecurityComponentAdmin
@@ -27,6 +28,8 @@ use SilverStripe\Forms\GridField\GridFieldViewButton;
  */
 class SecurityComponentAdmin extends ModelAdmin
 {
+    use SDLTAdminCommon;
+
     /**
      * @var string[]
      */
