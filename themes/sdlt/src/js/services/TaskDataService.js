@@ -128,7 +128,7 @@ query {
     for (let index = 0; index < questionIDList.length; index++) {
       const questionID = questionIDList[index];
       const answerData = answerDataList[index];
-      const answerDataStr = window.btoa(JSON.stringify(answerData));
+      const answerDataStr = window.btoa(unescape(encodeURIComponent(JSON.stringify(answerData))));
       let singleQuery = `
 updateQuestion${questionID}: updateTaskSubmission(
   UUID: "${uuid}",
