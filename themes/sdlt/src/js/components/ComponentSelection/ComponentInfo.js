@@ -27,8 +27,8 @@ export default class ComponentInfo extends React.Component<Props> {
             removeComponent();
           }}>
           <i className="fas fa-minus-circle text-danger"/>
+          <span> {name}</span>
           </button>)}
-          <span>{name}</span>
         </h3>
         <p>{description}</p>
 
