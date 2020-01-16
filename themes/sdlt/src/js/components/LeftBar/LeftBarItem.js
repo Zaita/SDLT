@@ -18,13 +18,13 @@ export default class LeftBarItem extends Component<Props> {
 
     return (
       <div className="LeftBarItem">
-        {this.renderIcon()}
         <button className="btn"
                 disabled={disabled}
                 onClick={(event) => {
                   event.preventDefault();
                   onItemClick();
                 }}>
+                {this.renderIcon()}
                 {title}
         </button>
       </div>
