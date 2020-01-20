@@ -43,6 +43,13 @@ trait SDLTAdminCommon
     private static $json_schema_questionnaire = '/app/src/ImportJsonSchema/Schema/QuestionnaireSchema.json';
 
     /**
+    * Default location of security component schema, allow dev to override for alternative schema
+    *
+    * @var string
+    */
+    private static $json_schema_security_component = '/app/src/ImportJsonSchema/Schema/SecurityComponentSchema.json';
+
+    /**
      * @var array
      */
     private static $allowed_actions = array(
@@ -99,13 +106,18 @@ trait SDLTAdminCommon
         $fields = FieldList::create(
             HiddenField::create('ClassName', false, $this->modelClass),
             FileField::create('_JsonFile', false)
-                ->setAllowedExtensions(['json', 'Json', 'JSON']),
-            CheckboxField::create(
-                'Overwrite',
-                'Overwrite an existing '. strtolower($modelName) . ' of the same name',
-                false
-            )
+                ->setAllowedExtensions(['json', 'Json', 'JSON'])
         );
+
+        if ($modelSNG->config()->show_overwrite_for_json_import) {
+            $fields->push(
+                CheckboxField::create(
+                    'Overwrite',
+                    'Overwrite an existing '. strtolower($modelName) . ' of the same name',
+                    false
+                )
+            );
+        }
 
         $actions = new FieldList(
             FormAction::create('importJson', 'Import from Json')
@@ -210,6 +222,10 @@ trait SDLTAdminCommon
                 $pathToSchema = BASE_PATH . $this->config()->json_schema_task;
                 $schemaJson = file_get_contents($pathToSchema);
                 break;
+            case 'Security Component':
+                $pathToSchema = BASE_PATH . $this->config()->json_schema_security_component;
+                $schemaJson = file_get_contents($pathToSchema);
+                break;
         }
 
         return $schemaJson;
@@ -224,7 +240,11 @@ trait SDLTAdminCommon
      */
     public function LoadJson($incomingJson, $overwrite)
     {
-        $this->modelClass::create_record_from_json($incomingJson, $overwrite);
+        if ($this->ImportClass == 'Security Component') {
+            $this->modelClass::create_record_from_json($incomingJson);
+        } else {
+            $this->modelClass::create_record_from_json($incomingJson, $overwrite);
+        }
     }
 
     /**

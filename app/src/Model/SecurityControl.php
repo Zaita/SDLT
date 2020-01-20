@@ -170,4 +170,47 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
 
         return 0;
     }
+
+    /**
+     * create control from json import
+     *
+     * @param object $control control json object
+     * @return void
+     */
+    public static function create_record_from_json($controls, $component)
+    {
+        foreach ($controls as $control) {
+            $controlObj = self::get_by_name($control->name);
+            // if obj doesn't exist with the same name then create a new object
+            if (empty($controlObj)) {
+                $controlObj = self::create();
+            }
+
+            $controlObj->Name = $control->name ?? '';
+            $controlObj->Description = $control->description ?? '';
+            $controlObj->SecurityComponent()->add($component);
+
+            $controlObj->write();
+
+            if (property_exists($control, "controlWeightSets") &&
+                !empty($weights = $control->controlWeightSets)) {
+                ControlWeightSet::create_record_from_json($weights, $controlObj, $component);
+            }
+        }
+    }
+
+    /**
+     * get security control by name
+     *
+     * @param string $controlName security control name
+     * @return object|null
+     */
+    public static function get_by_name($controlName)
+    {
+        $control = SecurityControl::get()
+            ->filter(['Name' => $controlName])
+            ->first();
+
+        return $control;
+    }
 }

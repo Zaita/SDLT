@@ -147,7 +147,8 @@ class Risk extends DataObject
         if (empty($riskInDB)) {
             $newRisk = self::create();
             $newRisk->Name = $name;
-            $riskInDB = $newRisk->write();
+            $newRisk->write();
+            $riskInDB = $newRisk;
         }
 
         return $riskInDB;

@@ -72,6 +72,11 @@ class Task extends DataObject implements ScaffoldingProvider, PermissionProvider
     private static $table_name = 'Task';
 
     /**
+     * @var boolean
+     */
+    private static $show_overwrite_for_json_import = true;
+
+    /**
      * @var array
      */
     private static $db = [
@@ -807,7 +812,8 @@ class Task extends DataObject implements ScaffoldingProvider, PermissionProvider
             $newTask = Task::create();
             $newTask->Name = $name;
             $newTask->TaskType = "questionnaire";
-            $taskInDB = $newTask->write();
+            $newTask->write();
+            $taskInDB = $newTask;
         }
 
         return $taskInDB;

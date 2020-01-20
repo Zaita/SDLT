@@ -37,7 +37,8 @@ class GroupExtension extends DataExtension
         if (empty($groupInDB)) {
             $newgroup = Group::create();
             $newgroup->Title = $title;
-            $groupInDB = $newgroup->write();
+            $newgroup->write();
+            $groupInDB = $newgroup;
         }
 
         return $groupInDB;
