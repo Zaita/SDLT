@@ -74,6 +74,11 @@ class Questionnaire extends DataObject implements ScaffoldingProvider, Permissio
     private static $min_expiry_days = 5;
 
     /**
+     * @var boolean
+     */
+    private static $show_overwrite_for_json_import = true;
+
+    /**
      * @var array
      */
     private static $db = [
