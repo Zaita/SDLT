@@ -266,4 +266,23 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider, Permi
 
         return $component;
     }
+
+    /**
+     * @return ValidationResult
+     */
+    public function validate()
+    {
+        $result = parent::validate();
+
+        $component = self::get()
+            ->filter([
+                'Name' => $this->Name
+            ])->exclude('ID', $this->ID);
+
+        if ($component->count()) {
+            $result->addError('Component already exists, please create a unique component.');
+        }
+
+        return $result;
+    }
 }
