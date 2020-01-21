@@ -15,7 +15,6 @@ namespace NZTA\SDLT\Model;
 
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Forms\TextField;
-use SilverStripe\Forms\TextareaField;
 use SilverStripe\Control\Controller;
 use SilverStripe\Forms\NumericField;
 use SilverStripe\Forms\LiteralField;
@@ -27,6 +26,7 @@ use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
+use SilverStripe\Forms\HTMLEditor\HtmlEditorField;
 
 /**
  * Class SecurityControl
@@ -51,7 +51,7 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
      */
     private static $db = [
         'Name' => 'Varchar(255)',
-        'Description' => 'Text'
+        'Description' => 'HTMLText'
     ];
 
     /**
@@ -97,7 +97,7 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
             ->setDescription('This is the title of the control. It is displayed'
             .' as the title as the line-item of a checklist.');
 
-        $desc = TextareaField::create('Description')
+        $desc = HtmlEditorField::create('Description')
             ->setDescription('This contains the description that appears under'
             .' the title of a line-item in the component checklist.');
 
