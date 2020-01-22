@@ -224,7 +224,17 @@ class ControlValidationAuditContainer extends Component<Props, State> {
         <div className="col-10">
           <label key={control.id}>
             <strong>{control.name}</strong>
-            <small className="text-muted">{control.description ? `- ${control.description}`: ''}</small>
+            {
+              control.description && (
+                <small
+                  className="text-muted control-description"
+                  dangerouslySetInnerHTML={{
+                    __html: '- ' + control.description
+                  }}
+                >
+                </small>
+              )
+            }
           </label>
         </div>
 

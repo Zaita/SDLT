@@ -16,7 +16,13 @@ export default class ControlInfo extends React.Component<Props> {
     return (
       <div className="ControlInfo">
         <h5>{name}</h5>
-        <p>{description}</p>
+        <p
+          className="control-description-cs"
+          dangerouslySetInnerHTML={{
+            __html: description
+          }}
+        >
+        </p>
       </div>
     );
   }
