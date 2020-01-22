@@ -14,4 +14,9 @@
     font-size: 12px !important;
     padding-left: 0px !important;
   }
+  .control-description-cs {
+      p, li, ul, a, h1, h2, h3, h4, h5, h6, pre {
+        margin-bottom: 5px;
+      }
+   }
 }
