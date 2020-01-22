@@ -213,4 +213,23 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
 
         return $control;
     }
+
+    /**
+     * @return ValidationResult
+     */
+    public function validate()
+    {
+        $result = parent::validate();
+
+        $control = self::get()
+            ->filter([
+                'Name' => $this->Name
+            ])->exclude('ID', $this->ID);
+
+        if ($control->count()) {
+            $result->addError('Control already exists, please create a unique control.');
+        }
+
+        return $result;
+    }
 }
