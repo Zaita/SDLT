@@ -35,6 +35,7 @@ import SecurityRiskAssessmentUtil from "../../utils/SecurityRiskAssessmentUtil";
 import {loadSiteConfig} from "../../actions/siteConfig";
 import type {SiteConfig} from "../../types/SiteConfig";
 import {SubmissionExpired} from "../Common/SubmissionExpired";
+import {SubmissionNotCompleted} from "../Common/SubmissionNotCompleted";
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -316,10 +317,24 @@ class ControlValidationAuditContainer extends Component<Props, State> {
         {
           controlValidationAuditData.status !== 'expired' && (
             <div className="ControlValidationAuditResult" key="0">
-              <div className="ControlValidationAuditForm"  key="component_validation_questions">
+              <div className="ControlValidationAuditForm">
                 <h3>Have These Controls Been Implemented?</h3>
-                {isSRATaskFinalised ? SecurityRiskAssessmentUtil.getSraIsFinalisedAlert() : false}
-                {this.renderCVAQuestionsForm()}
+                {
+                  ['start','in_progress'].includes(controlValidationAuditData.status)
+                  && !isSubmitter
+                  && (
+                        <SubmissionNotCompleted/>
+                    )
+                }
+                {
+                  (isSubmitter || controlValidationAuditData.status == "complete") &&
+                  (
+                    <div>
+                      {isSRATaskFinalised ? SecurityRiskAssessmentUtil.getSraIsFinalisedAlert() : false}
+                      {this.renderCVAQuestionsForm()}
+                    </div>
+                  )
+                }
               </div>
               <div className="buttons" key="component_validation_buttons">
                 <div>

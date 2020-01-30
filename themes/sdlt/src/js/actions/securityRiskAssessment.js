@@ -28,7 +28,7 @@ export function loadSecurityRiskAssessment(args: {uuid: string, secureToken?: st
   };
 }
 
-export function loadImapctThreshold() {
+export function loadImpactThreshold() {
     return async (dispatch) => {
     try {
       const payload = await SecurityRiskAssessmentTaskDataService.fetchImpactThreshold();

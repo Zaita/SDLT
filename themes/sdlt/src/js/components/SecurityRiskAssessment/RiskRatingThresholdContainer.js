@@ -14,8 +14,6 @@ class RiskRatingThresholdContainer extends Component<Props> {
       return null;
     }
 
-    console.log(riskRatingThresholds);
-
     return (
       <div className="RiskRatingLegend">
         <h3>Risk Rating Matix</h3>
