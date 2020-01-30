@@ -1276,25 +1276,9 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         }
 
         // If logged in
-        if ($member) {
-            // Submitter can view it
-            if ((int)$taskSubmission->SubmitterID === (int)$member->ID) {
-                return true;
-            }
-
-            // SA and CISO can view it
-            $isSA = $member->getIsSA();
-            $isCISO = $member->getIsCISO();
-            if ($isSA || $isCISO) {
-                return true;
-            }
-
-            // check for task approval group
-            $isTaskApprover = $member->Groups()->filter('Code', $taskSubmission->ApprovalGroup()->Code)->exists();
-
-            if($isTaskApprover) {
-                return true;
-            }
+        if ($member !== null) {
+            // All log in user can view it
+            return true;
         }
 
         // Correct SecureToken can view it

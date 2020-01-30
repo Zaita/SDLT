@@ -1,4 +1,4 @@
-export type ImapctThreshold = {
+export type ImpactThreshold = {
   value: number,
   operator: string,
   colour: string,
