@@ -66,6 +66,7 @@ query {
           ID
           Name
           Description
+          ImplementationGuidance
         }
       }
     }

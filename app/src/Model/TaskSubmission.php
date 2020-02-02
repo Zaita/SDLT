@@ -2012,6 +2012,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     'id' => $ctrl->ID,
                     'name' => $ctrl->Name,
                     'description' => $ctrl->Description,
+                    'implementationGuidance' => $ctrl->ImplementationGuidance,
                     'selectedOption' => SecurityControl::CTL_STATUS_2
                 ];
             }
@@ -2126,6 +2127,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     'name' => $ctrl->Name,
                     'selectedOption' => SecurityControl::CTL_STATUS_2,
                     'description' => $ctrl->Description,
+                    'implementationGuidance' => $ctrl->ImplementationGuidance
                 ];
             }
 

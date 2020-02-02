@@ -14,14 +14,6 @@ $white-background: rgba(255, 255, 255, 0.7);
     padding: 25px;
     background-color: $white-background;
   }
-  .control-description {
-    p:first-child {
-      display: inline;
-    }
-    p, li, ul, a, h1, h2, h3, h4, h5, h6, pre {
-      margin-bottom: 5px;
-    }
-  }
 
   label {
     margin-right: 10px;
