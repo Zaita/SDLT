@@ -42,6 +42,8 @@ export default class ComponentInfo extends React.Component<Props> {
                   id={control.id}
                   name={control.name}
                   description={control.description}
+                  implementationGuidance={control.implementationGuidance}
+                  className= "control-cs"
                 />
               );
             })

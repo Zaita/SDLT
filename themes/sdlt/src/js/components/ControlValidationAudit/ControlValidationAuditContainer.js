@@ -36,6 +36,7 @@ import {loadSiteConfig} from "../../actions/siteConfig";
 import type {SiteConfig} from "../../types/SiteConfig";
 import {SubmissionExpired} from "../Common/SubmissionExpired";
 import {SubmissionNotCompleted} from "../Common/SubmissionNotCompleted";
+import ControlInfo from "../ComponentSelection/ControlInfo";
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -225,21 +226,16 @@ class ControlValidationAuditContainer extends Component<Props, State> {
         <div className="col-10">
           <label key={control.id}>
             <strong>{control.name}</strong>
-            {
-              control.description && (
-                <small
-                  className="text-muted control-description"
-                  dangerouslySetInnerHTML={{
-                    __html: '- ' + control.description
-                  }}
-                >
-                </small>
-              )
-            }
           </label>
+          <ControlInfo
+            key={`controlInfo_${control.id}`}
+            id={control.id}
+            name=''
+            description={control.description}
+            implementationGuidance={control.implementationGuidance}
+            className="text-muted"
+          />
         </div>
-
-
       </div>
     );
   }

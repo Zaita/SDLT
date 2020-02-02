@@ -25,6 +25,9 @@
                 "description": {
                   "type": "string"
                 },
+                "ImplementationGuidance": {
+                  "type": "string"
+                },
                 "controlWeightSets" : {
                   "type": "array",
                   "items": {

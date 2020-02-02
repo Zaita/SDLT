@@ -51,7 +51,8 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
      */
     private static $db = [
         'Name' => 'Varchar(255)',
-        'Description' => 'HTMLText'
+        'Description' => 'HTMLText',
+        'ImplementationGuidance' => 'HTMLText',
     ];
 
     /**
@@ -81,6 +82,7 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
                 'ID',
                 'Name',
                 'Description',
+                'ImplementationGuidance'
             ]);
 
         return $typeScaffolder;
@@ -101,7 +103,9 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
             ->setDescription('This contains the description that appears under'
             .' the title of a line-item in the component checklist.');
 
-        $fields->addFieldsToTab('Root.Main', [$name, $desc]);
+        $implementationGuidance = HtmlEditorField::create('ImplementationGuidance');
+
+        $fields->addFieldsToTab('Root.Main', [$name, $desc, $implementationGuidance]);
         $fields->removeByName(['SecurityComponent', 'ControlWeightSets']);
 
         if ($this->ID) {
@@ -174,22 +178,34 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
     /**
      * create control from json import
      *
-     * @param object $control control json object
+     * @param object $controls  control json object
+     * @param object $component component dataobject
+     *
      * @return void
      */
     public static function create_record_from_json($controls, $component)
     {
         foreach ($controls as $control) {
             $controlObj = self::get_by_name($control->name);
+
             // if obj doesn't exist with the same name then create a new object
             if (empty($controlObj)) {
                 $controlObj = self::create();
             }
 
             $controlObj->Name = $control->name ?? '';
-            $controlObj->Description = $control->description ?? '';
-            $controlObj->SecurityComponent()->add($component);
 
+            // control can be reuse with the another component but if description exist then
+            // overwrite the control description with new one
+            if (property_exists($control, "description")) {
+                $controlObj->Description = $control->description;
+            }
+
+            if (property_exists($control, "implementationGuidance")) {
+                $controlObj->ImplementationGuidance = $control->implementationGuidance;
+            }
+
+            $controlObj->SecurityComponent()->add($component);
             $controlObj->write();
 
             if (property_exists($control, "controlWeightSets") &&
