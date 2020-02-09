@@ -13,13 +13,6 @@
     margin-bottom: 1rem;
   }
 
-  .extra-wrapper {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: stretch;
-  }
-
   .LeftBar {
     padding-right: 23px;
     padding-bottom: 0;
@@ -76,9 +69,17 @@
         padding-bottom: 15px;
       }
     }
-
-    .buttons {
-      display: flex;
-    }
   }
+
+  .buttons-wrapper {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      align-items: stretch;
+
+      .extra-buttons {
+          width: 290px;
+          margin-right: 5px;
+      }
+    }
 }

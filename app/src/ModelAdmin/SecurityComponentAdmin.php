@@ -20,6 +20,11 @@ use SilverStripe\Forms\Form;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig_RelationEditor;
 use SilverStripe\Forms\GridField\GridFieldViewButton;
+use NZTA\SDLT\Traits\SDLTAdminCommon;
+use SilverStripe\Forms\GridField\GridFieldImportButton;
+use SilverStripe\Forms\GridField\GridFieldExportButton;
+use SilverStripe\Forms\GridField\GridFieldPrintButton;
+use NZTA\SDLT\Form\GridField\GridFieldImportJsonButton;
 
 /**
  * Class SecurityComponentAdmin
@@ -27,6 +32,8 @@ use SilverStripe\Forms\GridField\GridFieldViewButton;
  */
 class SecurityComponentAdmin extends ModelAdmin
 {
+    use SDLTAdminCommon;
+
     /**
      * @var string[]
      */
@@ -43,4 +50,44 @@ class SecurityComponentAdmin extends ModelAdmin
      * @var string
      */
     private static $menu_title = 'Security Components';
+
+    /**
+     * @param int       $id     ID
+     * @param FieldList $fields Fields
+     * @return Form
+     */
+    public function getEditForm($id = null, $fields = null)
+    {
+        $form = parent::getEditForm($id, $fields);
+
+        $gridFieldName = $this->sanitiseClassName($this->modelClass);
+
+        /* @var GridField $gridField */
+        $gridField = $form->Fields()->fieldByName($gridFieldName);
+        $config = $gridField->getConfig();
+        $config->removeComponent($config->getComponentByType(GridFieldPrintButton::class));
+
+        if (!$this->modelClass::config()->get('show_import_button')) {
+            $config->removeComponent($config->getComponentByType(GridFieldImportButton::class));
+        }
+
+        if (!$this->modelClass::config()->get('show_export_button')) {
+            $config->removeComponent($config->getComponentByType(GridFieldExportButton::class));
+        }
+
+        // show json import button only for the model has "canImport" method
+        // and user has permission to canImport (set in CMS with user group permission)
+        if (singleton($this->modelClass)->hasMethod('canImport') &&
+            singleton($this->modelClass)->canImport()) {
+            $config->addComponent(
+                GridFieldImportJsonButton::create('buttons-before-left')
+                    ->setImportJsonForm($this->ImportJsonForm())
+                    ->setModalTitle('Import from Json')
+            );
+        }
+
+        $gridField->setConfig($config);
+
+        return $form;
+    }
 }

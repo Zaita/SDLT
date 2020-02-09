@@ -32,3 +32,4 @@ SilverStripe\Assets\File:
       - svg
   allowed_extensions:
     - 'svg'
+    - 'json'

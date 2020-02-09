@@ -11,3 +11,6 @@ NZTA\SDLT\Model\ImpactThreshold:
 NZTA\SDLT\Model\LikelihoodThreshold:
   extensions:
     - NZTA\SDLT\Extension\ThresholdExtension
+SilverStripe\Security\Group:
+  extensions:
+    - NZTA\SDLT\Extension\GroupExtension

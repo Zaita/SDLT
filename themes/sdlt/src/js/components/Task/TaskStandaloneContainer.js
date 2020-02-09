@@ -99,7 +99,7 @@ class TaskStandaloneContainer extends Component<Props> {
           showEditButton={showEditButton}
           canUpdateAnswers={canUpdateAnswers}
           showBackButton={false}
-          siteTitle={siteConfig.siteTitle}
+          siteConfig={siteConfig}
           currentUser={currentUser}
         />
         <Footer footerCopyrightText={siteConfig.footerCopyrightText}/>

@@ -1276,25 +1276,9 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         }
 
         // If logged in
-        if ($member) {
-            // Submitter can view it
-            if ((int)$taskSubmission->SubmitterID === (int)$member->ID) {
-                return true;
-            }
-
-            // SA and CISO can view it
-            $isSA = $member->getIsSA();
-            $isCISO = $member->getIsCISO();
-            if ($isSA || $isCISO) {
-                return true;
-            }
-
-            // check for task approval group
-            $isTaskApprover = $member->Groups()->filter('Code', $taskSubmission->ApprovalGroup()->Code)->exists();
-
-            if($isTaskApprover) {
-                return true;
-            }
+        if ($member !== null) {
+            // All log in user can view it
+            return true;
         }
 
         // Correct SecureToken can view it
@@ -1441,12 +1425,13 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         // audit log: for task submission approval by approval group member
         $hasAccess = $user || $user->Groups()->filter('Code', $this->ApprovalGroup()->Code)->exists();
         $doAudit = $this->exists() && $hasAccess;
+
         if ($doAudit && isset($changed['Status']) &&
             in_array($changed['Status']['after'], ['approved', 'denied', 'complete'])) {
               $msg = sprintf(
                   '"%s" was %s. (UUID: %s)',
                   $this->Task()->Name,
-                  $changed['Status']['after'] !== 'complete' ?:  'completed',
+                  $changed['Status']['after'] !== 'complete' ? $changed['Status']['after']:  'completed',
                   $this->UUID
               );
 
@@ -2028,6 +2013,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     'id' => $ctrl->ID,
                     'name' => $ctrl->Name,
                     'description' => $ctrl->Description,
+                    'implementationGuidance' => $ctrl->ImplementationGuidance,
                     'selectedOption' => SecurityControl::CTL_STATUS_2
                 ];
             }
@@ -2142,6 +2128,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     'name' => $ctrl->Name,
                     'selectedOption' => SecurityControl::CTL_STATUS_2,
                     'description' => $ctrl->Description,
+                    'implementationGuidance' => $ctrl->ImplementationGuidance
                 ];
             }
 

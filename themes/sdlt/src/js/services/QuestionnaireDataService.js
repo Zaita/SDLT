@@ -145,7 +145,7 @@ query {
     const memberData = _.get(json, "data.readCurrentMember.0", {});
     const submissionJSON = _.get(json, "data.readQuestionnaireSubmission.0", {});
     const siteData = _.get(json, "data.readSiteConfig.0", null);
-    
+
     if (!memberData || !submissionJSON || !siteData) {
       throw DEFAULT_NETWORK_ERROR;
     }
@@ -216,7 +216,7 @@ query {
     csrfToken: string
   }): Promise<void> {
     const {submissionID, questionID, answerData, csrfToken} = {...argument};
-    const answerDataStr = window.btoa(JSON.stringify(answerData));
+    const answerDataStr = window.btoa(unescape(encodeURIComponent(JSON.stringify(answerData))));
 
     const query = `
 mutation {
@@ -249,7 +249,7 @@ mutation {
     for (let index = 0; index < questionIDList.length; index++) {
       const questionID = questionIDList[index];
       const answerData = answerDataList[index];
-      const answerDataStr = window.btoa(JSON.stringify(answerData));
+      const answerDataStr = window.btoa(unescape(encodeURIComponent(JSON.stringify(answerData))));
       const singleQuery = `
 updateQuestion${questionID}: updateQuestionnaireSubmission(ID: "${submissionID}", QuestionID: "${questionID}", AnswerData: "${answerDataStr}") {
   ID
