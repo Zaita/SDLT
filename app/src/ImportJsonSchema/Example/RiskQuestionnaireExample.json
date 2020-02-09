@@ -4,7 +4,7 @@
     "type": "RiskQuestionnaire",
     "keyInformation": "<ol><li>Item 3</li><li>Item 2</li></ol>",
     "riskCalculation": "Maximum",
-    "byPassapproval": true,
+    "bypassApproval": true,
     "doesSubmissionExpire": "Yes",
     "expireAfterDays": 10,
     "questions": [

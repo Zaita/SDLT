@@ -560,7 +560,7 @@ class Questionnaire extends DataObject implements ScaffoldingProvider, Permissio
         $obj->Type =  $questionnaireJson->type ?? 'Questionnaire';
         $obj->KeyInformation = $questionnaireJson->keyInformation ?? '';
         $obj->RiskCalculation = $questionnaireJson->riskCalculation ?? 'NztaApproxRepresentation';
-        $obj->ApprovalIsNotRequired = $questionnaireJson->byPassapproval ?? false;
+        $obj->ApprovalIsNotRequired = $questionnaireJson->bypassApproval ?? false;
         $obj->DoesSubmissionExpire = $questionnaireJson->doesSubmissionExpire ?? "Yes";
         $obj->ExpireAfterDays = $questionnaireJson->expireAfterDays ?? self::$expiry_days;
 
