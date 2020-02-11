@@ -1294,6 +1294,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         // Send Email to Security Architect group for Approval
                         $qs = QueuedJobService::create();
 
+                        // send email to sa
                         $qs->queueJob(
                             new SendApprovalLinkEmailJob($questionnaireSubmission, $members),
                             date('Y-m-d H:i:s', time() + 90)
@@ -1882,6 +1883,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     if ($this->isBusinessOwnerEmailAddress()) {
                         $this->updateBusinessOwnerDetail($member, $status);
+                        $this->QuestionnaireStatus = $status;
                         $businessOwnerEmail = '';
                     }
 
