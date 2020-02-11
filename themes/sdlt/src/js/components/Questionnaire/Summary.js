@@ -171,9 +171,6 @@ class Summary extends Component<Props> {
 
           if (status === "start") {
             taskNameAndStatus = taskName + ' (Please complete me)';
-            if(taskType === 'security risk assessment') {
-              taskNameAndStatus = taskName;
-            }
           }
 
           if ((status === "approved" || status === "denied") && approver.name) {
