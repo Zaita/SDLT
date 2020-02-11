@@ -26,8 +26,12 @@ class QuestionForm extends Component<Props> {
         <div className="heading">
           {index+1}. {question.heading}
         </div>
-        <div className="description">
-          {question.description}
+        <div
+          className="description"
+          dangerouslySetInnerHTML={{
+            __html: question.description
+          }}
+        >
         </div>
 
         {this.renderActions(question)}

@@ -54,7 +54,7 @@ class Question extends DataObject implements ScaffoldingProvider
     private static $db = [
         'Title' => 'Varchar(255)',
         'Question' => 'Text',
-        'Description' => 'Text',
+        'Description' => 'HTMLText',
         'AnswerFieldType' => 'Enum(array("input", "action"))',
         'SortOrder' => 'Int',
     ];
@@ -292,6 +292,8 @@ class Question extends DataObject implements ScaffoldingProvider
      * @param string $questionnaireLevelTask Questinnaire level task
      * @param string $secureToken            When task is completed by vendor
      * @param string $type                   qs = Questinnaire Submission / ts =Task Submission
+     *
+     * @throws Exception
      * @return void
      */
     public static function create_task_submissions_according_to_answers($questionData, $answerData, $submissionID, $questionnaireLevelTask = '', $secureToken = '', $type = 'qs') : void
@@ -338,7 +340,7 @@ class Question extends DataObject implements ScaffoldingProvider
                     if (!isset($answers[$questionID]['actions'])) {
                         continue;
                     }
-                    $answerAction = array_filter ($answers[$questionID]['actions'], function($e) use ($filter) {
+                    $answerAction = array_filter($answers[$questionID]['actions'], function ($e) use ($filter) {
                         return $e['id'] === $filter && $e['isChose'];
                     });
 

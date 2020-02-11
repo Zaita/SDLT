@@ -2,7 +2,7 @@
   "questionnaire": {
     "name": "My Test Questionnaire",
     "type": "Questionnaire",
-    "keyInformation": "<ol><li>Item 3</li><li>Item 2</li></ol>",
+    "keyInformation": "<ol><li>Item 1</li><li>Item 2</li></ol>",
     "riskCalculation": "Maximum",
     "bypassApproval": false,
     "doesSubmissionExpire": "Yes",
@@ -11,7 +11,7 @@
       {
         "title": "Test input",
         "question": "test question 1",
-        "description": "test description 1",
+        "description": "<p>test description</p><ol><li>Item 1</li><li>Item 2</li></ol>",
         "answerFieldType": "input",
         "answerInputFields": [
           {
@@ -41,7 +41,7 @@
         "answerFieldType": "action",
         "answerActionFields": [
           {
-            "label": "Test goto 1",
+            "label": "Test goto question 4",
             "actionType": "goto",
             "gotoQuestionTitle": "q4 test goto",
             "tasks": [
@@ -54,7 +54,7 @@
             ]
           },
           {
-            "label": "Test goto 2",
+            "label": "Test goto question 3",
             "actionType": "goto",
             "gotoQuestionTitle": "q3 test"
           }
