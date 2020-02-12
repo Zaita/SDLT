@@ -1809,6 +1809,11 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         // update business owner details
         $this->updateBusinessOwnerDetail($member, $status);
 
+        // if business owner is in ciso group then approve as ciso as well
+        if ($member->getIsCISO()) {
+            $this->updateCisoDetail($member, $status);
+        }
+
         // if approve by business owner then change questionnaire status to approved
         // else denied and send email notification to the questionnaire submitter
         if ($status == self::STATUS_APPROVED) {
@@ -1863,16 +1868,32 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 if (!$skipBoAndCisoApproval) {
                     $this->QuestionnaireStatus = self::STATUS_WAITING_FOR_APPROVAL;
 
-                    // get CISO group member list
-                    $members = $this->getApprovalMembersListByGroup(UserGroupConstant::GROUP_CODE_CISO);
+                    // if member is ciso then approved a questioonaire as ciso as well
+                    $cisoMembers = [];
+
+                    if ($member->getIsCISO()) {
+                        $this->updateCisoDetail($member, $status);
+                    } else {
+                        $cisoMembers =  $this->getApprovalMembersListByGroup(UserGroupConstant::GROUP_CODE_CISO);
+                    }
+
+                    // if member is business owner then approved a questioonaire as BO as well
+                    $businessOwnerEmail = $this->BusinessOwnerEmailAddress;
+
+                    if ($this->isBusinessOwnerEmailAddress()) {
+                        $this->updateBusinessOwnerDetail($member, $status);
+                        $this->QuestionnaireStatus = $status;
+                        $businessOwnerEmail = '';
+                    }
 
                     // send email to CISO group and Business owner
-                    $qs = QueuedJobService::create();
-
-                    $qs->queueJob(
-                        new SendApprovalLinkEmailJob($this, $members, $this->BusinessOwnerEmailAddress),
-                        date('Y-m-d H:i:s', time() + 90)
-                    );
+                    if (!empty($cisoMembers) || !empty($businessOwnerEmail)) {
+                        $qs = QueuedJobService::create();
+                        $qs->queueJob(
+                            new SendApprovalLinkEmailJob($this, $cisoMembers, $businessOwnerEmail),
+                            date('Y-m-d H:i:s', time() + 90)
+                        );
+                    }
                 } else {
                     $this->QuestionnaireStatus = $status;
 
@@ -1902,6 +1923,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $taskSubmission->write();
                 });
             }
+
             $this->write();
         } elseif ($accessDetail['group'] == UserGroupConstant::GROUP_CODE_CISO) {
             // update CISO member details
