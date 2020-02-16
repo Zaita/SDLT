@@ -1890,7 +1890,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     if ($member->getIsCISO()) {
                         $this->updateCisoDetail($member, $status);
                     } else {
-                        $cisoMembers =  $this->getApprovalMembersListByGroup(UserGroupConstant::GROUP_CODE_CISO);
+                        $cisoMembers = $this->getApprovalMembersListByGroup(UserGroupConstant::GROUP_CODE_CISO);
                     }
 
                     // if member is business owner then approved a questioonaire as BO as well
