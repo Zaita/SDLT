@@ -111,6 +111,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SecurityArchitectStatusUpdateDate' => 'Varchar(255)',
         'ApprovalLinkToken' => 'Varchar(64)',
         'ProductName' => 'Varchar(255)',
+        'ReleaseDate' => 'Date',
         'ApprovalOverrideBySecurityArchitect' => 'Boolean',
         'QuestionnaireLevelTaskIDs' => 'Varchar(255)',
         'RiskResultData' => 'Text',
@@ -714,6 +715,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'BusinessOwnerApproverName',
                 'ApprovalOverrideBySecurityArchitect',
                 'RiskResultData',
+                'ReleaseDate'
             ]);
 
         $submissionScaffolder
@@ -1083,6 +1085,20 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         // if it is product name text field, then add product name
                         if (is_string($isProductName)) {
                             $questionnaireSubmission->ProductName = $isProductName;
+                        }
+
+                        // check for relese date
+                        $isReleaseDate = QuestionnaireSubmission::is_field_type_exist(
+                            $jsonAnswerDataArr,
+                            $questionnaireSubmission->QuestionnaireData,
+                            $args['QuestionID'],
+                            'release date',
+                            ''
+                        );
+
+                        // if field is release date type, then add Release date
+                        if (is_string($isReleaseDate)) {
+                            $questionnaireSubmission->ReleaseDate = $isReleaseDate;
                         }
                     }
 
@@ -2016,6 +2032,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 $questionId,
                 $inputAnswerField->id
             );
+
+            if ($fieldType == "release date" && $inputfieldDetails->InputType == $fieldType) {
+                return $inputAnswerField->data;
+            }
 
             // check if $fieldname exists before accessing it
             if (!isset($inputfieldDetails->$fieldName)) {

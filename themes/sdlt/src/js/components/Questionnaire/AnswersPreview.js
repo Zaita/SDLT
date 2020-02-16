@@ -59,7 +59,7 @@ class AnswersPreview extends Component<Props> {
         let data: string = input.data || "";
 
         // Format date
-        if (input.type === "date") {
+        if (input.type === "date" || input.type === "release date") {
           data = moment(data).format("DD-MM-YYYY");
         }
 
