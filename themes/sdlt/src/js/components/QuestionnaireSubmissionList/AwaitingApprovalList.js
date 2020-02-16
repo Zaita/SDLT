@@ -108,6 +108,7 @@ const list = (awaitingApprovalList: QuestionnaireSubmissionListItem, currentUser
               <th className="text-center">Business Owner</th>
               <th className="text-center">Submitter</th>
               <th className="text-center">Status</th>
+              <th className="text-center">Deliverable Release Date</th>
               <th className="text-center">Actions</th>
             </tr>
           </thead>
@@ -134,6 +135,9 @@ const list = (awaitingApprovalList: QuestionnaireSubmissionListItem, currentUser
                       awaitingApproval.SecurityArchitectApproverID,
                       currentUser)
                     }
+                  </td>
+                  <td>
+                    {awaitingApproval.releaseDate ? moment(awaitingApproval.releaseDate).format("DD MMM YYYY") : ''}
                   </td>
                   <td>
                     <a href={url}>View</a>

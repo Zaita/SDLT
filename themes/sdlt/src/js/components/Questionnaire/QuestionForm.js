@@ -143,8 +143,9 @@ class QuestionForm extends Component<Props> {
           }
 
           // Date validation
-          if (type === "date") {
+          if (type === "date" || type === "release date") {
             const date = moment(value, "YYYY-MM-DD");
+
             if (!date.isValid()) {
               errors[id] = "- Invalid date";
             }
@@ -271,7 +272,7 @@ class QuestionForm extends Component<Props> {
                   );
                 }
 
-                if (type === "date") {
+                if (type === "date" || type === "release date") {
                   return (
                     <tr key={id}>
                       <td className="label"><label>{label}</label></td>
