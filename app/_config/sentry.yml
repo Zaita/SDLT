@@ -8,7 +8,7 @@ Only:
 ---
 PhpTek\Sentry\Adaptor\SentryClientAdaptor:
   opts:
-    dsn: 'https://***REMOVED***:***REMOVED***@***REMOVED***/187'
+    dsn: '`SENTRY_DSN`'
     # CWP (Test) specific proxy constants
     #http_proxy:
     #  host: '`SS_OUTBOUND_PROXY`'
@@ -19,7 +19,7 @@ Except:
 ---
 PhpTek\Sentry\Adaptor\SentryClientAdaptor:
   opts:
-    dsn: 'https://***REMOVED***:***REMOVED***@***REMOVED***/187'
+    dsn: '`SENTRY_DSN`'
     # CWP (Prod) specific proxy constants
     #http_proxy:
     #  host: '`SS_OUTBOUND_PROXY`'

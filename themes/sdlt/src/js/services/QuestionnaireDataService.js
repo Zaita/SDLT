@@ -394,6 +394,7 @@ mutation {
         QuestionnaireName
         Created
         ProductName
+        ReleaseDate
         BusinessOwnerApproverName
         SubmitterName
         SecurityArchitectApprover {
@@ -418,6 +419,7 @@ mutation {
       obj['productName'] = _.get(item, 'ProductName', '');
       obj['questionnaireName'] = _.get(item, 'QuestionnaireName', '');
       obj['created'] = _.get(item, 'Created', '');
+      obj['releaseDate'] = _.get(item, 'ReleaseDate', '');
       obj['businessOwner'] = _.get(item, 'BusinessOwnerApproverName', '');
       obj['submitterName'] = _.get(item, 'SubmitterName', '');
       obj['SecurityArchitectApproverID'] = _.get(item, 'SecurityArchitectApprover.ID', '');
