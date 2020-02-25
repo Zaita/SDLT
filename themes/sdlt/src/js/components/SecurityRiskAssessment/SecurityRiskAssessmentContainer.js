@@ -14,7 +14,7 @@ import RiskRatingThresholdContainer from "./RiskRatingThresholdContainer";
 import type {User} from "../../types/User";
 import {
   loadSecurityRiskAssessment,
-  loadImapctThreshold
+  loadImpactThreshold
 } from "../../actions/securityRiskAssessment";
 import {
   completeTaskSubmission
@@ -25,7 +25,7 @@ import LightButton from "../Button/LightButton";
 import DarkButton from "../Button/DarkButton";
 import {loadSiteConfig} from "../../actions/siteConfig";
 import type {SiteConfig} from "../../types/SiteConfig";
-import type {ImapctThreshold} from "../../types/ImapctThreshold";
+import type {ImpactThreshold} from "../../types/ImpactThreshold";
 import SecurityRiskAssessmentUtil from "../../utils/SecurityRiskAssessmentUtil";
 import {SubmissionExpired} from "../Common/SubmissionExpired";
 
@@ -44,7 +44,7 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
       dispatch(loadCurrentUser());
       dispatch(loadSiteConfig());
       dispatch(loadSecurityRiskAssessment({uuid, secureToken}));
-      dispatch(loadImapctThreshold());
+      dispatch(loadImpactThreshold());
     },
     dispatchFinaliseAction(uuid: string, secureToken?: string | null, questionnaireUUID) {
       dispatch(completeTaskSubmission({'taskSubmissionUUID': uuid, 'secureToken': secureToken, 'questionnaireUUID': questionnaireUUID}));
@@ -57,7 +57,7 @@ type Props = {
   secureToken: string,
   siteConfig?: SiteConfig | null,
   currentUser?: User | null,
-  impactThresholdData?: Array<ImapctThreshold> | null,
+  impactThresholdData?: Array<ImpactThreshold> | null,
   securityRiskAssessmentData?: SecurityRiskAssessment | null,
   dispatchLoadDataAction?: (uuid: string, secureToken: string) => void,
   dispatchFinaliseAction?: (uuid: string, secureToken: string) => void,
@@ -87,6 +87,7 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
       uuid,
       taskName,
       questionnaireSubmissionUUID,
+      submitterID,
       taskSubmissions,
       sraData,
       status
@@ -106,7 +107,9 @@ class SecurityRiskAssessmentContainer extends Component<Props> {
 
     const isSiblingTaskPending = SecurityRiskAssessmentUtil.isSiblingTaskPending(taskSubmissions);
 
-    const finaliseButton = !isSRATaskFinalised && !isSiblingTaskPending
+    const isSubmitter = securityRiskAssessmentData.submitterID === currentUser.id;
+
+    const finaliseButton = !isSRATaskFinalised && !isSiblingTaskPending && isSubmitter
       ? (
         <DarkButton title="FINALISE"
           classes={["button ml-3"]}

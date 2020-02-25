@@ -1,6 +1,7 @@
 // @flow
 
 import React, {Component} from "react";
+import {Link} from "react-router-dom";
 import type {Submission} from "../../types/Questionnaire";
 import LightButton from "../Button/LightButton";
 import DarkButton from "../Button/DarkButton";
@@ -170,9 +171,6 @@ class Summary extends Component<Props> {
 
           if (status === "start") {
             taskNameAndStatus = taskName + ' (Please complete me)';
-            if(taskType === 'security risk assessment') {
-              taskNameAndStatus = taskName;
-            }
           }
 
           if ((status === "approved" || status === "denied") && approver.name) {
@@ -180,30 +178,30 @@ class Summary extends Component<Props> {
           }
 
           const {token} = {...this.props};
-          const button = (
-            <button className={"btn btn-link"} onClick={(event: Event) => {
-                if (taskType === "selection") {
-                  URLUtil.redirectToComponentSelectionSubmission(uuid, token);
-                  return;
-                }
-                if (taskType === "security risk assessment") {
-                  URLUtil.redirectToSecurityRiskAssessment(uuid, token);
-                  return;
-                }
 
-                if (taskType === "control validation audit") {
-                  URLUtil.redirectToControlValidationAudit(uuid, token);
-                  return;
-                }
-                URLUtil.redirectToTaskSubmission(uuid, token);
-              }}>
-                {taskNameAndStatus}
-            </button>
+          let taskRedirectURL = URLUtil.redirectToTaskSubmission(uuid, token, "urlString");
+
+          if (taskType === "selection") {
+            taskRedirectURL = URLUtil.redirectToComponentSelectionSubmission(uuid, token, "urlString");
+          }
+
+          if (taskType === "security risk assessment") {
+            taskRedirectURL = URLUtil.redirectToSecurityRiskAssessment(uuid, token, "urlString");
+          }
+
+          if (taskType === "control validation audit") {
+            taskRedirectURL = URLUtil.redirectToControlValidationAudit(uuid, token, "urlString");
+          }
+
+          const links = (
+            <Link to={taskRedirectURL}>
+              {taskNameAndStatus}
+            </Link>
           );
 
           return (
             <div key={uuid}>
-              {unfinshedRQTaskMessage && taskType === 'security risk assessment' ? null : button}
+              {unfinshedRQTaskMessage && taskType === 'security risk assessment' ? null : links}
             </div>
           );
         })}

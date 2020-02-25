@@ -15,7 +15,6 @@ namespace NZTA\SDLT\Model;
 
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Forms\TextField;
-use SilverStripe\Forms\TextareaField;
 use SilverStripe\Control\Controller;
 use SilverStripe\Forms\NumericField;
 use SilverStripe\Forms\LiteralField;
@@ -27,6 +26,7 @@ use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
+use SilverStripe\Forms\HTMLEditor\HtmlEditorField;
 
 /**
  * Class SecurityControl
@@ -51,7 +51,8 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
      */
     private static $db = [
         'Name' => 'Varchar(255)',
-        'Description' => 'Text'
+        'Description' => 'HTMLText',
+        'ImplementationGuidance' => 'HTMLText',
     ];
 
     /**
@@ -81,6 +82,7 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
                 'ID',
                 'Name',
                 'Description',
+                'ImplementationGuidance'
             ]);
 
         return $typeScaffolder;
@@ -97,11 +99,13 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
             ->setDescription('This is the title of the control. It is displayed'
             .' as the title as the line-item of a checklist.');
 
-        $desc = TextareaField::create('Description')
+        $desc = HtmlEditorField::create('Description')
             ->setDescription('This contains the description that appears under'
             .' the title of a line-item in the component checklist.');
 
-        $fields->addFieldsToTab('Root.Main', [$name, $desc]);
+        $implementationGuidance = HtmlEditorField::create('ImplementationGuidance');
+
+        $fields->addFieldsToTab('Root.Main', [$name, $desc, $implementationGuidance]);
         $fields->removeByName(['SecurityComponent', 'ControlWeightSets']);
 
         if ($this->ID) {
@@ -169,5 +173,79 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
         }
 
         return 0;
+    }
+
+    /**
+     * create control from json import
+     *
+     * @param object $controls  control json object
+     * @param object $component component dataobject
+     *
+     * @return void
+     */
+    public static function create_record_from_json($controls, $component)
+    {
+        foreach ($controls as $control) {
+            $controlObj = self::get_by_name($control->name);
+
+            // if obj doesn't exist with the same name then create a new object
+            if (empty($controlObj)) {
+                $controlObj = self::create();
+            }
+
+            $controlObj->Name = $control->name ?? '';
+
+            // control can be reuse with the another component but if description exist then
+            // overwrite the control description with new one
+            if (property_exists($control, "description")) {
+                $controlObj->Description = $control->description;
+            }
+
+            if (property_exists($control, "implementationGuidance")) {
+                $controlObj->ImplementationGuidance = $control->implementationGuidance;
+            }
+
+            $controlObj->SecurityComponent()->add($component);
+            $controlObj->write();
+
+            if (property_exists($control, "controlWeightSets") &&
+                !empty($weights = $control->controlWeightSets)) {
+                ControlWeightSet::create_record_from_json($weights, $controlObj, $component);
+            }
+        }
+    }
+
+    /**
+     * get security control by name
+     *
+     * @param string $controlName security control name
+     * @return object|null
+     */
+    public static function get_by_name($controlName)
+    {
+        $control = SecurityControl::get()
+            ->filter(['Name' => $controlName])
+            ->first();
+
+        return $control;
+    }
+
+    /**
+     * @return ValidationResult
+     */
+    public function validate()
+    {
+        $result = parent::validate();
+
+        $control = self::get()
+            ->filter([
+                'Name' => $this->Name
+            ])->exclude('ID', $this->ID);
+
+        if ($control->count()) {
+            $result->addError('Control already exists, please create a unique control.');
+        }
+
+        return $result;
     }
 }

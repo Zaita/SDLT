@@ -130,4 +130,27 @@ class Risk extends DataObject
 
         return $result;
     }
+
+    /**
+     * find or create a new risk from the given name string
+     *
+     * @param string $name name of the risk
+     * @return DataObject
+     */
+    public static function find_or_make_by_name($name)
+    {
+        $riskInDB = self::get()->filter([
+            'Name' => $name
+        ])->first();
+
+        // if risk doesn't exist with the given name then create one.
+        if (empty($riskInDB)) {
+            $newRisk = self::create();
+            $newRisk->Name = $name;
+            $newRisk->write();
+            $riskInDB = $newRisk;
+        }
+
+        return $riskInDB;
+    }
 }

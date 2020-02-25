@@ -7,7 +7,7 @@ import {DEFAULT_NETWORK_ERROR} from "../constants/errors";
 import type {Task, TaskSubmission} from "../types/Task";
 import UserParser from "../utils/UserParser";
 import TaskParser from "../utils/TaskParser";
-import type {ImapctThreshold} from "../types/ImapctThreshold";
+import type {ImpactThreshold} from "../types/ImpactThreshold";
 export default class SecurityRiskAssessmentTaskDataService {
 
   static async fetchSecurityRiskAssessmentTasK(args: { uuid: string, secureToken?: string }): Promise<TaskSubmission> {
@@ -24,6 +24,9 @@ query {
         Status
         TaskType
       }
+    }
+    Submitter {
+      ID
     }
     Status
     SecurityRiskAssessmentData
@@ -42,6 +45,7 @@ query {
       uuid: submissionJSONObject && submissionJSONObject.UUID ? submissionJSONObject.UUID : '',
       taskName: toString(get(submissionJSONObject, "TaskName", "")),
       status: toString(get(submissionJSONObject, "Status", "")),
+      submitterID: toString(get(submissionJSONObject, "Submitter.ID", "")),
       questionnaireSubmissionUUID: toString(get(submissionJSONObject, "QuestionnaireSubmission.UUID", "")),
       taskSubmissions: TaskParser.parseAlltaskSubmissionforQuestionnaire(submissionJSONObject),
       sraData: securityRiskAssessmentData
@@ -50,7 +54,7 @@ query {
     return data;
   }
 
-  static async fetchImpactThreshold(): Promise<ImapctThreshold> {
+  static async fetchImpactThreshold(): Promise<ImpactThreshold> {
     const query = `
 query {
   readImpactThreshold {
@@ -67,7 +71,7 @@ query {
       throw DEFAULT_NETWORK_ERROR;
     }
 
-    const data:ImapctThreshold = impactThresholdJSONObject.map((impactThreshold) => {
+    const data:ImpactThreshold = impactThresholdJSONObject.map((impactThreshold) => {
       return {
         name: _.toString(_.get(impactThreshold, "Name", "")),
         color: _.toString(_.get(impactThreshold, "Colour", "")),

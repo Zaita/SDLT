@@ -19,6 +19,11 @@ SilverStripe\Control\Session:
   timeout: 7200
   cookie_secure: 1
 
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Security\MemberAuthenticator\CookieAuthenticationHandler:
+    calls:
+      - [ setTokenCookieSecure, [ true ] ]
+
 SilverStripe\Security\Security:
   frame_options: 'DENY'
 
@@ -32,3 +37,4 @@ SilverStripe\Assets\File:
       - svg
   allowed_extensions:
     - 'svg'
+    - 'json'

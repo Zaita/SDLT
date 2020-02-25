@@ -54,7 +54,7 @@ class Question extends DataObject implements ScaffoldingProvider
     private static $db = [
         'Title' => 'Varchar(255)',
         'Question' => 'Text',
-        'Description' => 'Text',
+        'Description' => 'HTMLText',
         'AnswerFieldType' => 'Enum(array("input", "action"))',
         'SortOrder' => 'Int',
     ];
@@ -194,7 +194,7 @@ class Question extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * @param DataObject $question question
+     * get details for Answer Input Fields
      *
      * @return array $finalInputFields
      */
@@ -223,7 +223,7 @@ class Question extends DataObject implements ScaffoldingProvider
     }
 
     /**
-     * @param DataObject $question question
+     * get details for Answer Action Fields
      *
      * @return array $finalActionFields
      */
@@ -269,16 +269,14 @@ class Question extends DataObject implements ScaffoldingProvider
 
     /**
      * get current object link in model admin
-     *
+     * @param string $action action type
      * @return string
      */
     public function getLink($action = 'edit')
     {
         if ($this->QuestionnaireID) {
             return $this->Questionnaire()->getLink('ItemEditForm/field/Questions/item/'. $this->ID . '/' . $action);
-        }
-
-        else if ($this->TaskID) {
+        } elseif ($this->TaskID) {
             return $this->Task()->getLink('ItemEditForm/field/Questions/item/'. $this->ID . '/' . $action);
         }
 
@@ -294,6 +292,8 @@ class Question extends DataObject implements ScaffoldingProvider
      * @param string $questionnaireLevelTask Questinnaire level task
      * @param string $secureToken            When task is completed by vendor
      * @param string $type                   qs = Questinnaire Submission / ts =Task Submission
+     *
+     * @throws Exception
      * @return void
      */
     public static function create_task_submissions_according_to_answers($questionData, $answerData, $submissionID, $questionnaireLevelTask = '', $secureToken = '', $type = 'qs') : void
@@ -340,7 +340,7 @@ class Question extends DataObject implements ScaffoldingProvider
                     if (!isset($answers[$questionID]['actions'])) {
                         continue;
                     }
-                    $answerAction = array_filter($answers[$questionID]['actions'], function($e) use ($filter) {
+                    $answerAction = array_filter($answers[$questionID]['actions'], function ($e) use ($filter) {
                         return $e['id'] === $filter && $e['isChose'];
                     });
 
@@ -376,5 +376,42 @@ class Question extends DataObject implements ScaffoldingProvider
                 $isOldSubmission
             );
         }
+    }
+
+    /**
+     * create question from json import
+     *
+     * @param object $questionJsonObj question json object
+     * @return DataObject
+     */
+    public static function create_record_from_json($questionJsonObj)
+    {
+        $obj = self::create();
+
+        $obj->Title = $questionJsonObj->title;
+        $obj->Question = $questionJsonObj->question ?? '';
+        $obj->Description = $questionJsonObj->description ?? '';
+        $obj->AnswerFieldType = $questionJsonObj->answerFieldType ??  'input';
+
+        // add answer input fields
+        if (property_exists($questionJsonObj, "answerInputFields") &&
+            !empty($answerInputFields = $questionJsonObj->answerInputFields)) {
+            foreach ($answerInputFields as $inputField) {
+                $newInputField = AnswerInputField::create_record_from_json($inputField);
+                $obj->AnswerInputFields()->add($newInputField);
+            }
+        }
+
+        if (property_exists($questionJsonObj, "answerActionFields") &&
+            !empty($answerActionFields = $questionJsonObj->answerActionFields)) {
+            foreach ($answerActionFields as $actionField) {
+                $newActionField = AnswerActionField::create_record_from_json($actionField);
+                $obj->AnswerActionFields()->add($newActionField);
+            }
+        }
+
+        $obj->write();
+
+        return $obj;
     }
 }

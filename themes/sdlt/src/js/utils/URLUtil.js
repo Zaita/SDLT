@@ -23,40 +23,60 @@ export default class URLUtil {
     window.location.href = `/#/questionnaire/summary/${uuid}`;
   }
 
-  static redirectToTaskSubmission(uuid: string, token: string = "") {
-    if (token) {
-      window.location.href = `/#/task/submission/${uuid}?token=${token}`;
-      return;
+  static redirectToTaskSubmission(uuid: string, token: string = "", returnType: string = "redirect") {
+      let url= `/task/submission/${uuid}`;
+
+      if (token) {
+        url = `/task/submission/${uuid}?token=${token}`;
+      }
+
+      if (returnType == "urlString") {
+        return url;
+      }
+
+      window.location.href = `/#/${url}`;
     }
 
-    window.location.href = `/#/task/submission/${uuid}`;
+  static redirectToComponentSelectionSubmission(uuid: string, token: string = "", returnType: string = "redirect") {
+    let url = `/component-selection/submission/${uuid}`;
+
+    if (token) {
+      url = `/component-selection/submission/${uuid}?token=${token}`;
+    }
+
+    if (returnType == "urlString") {
+      return url;
+    }
+
+    window.location.href = `/#/${url}`;
   }
 
-  static redirectToComponentSelectionSubmission(uuid: string, token: string = "") {
+  static redirectToSecurityRiskAssessment(uuid: string, token: string = "", returnType: string = "redirect") {
+    let url = `/security-risk-assessment/submission/${uuid}`;
+
     if (token) {
-      window.location.href = `/#/component-selection/submission/${uuid}?token=${token}`;
-      return;
+      url = `/security-risk-assessment/submission/${uuid}?token=${token}`;
     }
 
-    window.location.href = `/#/component-selection/submission/${uuid}`;
+    if (returnType == "urlString") {
+      return url;
+    }
+
+    window.location.href = `/#/${url}`;
   }
 
-  static redirectToSecurityRiskAssessment(uuid: string, token: string = "") {
+  static redirectToControlValidationAudit(uuid: string, token: string = "", returnType: string = "redirect") {
+    let url = `/control-validation-audit/submission/${uuid}`;
+
     if (token) {
-      window.location.href = `/#/security-risk-assessment/submission/${uuid}?token=${token}`;
-      return;
+      url = `/control-validation-audit/submission/${uuid}?token=${token}`;
     }
 
-    window.location.href = `/#/security-risk-assessment/submission/${uuid}`;
-  }
-
-  static redirectToControlValidationAudit(uuid: string, token: string = "") {
-    if (token) {
-      window.location.href = `/#/control-validation-audit/submission/${uuid}?token=${token}`;
-      return;
+    if (returnType == "urlString") {
+      return url;
     }
 
-    window.location.href = `/#/control-validation-audit/submission/${uuid}`;
+    window.location.href = `/#/${url}`;
   }
 
   static redirectToLogout() {

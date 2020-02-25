@@ -30,7 +30,7 @@ class SendApprovalLinkEmailJob extends AbstractQueuedJob implements QueuedJob
      * @param  string                  $businessOwnerEmail      A business owner email address.
      * @return void
      */
-    public function __construct(QuestionnaireSubmission $questionnaireSubmission = null, $members = null, string $businessOwnerEmail = '')
+    public function __construct(QuestionnaireSubmission $questionnaireSubmission = null, $members = null, $businessOwnerEmail = '')
     {
         $this->questionnaireSubmission = $questionnaireSubmission;
         $this->members = $members;

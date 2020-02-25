@@ -16,6 +16,7 @@ namespace NZTA\SDLT\Model;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
+use SilverStripe\Security\Security;
 
 /**
  * Class ImpactThreshold. Represents an admin-managed record for association with
@@ -101,5 +102,16 @@ class ImpactThreshold extends DataObject implements ScaffoldingProvider
             ->end();
 
         return $scaffolder;
+    }
+
+    /**
+     * Allow logged-in user to access the model
+     *
+     * @param Member|null $member member
+     * @return bool
+     */
+    public function canView($member = null)
+    {
+        return (Security::getCurrentUser() !== null);
     }
 }

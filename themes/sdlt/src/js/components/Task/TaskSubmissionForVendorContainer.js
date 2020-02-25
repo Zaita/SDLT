@@ -94,6 +94,7 @@ class TaskSubmissionForVendorContainer extends Component<Props> {
           showBackButton={false}
           showEditButton={false}
           canUpdateAnswers={taskSubmission.status === "in_progress" || taskSubmission.status === "start"}
+          siteConfig={siteConfig}
           siteTitle={siteConfig.siteTitle}
         />
         <Footer footerCopyrightText={siteConfig.footerCopyrightText}/>
