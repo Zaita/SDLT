@@ -280,7 +280,12 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider, Permi
             ])->exclude('ID', $this->ID);
 
         if ($component->count()) {
-            $result->addError('Component already exists, please create a unique component.');
+            $result->addError(
+                sprintf(
+                    'Component with name "%s" already exists, please create a unique component.',
+                    $this->Name
+                )
+            );
         }
 
         return $result;
