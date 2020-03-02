@@ -70,6 +70,29 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
     ];
 
     /**
+     * @var array
+     */
+    private static $summary_fields = [
+        'Name' => 'Name',
+        'Description' => 'Description',
+        'usedOnComponent' => 'Used On',
+    ];
+
+    /**
+     * @var array
+     */
+    private static $searchable_fields = [
+        'Name',
+        'Description'
+    ];
+
+    /**
+     * Default sort ordering
+     * @var array
+     */
+    private static $default_sort = ['Name' => 'ASC'];
+
+    /**
      * @param SchemaScaffolder $scaffolder Scaffolder
      * @return SchemaScaffolder
      */
@@ -240,12 +263,33 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
         $control = self::get()
             ->filter([
                 'Name' => $this->Name
-            ])->exclude('ID', $this->ID);
+            ])
+            ->exclude('ID', $this->ID);
 
         if ($control->count()) {
-            $result->addError('Control already exists, please create a unique control.');
+            $result->addError(
+                sprintf(
+                    'Control with name "%s" already exists, please create a unique control.',
+                    $this->Name
+                )
+            );
         }
 
         return $result;
+    }
+
+    /**
+     * @return string
+     */
+    public function usedOnComponent()
+    {
+        $components = $this->SecurityComponent();
+        $componentName = '';
+
+        if ($components) {
+            $componentName = implode(", ", $components->column('Name'));
+        }
+
+        return $componentName;
     }
 }

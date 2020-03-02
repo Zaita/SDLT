@@ -14,6 +14,7 @@
 namespace NZTA\SDLT\ModelAdmin;
 
 use NZTA\SDLT\Model\SecurityComponent;
+use NZTA\SDLT\Model\SecurityControl;
 use SilverStripe\Admin\ModelAdmin;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;
@@ -25,6 +26,7 @@ use SilverStripe\Forms\GridField\GridFieldImportButton;
 use SilverStripe\Forms\GridField\GridFieldExportButton;
 use SilverStripe\Forms\GridField\GridFieldPrintButton;
 use NZTA\SDLT\Form\GridField\GridFieldImportJsonButton;
+use SilverStripe\Forms\GridField\GridFieldDetailForm;
 
 /**
  * Class SecurityComponentAdmin
@@ -39,6 +41,7 @@ class SecurityComponentAdmin extends ModelAdmin
      */
     private static $managed_models = [
         SecurityComponent::class,
+        SecurityControl::class,
     ];
 
     /**
@@ -65,6 +68,23 @@ class SecurityComponentAdmin extends ModelAdmin
         /* @var GridField $gridField */
         $gridField = $form->Fields()->fieldByName($gridFieldName);
         $config = $gridField->getConfig();
+
+        // if grid is SecurityControl, then hide the display for control weight set
+        // only display the fields related to SecurityControl
+        if ($gridFieldName == "NZTA-SDLT-Model-SecurityControl") {
+            $detailForm = $config->getComponentByType(GridFieldDetailForm::class);
+
+            $securityControlFields = singleton($this->modelClass)->getCMSFields();
+
+            if ($securityControlFields) {
+                $securityControlFields->removeByName([
+                    'ControlWeightSets'
+                ]);
+            }
+
+            $detailForm->setFields($securityControlFields);
+        }
+
         $config->removeComponent($config->getComponentByType(GridFieldPrintButton::class));
 
         if (!$this->modelClass::config()->get('show_import_button')) {
