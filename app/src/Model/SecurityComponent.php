@@ -6,8 +6,8 @@
  * @category SilverStripe_Project
  * @package SDLT
  * @author  Catalyst I.T. SilverStripe Team 2018 <silverstripedev@catalyst.net.nz>
- * @copyright 2018 Catalyst.Net Ltd
- * @license https://www.catalyst.net.nz (Commercial)
+ * @copyright NZ Transport Agency
+ * @license BSD-3
  * @link https://www.catalyst.net.nz
  */
 
@@ -280,7 +280,12 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider, Permi
             ])->exclude('ID', $this->ID);
 
         if ($component->count()) {
-            $result->addError('Component already exists, please create a unique component.');
+            $result->addError(
+                sprintf(
+                    'Component with name "%s" already exists, please create a unique component.',
+                    $this->Name
+                )
+            );
         }
 
         return $result;

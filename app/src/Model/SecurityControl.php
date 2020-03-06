@@ -6,8 +6,8 @@
  * @category SilverStripe_Project
  * @package SDLT
  * @author  Catalyst I.T. SilverStripe Team 2018 <silverstripedev@catalyst.net.nz>
- * @copyright 2018 Catalyst.Net Ltd
- * @license https://www.catalyst.net.nz (Commercial)
+ * @copyright NZ Transport Agency
+ * @license BSD-3
  * @link https://www.catalyst.net.nz
  */
 
@@ -68,6 +68,29 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
     private static $belongs_many_many = [
         'SecurityComponent' => SecurityComponent::class
     ];
+
+    /**
+     * @var array
+     */
+    private static $summary_fields = [
+        'Name' => 'Name',
+        'Description' => 'Description',
+        'usedOnComponent' => 'Used On',
+    ];
+
+    /**
+     * @var array
+     */
+    private static $searchable_fields = [
+        'Name',
+        'Description'
+    ];
+
+    /**
+     * Default sort ordering
+     * @var array
+     */
+    private static $default_sort = ['Name' => 'ASC'];
 
     /**
      * @param SchemaScaffolder $scaffolder Scaffolder
@@ -240,12 +263,33 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
         $control = self::get()
             ->filter([
                 'Name' => $this->Name
-            ])->exclude('ID', $this->ID);
+            ])
+            ->exclude('ID', $this->ID);
 
         if ($control->count()) {
-            $result->addError('Control already exists, please create a unique control.');
+            $result->addError(
+                sprintf(
+                    'Control with name "%s" already exists, please create a unique control.',
+                    $this->Name
+                )
+            );
         }
 
         return $result;
+    }
+
+    /**
+     * @return string
+     */
+    public function usedOnComponent()
+    {
+        $components = $this->SecurityComponent();
+        $componentName = '';
+
+        if ($components) {
+            $componentName = implode(", ", $components->column('Name'));
+        }
+
+        return $componentName;
     }
 }
