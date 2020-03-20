@@ -850,8 +850,8 @@ class Task extends DataObject implements ScaffoldingProvider, PermissionProvider
         $obj->IsApprovalRequired = $taskJson->isApprovalRequired ?? false;
 
         // add approval group if "approvalGroupName" key exist in the incoming json
-        if (property_exists($taskJson, "approvalGroupTitle") &&
-            !empty($approvalGroupTitle = $taskJson->approvalGroupTitle)) {
+        if (property_exists($taskJson, "approvalGroupName") &&
+            !empty($approvalGroupTitle = $taskJson->approvalGroupName)) {
             $dbGroup = GroupExtension::find_or_make_by_name($approvalGroupTitle);
             $obj->ApprovalGroupID = $dbGroup->ID;
         }
@@ -938,7 +938,8 @@ class Task extends DataObject implements ScaffoldingProvider, PermissionProvider
     public function providePermissions()
     {
         return [
-            'IMPORT_TASK' => 'Allow user to import Task'
+            'IMPORT_TASK' => 'Allow user to import Task',
+            'EXPORT_TASK' => 'Allow user to export Task'
         ];
     }
 
@@ -961,5 +962,50 @@ class Task extends DataObject implements ScaffoldingProvider, PermissionProvider
         ]);
 
         return $canImport;
+    }
+    /**
+     * Only ADMIN users and user with export permission should be able to export Questionnaire.
+     *
+     * @param Member $member to check the permission of
+     * @return boolean
+     */
+    public function canExport($member = null)
+    {
+        if (!$member) {
+            $member = Member::currentUser();
+        }
+
+        // checkMember(<Member>, [<at-least-one-match>])
+        $canImport = Permission::checkMember($member, [
+            'ADMIN',
+            'EXPORT_TASK'
+        ]);
+
+        return $canImport;
+    }
+
+    /**
+     * export task
+     *
+     * @param object $task task
+     * @return string
+     */
+    public static function export_record($task)
+    {
+        $obj['name'] = $task->Name;
+        $obj['taskType'] =  $task->TaskType;
+        $obj['keyInformation'] = $task->KeyInformation ?? '';
+        $obj['lockAnswersWhenComplete'] = (boolean) $task->LockAnswersWhenComplete;
+        $obj['isApprovalRequired'] = (boolean) $task->IsApprovalRequired;
+        $obj['riskCalculation'] = $task->RiskCalculation;
+        $obj['approvalGroupName'] = $task->ApprovalGroup()->Title ?: '';
+
+        foreach ($task->Questions() as $question) {
+            $obj['questions'][] = QUESTION::export_record($question);
+        }
+
+        $returnobj['task'] = $obj;
+
+        return json_encode($returnobj, JSON_PRETTY_PRINT);
     }
 }

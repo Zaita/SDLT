@@ -44,6 +44,7 @@ use NZTA\SDLT\Traits\SDLTModelPermissions;
 class AnswerActionField extends DataObject implements ScaffoldingProvider
 {
     use SDLTModelPermissions;
+
     /**
      * @var string
      */
@@ -236,6 +237,32 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
         }
 
         $obj->write();
+
+        return $obj;
+    }
+
+    /**
+     * export actionField
+     *
+     * @param object $actionField actionField
+     * @return array
+     */
+    public static function export_record($actionField)
+    {
+        $obj['label'] = $actionField->Label ?? '';
+        $obj['actionType'] =  $actionField->ActionType;
+
+        if ($actionField->ActionType == 'goto') {
+            $obj['gotoQuestionTitle'] = $actionField->Goto() ? $actionField->Goto()->Title: '';
+        }
+
+        $tasks = $actionField->Tasks();
+
+        if ($tasks->count()) {
+            foreach ($tasks as $task) {
+                $obj['tasks'][] = ['name' => $task->Name];
+            }
+        }
 
         return $obj;
     }
