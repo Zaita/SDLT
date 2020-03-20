@@ -166,6 +166,7 @@ trait SDLTAdminCommon
         }
 
         $overwrite = false;
+
         if (!empty($data['Overwrite']) && $data['Overwrite']) {
             $overwrite = true;
         }

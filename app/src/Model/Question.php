@@ -414,4 +414,34 @@ class Question extends DataObject implements ScaffoldingProvider
 
         return $obj;
     }
+
+    /**
+     * export question
+     *
+     * @param object $question question
+     * @return array
+     */
+    public static function export_record($question)
+    {
+        $obj['title'] = $question->Title;
+        $obj['question'] =  $question->Question ?? '';;
+        $obj['description'] = $question->Description ?? '';
+        $obj['answerFieldType'] = $question->AnswerFieldType;
+
+        // input fields
+        if ($question->AnswerFieldType == "input") {
+            foreach ($question->AnswerInputFields() as $inputfield) {
+                $obj['answerInputFields'][] = AnswerInputField::export_record($inputfield);
+            }
+        }
+
+        // action fields
+        if ($question->AnswerFieldType == "action") {
+            foreach ($question->AnswerActionFields() as $actionField) {
+                $obj['answerActionFields'][] = AnswerActionField::export_record($actionField);
+            }
+        }
+
+        return $obj;
+    }
 }
