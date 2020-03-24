@@ -19,6 +19,7 @@ use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\HTTPRequest;
 use Ergebnis\Json\Printer\Printer;
+use SilverStripe\Core\Environment;
 
 /**
  * Class GridFieldExportJsonButton
@@ -195,6 +196,8 @@ class GridFieldExportJsonButton implements GridField_ActionProvider, GridField_C
         if ($actionName !== 'export') {
             retutn;
         }
+
+        Environment::increaseTimeLimitTo(60);
 
         $now = date("d-m-Y-H-i");
         $fileName = "export-$now.json";
