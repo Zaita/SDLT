@@ -292,4 +292,23 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
 
         return $componentName;
     }
+
+    /**
+     * export control
+     *
+     * @param integer $control control
+     * @return string
+     */
+    public static function export_record($control)
+    {
+        $obj['name'] = $control->Name;
+        $obj['description'] = $control->Description ?? '';
+        $obj['implementationGuidance'] = $control->ImplementationGuidance ?? '';
+
+        foreach ($control->ControlWeightSets() as $weight) {
+            $obj['controlWeightSets'][] = ControlWeightSet::export_record($weight);
+        }
+
+        return $obj;
+    }
 }
