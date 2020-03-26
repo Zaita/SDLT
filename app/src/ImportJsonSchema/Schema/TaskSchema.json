@@ -75,7 +75,8 @@
                         "date",
                         "url",
                         "multiple-choice: single selection",
-                        "multiple-choice: multiple selection"
+                        "multiple-choice: multiple selection",
+                        "release date"
                       ]
                     },
                     "required": {
