@@ -1062,8 +1062,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 public function resolve($object, array $args, $context, ResolveInfo $info)
                 {
                     $member = Security::getCurrentUser();
-                    $uuid = isset($args['UUID']) ? htmlentities(trim($args['UUID'])) : null;
-                    $userID = isset($args['UserID']) ? htmlentities(trim($args['UserID'])) : null;
+                    $uuid = isset($args['UUID']) ? Convert::raw2sql(trim($args['UUID'])) : null;
+                    $userID = isset($args['UserID']) ? (int) $args['UserID'] : null;
                     $secureToken = isset($args['SecureToken']) ? Convert::raw2sql(trim($args['SecureToken'])) : null;
                     $pageType= isset($args['PageType']) ? Convert::raw2sql(trim($args['PageType'])) : '';
 
@@ -1096,7 +1096,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                             throw new GraphQLAuthFailure();
                         }
 
-                        $data->ProductAspects = $data->QuestionnaireSubmission()->getProductAspects();
+                        $data->ProductAspects = $data->QuestionnaireSubmissionID ? $data->QuestionnaireSubmission()->getProductAspects(): '{}';
 
                         if ($data->TaskType === 'security risk assessment') {
                             $data->SecurityRiskAssessmentData = $data->calculateSecurityRiskAssessmentData();
