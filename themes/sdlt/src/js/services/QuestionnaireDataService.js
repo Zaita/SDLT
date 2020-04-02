@@ -398,8 +398,12 @@ mutation {
         BusinessOwnerApproverName
         SubmitterName
         SecurityArchitectApprover {
+          FirstName
+          Surname
           ID
         }
+        CisoApprovalStatus
+        BusinessOwnerApprovalStatus
       }
     }`;
 
@@ -422,7 +426,11 @@ mutation {
       obj['releaseDate'] = _.get(item, 'ReleaseDate', '');
       obj['businessOwner'] = _.get(item, 'BusinessOwnerApproverName', '');
       obj['submitterName'] = _.get(item, 'SubmitterName', '');
+      obj['SecurityArchitectApprover'] = _.toString(_.get(item, 'SecurityArchitectApprover.FirstName', '') + " " + _.get(item, 'SecurityArchitectApprover.Surname', ''));
       obj['SecurityArchitectApproverID'] = _.get(item, 'SecurityArchitectApprover.ID', '');
+      obj['CisoApprovalStatus'] = _.get(item, 'CisoApprovalStatus', '');
+      obj['BusinessOwnerApprovalStatus'] =  _.get(item, 'BusinessOwnerApprovalStatus', '');
+      obj['']
       return obj;
     });
   }
