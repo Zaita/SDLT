@@ -479,6 +479,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'CVATaskData',
                 'CVATaskDataSource',
                 'SecurityRiskAssessmentData',
+                'Created'
             ]);
 
         $dataObjectScaffolder
@@ -1040,8 +1041,10 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         $scaffolder
             ->operation(SchemaScaffolder::READ)
             ->setName('readTaskSubmission')
-            ->addArg('UUID', 'String!')
+            ->addArg('UUID', 'String')
+            ->addArg('UserID', 'String')
             ->addArg('SecureToken', 'String')
+            ->addArg('PageType', 'String')
             ->setUsePagination(false)
             ->setResolver(new class implements ResolverInterface {
 
@@ -1059,49 +1062,68 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 public function resolve($object, array $args, $context, ResolveInfo $info)
                 {
                     $member = Security::getCurrentUser();
-                    $uuid = Convert::raw2sql($args['UUID']);
+                    $uuid = isset($args['UUID']) ? Convert::raw2sql(trim($args['UUID'])) : null;
+                    $userID = isset($args['UserID']) ? (int) $args['UserID'] : null;
                     $secureToken = isset($args['SecureToken']) ? Convert::raw2sql(trim($args['SecureToken'])) : null;
+                    $pageType= isset($args['PageType']) ? Convert::raw2sql(trim($args['PageType'])) : '';
 
                     // Check argument
-                    if (!$uuid) {
-                        throw new Exception('Wrong argument');
+                    if (!$uuid && !$userID) {
+                        throw new Exception('Sorry, there is no UUID or user Id.');
                     }
 
-                    // Filter data by UUID
-                    /* @var $data TaskSubmission */
-                    $data = TaskSubmission::get()
-                        ->filter(['UUID' => $uuid])
-                        ->exclude('Status', TaskSubmission::STATUS_INVALID)
-                        ->first();
-
-                    $canView = TaskSubmission::can_view_task_submission(
-                        $data,
-                        $member,
-                        $secureToken
-                    );
-
-                    if (!$canView) {
-                        throw new GraphQLAuthFailure();
+                    if (!empty($userID) && $member->ID != $userID) {
+                        throw new Exception('Sorry, wrong user Id.');
                     }
 
-                    $data->ProductAspects = $data->QuestionnaireSubmission()->getProductAspects();
+                    $data = [];
 
-                    if ($data->TaskType === 'security risk assessment') {
-                        $data->SecurityRiskAssessmentData = $data->calculateSecurityRiskAssessmentData();
-                    }
+                    if ($uuid) {
+                        // Filter data by UUID
+                        /* @var $data TaskSubmission */
+                        $data = TaskSubmission::get()
+                            ->filter(['UUID' => $uuid])
+                            ->exclude('Status', TaskSubmission::STATUS_INVALID)
+                            ->first();
 
-                    if ($data->TaskType === 'control validation audit') {
-                        $siblingComponentSelectionTask = $data->getSiblingTaskSubmissionsByType('selection');
+                        $canView = TaskSubmission::can_view_task_submission(
+                            $data,
+                            $member,
+                            $secureToken
+                        );
 
-                        if ($siblingComponentSelectionTask) {
-                            $data->setCVATaskDataSource ($siblingComponentSelectionTask->ComponentTarget);
-                        } else {
-                            $data->setCVATaskDataSource ();
+                        if (!$canView) {
+                            throw new GraphQLAuthFailure();
                         }
 
-                        if (empty($data->CVATaskData)) {
-                            $data->CVATaskData = $data->getDataforCVATask($siblingComponentSelectionTask);
+                        $data->ProductAspects = $data->QuestionnaireSubmissionID ? $data->QuestionnaireSubmission()->getProductAspects(): '{}';
+
+                        if ($data->TaskType === 'security risk assessment') {
+                            $data->SecurityRiskAssessmentData = $data->calculateSecurityRiskAssessmentData();
                         }
+
+                        if ($data->TaskType === 'control validation audit') {
+                            $siblingComponentSelectionTask = $data->getSiblingTaskSubmissionsByType('selection');
+
+                            if ($siblingComponentSelectionTask) {
+                                $data->setCVATaskDataSource($siblingComponentSelectionTask->ComponentTarget);
+                            } else {
+                                $data->setCVATaskDataSource();
+                            }
+
+                            if (empty($data->CVATaskData)) {
+                                $data->CVATaskData = $data->getDataforCVATask($siblingComponentSelectionTask);
+                            }
+                        }
+                    }
+
+                    if ($userID && $pageType=="awaiting_approval_list") {
+                        $groupIds = $member->groups()->column('ID');
+
+                        $data = TaskSubmission::get()
+                            ->filter(['ApprovalGroupID' => $groupIds])
+                            ->filter('Status', TaskSubmission::STATUS_WAITING_FOR_APPROVAL)
+                            ->exclude('Status', TaskSubmission::STATUS_INVALID);
                     }
 
                     return $data;

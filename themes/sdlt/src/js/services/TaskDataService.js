@@ -7,7 +7,7 @@ import uniq from "lodash/uniq";
 import {DEFAULT_NETWORK_ERROR} from "../constants/errors";
 import type {Question, SubmissionQuestionData} from "../types/Questionnaire";
 import QuestionParser from "../utils/QuestionParser";
-import type {Task, TaskSubmission} from "../types/Task";
+import type {Task, TaskSubmission, TaskSubmissionListItem} from "../types/Task";
 import UserParser from "../utils/UserParser";
 import TaskParser from "../utils/TaskParser";
 import SecurityComponentParser from "../utils/SecurityComponentParser";
@@ -108,10 +108,10 @@ query {
       }),
       selectedComponents: SecurityComponentParser.parseFromJSONOArray(get(submissionJSONObject, "SelectedComponents", [])),
       jiraTickets: JiraTicketParser.parseFromJSONArray(get(submissionJSONObject, "JiraTickets", [])),
-      isCurrentUserAnApprover:  _.get(submissionJSONObject, "IsCurrentUserAnApprover", "false") === "true",
+      isCurrentUserAnApprover:  get(submissionJSONObject, "IsCurrentUserAnApprover", "false") === "true",
       isTaskApprovalRequired: get(submissionJSONObject, "IsTaskApprovalRequired", false) === "true",
-      riskResults: _.has(submissionJSONObject, 'RiskResultData') ? JSON.parse(_.get(submissionJSONObject, "RiskResultData", "[]")) : "[]",
-      productAspects:  _.has(submissionJSONObject, 'ProductAspects') ? JSON.parse(_.get(submissionJSONObject, "ProductAspects", [])) : [],
+      riskResults: _.has(submissionJSONObject, 'RiskResultData') ? JSON.parse(get(submissionJSONObject, "RiskResultData", "[]")) : "[]",
+      productAspects:  _.has(submissionJSONObject, 'ProductAspects') ? JSON.parse(get(submissionJSONObject, "ProductAspects", [])) : [],
       componentTarget: toString(get(submissionJSONObject, "ComponentTarget", "")),
       siblingSubmissions: TaskParser.parseAlltaskSubmissionforQuestionnaire(submissionJSONObject)
     };
@@ -256,8 +256,8 @@ mutation {
  }
 }`;
     const json = await GraphQLRequestHelper.request({query, csrfToken});
-    const status = _.toString(
-      _.get(json, "data.updateTaskStatusToApproved.Status", null));
+    const status = toString(
+      get(json, "data.updateTaskStatusToApproved.Status", null));
     if (!status || !uuid) {
       throw DEFAULT_NETWORK_ERROR;
     }
@@ -274,11 +274,47 @@ mutation {
  }
 }`;
     const json = await GraphQLRequestHelper.request({query, csrfToken});
-    const status = _.toString(
-      _.get(json, "data.updateTaskStatusToDenied.Status", null));
+    const status = toString(
+      get(json, "data.updateTaskStatusToDenied.Status", null));
     if (!status || !uuid) {
       throw DEFAULT_NETWORK_ERROR;
     }
     return {status};
+  }
+
+  // load data for Awaiting Approvals
+  static async fetchTaskSubmissionList(userID: string, pageType: string): Promise<Array<TaskSubmissionListItem>> {
+    const query = `query {
+      readTaskSubmission(UserID: "${userID}", PageType: "${pageType}") {
+        ID
+        UUID
+        Created
+        TaskName
+        Submitter {
+          FirstName
+          Surname
+        }
+        Status
+      }
+    }`;
+
+    const json = await GraphQLRequestHelper.request({query});
+
+    // TODO: parse data
+    const data = get(json, 'data.readTaskSubmission', []);
+    if (!Array.isArray(data)) {
+      throw 'error';
+    }
+
+    return data.map((item: any) : TaskSubmissionListItem => {
+      let obj = {};
+      obj['id'] = get(item, 'ID', '');
+      obj['uuid'] = get(item, 'UUID', '');
+      obj['created'] = get(item, 'Created', '');
+      obj['taskName'] = get(item, 'TaskName', '');
+      obj['submitterName'] = toString(get(item, "Submitter.FirstName", ""))+ ' ' + toString(get(item, "Submitter.Surname", ""));
+      obj['status'] = get(item, 'Status', '');
+      return obj;
+    });
   }
 }
