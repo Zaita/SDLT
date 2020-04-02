@@ -6,6 +6,7 @@ import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import type {User} from "../../types/User";
 import type {QuestionnaireSubmissionListItem} from "../../types/Questionnaire";
+import PrettifyStatusUtil from "../../utils/PrettifyStatusUtil";
 import {loadCurrentUser} from "../../actions/user";
 import {loadAwaitingApprovalList} from "../../actions/questionnaire";
 import moment from "moment";
@@ -37,20 +38,6 @@ type Props = {
   dispatchLoadDataAction?: () => void,
   awaitingApprovalList?: Array<QuestionnaireSubmissionListItem>,
   loadingState: object<*>
-};
-
-const prettifyStatus = (status: string,  securityArchitectID: string, currentUser: User) => {
-  if (status === "waiting_for_security_architect_approval" &&
-    currentUser.id == securityArchitectID
-  ) {
-    return "Assigned to me";
-  }
-  return status
-    .split("_")
-    .map((str) => {
-      return str.charAt(0).toUpperCase() + str.slice(1);
-    })
-    .join(" ");
 };
 
 class AwaitingApprovalList extends Component<Props> {
@@ -130,10 +117,14 @@ const list = (awaitingApprovalList: QuestionnaireSubmissionListItem, currentUser
                     {awaitingApproval.submitterName}
                   </td>
                   <td>
-                    {prettifyStatus(
+                    {PrettifyStatusUtil.prettifyStatus(
                       awaitingApproval.status,
                       awaitingApproval.SecurityArchitectApproverID,
-                      currentUser)
+                      currentUser,
+                      awaitingApproval.SecurityArchitectApprover,
+                      awaitingApproval.CisoApprovalStatus,
+                      awaitingApproval.BusinessOwnerApprovalStatus,
+                    )
                     }
                   </td>
                   <td>
