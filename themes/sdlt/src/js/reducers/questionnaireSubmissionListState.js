@@ -3,6 +3,7 @@ import ActionType from "../actions/ActionType";
 
 const initalState: QuestionnaireSubmissionListState = {
   awaitingApprovalList: [],
+  awaitingApprovalTaskList: [],
   mySubmissionList: [],
   myProductList: [],
 }
@@ -12,6 +13,13 @@ export function questionnaireSubmissionListState(state: QuestionnaireSubmissionL
     return {
       ...state,
       awaitingApprovalList: action.payload
+    };
+  }
+
+  if (action.type === ActionType.TASK.FETCH_AWAITING_APPROVAL_TASK_LIST_SUCCESS) {
+    return {
+      ...state,
+      awaitingApprovalTaskList: action.payload
     };
   }
 
