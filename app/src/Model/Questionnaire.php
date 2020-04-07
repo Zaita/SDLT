@@ -495,8 +495,7 @@ class Questionnaire extends DataObject implements ScaffoldingProvider, Permissio
     {
         $result = parent::validate();
 
-        $changedFields = $this->getChangedFields();
-
+        // validation for require field
         if (!$this->Name) {
             $result->addError('Please add a questionnnaire name.');
         } elseif (!$this->Type) {
@@ -504,6 +503,24 @@ class Questionnaire extends DataObject implements ScaffoldingProvider, Permissio
         } elseif ($this->Type === 'RiskQuestionnaire' && !$this->RiskCalculation) {
             $result->addError('Please select a risk-calculation type.');
         }
+
+        // validation for unique questionnaire name
+        $questionnaire = self::get()
+           ->filter([
+               'Name' => $this->Name
+           ])->exclude('ID', $this->ID);
+
+        if ($questionnaire->count()) {
+            $result->addError(
+                sprintf(
+                    'Questionnaire name "%s" already exists. Please enter a unique Questionnaire name.',
+                    $this->Name
+                )
+            );
+        }
+
+        // validation for expiry date
+        $changedFields = $this->getChangedFields();
 
         if (isset($changedFields['ExpireAfterDays']['after'])) {
             $newExpireAfterDays = $changedFields['ExpireAfterDays']['after'];
