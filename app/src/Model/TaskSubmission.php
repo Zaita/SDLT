@@ -240,9 +240,11 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     }
 
     /**
+     * @param string $dataSource jira/local/default
      * @return string
      */
-    public function setCVATaskDataSource($dataSource = 'DefaultComponent') {
+    public function setCVATaskDataSource($dataSource = 'DefaultComponent')
+    {
         $this->cvaTaskDataSource = $dataSource;
     }
 
@@ -366,14 +368,14 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                         LiteralField::create('RiskResultDataTable', $riskResultTable),
                     ]
                 );
-
             }
         }
 
         $taskApproverList = [];
 
         if ($approvalGroup = $this->ApprovalGroup()) {
-            $taskApproverList = $approvalGroup->Members() ? $approvalGroup->Members()->map('ID', 'Name') : $taskApproverList;
+            $taskApproverList = $approvalGroup->Members() ?
+                $approvalGroup->Members()->map('ID', 'Name') : $taskApproverList;
         }
         $fields->addFieldsToTab(
             'Root.TaskSubmitter',
@@ -503,13 +505,13 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     $productAspect = json_decode($object->ProductAspects);
 
                     if (!empty($productAspect)) {
-                      return $selectedComponent = $selectedComponent->filter([
+                        return $selectedComponent = $selectedComponent->filter([
                             'ProductAspect' => $productAspect
                         ]);
                     }
 
                     if (empty($productAspect)) {
-                      return $selectedComponent = $selectedComponent->filter([
+                        return $selectedComponent = $selectedComponent->filter([
                             'ProductAspect' => null
                         ]);
                     }
@@ -722,12 +724,20 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
                         if ($questionAnswerData->answerType == "input") {
                             // validate input field data
-                            QuestionnaireValidation::validate_answer_input_data($questionAnswerData->inputs, $submission->QuestionnaireData, $args['QuestionID']);
+                            QuestionnaireValidation::validate_answer_input_data(
+                                $questionAnswerData->inputs,
+                                $submission->QuestionnaireData,
+                                $args['QuestionID']
+                            );
                         }
 
                         if ($questionAnswerData->answerType == "action") {
                             //validate action field
-                            QuestionnaireValidation::validate_answer_action_data($questionAnswerData->actions, $submission->QuestionnaireData, $args['QuestionID']);
+                            QuestionnaireValidation::validate_answer_action_data(
+                                $questionAnswerData->actions,
+                                $submission->QuestionnaireData,
+                                $args['QuestionID']
+                            );
                         }
                     } while (false);
 
@@ -759,52 +769,53 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      * @param SchemaScaffolder $scaffolder The scaffolder of the schema
      * @return void
      */
-    public function provideGraphQLScaffoldingtoReSyncWithJira(SchemaScaffolder $scaffolder) {
-      $scaffolder
-          ->mutation('reSyncWithJira', TaskSubmission::class)
-          ->addArgs([
-              'UUID' => 'String!'
-          ])
-          ->setResolver(new class implements ResolverInterface {
-              /**
-               * Invoked by the Executor class to resolve this mutation / query
-               * @see Executor
-               *
-               * @param mixed       $object  object
-               * @param array       $args    args
-               * @param mixed       $context context
-               * @param ResolveInfo $info    info
-               * @throws GraphQLAuthFailure
-               * @return mixed
-               */
-              public function resolve($object, array $args, $context, ResolveInfo $info)
-              {
-                  $member = Security::getCurrentUser();
-                  $uuid = Convert::raw2sql($args['UUID']);
-                  $submission = TaskSubmission::get_task_submission_by_uuid($uuid);
-                  $canEdit = TaskSubmission::can_edit_task_submission(
-                      $submission,
-                      $member,
-                      ''
-                  );
-                  if (!$canEdit) {
-                      throw new GraphQLAuthFailure();
-                  }
+    public function provideGraphQLScaffoldingtoReSyncWithJira(SchemaScaffolder $scaffolder)
+    {
+        $scaffolder
+            ->mutation('reSyncWithJira', TaskSubmission::class)
+            ->addArgs([
+                'UUID' => 'String!'
+            ])
+            ->setResolver(new class implements ResolverInterface {
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
+                 * @throws GraphQLAuthFailure
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    $member = Security::getCurrentUser();
+                    $uuid = Convert::raw2sql($args['UUID']);
+                    $submission = TaskSubmission::get_task_submission_by_uuid($uuid);
+                    $canEdit = TaskSubmission::can_edit_task_submission(
+                        $submission,
+                        $member,
+                        ''
+                    );
+                    if (!$canEdit) {
+                        throw new GraphQLAuthFailure();
+                    }
 
-                  $submission->Status = TaskSubmission::STATUS_IN_PROGRESS;
-                  $submission->write();
+                    $submission->Status = TaskSubmission::STATUS_IN_PROGRESS;
+                    $submission->write();
 
-                  if ($submission->TaskType === 'control validation audit') {
-                      $siblingComponentSelectionTask = $submission->getSiblingTaskSubmissionsByType('selection');
+                    if ($submission->TaskType === 'control validation audit') {
+                        $siblingComponentSelectionTask = $submission->getSiblingTaskSubmissionsByType('selection');
 
-                      if (empty($data->CVATaskData)) {
-                          $submission->CVATaskData = $submission->getDataforCVATask($siblingComponentSelectionTask);
-                      }
-                  }
-                  return $submission;
-              }
-          })
-          ->end();
+                        if (empty($data->CVATaskData)) {
+                            $submission->CVATaskData = $submission->getDataforCVATask($siblingComponentSelectionTask);
+                        }
+                    }
+                    return $submission;
+                }
+            })
+            ->end();
     }
 
     /**
@@ -813,57 +824,57 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      */
     private function provideGraphQLScaffoldingForUpdateControlValidationAuditTaskSubmission(SchemaScaffolder $scaffolder)
     {
-      $scaffolder
-        ->mutation('updateControlValidationAuditTaskSubmission', TaskSubmission::class)
-        ->addArgs([
-            'UUID' => 'String!',
-            'CVATaskData' => 'String'
-        ])
-        ->setResolver(new class implements ResolverInterface {
-            /**
-             * Invoked by the Executor class to resolve this mutation / query
-             * @see Executor
-             *
-             * @param mixed       $object  object
-             * @param array       $args    args
-             * @param mixed       $context context
-             * @param ResolveInfo $info    info
-             * @throws GraphQLAuthFailure
-             * @return mixed
-             */
-            public function resolve($object, array $args, $context, ResolveInfo $info)
-            {
-                $member = Security::getCurrentUser();
-                $uuid = Convert::raw2sql($args['UUID']);
-                $submission = TaskSubmission::get_task_submission_by_uuid($uuid);
-                $canEdit = TaskSubmission::can_edit_task_submission(
-                    $submission,
-                    $member,
-                    ''
-                );
-                if (!$canEdit) {
-                    throw new GraphQLAuthFailure();
+        $scaffolder
+            ->mutation('updateControlValidationAuditTaskSubmission', TaskSubmission::class)
+            ->addArgs([
+                'UUID' => 'String!',
+                'CVATaskData' => 'String'
+            ])
+            ->setResolver(new class implements ResolverInterface {
+                /**
+                 * Invoked by the Executor class to resolve this mutation / query
+                 * @see Executor
+                 *
+                 * @param mixed       $object  object
+                 * @param array       $args    args
+                 * @param mixed       $context context
+                 * @param ResolveInfo $info    info
+                 * @throws GraphQLAuthFailure
+                 * @return mixed
+                 */
+                public function resolve($object, array $args, $context, ResolveInfo $info)
+                {
+                    $member = Security::getCurrentUser();
+                    $uuid = Convert::raw2sql($args['UUID']);
+                    $submission = TaskSubmission::get_task_submission_by_uuid($uuid);
+                    $canEdit = TaskSubmission::can_edit_task_submission(
+                        $submission,
+                        $member,
+                        ''
+                    );
+                    if (!$canEdit) {
+                        throw new GraphQLAuthFailure();
+                    }
+                    $submission->CompletedAt = date('Y-m-d H:i:s');
+                    $submission->CVATaskData = base64_decode($args['CVATaskData']);
+
+                    // set Submitter IP Address
+                    if ($_SERVER['REMOTE_ADDR']) {
+                        $submission->SubmitterIPAddress = Convert::raw2sql($_SERVER['REMOTE_ADDR']);
+                    }
+
+                    $submission->Status = TaskSubmission::STATUS_COMPLETE;
+
+                    // if task approval requires then set status to waiting for approval
+                    if ($submission->IsTaskApprovalRequired) {
+                        $submission->setStatusToWatingforApproval();
+                    }
+
+                    $submission->write();
+                    return $submission;
                 }
-                $submission->CompletedAt = date('Y-m-d H:i:s');
-                $submission->CVATaskData = base64_decode($args['CVATaskData']);
-
-                // set Submitter IP Address
-                if ($_SERVER['REMOTE_ADDR']) {
-                    $submission->SubmitterIPAddress = Convert::raw2sql($_SERVER['REMOTE_ADDR']);
-                }
-
-                $submission->Status = TaskSubmission::STATUS_COMPLETE;
-
-                // if task approval requires then set status to waiting for approval
-                if ($submission->IsTaskApprovalRequired) {
-                    $submission->setStatusToWatingforApproval();
-                }
-
-                $submission->write();
-                return $submission;
-            }
-        })
-        ->end();
+            })
+            ->end();
     }
 
     /**
@@ -928,7 +939,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     }
 
                     // create another tasks form task submission based on task submission's answer
-                    Question::create_task_submissions_according_to_answers (
+                    Question::create_task_submissions_according_to_answers(
                         $submission->QuestionnaireData,
                         $submission->AnswerData,
                         $submission->QuestionnaireSubmissionID,
@@ -1097,7 +1108,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                             throw new GraphQLAuthFailure();
                         }
 
-                        $data->ProductAspects = $data->QuestionnaireSubmissionID ? $data->QuestionnaireSubmission()->getProductAspects(): '{}';
+                        $data->ProductAspects = $data->QuestionnaireSubmissionID ?
+                            $data->QuestionnaireSubmission()->getProductAspects(): '{}';
 
                         if ($data->TaskType === 'security risk assessment') {
                             $data->SecurityRiskAssessmentData = $data->calculateSecurityRiskAssessmentData();
@@ -1344,10 +1356,13 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
             // Submitter can edit when answers are not locked
             if ($isSubmitter) {
-                if ($taskSubmission->Status === TaskSubmission::STATUS_IN_PROGRESS || $taskSubmission->Status === TaskSubmission::STATUS_START || $taskSubmission->Status === TaskSubmission::STATUS_DENIED) {
+                if ($taskSubmission->Status === TaskSubmission::STATUS_IN_PROGRESS ||
+                    $taskSubmission->Status === TaskSubmission::STATUS_START ||
+                    $taskSubmission->Status === TaskSubmission::STATUS_DENIED) {
                     return true;
                 }
-                if ($taskSubmission->Status === TaskSubmission::STATUS_COMPLETE || $taskSubmission->Status === TaskSubmission::STATUS_WAITING_FOR_APPROVAL) {
+                if ($taskSubmission->Status === TaskSubmission::STATUS_COMPLETE ||
+                    $taskSubmission->Status === TaskSubmission::STATUS_WAITING_FOR_APPROVAL) {
                     if (!$taskSubmission->LockAnswersWhenComplete) {
                         return true;
                     }
@@ -1362,7 +1377,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
         // Any user with correct SecureToken can edit when answers are not locked
         if ($taskSubmission->SecureToken && @hash_equals($taskSubmission->SecureToken, $secureToken)) {
-            if ($taskSubmission->Status === TaskSubmission::STATUS_IN_PROGRESS || $taskSubmission->Status === TaskSubmission::STATUS_START) {
+            if ($taskSubmission->Status === TaskSubmission::STATUS_IN_PROGRESS ||
+                $taskSubmission->Status === TaskSubmission::STATUS_START) {
                 return true;
             }
             if ($taskSubmission->Status === TaskSubmission::STATUS_COMPLETE) {
@@ -1433,16 +1449,14 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         if ($doAudit && isset($changed['Status']) &&
             $changed['Status']['before'] !== 'in_progress' &&
             $changed['Status']['after'] == 'in_progress') {
-
-              $msg = sprintf(
-                  '"%s" had its status changed from "%s" to "%s". (UUID: %s)',
-                  $this->Task()->Name,
-                  $changed['Status']['before'],
-                  $changed['Status']['after'],
-                  $this->UUID
-              );
-
-              $this->auditService->commit('Change', $msg, $this, $userData);
+            $msg = sprintf(
+                '"%s" had its status changed from "%s" to "%s". (UUID: %s)',
+                $this->Task()->Name,
+                $changed['Status']['before'],
+                $changed['Status']['after'],
+                $this->UUID
+            );
+            $this->auditService->commit('Change', $msg, $this, $userData);
         }
 
         // audit log: for task submission approval by approval group member
@@ -1451,20 +1465,20 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
         if ($doAudit && isset($changed['Status']) &&
             in_array($changed['Status']['after'], ['approved', 'denied', 'complete'])) {
-              $msg = sprintf(
-                  '"%s" was %s. (UUID: %s)',
-                  $this->Task()->Name,
-                  $changed['Status']['after'] !== 'complete' ? $changed['Status']['after']:  'completed',
-                  $this->UUID
-              );
+            $msg = sprintf(
+                '"%s" was %s. (UUID: %s)',
+                $this->Task()->Name,
+                $changed['Status']['after'] !== 'complete' ? $changed['Status']['after']:  'completed',
+                $this->UUID
+            );
 
-              if ($changed['Status']['after'] == 'complete') {
-                  $status = $changed['Status']['after'] = 'Complete';
-              } else {
-                  $status = ($changed['Status']['after'] === 'approved') ? 'Approve' : 'Deny';
-              }
+            if ($changed['Status']['after'] == 'complete') {
+                $status = $changed['Status']['after'] = 'Complete';
+            } else {
+                $status = ($changed['Status']['after'] === 'approved') ? 'Approve' : 'Deny';
+            }
 
-              $this->auditService->commit($status, $msg, $this, $userData);
+            $this->auditService->commit($status, $msg, $this, $userData);
         }
     }
 
@@ -1577,7 +1591,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     // check if taget is remote
                     if ($isRemoteTarget) {
                         // check for the empty ticket
-                        if(empty($ticketId)) {
+                        if (empty($ticketId)) {
                             throw new Exception('Please enter a Project Key.');
                         }
 
@@ -1599,9 +1613,9 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                     );
 
                     $removedComponentdetails = TaskSubmission::get_component_diff(
-                       $existingComponents->toNestedArray(),
-                       $selectedComponents,
-                       'remove'
+                        $existingComponents->toNestedArray(),
+                        $selectedComponents,
+                        'remove'
                     );
 
                     // remove the component
@@ -1610,7 +1624,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                             'SecurityComponentID' => $removedComponent['SecurityComponentID']
                         ];
 
-                        if (!empty($removedComponent['ProductAspect'])){
+                        if (!empty($removedComponent['ProductAspect'])) {
                             $filterArray = [
                                 'SecurityComponentID' => $removedComponent['SecurityComponentID'],
                                 'ProductAspect' => $removedComponent['ProductAspect']
@@ -1628,7 +1642,9 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
                     // add the component
                     foreach ($newTicketComponents as $newTicketComponent) {
-                        $securityComponent = SecurityComponent::get_by_id(Convert::raw2sql($newTicketComponent['SecurityComponentID']));
+                        $securityComponent = SecurityComponent::get_by_id(
+                            Convert::raw2sql($newTicketComponent['SecurityComponentID'])
+                        );
 
                         if ($securityComponent) {
                             $jiraLink = '';
@@ -1690,34 +1706,48 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         }
 
         foreach ($primaryArray as $primaryComponent) {
-            $doesComponentExist = array_filter($secondaryArray, function ($secondaryComponent) use ($primaryComponent, $type) {
-                $primaryProductAspect = isset($primaryComponent['ProductAspect']) ? $primaryComponent['ProductAspect']: '';
-                $secondaryProductAspect = isset($secondaryComponent['ProductAspect']) ? $secondaryComponent['ProductAspect']: '';
+            $doesComponentExist = array_filter(
+                $secondaryArray,
+                function ($secondaryComponent) use ($primaryComponent, $type) {
+                    $primaryProductAspect = isset($primaryComponent['ProductAspect']) ?
+                        $primaryComponent['ProductAspect']: '';
+                    $secondaryProductAspect = isset($secondaryComponent['ProductAspect']) ?
+                        $secondaryComponent['ProductAspect']: '';
 
-                if (empty($primaryProductAspect) && empty($secondaryProductAspect)) {
-                    return (int)$secondaryComponent['SecurityComponentID'] === (int)$primaryComponent['SecurityComponentID'];
-                }
+                    if (empty($primaryProductAspect) && empty($secondaryProductAspect)) {
+                        return (
+                            (int)$secondaryComponent['SecurityComponentID']
+                            ===
+                            (int)$primaryComponent['SecurityComponentID']
+                        );
+                    }
 
-                if (!empty($primaryProductAspect) && $type === 'add' && empty($secondaryProductAspect)) {
-                    return [];
-                }
+                    if (!empty($primaryProductAspect) && $type === 'add' && empty($secondaryProductAspect)) {
+                        return [];
+                    }
 
-                if (empty($primaryProductAspect) && $type === 'remove' && !empty($secondaryProductAspect)) {
-                    return [];
-                }
+                    if (empty($primaryProductAspect) && $type === 'remove' && !empty($secondaryProductAspect)) {
+                        return [];
+                    }
 
-                if (!empty($primaryProductAspect) && !empty($secondaryProductAspect)) {
-                    return (
-                        (int)$secondaryComponent['SecurityComponentID'] === (int)$primaryComponent['SecurityComponentID'] &&
-                        (string)$secondaryProductAspect === (string)$primaryProductAspect
-                    );
+                    if (!empty($primaryProductAspect) && !empty($secondaryProductAspect)) {
+                        return (
+                            (
+                                (int)$secondaryComponent['SecurityComponentID']
+                                ===
+                                (int)$primaryComponent['SecurityComponentID']
+                            ) &&
+                            (string)$secondaryProductAspect === (string)$primaryProductAspect
+                        );
+                    }
                 }
-            });
+            );
 
             if (empty($doesComponentExist)) {
                 $returnArray[] = [
                     'SecurityComponentID' => $primaryComponent['SecurityComponentID'],
-                    'ProductAspect' => isset($primaryComponent['ProductAspect']) ? $primaryComponent['ProductAspect'] : '' ,
+                    'ProductAspect' => isset($primaryComponent['ProductAspect'])
+                        ? $primaryComponent['ProductAspect'] : '' ,
                 ];
             }
         }
