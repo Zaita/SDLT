@@ -109,6 +109,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SecurityArchitectApproverIPAddress' => 'Varchar(255)',
         'SecurityArchitectApproverMachineName' => 'Varchar(255)',
         'SecurityArchitectStatusUpdateDate' => 'Varchar(255)',
+        'SubmittedDate' => 'Varchar(255)',
+        'SubmittedForApprovalDate'=> 'Varchar(255)',
         'ApprovalLinkToken' => 'Varchar(64)',
         'ProductName' => 'Varchar(255)',
         'ReleaseDate' => 'Date',
@@ -151,7 +153,14 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SecurityArchitectApprovalStatus',
         'UUID',
         'IsStartLinkEmailSent',
-        'Created' => 'Created date'
+        'Created' => 'Created date',
+        'SubmittedDate',
+        'SubmittedForApprovalDate',
+        // If the approver groups are configurable in the future, i.e. change their group name,
+        // then these columns require to be changed accordingly.
+        'getSaApprovalDateToDisplay' => 'Date approved/denied by Security Architect',
+        'CisoApprovalStatusUpdateDate' => 'Date approved/denied by Chief Information Security Officer',
+        'BusinessOwnerStatusUpdateDate' => 'Date approved/denied by Business Owner'
     ];
 
     /**
@@ -206,10 +215,35 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'filter' => 'PartialMatchFilter',
                 'title' => 'UUID'
             ],
-            'Created'=> [
+            'Created' => [
                 'filter' => 'PartialMatchFilter',
                 'title' => 'Created Date',
                 'field' => DateField::create('Created')
+            ],
+            'SubmittedDate' => [
+                'filter' => 'PartialMatchFilter',
+                'title' => 'Submitted Date',
+                'field' => DateField::create('SubmittedDate')
+            ],
+            'SubmittedForApprovalDate' => [
+                'filter' => 'PartialMatchFilter',
+                'title' => 'Submitted For Approval Date',
+                'field' => DateField::create('SubmittedForApprovalDate')
+            ],
+            'SecurityArchitectStatusUpdateDate' => [
+                'filter' => 'PartialMatchFilter',
+                'title' => 'Date approved/denied by Security Architect',
+                'field' => DateField::create('SecurityArchitectStatusUpdateDate')
+            ],
+            'BusinessOwnerStatusUpdateDate' => [
+                'filter' => 'PartialMatchFilter',
+                'title' => 'Date approved/denied by Business Owner',
+                'field' => DateField::create('BusinessOwnerStatusUpdateDate')
+            ],
+            'CisoApprovalStatusUpdateDate' => [
+                'filter' => 'PartialMatchFilter',
+                'title' => 'Date approved/denied by Chief Information Security Officer',
+                'field' => DateField::create('CisoApprovalStatusUpdateDate')
             ]
         ];
     }
@@ -576,7 +610,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 $fields->dataFieldByName('SecurityArchitectApprovalStatus'),
                 $fields->dataFieldByName('SecurityArchitectApproverIPAddress'),
                 $fields->dataFieldByName('SecurityArchitectApproverMachineName'),
-                $fields->dataFieldByName('SecurityArchitectStatusUpdateDate'),
+                $fields->dataFieldByName('SecurityArchitectStatusUpdateDate')
+                        ->setDescription('Collect the date when SA is assigned and update it when SA
+                            approved/denied the submission.'),
                 $fields->dataFieldByName('IsEmailSentToSecurityArchitect')
             ]
         );
@@ -601,6 +637,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 $fields->dataFieldByName('CisoApproverIPAddress'),
                 $fields->dataFieldByName('CisoApproverMachineName'),
                 $fields->dataFieldByName('CisoApprovalStatusUpdateDate')
+                        ->setDescription('Collect the date when CISO approved/denied the submission.')
             ]
         );
 
@@ -618,6 +655,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 $fields->dataFieldByName('BusinessOwnerIPAddress'),
                 $fields->dataFieldByName('BusinessOwnerMachineName'),
                 $fields->dataFieldByName('BusinessOwnerStatusUpdateDate')
+                        ->setDescription('Collect date when Business Owner approved/denied the submission.')
             ]
         );
 
@@ -1161,6 +1199,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
 
                     $questionnaireSubmission->QuestionnaireStatus = QuestionnaireSubmission::STATUS_SUBMITTED;
 
+                    $questionnaireSubmission->SubmittedDate = date('Y-m-d H:i:s');
+
                     $questionnaireSubmission->write();
 
                     // after submit the questionnaire, please send a summary page link
@@ -1289,6 +1329,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $questionnaireSubmission->doesQuestionnairBelongToCurrentUser();
 
                     $questionnaireSubmission->QuestionnaireStatus = QuestionnaireSubmission::STATUS_AWAITING_SA_REVIEW;
+
+                    $questionnaireSubmission->SubmittedForApprovalDate = date('Y-m-d H:i:s');
 
                     if ($questionnaireSubmission->SecurityArchitectApprovalStatus == 'denied') {
                         $questionnaireSubmission->QuestionnaireStatus =
@@ -2561,6 +2603,20 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $productAspects = $this->getProductAspectList($productAspectAnswerData);
 
         return json_encode($productAspects);
+    }
+
+    /**
+     * customise SA approved/denied date to display in Questionnaire Submission screen
+     *
+     * @return string
+     */
+    public function getSaApprovalDateToDisplay()
+    {
+        if ($this->isApprovedBySA() || $this->isDeniedBySA()) {
+            return $this->SecurityArchitectStatusUpdateDate;
+        }
+
+        return '';
     }
 
     /**

@@ -148,6 +148,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         'Status',
         'Result',
         'Created' => 'Created date',
+        'CompletedAt' => 'Completed Date'
     ];
 
     /**
@@ -1684,8 +1685,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
     {
         $returnArray = [];
 
-        if (empty($primaryArray))
-        {
+        if (empty($primaryArray)) {
             return $returnArray;
         }
 
@@ -1912,6 +1912,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      * Get sibling task submissions by type from the parent
      * This list will include the current task submission
      *
+     * @param string $type task type
+     *
      * @return DataList | null
      */
     public function getSiblingTaskSubmissionsByType($type)
@@ -1984,7 +1986,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
         // if there is no sibling component selection task, then return default component od CVA task
         if (empty($siblingTask)) {
-          return json_encode($this->getDefaultComponentsFromCVATask());
+            return json_encode($this->getDefaultComponentsFromCVATask());
         }
 
         $isSiblingTaskCompleted = $this->isSiblingTaskCompleted($siblingTask);
@@ -2030,7 +2032,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 continue;
             }
 
-            foreach($comp->SecurityComponent()->Controls() as $ctrl) {
+            foreach ($comp->SecurityComponent()->Controls() as $ctrl) {
                 $controls[] = [
                     'id' => $ctrl->ID,
                     'name' => $ctrl->Name,
@@ -2090,7 +2092,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
               ])->first();
 
             if (($localControls = $securityComponent->Controls()) && $ticket) {
-                $remoteControls =  $componentSelectionTask->issueTrackerService->getControlDetailsFromJiraTicket($ticket) ?: [];
+                $remoteControls =
+                    $componentSelectionTask->issueTrackerService->getControlDetailsFromJiraTicket($ticket) ?: [];
 
                 foreach ($localControls as $localControl) {
                     $doesControlExist = [];
@@ -2189,20 +2192,23 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      * @param [type] $fields FieldList obtained from getCMSFields
      * @return FieldList a modified version of $fields, passed in via parameter
      */
-    public function getCVA_CMSFields($fields) {
-        $fields->removeByName([
-            'QuestionData',
-            'AnswerData',
-            'QuestionnaireDataToggle',
-            'AnswerDataToggle',
-            'CVATaskData',
-            'EmailRelativeLinkToTask',
-            'JiraKey',
-            'JiraTickets',
-            'SelectedComponents',
-            'ResultToggle',
-            'Result'
-        ]);
+    public function getCVA_CMSFields($fields)
+    {
+        $fields->removeByName(
+            [
+                'QuestionData',
+                'AnswerData',
+                'QuestionnaireDataToggle',
+                'AnswerDataToggle',
+                'CVATaskData',
+                'EmailRelativeLinkToTask',
+                'JiraKey',
+                'JiraTickets',
+                'SelectedComponents',
+                'ResultToggle',
+                'Result'
+            ]
+        );
         $fields->addFieldToTab(
             'Root.TaskSubmissionData',
             ToggleCompositeField::create(
