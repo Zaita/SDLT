@@ -670,6 +670,7 @@ class Task extends DataObject implements ScaffoldingProvider, PermissionProvider
     {
         $result = parent::validate();
 
+        // validation for require field
         if ($this->IsApprovalRequired && !$this->ApprovalGroup()->exists()) {
             $result->addError('Please select Approval group.');
         } elseif (!$this->TaskType) {
@@ -678,6 +679,21 @@ class Task extends DataObject implements ScaffoldingProvider, PermissionProvider
             $result->addError('Please select a risk-calculation.');
         } elseif ($this->ID && $this->isSRAType() && !$this->RiskQuestionnaireDataSourceID) {
             $result->addError('Please select a data source for the risk questionnaire.');
+        }
+
+        // validation for unique task name
+        $task = self::get()
+           ->filter([
+               'Name' => $this->Name
+           ])->exclude('ID', $this->ID);
+
+        if ($task->count()) {
+            $result->addError(
+                sprintf(
+                    'Task name "%s" already exists. Please enter a unique Task name.',
+                    $this->Name
+                )
+            );
         }
 
         return $result;
