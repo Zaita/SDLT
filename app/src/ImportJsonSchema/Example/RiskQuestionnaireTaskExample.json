@@ -51,6 +51,16 @@
               {
                 "name": "Penetration Test"
               }
+            ],
+            "risks": [
+              {
+                "name": "Information Disclosure",
+                "weight": 65
+              },
+              {
+                "name": "Information Loss",
+                "weight": 52
+              }
             ]
           },
           {
