@@ -194,6 +194,26 @@
                           "name"
                         ]
                       }
+                    },
+                    "risks": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "weight": {
+                            "type": "number",
+                            "minimum": 0
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "weight"
+                        ]
+                      },
+                      "uniqueItems": true
                     }
                   },
                   "required": [

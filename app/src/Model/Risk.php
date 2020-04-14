@@ -128,6 +128,10 @@ class Risk extends DataObject
             $result->addError('Weight values should be >= 0.');
         }
 
+        if (strlen($this->Weight) && $this->Weight > 100) {
+            $result->addError('Weight values should be <= 100.');
+        }
+
         return $result;
     }
 
