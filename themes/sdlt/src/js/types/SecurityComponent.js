@@ -4,7 +4,8 @@ export type SecurityComponent = {
   id: string,
   name: string,
   description: string,
-  implementationGuidance: string
+  implementationGuidance: string,
+  implementationEvidence: string
 }
 
 export type JiraTicket = {

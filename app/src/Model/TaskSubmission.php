@@ -2062,21 +2062,76 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 continue;
             }
 
-            foreach ($comp->SecurityComponent()->Controls() as $ctrl) {
-                $controls[] = [
-                    'id' => $ctrl->ID,
-                    'name' => $ctrl->Name,
-                    'description' => $ctrl->Description,
-                    'implementationGuidance' => $ctrl->ImplementationGuidance,
-                    'selectedOption' => SecurityControl::CTL_STATUS_2
-                ];
-            }
+            $controls = $comp->SecurityComponent()->Controls();
+
+            $cvaControls = $this->getLocalAndDefultCVAControls($controls);
 
             $out[] = [
                 'id' => $comp->SecurityComponent()->ID,
                 'name' => $comp->SecurityComponent()->Name,
                 'productAspect' => $comp->ProductAspect,
-                'controls' => $controls
+                'controls' => $cvaControls
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param DataObject $controls controls
+     *
+     * @return array
+     */
+    public function getLocalAndDefultCVAControls($controls)
+    {
+        $cvaControls = [];
+
+        foreach ($controls as $ctrl) {
+            $cvaControls[] = [
+                'id' => $ctrl->ID,
+                'name' => $ctrl->Name,
+                'description' => $ctrl->Description,
+                'implementationGuidance' => $ctrl->ImplementationGuidance,
+                'implementationEvidence'  => $ctrl->ImplementationEvidence,
+                'selectedOption' => SecurityControl::CTL_STATUS_2,
+                'implementationEvidenceUserInput' => ''
+            ];
+        }
+
+        return $cvaControls;
+    }
+
+    /**
+     * When no component selection task is available, we show default components
+     * from the CVA task amongst the siblings of this task submission. These
+     * default components are configured on the CVA task itself
+     *
+     * @return array
+     */
+    public function getDefaultComponentsFromCVATask() : array
+    {
+        $out = [];
+
+        if ($this->TaskType !== 'control validation audit') {
+            return $out;
+        }
+
+        $selectedComponents = $this->Task()->DefaultSecurityComponents();
+
+        if (!$selectedComponents) {
+            return $out;
+        }
+
+        foreach ($selectedComponents as $comp) {
+            $controls = $comp->Controls();
+
+            $cvaControls = $this->getLocalAndDefultCVAControls($controls);
+
+            $out[] = [
+                'id' => $comp->ID,
+                'name' => $comp->Name,
+                'productAspect' => $comp->ProductAspect,
+                'controls' => $cvaControls
             ];
         }
 
@@ -2146,51 +2201,6 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'name' => $securityComponent->Name,
                 'productAspect' => $selectedComponent->ProductAspect,
                 'jiraTicketLink' => $ticket ? $ticket->TicketLink : '',
-                'controls' => $controls
-            ];
-        }
-
-        return $out;
-    }
-
-    /**
-     * When no component selection task is available, we show default components
-     * from the CVA task amongst the siblings of this task submission. These
-     * default components are configured on the CVA task itself
-     *
-     * @return array
-     */
-    public function getDefaultComponentsFromCVATask() : array
-    {
-        $out = [];
-
-        if ($this->TaskType !== 'control validation audit') {
-            return $out;
-        }
-
-        $selectedComponents = $this->Task()->DefaultSecurityComponents();
-
-        if (!$selectedComponents) {
-            return $out;
-        }
-
-        foreach ($selectedComponents as $comp) {
-            $controls = [];
-
-            foreach ($comp->Controls() as $ctrl) {
-                $controls[] = [
-                    'id' => $ctrl->ID,
-                    'name' => $ctrl->Name,
-                    'selectedOption' => SecurityControl::CTL_STATUS_2,
-                    'description' => $ctrl->Description,
-                    'implementationGuidance' => $ctrl->ImplementationGuidance
-                ];
-            }
-
-            $out[] = [
-                'id' => $comp->ID,
-                'name' => $comp->Name,
-                'productAspect' => $comp->ProductAspect,
                 'controls' => $controls
             ];
         }

@@ -8,6 +8,7 @@
           "name": "Azure Active Directory Integration",
           "description": "test This product integrateswith Azure Active Directory for NZTA UserAuthentication This product integrates with Azure",
           "implementationGuidance": "test implementation guidance",
+          "implementationEvidence": "test implementation evidence 1",
           "controlWeightSets": [
             {
               "risk": "Information Modification",
@@ -28,6 +29,7 @@
         {
           "name": "New test control 1",
           "description": "new test control 1",
+          "implementationEvidence": "test implementation evidence 2",
           "controlWeightSets": [
             {
               "risk": "Information Modification",
