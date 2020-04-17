@@ -2064,7 +2064,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
 
             $controls = $comp->SecurityComponent()->Controls();
 
-            $cvaControls = $this->getLocalAndDefultCVAControls($controls);
+            $cvaControls = $this->getLocalAndDefaultCVAControls($controls);
 
             $out[] = [
                 'id' => $comp->SecurityComponent()->ID,
@@ -2082,7 +2082,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
      *
      * @return array
      */
-    public function getLocalAndDefultCVAControls($controls)
+    public function getLocalAndDefaultCVAControls($controls)
     {
         $cvaControls = [];
 
@@ -2125,7 +2125,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         foreach ($selectedComponents as $comp) {
             $controls = $comp->Controls();
 
-            $cvaControls = $this->getLocalAndDefultCVAControls($controls);
+            $cvaControls = $this->getLocalAndDefaultCVAControls($controls);
 
             $out[] = [
                 'id' => $comp->ID,
