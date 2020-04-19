@@ -110,6 +110,9 @@ export type QuestionnaireSubmissionListItem = {
   startLink: string,
   summaryPageLink: string,
   businessOwner: string,
+  securityArchitectApprover: string,
+  CisoApprovalStatus: string,
+  businessOwnerApprovalStatus: string,
   submitterName: string,
   releaseDate: string
 };

@@ -28,6 +28,9 @@
                 "implementationGuidance": {
                   "type": "string"
                 },
+                "implementationEvidence": {
+                  "type": "string"
+                },
                 "controlWeightSets" : {
                   "type": "array",
                   "items": {

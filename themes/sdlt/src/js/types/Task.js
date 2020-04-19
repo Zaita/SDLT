@@ -64,3 +64,12 @@ export type RiskRatingThreshold = {
   likelihood: string,
   impact: string
 }
+
+export type TaskSubmissionListItem = {
+  id: string,
+  uuid: string,
+  taskName: string,
+  created: string,
+  status: string,
+  submitterName: string
+};

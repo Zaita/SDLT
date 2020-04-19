@@ -53,6 +53,7 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
         'Name' => 'Varchar(255)',
         'Description' => 'HTMLText',
         'ImplementationGuidance' => 'HTMLText',
+        'ImplementationEvidence' => 'HTMLText'
     ];
 
     /**
@@ -105,7 +106,8 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
                 'ID',
                 'Name',
                 'Description',
-                'ImplementationGuidance'
+                'ImplementationGuidance',
+                'ImplementationEvidence'
             ]);
 
         return $typeScaffolder;
@@ -124,11 +126,16 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
 
         $desc = HtmlEditorField::create('Description')
             ->setDescription('This contains the description that appears under'
-            .' the title of a line-item in the component checklist.');
+            .' the title of a line-item in the component checklist.')
+            ->setRows(3);
 
-        $implementationGuidance = HtmlEditorField::create('ImplementationGuidance');
+        $implementationGuidance = HtmlEditorField::create('ImplementationGuidance')
+            ->setRows(3);
 
-        $fields->addFieldsToTab('Root.Main', [$name, $desc, $implementationGuidance]);
+        $implementationEvidence = HtmlEditorField::create('ImplementationEvidence')
+            ->setRows(3);
+
+        $fields->addFieldsToTab('Root.Main', [$name, $desc, $implementationGuidance, $implementationEvidence]);
         $fields->removeByName(['SecurityComponent', 'ControlWeightSets']);
 
         if ($this->ID) {
@@ -228,6 +235,10 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
                 $controlObj->ImplementationGuidance = $control->implementationGuidance;
             }
 
+            if (property_exists($control, "implementationEvidence")) {
+                $controlObj->ImplementationEvidence = $control->implementationEvidence;
+            }
+
             $controlObj->SecurityComponent()->add($component);
             $controlObj->write();
 
@@ -291,5 +302,25 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
         }
 
         return $componentName;
+    }
+
+    /**
+     * export control
+     *
+     * @param integer $control control
+     * @return string
+     */
+    public static function export_record($control)
+    {
+        $obj['name'] = $control->Name;
+        $obj['description'] = $control->Description ?? '';
+        $obj['implementationGuidance'] = $control->ImplementationGuidance ?? '';
+        $obj['implementationEvidence'] = $control->ImplementationEvidence ?? '';
+
+        foreach ($control->ControlWeightSets() as $weight) {
+            $obj['controlWeightSets'][] = ControlWeightSet::export_record($weight);
+        }
+
+        return $obj;
     }
 }

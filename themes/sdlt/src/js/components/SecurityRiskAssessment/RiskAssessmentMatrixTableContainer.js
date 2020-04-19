@@ -122,10 +122,10 @@ class RiskAssessmentMatrixTableContainer extends Component<Props> {
           <span key={control.id}>{control.name}</span>
           <small className="text-muted">
             (
-              I: {control.impactWeight},
               L: {control.likelihoodWeight},
-              IP: {control.impactPenalty},
-              LP: {control.likelihoodPenalty}
+              I: {control.impactWeight},
+              LP: {control.likelihoodPenalty},
+              IP: {control.impactPenalty}
             )
           </small>
         </div>
