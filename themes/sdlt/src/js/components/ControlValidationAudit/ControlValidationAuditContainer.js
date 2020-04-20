@@ -1,5 +1,4 @@
 // @flow
-
 import React, {Component} from "react";
 import {connect} from "react-redux";
 import type {RootState} from "../../store/RootState";
@@ -59,7 +58,7 @@ const mapDispatchToProps = (dispatch: Dispatch, props: *) => {
     dispatchSaveControlValidationAuditDataAction(uuid: string, controlData: object, questionnaireSubmissionUUID: string, secureToken: string) {
       dispatch(saveControlValidationAuditData(uuid, controlData, questionnaireSubmissionUUID, secureToken));
     },
-    dispatchUpdateControlValidationQuestionDataAction (selectedOptionDetail: object){
+    dispatchUpdateControlValidationQuestionDataAction (selectedOptionDetail: object) {
       dispatch(updateControlValidationAuditData(selectedOptionDetail));
     },
     dispatchReSyncWithJira(uuid: string) {
@@ -90,14 +89,14 @@ class ControlValidationAuditContainer extends Component<Props, State> {
   /**
    * Display a list of security component headlines with radio inputs for controls
    */
-  renderCVAQuestionsForm() {
+  renderCVAQuestionsForm(isCVATaskEditable) {
     const productAspects = this.props.controlValidationAuditData.productAspects;
     const selectedComponents = this.props.cvaSelectedComponents;
     const componentTarget =this.props.controlValidationAuditData.componentTarget;
 
     if (componentTarget !== 'DefaultComponent' && productAspects.length > 0 && selectedComponents.length > 0) {
       return (
-        this.renderComponentGroupByProductAspect(productAspects, selectedComponents)
+        this.renderComponentGroupByProductAspect(productAspects, selectedComponents, isCVATaskEditable)
       );
     } else if (selectedComponents.length > 0) {
       return(
@@ -105,7 +104,7 @@ class ControlValidationAuditContainer extends Component<Props, State> {
           {
             selectedComponents.map((component) => {
               return (
-                this.renderComponent(component)
+                this.renderComponent(component, isCVATaskEditable)
               );
             })
           }
@@ -121,7 +120,7 @@ class ControlValidationAuditContainer extends Component<Props, State> {
     }
   }
 
-  renderComponentGroupByProductAspect(productAspects, components) {
+  renderComponentGroupByProductAspect(productAspects, components, isCVATaskEditable) {
     return (
       <div>
       {
@@ -140,7 +139,7 @@ class ControlValidationAuditContainer extends Component<Props, State> {
               {
                 filterComponent.map((component) => {
                   return (
-                    this.renderComponent(component)
+                    this.renderComponent(component, isCVATaskEditable)
                   );
                 })
               }
@@ -152,7 +151,7 @@ class ControlValidationAuditContainer extends Component<Props, State> {
     );
   }
 
-  renderComponent(component) {
+  renderComponent(component, isCVATaskEditable) {
     const componentKey = component.productAspect ? `${component.productAspect}_${component.id}`: component.id;
 
     const controls = component.controls;
@@ -165,7 +164,7 @@ class ControlValidationAuditContainer extends Component<Props, State> {
         </h5>
         {
           controls && controls.length > 0 && controls.map((control) => {
-            return (this.renderControl(control, component));
+            return (this.renderControl(control, component, isCVATaskEditable));
           })
         }
         {
@@ -179,26 +178,26 @@ class ControlValidationAuditContainer extends Component<Props, State> {
     );
   }
 
-  renderControl(control, component) {
+  renderControl(control, component, isCVATaskEditable) {
     const controlKey = component.productAspect ? `${component.productAspect}_${component.id}_${control.id}`: `${component.id}_${control.id}`;
     const componentTarget = this.props.controlValidationAuditData.componentTarget;
 
     if (componentTarget === "JIRA Cloud") {
       return this.renderRemoteControls(control, controlKey);
     } else {
-      return this.renderLocalControl(control, controlKey, component);
+      return this.renderLocalControl(control, controlKey, component, isCVATaskEditable);
     }
   }
 
-  renderLocalControl(control, controlKey, component) {
+  renderLocalControl(control, controlKey, component, isCVATaskEditable) {
     const options = [
       {'value': CTL_STATUS_1, 'label': DEFAULT_CVA_CONTROLS_ANSWER_YES},
       {'value':CTL_STATUS_2, 'label': DEFAULT_CVA_CONTROLS_ANSWER_NO},
       {'value':CTL_STATUS_3, 'label': DEFAULT_CVA_CONTROLS_ANSWER_NOT_APPLICABLE}
     ];
-
     return(
       <div className="my-0 container row" key={controlKey}>
+
         <div className="col-xs-2">
           {
             options.map((option, optionIndex) => {
@@ -210,11 +209,13 @@ class ControlValidationAuditContainer extends Component<Props, State> {
                     name={controlKey}
                     value={option.value}
                     defaultChecked={control.selectedOption === option.value}
+                    disabled={!isCVATaskEditable}
                     onClick={() => this.props.dispatchUpdateControlValidationQuestionDataAction({
                       "selectedOption": option.value,
                       "controlID":control.id,
                       "componentID":component.id,
-                      "productAspect":component.productAspect
+                      "productAspect":component.productAspect,
+                      "implementationEvidenceUserInput": control.implementationEvidenceUserInput
                   })}
                   />
                   {option.label}
@@ -223,18 +224,34 @@ class ControlValidationAuditContainer extends Component<Props, State> {
             })
           }
         </div>
+
         <div className="col-10">
           <label key={control.id}>
             <strong>{control.name}</strong>
           </label>
+
           <ControlInfo
             key={`controlInfo_${control.id}`}
             id={control.id}
             name=''
             description={control.description}
             implementationGuidance={control.implementationGuidance}
+            implementationEvidence={control.implementationEvidence}
+            implementationEvidenceUserInput={control.implementationEvidenceUserInput}
+            showImplementationEvidence={true}
             className="text-muted"
+            isCVATaskEditable={isCVATaskEditable}
+            updateEvidenceTextareaData={
+              (value) => this.props.dispatchUpdateControlValidationQuestionDataAction({
+                "selectedOption": control.selectedOption,
+                "controlID":control.id,
+                "componentID":component.id,
+                "productAspect":component.productAspect,
+                "implementationEvidenceUserInput":value
+              })
+            }
           />
+
         </div>
       </div>
     );
@@ -269,8 +286,9 @@ class ControlValidationAuditContainer extends Component<Props, State> {
 
     const isSubmitter = controlValidationAuditData.submitterID === currentUser.id;
     const isSRATaskFinalised = SecurityRiskAssessmentUtil.isSRATaskFinalised(controlValidationAuditData.siblingSubmissions);
+    const isCVATaskEditable = (isSubmitter && !isSRATaskFinalised);
 
-    const submitButton = isSubmitter && !isSRATaskFinalised && cvaSelectedComponents.length > 0 ? (
+    const submitButton = isCVATaskEditable && cvaSelectedComponents.length > 0 ? (
       <LightButton
       title="SUBMIT"
       onClick={() => dispatchSaveControlValidationAuditDataAction(
@@ -290,7 +308,7 @@ class ControlValidationAuditContainer extends Component<Props, State> {
       />
     );
 
-    const reSync = isSubmitter && !isSRATaskFinalised && controlValidationAuditData.componentTarget == "JIRA Cloud" && cvaSelectedComponents.length > 0 ? (
+    const reSync = isCVATaskEditable && controlValidationAuditData.componentTarget == "JIRA Cloud" && cvaSelectedComponents.length > 0 ? (
       <DarkButton
         title={"RE SYNC WITH JIRA"}
         onClick={() => dispatchReSyncWithJira(controlValidationAuditData.uuid)}
@@ -327,7 +345,7 @@ class ControlValidationAuditContainer extends Component<Props, State> {
                   (
                     <div>
                       {isSRATaskFinalised ? SecurityRiskAssessmentUtil.getSraIsFinalisedAlert() : false}
-                      {this.renderCVAQuestionsForm()}
+                      {this.renderCVAQuestionsForm(isCVATaskEditable)}
                     </div>
                   )
                 }

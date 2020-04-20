@@ -82,7 +82,17 @@
           {
             "label": "Test continue 2",
             "actionType": "continue",
-            "message": "test message continue 2"
+            "message": "test message continue 2",
+            "risks": [
+              {
+                "name": "Information Disclosure",
+                "weight": 11
+              },
+              {
+                "name": "Information Loss",
+                "weight": 31
+              }
+            ]
           }
         ]
       },

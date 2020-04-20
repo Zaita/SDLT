@@ -33,8 +33,10 @@ export function controlValidationAuditState(state: ControlValidationAuditState =
     const productAspect = action.payload.productAspect;
     const controlID = action.payload.controlID;
     const componentID = action.payload.componentID;
+    const implementationEvidenceUserInput = action.payload.implementationEvidenceUserInput;
     const selectedComponents = cloneDeep(state.cvaSelectedComponents);
     let selectedcomponent = [];
+
     if (productAspect !== "") {
       selectedcomponent = selectedComponents.filter((component) => component.id == componentID && component.productAspect == productAspect);
     } else {
@@ -45,6 +47,7 @@ export function controlValidationAuditState(state: ControlValidationAuditState =
       const control = selectedcomponent[0].controls.filter((control) => control.id == controlID);
       if(control.length> 0) {
         control[0].selectedOption = selectedOption;
+        control[0].implementationEvidenceUserInput = implementationEvidenceUserInput;
         return {
           ...state,
           cvaSelectedComponents: selectedComponents,

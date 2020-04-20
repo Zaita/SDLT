@@ -15,6 +15,10 @@ $white-background: rgba(255, 255, 255, 0.7);
     background-color: $white-background;
   }
 
+  textarea {
+    font-size: 14px !important;
+  }
+
   label {
     margin-right: 10px;
     padding: 0;

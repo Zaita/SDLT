@@ -190,19 +190,20 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider, Permi
     }
 
     /**
-     * permission-provider to import Questionnaire
+     * permission-provider to import Component
      *
      * @return array
      */
     public function providePermissions()
     {
         return [
-            'IMPORT_COMPONENT' => 'Allow user to import Security Component'
+            'IMPORT_COMPONENT' => 'Allow user to import Security Component',
+            'EXPORT_COMPONENT' => 'Allow user to export Security Component'
         ];
     }
 
     /**
-     * Only ADMIN users and user with import permission should be able to import Questionnaire.
+     * Only ADMIN users and user with import permission should be able to import component.
      *
      * @param Member $member to check the permission of
      * @return boolean
@@ -217,6 +218,27 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider, Permi
         $canImport = Permission::checkMember($member, [
             'ADMIN',
             'IMPORT_COMPONENT'
+        ]);
+
+        return $canImport;
+    }
+
+    /**
+     * Only ADMIN users and user with export permission should be able to export Component.
+     *
+     * @param Member $member to check the permission of
+     * @return boolean
+     */
+    public function canExport($member = null)
+    {
+        if (!$member) {
+            $member = Member::currentUser();
+        }
+
+        // checkMember(<Member>, [<at-least-one-match>])
+        $canImport = Permission::checkMember($member, [
+            'ADMIN',
+            'EXPORT_COMPONENT'
         ]);
 
         return $canImport;
@@ -289,5 +311,25 @@ class SecurityComponent extends DataObject implements ScaffoldingProvider, Permi
         }
 
         return $result;
+    }
+
+    /**
+     * export component
+     *
+     * @param integer $component component
+     * @return string
+     */
+    public static function export_record($component)
+    {
+        $obj['name'] = $component->Name;
+        $obj['description'] = $component->Description ?? '';
+
+        foreach ($component->Controls() as $control) {
+            $obj['controls'][] = SecurityControl::export_record($control);
+        }
+
+        $returnobj['securityComponents'][] = $obj;
+
+        return json_encode($returnobj, JSON_PRETTY_PRINT);
     }
 }

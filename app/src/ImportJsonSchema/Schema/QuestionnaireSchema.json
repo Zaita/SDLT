@@ -79,7 +79,8 @@
                         "date",
                         "url",
                         "multiple-choice: single selection",
-                        "multiple-choice: multiple selection"
+                        "multiple-choice: multiple selection",
+                        "release date"
                       ]
                     },
                     "required": {
@@ -191,6 +192,26 @@
                           "name"
                         ]
                       }
+                    },
+                    "risks": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "weight": {
+                            "type": "number",
+                            "minimum": 0
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "weight"
+                        ]
+                      },
+                      "uniqueItems": true
                     }
                   },
                   "required": [

@@ -6,6 +6,7 @@ import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import type {User} from "../../types/User";
 import type {QuestionnaireSubmissionListItem} from "../../types/Questionnaire";
+import PrettifyStatusUtil from "../../utils/PrettifyStatusUtil";
 import {loadCurrentUser} from "../../actions/user";
 import {loadMyProductList} from "../../actions/questionnaire";
 import moment from "moment";
@@ -39,16 +40,7 @@ type Props = {
   loadingState: object<*>
 };
 
-const prettifyStatus = (status: string) => {
-  return status
-    .split("_")
-    .map((str) => {
-      return str.charAt(0).toUpperCase() + str.slice(1);
-    })
-    .join(" ");
-};
-
-const list = (myProductList: QuestionnaireSubmissionListItem) => {
+const list = (myProductList: QuestionnaireSubmissionListItem, currentUser: User) => {
   if(!myProductList.length)
   {
     return (
@@ -87,7 +79,14 @@ const list = (myProductList: QuestionnaireSubmissionListItem) => {
                     {myProduct.submitterName}
                   </td>
                   <td>
-                    {prettifyStatus(myProduct.status)}
+                    {PrettifyStatusUtil.prettifyStatus(
+                      myProduct.status,
+                      myProduct.SecurityArchitectApproverID,
+                      currentUser,
+                      myProduct.SecurityArchitectApprover,
+                      myProduct.CisoApprovalStatus,
+                      myProduct.BusinessOwnerApprovalStatus
+                    )}
                   </td>
                   <td>
                     <a href={url}>View</a>
@@ -127,7 +126,7 @@ class MyProductList extends Component<Props> {
     return (
       <div className="AnswersPreview">
         <Header title="My Products" subtitle={siteConfig.siteTitle} username={currentUser.name} logopath={siteConfig.logoPath} />
-        {list(myProductList)}
+        {list(myProductList, currentUser)}
         <Footer footerCopyrightText={siteConfig.footerCopyrightText}/>
       </div>
     );

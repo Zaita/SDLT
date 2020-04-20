@@ -203,4 +203,27 @@ class MultiChoiceAnswerSelection extends DataObject
 
         return $obj;
     }
+
+    /**
+     * export MultiChoiceAnswerSelection and associate risk
+     *
+     * @param object $selection selection
+     * @return array
+     */
+    public static function export_record($selection)
+    {
+        $obj['label'] = $selection->Label ?? '';
+        $obj['value'] =  $selection->Value ?? '';
+        $risks = $selection->Risks();
+
+        if ($risks->count()) {
+            foreach ($risks as $risk) {
+                $tmp['name'] = $risk->Name;
+                $tmp['weight'] = $risk->Weight;
+                $obj['risks'][] = $tmp;
+            }
+        }
+
+        return $obj;
+    }
 }

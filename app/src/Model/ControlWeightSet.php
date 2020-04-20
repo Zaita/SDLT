@@ -230,4 +230,21 @@ class ControlWeightSet extends DataObject
 
         return $weightInDB;
     }
+
+    /**
+     * export weight
+     *
+     * @param integer $weight weight
+     * @return string
+     */
+    public static function export_record($weight)
+    {
+        $obj['risk'] = $weight->Risk()->Name ?? '';
+        $obj['likelihood'] = $weight->Likelihood ?? 0;
+        $obj['Impact'] = $weight->Impact ?? 0;
+        $obj['likelihoodPenalty'] = $weight->LikelihoodPenalty ?? 0;
+        $obj['impactPenalty'] = $weight->ImpactPenalty ?? 0;
+
+        return $obj;
+    }
 }

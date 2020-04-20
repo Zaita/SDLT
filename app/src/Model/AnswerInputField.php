@@ -410,7 +410,8 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         $obj->MultiChoiceMultipleAnswerDefault = $inputFieldJson->multiChoiceMultipleAnswerDefault ?? '';
 
         // if field type is multi select (radio or checkobox) then add option field
-        if (property_exists($inputFieldJson, "answerSelections") && !empty($selections = $inputFieldJson->answerSelections)) {
+        if (property_exists($inputFieldJson, "answerSelections") &&
+            !empty($selections = $inputFieldJson->answerSelections)) {
             foreach ($selections as $selection) {
                 $dbSelection = MultiChoiceAnswerSelection::create_record_from_json($selection);
                 $obj->AnswerSelections()->add($dbSelection);
@@ -418,6 +419,35 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         }
 
         $obj->write();
+
+        return $obj;
+    }
+
+    /**
+     * export inputField
+     *
+     * @param object $inputField inputField
+     * @return array
+     */
+    public static function export_record($inputField)
+    {
+        $obj['label'] = $inputField->Label ?? '';
+        $obj['inputType'] =  $inputField->InputType;
+        $obj['required'] = (boolean) $inputField->Required;
+        $obj['minLength'] = $inputField->MinLength;
+        $obj['maxLength'] = $inputField->MaxLength;
+        $obj['placeHolder'] = $inputField->PlaceHolder?? '';
+        $obj['isBusinessOwner'] = (boolean) $inputField->IsBusinessOwner;
+        $obj['isProductName'] = (boolean) $inputField->IsProductName;
+
+        if ($inputField->isMultipleChoice()) {
+            $obj['multiChoiceSingleAnswerDefault'] = $inputField->MultiChoiceSingleAnswerDefault ?? '';
+            $obj['multiChoiceMultipleAnswerDefault'] = $inputField->MultiChoiceMultipleAnswerDefault ?? '';
+
+            foreach ($inputField->AnswerSelections() as $selection) {
+                $obj['answerSelections'][] =  MultiChoiceAnswerSelection::export_record($selection);
+            }
+        }
 
         return $obj;
     }

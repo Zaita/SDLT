@@ -390,3 +390,30 @@ export function denyTaskSubmission(uuid: string): ThunkAction {
     }
   }
 }
+
+// Questionnaire Submissions list of pending approval list
+// for SA, CISO and Business owner
+export function loadAwaitingApprovalTaskList(): ThunkAction {
+  return async (dispatch: any, getState: () => RootState) => {
+    const user = getState().currentUserState.user;
+    if (!user) {
+      return;
+    }
+
+    await dispatch({type: ActionType.TASK.FETCH_AWAITING_APPROVAL_TASK_LIST_REQUEST});
+
+    try {
+      // Call re sync with jira data api
+      const data = await TaskDataService.fetchTaskSubmissionList(user.id, 'awaiting_approval_list');
+
+      dispatch({
+        type: ActionType.TASK.FETCH_AWAITING_APPROVAL_TASK_LIST_SUCCESS,
+        payload: data
+      });
+    }
+    catch (error) {
+      await dispatch({ type: ActionType.TASK.FETCH_AWAITING_APPROVAL_TASK_LIST_FAILURE, error: error});
+      ErrorUtil.displayError(error);
+    }
+  };
+}

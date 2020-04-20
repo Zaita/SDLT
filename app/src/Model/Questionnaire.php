@@ -495,8 +495,7 @@ class Questionnaire extends DataObject implements ScaffoldingProvider, Permissio
     {
         $result = parent::validate();
 
-        $changedFields = $this->getChangedFields();
-
+        // validation for require field
         if (!$this->Name) {
             $result->addError('Please add a questionnnaire name.');
         } elseif (!$this->Type) {
@@ -504,6 +503,24 @@ class Questionnaire extends DataObject implements ScaffoldingProvider, Permissio
         } elseif ($this->Type === 'RiskQuestionnaire' && !$this->RiskCalculation) {
             $result->addError('Please select a risk-calculation type.');
         }
+
+        // validation for unique questionnaire name
+        $questionnaire = self::get()
+           ->filter([
+               'Name' => $this->Name
+           ])->exclude('ID', $this->ID);
+
+        if ($questionnaire->count()) {
+            $result->addError(
+                sprintf(
+                    'Questionnaire name "%s" already exists. Please enter a unique Questionnaire name.',
+                    $this->Name
+                )
+            );
+        }
+
+        // validation for expiry date
+        $changedFields = $this->getChangedFields();
 
         if (isset($changedFields['ExpireAfterDays']['after'])) {
             $newExpireAfterDays = $changedFields['ExpireAfterDays']['after'];
@@ -645,7 +662,8 @@ class Questionnaire extends DataObject implements ScaffoldingProvider, Permissio
     public function providePermissions()
     {
         return [
-            'IMPORT_QUESTIONNAIRE' => 'Allow user to import Questionnaire'
+            'IMPORT_QUESTIONNAIRE' => 'Allow user to import Questionnaire',
+            'EXPORT_QUESTIONNAIRE' => 'Allow user to export Questionnaire'
         ];
     }
 
@@ -668,5 +686,59 @@ class Questionnaire extends DataObject implements ScaffoldingProvider, Permissio
         ]);
 
         return $canImport;
+    }
+
+    /**
+     * Only ADMIN users and user with export permission should be able to export Questionnaire.
+     *
+     * @param Member $member to check the permission of
+     * @return boolean
+     */
+    public function canExport($member = null)
+    {
+        if (!$member) {
+            $member = Member::currentUser();
+        }
+
+        // checkMember(<Member>, [<at-least-one-match>])
+        $canImport = Permission::checkMember($member, [
+            'ADMIN',
+            'EXPORT_QUESTIONNAIRE'
+        ]);
+
+        return $canImport;
+    }
+
+    /**
+     * export questionnaire
+     *
+     * @param integer $questionnaire questionnaire
+     * @return string
+     */
+    public static function export_record($questionnaire)
+    {
+        $obj['name'] = $questionnaire->Name;
+        $obj['type'] =  $questionnaire->Type;
+        $obj['keyInformation'] = $questionnaire->KeyInformation ?? '';
+        $obj['riskCalculation'] = $questionnaire->RiskCalculation;
+        $obj['bypassApproval'] = (boolean) $questionnaire->ApprovalIsNotRequired;
+        $obj['doesSubmissionExpire'] = $questionnaire->DoesSubmissionExpire;
+        $obj['expireAfterDays '] = $questionnaire->ExpireAfterDays;
+
+        foreach ($questionnaire->Questions() as $question) {
+            $obj['questions'][] = QUESTION::export_record($question);
+        }
+
+        $tasks = $questionnaire->Tasks();
+
+        if ($tasks->count()) {
+            foreach ($tasks as $task) {
+                $obj['tasks'][] = ['name' => $task->Name];
+            }
+        }
+
+        $returnobj['questionnaire'] = $obj;
+
+        return json_encode($returnobj, JSON_PRETTY_PRINT);
     }
 }

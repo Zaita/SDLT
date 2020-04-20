@@ -244,6 +244,18 @@ class Question extends DataObject implements ScaffoldingProvider
                 ? json_encode($taskIDs)
                 : '';
 
+            //ensure the Risks key always exists as an array
+            $risks = $answerActionField->Risks()->toNestedArray();
+            if ($risks) {
+                //avoid un-needed fields from JSON response
+                //reduces network payload and avoids info disclosure
+                foreach ($risks as $idx => $risk) {
+                    unset($risk['ClassName'], $risk['LastEdited'], $risk['Created'], $risk['RecordClassName']);
+                    $risks[$idx] = $risk;
+                }
+            }
+            $actionFields['Risks'] = $risks ?: [];
+
             $actionFields['Result'] = $answerActionField->Result;
             $actionFields['IsApprovalForTaskRequired'] = $answerActionField->IsApprovalForTaskRequired;
             $finalActionFields[] = $actionFields;
@@ -411,6 +423,36 @@ class Question extends DataObject implements ScaffoldingProvider
         }
 
         $obj->write();
+
+        return $obj;
+    }
+
+    /**
+     * export question
+     *
+     * @param object $question question
+     * @return array
+     */
+    public static function export_record($question)
+    {
+        $obj['title'] = $question->Title;
+        $obj['question'] =  $question->Question ?? '';
+        $obj['description'] = $question->Description ?? '';
+        $obj['answerFieldType'] = $question->AnswerFieldType;
+
+        // input fields
+        if ($question->AnswerFieldType == "input") {
+            foreach ($question->AnswerInputFields() as $inputfield) {
+                $obj['answerInputFields'][] = AnswerInputField::export_record($inputfield);
+            }
+        }
+
+        // action fields
+        if ($question->AnswerFieldType == "action") {
+            foreach ($question->AnswerActionFields() as $actionField) {
+                $obj['answerActionFields'][] = AnswerActionField::export_record($actionField);
+            }
+        }
 
         return $obj;
     }
