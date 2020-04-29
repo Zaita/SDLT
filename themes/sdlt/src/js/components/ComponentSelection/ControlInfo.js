@@ -98,7 +98,7 @@ export default class ControlInfo extends React.Component<Props> {
                 onClick={() => this.setState({ isImplementationEvidenceExpaned: !isImplementationEvidenceExpaned })}
               >
                 <span>
-                  <b>Evidence of Implementation</b>
+                  <b>Evidence of Implementation / Rationale of Not Applicable</b>
                   <Icon name={`${isImplementationEvidenceExpaned ? "caret-up" : "caret-down"}`} />
                 </span>
               </div>
