@@ -27,6 +27,7 @@ use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
 use SilverStripe\Forms\HTMLEditor\HtmlEditorField;
+use SilverStripe\ORM\HasManyList;
 
 /**
  * Class SecurityControl
@@ -239,9 +240,21 @@ class SecurityControl extends DataObject implements ScaffoldingProvider
                 $controlObj->ImplementationEvidence = $control->implementationEvidence;
             }
 
+            // add component to the security component
             $controlObj->SecurityComponent()->add($component);
+
+            // remove the controls weight set for component and control
+            $controlWeightSets = $controlObj->ControlWeightSets()->filter(
+                ['SecurityComponentID' => $component->ID]
+            );
+
+            foreach ($controlWeightSets as $controlWeightSet) {
+                $controlWeightSet->delete();
+            }
+
             $controlObj->write();
 
+            // add new control weight set if exist
             if (property_exists($control, "controlWeightSets") &&
                 !empty($weights = $control->controlWeightSets)) {
                 ControlWeightSet::create_record_from_json($weights, $controlObj, $component);

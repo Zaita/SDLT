@@ -191,14 +191,12 @@ class ControlWeightSet extends DataObject
     {
         foreach ($weights as $weight) {
             $risk = Risk::find_or_make_by_name($weight->risk);
-            $weightsDBObj = self::get_control_weight_set($risk->ID, $control->ID, $component->ID);
 
-            if (empty($weightsDBObj)) {
-                $weightsDBObj = self::create();
-                $weightsDBObj->RiskID = $risk->ID;
-                $weightsDBObj->SecurityControlID = $control->ID;
-                $weightsDBObj->SecurityComponentID = $component->ID;
-            }
+            //create new object
+            $weightsDBObj = self::create();
+            $weightsDBObj->RiskID = $risk->ID;
+            $weightsDBObj->SecurityControlID = $control->ID;
+            $weightsDBObj->SecurityComponentID = $component->ID;
 
             $weightsDBObj->Likelihood = $weight->likelihood ?? 0;
             $weightsDBObj->Impact = $weight->impact ?? 0;
