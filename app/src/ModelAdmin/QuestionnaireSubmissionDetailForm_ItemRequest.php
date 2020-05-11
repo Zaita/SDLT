@@ -44,11 +44,14 @@ class QuestionnaireSubmissionDetailForm_ItemRequest extends GridFieldDetailForm_
     public function ItemEditForm()
     {
         $form = parent::ItemEditForm();
-        $formActions = $form->Actions();
 
-        if ($actions = $this->record->getCMSActions()) {
-            foreach ($actions as $action) {
-                $formActions->push($action);
+        if ($form) {
+            $formActions = $form->Actions();
+
+            if ($actions = $this->record->getCMSActions()) {
+                foreach ($actions as $action) {
+                    $formActions->push($action);
+                }
             }
         }
 

@@ -1,67 +1,67 @@
 @import "../../variables";
 
 .QuestionForm {
-    background-color: $white;
-    width: 840px;
-    padding: 45px;
-    font-size: 14px;
-    color: $black;
+  background-color: $white;
+  width: 840px;
+  padding: 45px;
+  font-size: 14px;
+  color: $black;
 
-    .heading {
-        font-size: 24px;
-        font-weight: 300;
-        color: $blue;
-        margin-bottom: 1rem;
-        white-space: pre-line;
-    }
+  .heading {
+    font-size: 24px;
+    font-weight: 300;
+    color: $blue;
+    margin-bottom: 1rem;
+    white-space: pre-line;
+  }
 
-    .description {
-        margin-bottom: 1rem;
-    }
+  .description {
+    margin-bottom: 1rem;
+  }
 
-    td {
-        padding-bottom: 1rem;
-        vertical-align: top;
-    }
+  td {
+    padding-bottom: 1rem;
+    vertical-align: top;
+    max-width: 500px;
+  }
 
-    td.label {
-        width: auto;
-        padding-right: 1rem;
-        white-space: nowrap;
-    }
+  td.label {
+    width: auto;
+    padding-right: 1rem;
+  }
 
-    input, textarea {
-        @extend .rounded-0;
-        border: solid 1px #959595;
-        width: 355px;
-    }
+  input, textarea {
+    @extend .rounded-0;
+    border: solid 1px #959595;
+    width: 355px;
+  }
 
-    textarea {
-        height: 119px;
-    }
+  textarea {
+    height: 119px;
+  }
 
-    input.error, textarea.error {
-        border: solid 1px $red;
-    }
+  input.error, textarea.error {
+    border: solid 1px $red;
+  }
 
-    .actions {
-        margin-top: 1.5rem;
-        margin-bottom: 2rem;
-    }
+  .actions {
+    margin-top: 1.5rem;
+    margin-bottom: 2rem;
+  }
 
-    .message {
-        font-size: 16px;
-    }
+  .message {
+    font-size: 16px;
+  }
 
-    .DarkButton, .LightButton {
-        min-width: 84px;
-    }
+  .DarkButton, .LightButton {
+    min-width: 84px;
+  }
 
-    .radio,
-    .checkbox {
-      position: relative;
-      width: auto;
-      margin: 0 7px 7px 0;
-      top: 3px;
-    }
+  .radio,
+  .checkbox {
+    position: relative;
+    width: auto;
+    margin: 0 7px 7px 0;
+    top: 3px;
+  }
 }
