@@ -1,5 +1,5 @@
 "ID","ClassName","Label","Disabled","Type","DashboardID","SortOrder"
-"1","NZTA\\SDLT\\Model\\Pillar","SOFTWARE AS A SERVICE (SAAS)","0","software_as_service","0","0"
+"1","NZTA\\SDLT\\Model\\Pillar","SOFTWARE AS A SERVICE (SAAS)","0","software_as_service","0","0"
 "2","NZTA\\SDLT\\Model\\Pillar","PROOF OF CONCEPT  OR SOFTWARE TRIAL","0","proof_of_concept","0","0"
 "3","NZTA\\SDLT\\Model\\Pillar","PRODUCT, PROJECT OR SOLUTION","0","product_project_or_solution","0","0"
 "4","NZTA\\SDLT\\Model\\Pillar","FEATURE OR BUG FIX","0","feature_or_bug_fix","0","0"
@@ -8,4 +8,4 @@
 "9","NZTA\\SDLT\\Model\\Pillar","Solution Delivery or Initial Software Release","0","product_project_or_solution","1","4"
 "10","NZTA\\SDLT\\Model\\Pillar","Product Release, Technical Change or Bug Fix","0","feature_or_bug_fix","1","5"
 "11","NZTA\\SDLT\\Model\\Pillar","Test Pillar","0","proof_of_concept","0","0"
-"12","NZTA\\SDLT\\Model\\Pillar","Business Case Risk Assessment","1","risk_questionnaire","1","1"
+"12","NZTA\\SDLT\\Model\\Pillar","Risk Profile Analysis","1","risk_questionnaire","1","1"
