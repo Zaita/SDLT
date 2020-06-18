@@ -4,6 +4,7 @@ apt-get -y install libicu-dev wget git zip unzip
 docker-php-ext-install intl
 docker-php-ext-install mysqli
 docker-php-ext-install pdo_mysql
+echo install composer
 chmod +x /var/www/html/docker/install_composer.sh
 /var/www/html/docker/install_composer.sh
 php composer.phar install

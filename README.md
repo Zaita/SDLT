@@ -45,6 +45,26 @@ To run the suite ("dev" environments only - see the .env file example below):
 
 ### Setting up Azure Active Directory
 
-This application normally uses SilverStripe's default authentication system (username and password). It can optionally be configured to support Azure's Active Directory service or any provider that supports OAuth2. 
+This application normally uses SilverStripe's default authentication system (username and password). It can optionally be configured to support Azure's Active Directory service or any provider that supports OAuth2.
 
 Instructions for configuring SDLT to work with Azure and other OAuth providers can be found here: https://github.com/NZTA/SDLT/wiki/Installing-Active-Directory
+
+### Setting up project using docker
+Make sure you have docker and docker compose installed on your machine and then run the below commands.
+
+Clone the repository
+```
+git clone git@github.com:NZTA/SDLT.git
+```
+Create .env file
+```
+cp .env.example .env
+```
+Starts the containers in the background and leaves them running
+```
+docker-compose up -d
+```
+Displays log output from services.
+```
+docker logs -f sdlt_php
+```
