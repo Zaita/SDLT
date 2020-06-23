@@ -229,6 +229,33 @@ class SecurityRiskAssessmentCalculator
     }
 
     /**
+     * Get the IDs of the selected component from the CVA tasks
+     * This is used to construct a lookup table of weights with an associated
+     * risk
+     *
+     * @return array
+     */
+    public function getSelectedComponentIDsFromCVATask()
+    {
+        $selectedComponentsAndControls = $this->getCVATaskResult();
+
+        if (!$selectedComponentsAndControls) {
+            return [];
+        }
+
+        $componentIds = [];
+
+        foreach ($selectedComponentsAndControls as $component) {
+            if (isset($component['id']) &&
+                !in_array($component['id'], $componentIds)) {
+                $componentIds[] = $component['id'];
+            }
+        }
+
+        return $componentIds;
+    }
+
+    /**
      * Calculate the current likelihood score for this aspect (or risk, if no
      * aspects) We start with 100, then deduct the implemented weights. THEN we
      * add the penalties. The result will be the greater of 1 and that number.
@@ -473,6 +500,7 @@ class SecurityRiskAssessmentCalculator
         $out = [];
 
         $controlIds = $cvaTaskData ? $this->getSelectedControlIDsFromCVATask() : [];
+        $componentIds = $cvaTaskData ? $this->getSelectedComponentIDsFromCVATask() : [];
         $sraTask = $this->getSRATaskSubmission();
         $sraTaskID = $sraTask->Task()->ID;
         $productAspectList = $this->getProductAspectList();
@@ -506,21 +534,21 @@ class SecurityRiskAssessmentCalculator
                 $weights = ControlWeightSet::get()->filter(
                     [
                         'RiskID' => $risk['riskID'],
-                        'SecurityControlID' => $controlIds
+                        'SecurityControlID' => $controlIds,
+                        'SecurityComponentID' => $componentIds
                     ]
                 );
 
                 $controlRiskWeights = [];
 
                 foreach ($weights as $weight) {
-                    //index with selected control
-                    //add Impact, Likelihood, ImpactPenalty, LikelihoodPenalty
-                    $controlRiskWeights[$weight->SecurityControlID] = [
+                    // index with selected component and control (create multi multidimensional array)
+                    // add Impact, Likelihood, ImpactPenalty, LikelihoodPenalty
+                    $controlRiskWeights[$weight->SecurityComponentID][$weight->SecurityControlID] = [
                         'I' => $weight->Impact,
                         'L' => $weight->Likelihood,
                         'IP' => $weight->ImpactPenalty,
-                        'LP' => $weight->LikelihoodPenalty,
-                        'CID' => $weight->SecurityComponentID
+                        'LP' => $weight->LikelihoodPenalty
                     ];
                 }
 
@@ -590,6 +618,7 @@ class SecurityRiskAssessmentCalculator
         // we will traverse the same component of the cva task fot the other risk
         // that's we need to deep clone the $cvaComponent
         $cloneComponent = unserialize(serialize($cvaComponent)); // deep clone the component
+        $componentId = (string) $cloneComponent['id'];
         $filteredImplementedControls = [];
         $filteredRecommendedControls = [];
         $implementedControls = [];
@@ -600,22 +629,25 @@ class SecurityRiskAssessmentCalculator
             return $ctrl['selectedOption'] === SecurityControl::CTL_STATUS_1;
         });
 
-        $implementedControls = $this->updateControlsDetailAndAddWeightSet(
-            $filteredImplementedControls,
-            $controlRiskWeights,
-            $cloneComponent['id']
-        );
+        if ($filteredImplementedControls && isset($controlRiskWeights[$componentId])) {
+            $implementedControls = $this->updateControlsDetailAndAddWeightSet(
+                $filteredImplementedControls,
+                $controlRiskWeights[$componentId]
+            );
+        }
+
 
         // get all recommended Controls for the component
         $filteredRecommendedControls = array_filter($cloneComponent['controls'], function ($ctrl) {
             return $ctrl['selectedOption'] === SecurityControl::CTL_STATUS_2;
         });
 
-        $recommendedControls = $this->updateControlsDetailAndAddWeightSet(
-            $filteredRecommendedControls,
-            $controlRiskWeights,
-            $cloneComponent['id']
-        );
+        if ($filteredRecommendedControls && isset($controlRiskWeights[$componentId])) {
+            $recommendedControls = $this->updateControlsDetailAndAddWeightSet(
+                $filteredRecommendedControls,
+                $controlRiskWeights[$componentId]
+            );
+        }
 
         // update clone component details
         $cloneComponent['implementedControls'] = $implementedControls;
@@ -634,8 +666,6 @@ class SecurityRiskAssessmentCalculator
         $cloneComponent['sumOfRecommendedControlsImpactPenalty'] =
             $this->getControlsSum($recommendedControls, 'impactPenalty');
 
-        $cloneComponent['recommendedControls'] = $recommendedControls;
-
         // unset the additional information about the cva comopnent from the clone component
         unset($cloneComponent['controls']);
         unset($cloneComponent['jiraTicketLink']);
@@ -649,11 +679,10 @@ class SecurityRiskAssessmentCalculator
      *
      * @param array $filteredControls   implemeted or recommened controls list
      * @param array $controlRiskWeights list of control weight
-     * @param array $componentID        component id for lookup the control weight set
      *
      * @return array
      */
-    public function updateControlsDetailAndAddWeightSet($filteredControls, $controlRiskWeights, $componentID) : array
+    public function updateControlsDetailAndAddWeightSet($filteredControls, $controlRiskWeights) : array
     {
         $updatedControls = [];
 
@@ -664,8 +693,7 @@ class SecurityRiskAssessmentCalculator
 
         foreach ($cloneControls as $control) {
             $controlID = $control['id'];
-            if (isset($controlRiskWeights[$controlID]) &&
-                (int) $controlRiskWeights[$controlID]['CID'] === (int) $componentID) {
+            if (isset($controlRiskWeights[$controlID])) {
                 // set control weights set
                 $control['impact'] = $controlRiskWeights[$controlID]['I'];
                 $control['likelihood'] = $controlRiskWeights[$controlID]['L'];
