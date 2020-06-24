@@ -1,0 +1,143 @@
+{
+  "questionnaire": {
+    "name": "My test risk questionnaire",
+    "type": "RiskQuestionnaire",
+    "keyInformation": "<ol><li>Item 3</li><li>Item 2</li></ol>",
+    "riskCalculation": "Maximum",
+    "bypassApproval": true,
+    "doesSubmissionExpire": "Yes",
+    "expireAfterDays": 10,
+    "questions": [
+      {
+        "title": "Test input",
+        "question": "test question 1",
+        "description": "test description 1",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Test textbox",
+            "inputType": "text",
+            "required": true,
+            "minLength": 25,
+            "maxLength": 50,
+            "placeHolder": "Test textbox placeholder",
+            "isBusinessOwner": false,
+            "isProductName": true
+          },
+          {
+            "label": "Test textarea",
+            "inputType": "textarea",
+            "required": false,
+            "minLength": 0,
+            "maxLength": 100,
+            "placeHolder": "Test textarea placeholder"
+          }
+        ]
+      },
+      {
+        "title": "Test Action",
+        "question": "test question 2 for action",
+        "description": "test description 2",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Test goto 1",
+            "actionType": "goto",
+            "gotoQuestionTitle": "q4 test goto",
+            "tasks": [
+              {
+                "name": "Information Classification"
+              },
+              {
+                "name": "Penetration Test"
+              }
+            ]
+          },
+          {
+            "label": "Test goto 2",
+            "actionType": "goto",
+            "gotoQuestionTitle": "q3 test"
+          }
+        ]
+      },
+      {
+        "title": "q3 test",
+        "question": "test question 2 for action",
+        "description": "test description 2",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Test message",
+            "actionType": "message",
+            "message": "test message  1"
+          }
+        ]
+      },
+      {
+        "title": "q4 test goto",
+        "question": "test question 2 for action",
+        "description": "test description 2",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Test continue 2",
+            "actionType": "continue",
+            "message": "test message continue 2",
+            "risks": [
+              {
+                "name": "Information Disclosure",
+                "weight": 11
+              },
+              {
+                "name": "Information Loss",
+                "weight": 31
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Test radio que",
+        "question": "test radio question",
+        "description": "test radio description",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Test mutifield",
+            "inputType": "multiple-choice: single selection",
+            "required": false,
+            "placeHolder": "Test radio button",
+            "answerSelections": [
+              {
+                "label": "test radio 1",
+                "value": "test1",
+                "risks": [
+                  {
+                    "name": "Information Disclosure",
+                    "weight": 11
+                  },
+                  {
+                    "name": "Information Loss",
+                    "weight": 31
+                  }
+                ]
+              },
+              {
+                "label": "test radio 2",
+                "value": "test2"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "tasks": [
+      {
+        "name": "questionnaire level task test"
+      },
+      {
+        "name": "Penetration Test"
+      }
+    ]
+  }
+}

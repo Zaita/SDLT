@@ -18,9 +18,10 @@ query {
     Name
     Description
     Controls {
-        ID
-        Name
-        Description
+      ID
+      Name
+      Description
+      ImplementationGuidance
     }
   }
 }`;

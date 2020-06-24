@@ -54,7 +54,7 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
      */
     private static $db = [
         'Label' => 'Varchar(255)',
-        'InputType' => 'Enum("text, email, textarea,  product aspects, date, url, multiple-choice: single selection, multiple-choice: multiple selection", "text")',
+        'InputType' => 'Enum("text, email, textarea,  product aspects, date, release date, url, multiple-choice: single selection, multiple-choice: multiple selection", "text")',
         'Required' => 'Boolean',
         'MinLength' => 'Int',
         'MaxLength' => 'Int',
@@ -338,7 +338,6 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
 
         // traverse question's input fields
         foreach ($inputFields as $inputField) {
-
             // if input type isn't MultiChoiceAnswer (radio/checkbox)
             // then continue for next input field
             if (!isset($inputField['MultiChoiceAnswer']) ||
@@ -387,5 +386,69 @@ class AnswerInputField extends DataObject implements ScaffoldingProvider
         }
 
         return $selectedOptionRisks;
+    }
+
+    /**
+     * create input field from json import
+     *
+     * @param object $inputFieldJson input field json object
+     * @return DataObject
+     */
+    public static function create_record_from_json($inputFieldJson)
+    {
+        $obj = self::create();
+
+        $obj->Label = $inputFieldJson->label;
+        $obj->InputType = $inputFieldJson->inputType ?? 'text';
+        $obj->Required = $inputFieldJson->required ?? false;
+        $obj->MinLength = $inputFieldJson->minLength ?? 0;
+        $obj->MaxLength = $inputFieldJson->maxLength ?? 4096;
+        $obj->PlaceHolder = $inputFieldJson->placeHolder ?? '';
+        $obj->IsBusinessOwner = $inputFieldJson->isBusinessOwner ?? false;
+        $obj->IsProductName = $inputFieldJson->isProductName ?? false;
+        $obj->MultiChoiceSingleAnswerDefault = $inputFieldJson->multiChoiceSingleAnswerDefault ?? '';
+        $obj->MultiChoiceMultipleAnswerDefault = $inputFieldJson->multiChoiceMultipleAnswerDefault ?? '';
+
+        // if field type is multi select (radio or checkobox) then add option field
+        if (property_exists($inputFieldJson, "answerSelections") &&
+            !empty($selections = $inputFieldJson->answerSelections)) {
+            foreach ($selections as $selection) {
+                $dbSelection = MultiChoiceAnswerSelection::create_record_from_json($selection);
+                $obj->AnswerSelections()->add($dbSelection);
+            }
+        }
+
+        $obj->write();
+
+        return $obj;
+    }
+
+    /**
+     * export inputField
+     *
+     * @param object $inputField inputField
+     * @return array
+     */
+    public static function export_record($inputField)
+    {
+        $obj['label'] = $inputField->Label ?? '';
+        $obj['inputType'] =  $inputField->InputType;
+        $obj['required'] = (boolean) $inputField->Required;
+        $obj['minLength'] = $inputField->MinLength;
+        $obj['maxLength'] = $inputField->MaxLength;
+        $obj['placeHolder'] = $inputField->PlaceHolder?? '';
+        $obj['isBusinessOwner'] = (boolean) $inputField->IsBusinessOwner;
+        $obj['isProductName'] = (boolean) $inputField->IsProductName;
+
+        if ($inputField->isMultipleChoice()) {
+            $obj['multiChoiceSingleAnswerDefault'] = $inputField->MultiChoiceSingleAnswerDefault ?? '';
+            $obj['multiChoiceMultipleAnswerDefault'] = $inputField->MultiChoiceMultipleAnswerDefault ?? '';
+
+            foreach ($inputField->AnswerSelections() as $selection) {
+                $obj['answerSelections'][] =  MultiChoiceAnswerSelection::export_record($selection);
+            }
+        }
+
+        return $obj;
     }
 }

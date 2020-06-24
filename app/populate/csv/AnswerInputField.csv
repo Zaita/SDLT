@@ -1,162 +1,171 @@
-ID,ClassName,Label,InputType,Required,MinLength,PlaceHolder,QuestionID,SortOrder,IsProductOwner,IsBusinessOwner,IsProductName
-1,NZTA\SDLT\Model\AnswerInputField,Product Name,text,1,3,Product Name,1,0,0,0,1
-2,NZTA\SDLT\Model\AnswerInputField,Full Name,text,1,0,,6,0,0,0,0
-3,NZTA\SDLT\Model\AnswerInputField,Role at Agency,text,1,0,,6,0,0,0,0
-4,NZTA\SDLT\Model\AnswerInputField,Email,email,1,12,person@example.govt.nz,6,0,0,1,0
-5,NZTA\SDLT\Model\AnswerInputField,Continue,text,1,0,,0,0,0,0,0
-6,NZTA\SDLT\Model\AnswerInputField,Time-Span,text,1,0,2 weeks,18,0,0,0,0
-7,NZTA\SDLT\Model\AnswerInputField,Start Date,date,1,0,DD-MM-YYYY,19,0,0,0,0
-8,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,Person A - Business Analyst,20,0,0,0,0
-9,NZTA\SDLT\Model\AnswerInputField,yes,text,1,1,1234,21,0,0,0,0
-10,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,Ensure you describe what the product does and what features we want to trial,7,0,0,0,0
-11,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,8,0,0,0,0
-12,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,20,,13,0,0,0,0
-13,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,20,,14,0,0,0,0
-14,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,10,,15,0,0,0,0
-15,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,10,,17,0,0,0,0
-16,NZTA\SDLT\Model\AnswerInputField,Product URL,url,1,6,https://www.product.com,22,2,0,0,0
-17,NZTA\SDLT\Model\AnswerInputField,Product Name,text,1,3,The Product,22,1,0,0,1
-18,NZTA\SDLT\Model\AnswerInputField,Contact Email,email,1,6,person@product.com,22,3,0,0,0
-19,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,0,0,0,0,0
-20,NZTA\SDLT\Model\AnswerInputField,Full Name,text,1,0,,25,0,0,0,0
-21,NZTA\SDLT\Model\AnswerInputField,Role at Agency,text,1,0,,25,0,0,0,0
-22,NZTA\SDLT\Model\AnswerInputField,Email,text,1,0,,25,0,0,0,0
-23,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,26,0,0,0,0
-24,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,27,0,0,0,0
-25,NZTA\SDLT\Model\AnswerInputField,Full Name,text,1,0,,28,0,0,0,0
-26,NZTA\SDLT\Model\AnswerInputField,Role at Agency,text,1,0,,28,0,0,0,0
-27,NZTA\SDLT\Model\AnswerInputField,Email,email,1,12,person@example.govt.nz,28,0,0,1,0
-28,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,31,0,0,0,0
-29,NZTA\SDLT\Model\AnswerInputField,Product Name,text,1,0,,32,0,0,0,1
-30,NZTA\SDLT\Model\AnswerInputField,Project/Product Manager,text,1,0,,32,0,0,0,0
-31,NZTA\SDLT\Model\AnswerInputField,Locations,textarea,1,0,,33,0,0,0,0
-32,NZTA\SDLT\Model\AnswerInputField,Full Name,text,1,0,,34,0,0,0,0
-33,NZTA\SDLT\Model\AnswerInputField,Role at the Agency,text,1,0,,34,0,0,0,0
-34,NZTA\SDLT\Model\AnswerInputField,Email,email,1,0,person@example.govt.nz,34,0,0,1,0
-35,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,38,0,0,0,0
-36,NZTA\SDLT\Model\AnswerInputField,Users,textarea,1,0,,39,0,0,0,0
-37,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,40,0,0,0,0
-38,NZTA\SDLT\Model\AnswerInputField,Link,url,0,0,,36,0,0,0,0
-39,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,48,0,0,0,0
-40,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,54,0,0,0,0
-41,NZTA\SDLT\Model\AnswerInputField,Description,textarea,0,0,,56,0,0,0,0
-42,NZTA\SDLT\Model\AnswerInputField,Full Name,text,1,0,,59,0,0,0,0
-43,NZTA\SDLT\Model\AnswerInputField,Role at Agency,text,1,0,,59,0,0,0,0
-44,NZTA\SDLT\Model\AnswerInputField,Email,email,1,12,person@example.govt.nz,59,0,0,1,0
-45,NZTA\SDLT\Model\AnswerInputField,Description,text,0,0,,62,0,0,0,0
-46,NZTA\SDLT\Model\AnswerInputField,Locations,textarea,1,0,,63,0,0,0,0
-47,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,69,0,0,0,0
-48,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,70,0,0,0,0
-49,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,71,0,0,0,0
-50,NZTA\SDLT\Model\AnswerInputField,Product URL,url,1,6,https://www.product.com,1,0,0,0,0
-51,NZTA\SDLT\Model\AnswerInputField,Contact Email,email,1,6,person@product.com,1,0,1,0,0
-52,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,System A -> HTTP -> System B,12,0,0,0,0
-53,NZTA\SDLT\Model\AnswerInputField,sfsfs,text,0,0,,72,0,0,0,0
-54,NZTA\SDLT\Model\AnswerInputField,dsdsdsd,text,0,0,,73,0,0,0,0
-55,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,10,Description of Data,74,0,0,0,0
-56,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,76,0,0,0,0
-57,NZTA\SDLT\Model\AnswerInputField,Your Age,text,1,0,,75,0,0,0,0
-58,NZTA\SDLT\Model\AnswerInputField,Your Gender,text,1,0,,81,0,0,0,0
-59,NZTA\SDLT\Model\AnswerInputField,Your Role,text,1,0,,82,0,0,0,0
-60,NZTA\SDLT\Model\AnswerInputField,Vehicle type,text,1,0,,83,0,0,0,0
-61,NZTA\SDLT\Model\AnswerInputField, Age of vehicle,text,1,0,,85,0,0,0,0
-62,NZTA\SDLT\Model\AnswerInputField,Enter name,text,1,0,,86,0,0,0,0
-63,NZTA\SDLT\Model\AnswerInputField,Enter Address,text,1,0,,87,0,0,0,0
-64,NZTA\SDLT\Model\AnswerInputField,Enter Phone number,text,1,0,,88,0,0,0,0
-65,NZTA\SDLT\Model\AnswerInputField,Vehicle colour,text,1,0,,84,0,0,0,0
-68,NZTA\SDLT\Model\AnswerInputField,URL,url,1,0,,95,0,0,0,0
-69,NZTA\SDLT\Model\AnswerInputField,URL,url,1,0,,96,0,0,0,0
-70,NZTA\SDLT\Model\AnswerInputField,Address,text,1,0,,103,0,0,0,0
-71,NZTA\SDLT\Model\AnswerInputField,Countries,textarea,1,0,,104,0,0,0,0
-72,NZTA\SDLT\Model\AnswerInputField,Countries,textarea,1,0,"Same as countries where data is transmitted, received or stored.",105,0,0,0,0
-73,NZTA\SDLT\Model\AnswerInputField,Link,url,1,0,,110,0,0,0,0
-74,NZTA\SDLT\Model\AnswerInputField,Link,url,1,0,,112,0,0,0,0
-75,NZTA\SDLT\Model\AnswerInputField,Link,url,1,0,,114,0,0,0,0
-76,NZTA\SDLT\Model\AnswerInputField,Link,url,1,0,,123,0,0,0,0
-77,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,129,0,0,0,0
-78,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,130,0,0,0,0
-79,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,131,0,0,0,0
-80,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,132,0,0,0,0
-81,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,133,0,0,0,0
-82,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,134,0,0,0,0
-83,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,135,0,0,0,0
-84,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,136,0,0,0,0
-85,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,138,0,0,0,0
-86,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,141,0,0,0,0
-87,NZTA\SDLT\Model\AnswerInputField,Collection,textarea,1,0,,129,0,0,0,0
-88,NZTA\SDLT\Model\AnswerInputField,Answer Field,textarea,1,0,,143,0,0,0,0
-89,NZTA\SDLT\Model\AnswerInputField,Response,textarea,1,2,,144,0,0,0,0
-90,NZTA\SDLT\Model\AnswerInputField,Response,textarea,1,2,,145,0,0,0,0
-91,NZTA\SDLT\Model\AnswerInputField,Response,textarea,1,2,,146,0,0,0,0
-92,NZTA\SDLT\Model\AnswerInputField,Response,textarea,1,2,,147,0,0,0,0
-93,NZTA\SDLT\Model\AnswerInputField,Response,textarea,1,2,,148,0,0,0,0
-94,NZTA\SDLT\Model\AnswerInputField,Response,textarea,1,2,,149,0,0,0,0
-95,NZTA\SDLT\Model\AnswerInputField,Response,textarea,1,2,,150,0,0,0,0
-96,NZTA\SDLT\Model\AnswerInputField,Response,textarea,1,2,,151,0,0,0,0
-97,NZTA\SDLT\Model\AnswerInputField,Response,textarea,1,2,,152,0,0,0,0
-98,NZTA\SDLT\Model\AnswerInputField,Response,textarea,1,2,,153,0,0,0,0
-99,NZTA\SDLT\Model\AnswerInputField,Response,textarea,1,2,,154,0,0,0,0
-100,NZTA\SDLT\Model\AnswerInputField,Response,textarea,1,2,,155,0,0,0,0
-101,NZTA\SDLT\Model\AnswerInputField,Response,textarea,1,2,,156,0,0,0,0
-102,NZTA\SDLT\Model\AnswerInputField,Response,textarea,1,2,,157,0,0,0,0
-103,NZTA\SDLT\Model\AnswerInputField,Responses,textarea,1,2,,158,0,0,0,0
-104,NZTA\SDLT\Model\AnswerInputField,Response,textarea,1,2,,159,0,0,0,0
-105,NZTA\SDLT\Model\AnswerInputField,Response,textarea,1,2,,160,0,0,0,0
-106,NZTA\SDLT\Model\AnswerInputField,Link,url,1,0,,168,0,0,0,0
-107,NZTA\SDLT\Model\AnswerInputField,Link,url,1,0,,171,0,0,0,0
-108,NZTA\SDLT\Model\AnswerInputField,Information,textarea,0,0,,176,0,0,0,0
-109,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,20,,179,0,0,0,0
-110,NZTA\SDLT\Model\AnswerInputField,Information,textarea,0,0,,181,0,0,0,0
-111,NZTA\SDLT\Model\AnswerInputField,Link,url,1,8,,183,0,0,0,0
-112,NZTA\SDLT\Model\AnswerInputField,Link,url,1,0,,184,0,0,0,0
-113,NZTA\SDLT\Model\AnswerInputField,Link,url,1,6,,185,0,0,0,0
-114,NZTA\SDLT\Model\AnswerInputField,Classification,text,1,0,,187,0,0,0,0
-115,NZTA\SDLT\Model\AnswerInputField,Information,textarea,0,0,,190,0,0,0,0
-116,NZTA\SDLT\Model\AnswerInputField,Product Name,text,1,0,,191,0,0,0,1
-117,NZTA\SDLT\Model\AnswerInputField,Project/Product Manager,text,1,0,,191,0,0,0,0
-118,NZTA\SDLT\Model\AnswerInputField,Link,url,0,0,,0,0,0,0,0
-119,NZTA\SDLT\Model\AnswerInputField,Classification,text,1,0,,197,0,0,0,0
-120,NZTA\SDLT\Model\AnswerInputField,Locations,textarea,1,0,,49,0,0,0,0
-121,NZTA\SDLT\Model\AnswerInputField,Users,textarea,1,0,,202,0,0,0,0
-122,NZTA\SDLT\Model\AnswerInputField,Company Information,textarea,1,0,,227,0,0,0,0
-123,NZTA\SDLT\Model\AnswerInputField,Access,textarea,1,0,,228,0,0,0,0
-124,NZTA\SDLT\Model\AnswerInputField,Process,textarea,1,0,,232,0,0,0,0
-125,NZTA\SDLT\Model\AnswerInputField,Link,url,1,6,,237,0,0,0,0
-126,NZTA\SDLT\Model\AnswerInputField,Name,text,1,0,Full Name,239,0,0,0,0
-127,NZTA\SDLT\Model\AnswerInputField,Role,text,1,0,Person's Role,239,0,0,0,0
-128,NZTA\SDLT\Model\AnswerInputField,Email,email,1,0,person@your_organisation.com,239,0,0,0,0
-129,NZTA\SDLT\Model\AnswerInputField,Phone DDI,text,0,0,+64 0 000 0000,239,0,0,0,0
-130,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,288,0,0,0,0
-131,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,290,0,0,0,0
-132,NZTA\SDLT\Model\AnswerInputField,Process,textarea,1,0,,291,0,0,0,0
-133,NZTA\SDLT\Model\AnswerInputField,Method,textarea,0,0,,304,0,0,0,0
-134,NZTA\SDLT\Model\AnswerInputField,Frequency,text,0,0,,306,0,0,0,0
-135,NZTA\SDLT\Model\AnswerInputField,City,text,1,0,,103,0,0,0,0
-136,NZTA\SDLT\Model\AnswerInputField,Country,text,1,0,,103,0,0,0,0
-137,NZTA\SDLT\Model\AnswerInputField,Link,url,1,6,,325,0,0,0,0
-138,NZTA\SDLT\Model\AnswerInputField,Name,text,1,0,,333,0,0,0,0
-139,NZTA\SDLT\Model\AnswerInputField,Role,text,1,0,,333,0,0,0,0
-140,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,334,0,0,0,0
-141,NZTA\SDLT\Model\AnswerInputField,Classification,text,1,0,,335,0,0,0,0
-142,NZTA\SDLT\Model\AnswerInputField,Users,textarea,1,0,,338,0,0,0,0
-143,NZTA\SDLT\Model\AnswerInputField,Permissions,textarea,1,0,,339,0,0,0,0
-144,NZTA\SDLT\Model\AnswerInputField,Legislations,textarea,1,0,,340,0,0,0,0
-145,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,341,0,0,0,0
-146,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,342,0,0,0,0
-147,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,343,0,0,0,0
-148,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,345,0,0,0,0
-149,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,346,0,0,0,0
-150,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,347,0,0,0,0
-151,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,348,0,0,0,0
-152,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,355,0,0,0,0
-153,NZTA\SDLT\Model\AnswerInputField,Description,textarea,1,0,,377,0,0,0,0
-154,NZTA\SDLT\Model\AnswerInputField,URL,url,0,0,,396,0,0,0,0
-155,NZTA\SDLT\Model\AnswerInputField,Link,url,1,0,,399,0,0,0,0
-156,NZTA\SDLT\Model\AnswerInputField,Link,url,1,0,,407,0,0,0,0
-157,NZTA\SDLT\Model\AnswerInputField,Link,url,1,0,,409,0,0,0,0
-158,NZTA\SDLT\Model\AnswerInputField,Link,url,1,0,,415,0,0,0,0
-159,NZTA\SDLT\Model\AnswerInputField,Link,url,1,0,,416,0,0,0,0
-160,NZTA\SDLT\Model\AnswerInputField,Date,date,1,0,,417,0,0,0,0
-161,NZTA\SDLT\Model\AnswerInputField,Date,date,1,0,,418,0,0,0,0
-162,NZTA\SDLT\Model\AnswerInputField,Date,date,1,0,,419,0,0,0,0
-163,NZTA\SDLT\Model\AnswerInputField,URL,url,1,0,,427,0,0,0,0
+"ID","ClassName","Label","InputType","Required","MinLength","PlaceHolder","QuestionID","SortOrder","IsProductOwner","IsBusinessOwner","IsProductName"
+"1","NZTA\\SDLT\\Model\\AnswerInputField","Product Name","text","1","3","Product Name","1","0","0","0","1"
+"2","NZTA\\SDLT\\Model\\AnswerInputField","Full Name","text","1","0","","6","0","0","0","0"
+"3","NZTA\\SDLT\\Model\\AnswerInputField","Role at Agency","text","1","0","","6","0","0","0","0"
+"4","NZTA\\SDLT\\Model\\AnswerInputField","Email","email","1","12","person@example.govt.nz","6","0","0","1","0"
+"5","NZTA\\SDLT\\Model\\AnswerInputField","Continue","text","1","0","","0","0","0","0","0"
+"6","NZTA\\SDLT\\Model\\AnswerInputField","Time-Span","text","1","0","2 weeks","18","0","0","0","0"
+"7","NZTA\\SDLT\\Model\\AnswerInputField","Start Date","date","1","0","DD-MM-YYYY","19","0","0","0","0"
+"8","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","Person A - Business Analyst","20","0","0","0","0"
+"9","NZTA\\SDLT\\Model\\AnswerInputField","yes","text","1","1","1234","21","0","0","0","0"
+"10","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","Ensure you describe what the product does and what features we want to trial","7","0","0","0","0"
+"11","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","8","0","0","0","0"
+"12","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","20","","13","0","0","0","0"
+"13","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","20","","14","0","0","0","0"
+"14","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","10","","15","0","0","0","0"
+"15","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","10","","17","0","0","0","0"
+"16","NZTA\\SDLT\\Model\\AnswerInputField","Product URL","url","1","6","https://www.product.com","22","2","0","0","0"
+"17","NZTA\\SDLT\\Model\\AnswerInputField","Product Name","text","1","3","The Product","22","1","0","0","1"
+"18","NZTA\\SDLT\\Model\\AnswerInputField","Contact Email","email","1","6","person@product.com","22","3","0","0","0"
+"19","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","0","0","0","0","0"
+"20","NZTA\\SDLT\\Model\\AnswerInputField","Full Name","text","1","0","","25","0","0","0","0"
+"21","NZTA\\SDLT\\Model\\AnswerInputField","Role at Agency","text","1","0","","25","0","0","0","0"
+"22","NZTA\\SDLT\\Model\\AnswerInputField","Email","text","1","0","","25","0","0","0","0"
+"23","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","26","0","0","0","0"
+"24","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","27","0","0","0","0"
+"25","NZTA\\SDLT\\Model\\AnswerInputField","Full Name","text","1","0","","28","0","0","0","0"
+"26","NZTA\\SDLT\\Model\\AnswerInputField","Role at Agency","text","1","0","","28","0","0","0","0"
+"27","NZTA\\SDLT\\Model\\AnswerInputField","Email","email","1","12","person@example.govt.nz","28","0","0","1","0"
+"28","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","31","0","0","0","0"
+"29","NZTA\\SDLT\\Model\\AnswerInputField","Product Name","text","1","0","","32","0","0","0","1"
+"30","NZTA\\SDLT\\Model\\AnswerInputField","Project/Product Manager","text","1","0","","32","0","0","0","0"
+"31","NZTA\\SDLT\\Model\\AnswerInputField","Locations","textarea","1","0","","33","0","0","0","0"
+"32","NZTA\\SDLT\\Model\\AnswerInputField","Full Name","text","1","0","","34","0","0","0","0"
+"33","NZTA\\SDLT\\Model\\AnswerInputField","Role at the Agency","text","1","0","","34","0","0","0","0"
+"34","NZTA\\SDLT\\Model\\AnswerInputField","Email","email","1","0","person@example.govt.nz","34","0","0","1","0"
+"35","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","38","0","0","0","0"
+"36","NZTA\\SDLT\\Model\\AnswerInputField","Users","textarea","1","0","","39","0","0","0","0"
+"37","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","40","0","0","0","0"
+"38","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","36","0","0","0","0"
+"39","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","48","0","0","0","0"
+"40","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","54","0","0","0","0"
+"41","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","0","0","","56","0","0","0","0"
+"42","NZTA\\SDLT\\Model\\AnswerInputField","Full Name","text","1","0","","59","0","0","0","0"
+"43","NZTA\\SDLT\\Model\\AnswerInputField","Role at Agency","text","1","0","","59","0","0","0","0"
+"44","NZTA\\SDLT\\Model\\AnswerInputField","Email","email","1","12","person@example.govt.nz","59","0","0","1","0"
+"45","NZTA\\SDLT\\Model\\AnswerInputField","Description","text","0","0","","62","0","0","0","0"
+"46","NZTA\\SDLT\\Model\\AnswerInputField","Locations","textarea","1","0","","63","0","0","0","0"
+"47","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","69","0","0","0","0"
+"48","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","70","0","0","0","0"
+"49","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","71","0","0","0","0"
+"50","NZTA\\SDLT\\Model\\AnswerInputField","Product URL","url","1","6","https://www.product.com","1","0","0","0","0"
+"51","NZTA\\SDLT\\Model\\AnswerInputField","Contact Email","email","1","6","person@product.com","1","0","1","0","0"
+"52","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","System A -> HTTP -> System B","12","0","0","0","0"
+"53","NZTA\\SDLT\\Model\\AnswerInputField","sfsfs","text","0","0","","72","0","0","0","0"
+"54","NZTA\\SDLT\\Model\\AnswerInputField","dsdsdsd","text","0","0","","73","0","0","0","0"
+"55","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","10","Description of Data","74","0","0","0","0"
+"56","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","76","0","0","0","0"
+"57","NZTA\\SDLT\\Model\\AnswerInputField","Your Age","text","1","0","","75","0","0","0","0"
+"58","NZTA\\SDLT\\Model\\AnswerInputField","Your Gender","text","1","0","","81","0","0","0","0"
+"59","NZTA\\SDLT\\Model\\AnswerInputField","Your Role","text","1","0","","82","0","0","0","0"
+"60","NZTA\\SDLT\\Model\\AnswerInputField","Vehicle type","text","1","0","","83","0","0","0","0"
+"61","NZTA\\SDLT\\Model\\AnswerInputField"," Age of vehicle","text","1","0","","85","0","0","0","0"
+"62","NZTA\\SDLT\\Model\\AnswerInputField","Enter name","text","1","0","","86","0","0","0","0"
+"63","NZTA\\SDLT\\Model\\AnswerInputField","Enter Address","text","1","0","","87","0","0","0","0"
+"64","NZTA\\SDLT\\Model\\AnswerInputField","Enter Phone number","text","1","0","","88","0","0","0","0"
+"65","NZTA\\SDLT\\Model\\AnswerInputField","Vehicle colour","text","1","0","","84","0","0","0","0"
+"68","NZTA\\SDLT\\Model\\AnswerInputField","URL","url","1","0","","95","0","0","0","0"
+"69","NZTA\\SDLT\\Model\\AnswerInputField","URL","url","1","0","","96","0","0","0","0"
+"70","NZTA\\SDLT\\Model\\AnswerInputField","Address","text","1","0","","103","0","0","0","0"
+"71","NZTA\\SDLT\\Model\\AnswerInputField","Countries","textarea","1","0","","104","0","0","0","0"
+"72","NZTA\\SDLT\\Model\\AnswerInputField","Countries","textarea","1","0","Same as countries where data is transmitted, received or stored.","105","0","0","0","0"
+"73","NZTA\\SDLT\\Model\\AnswerInputField","Link","url","1","0","","110","0","0","0","0"
+"74","NZTA\\SDLT\\Model\\AnswerInputField","Link","url","1","0","","112","0","0","0","0"
+"75","NZTA\\SDLT\\Model\\AnswerInputField","Link","url","1","0","","114","0","0","0","0"
+"76","NZTA\\SDLT\\Model\\AnswerInputField","Link","url","1","0","","123","0","0","0","0"
+"77","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","129","0","0","0","0"
+"78","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","130","0","0","0","0"
+"79","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","131","0","0","0","0"
+"80","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","132","0","0","0","0"
+"81","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","133","0","0","0","0"
+"82","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","134","0","0","0","0"
+"83","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","135","0","0","0","0"
+"84","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","136","0","0","0","0"
+"85","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","138","0","0","0","0"
+"86","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","141","0","0","0","0"
+"87","NZTA\\SDLT\\Model\\AnswerInputField","Collection","textarea","1","0","","129","0","0","0","0"
+"88","NZTA\\SDLT\\Model\\AnswerInputField","Answer Field","textarea","1","0","","143","0","0","0","0"
+"89","NZTA\\SDLT\\Model\\AnswerInputField","Response","textarea","1","2","","144","0","0","0","0"
+"90","NZTA\\SDLT\\Model\\AnswerInputField","Response","textarea","1","2","","145","0","0","0","0"
+"91","NZTA\\SDLT\\Model\\AnswerInputField","Response","textarea","1","2","","146","0","0","0","0"
+"92","NZTA\\SDLT\\Model\\AnswerInputField","Response","textarea","1","2","","147","0","0","0","0"
+"93","NZTA\\SDLT\\Model\\AnswerInputField","Response","textarea","1","2","","148","0","0","0","0"
+"94","NZTA\\SDLT\\Model\\AnswerInputField","Response","textarea","1","2","","149","0","0","0","0"
+"95","NZTA\\SDLT\\Model\\AnswerInputField","Response","textarea","1","2","","150","0","0","0","0"
+"96","NZTA\\SDLT\\Model\\AnswerInputField","Response","textarea","1","2","","151","0","0","0","0"
+"97","NZTA\\SDLT\\Model\\AnswerInputField","Response","textarea","1","2","","152","0","0","0","0"
+"98","NZTA\\SDLT\\Model\\AnswerInputField","Response","textarea","1","2","","153","0","0","0","0"
+"99","NZTA\\SDLT\\Model\\AnswerInputField","Response","textarea","1","2","","154","0","0","0","0"
+"100","NZTA\\SDLT\\Model\\AnswerInputField","Response","textarea","1","2","","155","0","0","0","0"
+"101","NZTA\\SDLT\\Model\\AnswerInputField","Response","textarea","1","2","","156","0","0","0","0"
+"102","NZTA\\SDLT\\Model\\AnswerInputField","Response","textarea","1","2","","157","0","0","0","0"
+"103","NZTA\\SDLT\\Model\\AnswerInputField","Responses","textarea","1","2","","158","0","0","0","0"
+"104","NZTA\\SDLT\\Model\\AnswerInputField","Response","textarea","1","2","","159","0","0","0","0"
+"105","NZTA\\SDLT\\Model\\AnswerInputField","Response","textarea","1","2","","160","0","0","0","0"
+"106","NZTA\\SDLT\\Model\\AnswerInputField","Link","url","1","0","","168","0","0","0","0"
+"107","NZTA\\SDLT\\Model\\AnswerInputField","Link","url","1","0","","171","0","0","0","0"
+"108","NZTA\\SDLT\\Model\\AnswerInputField","Information","textarea","0","0","","176","0","0","0","0"
+"109","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","20","","179","0","0","0","0"
+"110","NZTA\\SDLT\\Model\\AnswerInputField","Information","textarea","0","0","","181","0","0","0","0"
+"111","NZTA\\SDLT\\Model\\AnswerInputField","Link","url","1","8","","183","0","0","0","0"
+"112","NZTA\\SDLT\\Model\\AnswerInputField","Link","url","1","0","","184","0","0","0","0"
+"113","NZTA\\SDLT\\Model\\AnswerInputField","Link","url","1","6","","185","0","0","0","0"
+"114","NZTA\\SDLT\\Model\\AnswerInputField","Classification","text","1","0","","187","0","0","0","0"
+"115","NZTA\\SDLT\\Model\\AnswerInputField","Information","textarea","0","0","","190","0","0","0","0"
+"116","NZTA\\SDLT\\Model\\AnswerInputField","Product Name","text","1","0","","191","0","0","0","1"
+"117","NZTA\\SDLT\\Model\\AnswerInputField","Project/Product Manager","text","1","0","","191","0","0","0","0"
+"118","NZTA\\SDLT\\Model\\AnswerInputField","Link","url","0","0","","0","0","0","0","0"
+"119","NZTA\\SDLT\\Model\\AnswerInputField","Classification","text","1","0","","197","0","0","0","0"
+"120","NZTA\\SDLT\\Model\\AnswerInputField","Locations","textarea","1","0","","49","0","0","0","0"
+"121","NZTA\\SDLT\\Model\\AnswerInputField","Users","textarea","1","0","","202","0","0","0","0"
+"122","NZTA\\SDLT\\Model\\AnswerInputField","Company Information","textarea","1","0","","227","0","0","0","0"
+"123","NZTA\\SDLT\\Model\\AnswerInputField","Access","textarea","1","0","","228","0","0","0","0"
+"124","NZTA\\SDLT\\Model\\AnswerInputField","Process","textarea","1","0","","232","0","0","0","0"
+"125","NZTA\\SDLT\\Model\\AnswerInputField","Link","url","1","6","","237","0","0","0","0"
+"126","NZTA\\SDLT\\Model\\AnswerInputField","Name","text","1","0","Full Name","239","0","0","0","0"
+"127","NZTA\\SDLT\\Model\\AnswerInputField","Role","text","1","0","Person's Role","239","0","0","0","0"
+"128","NZTA\\SDLT\\Model\\AnswerInputField","Email","email","1","0","person@your_organisation.com","239","0","0","0","0"
+"129","NZTA\\SDLT\\Model\\AnswerInputField","Phone DDI","text","0","0","+64 0 000 0000","239","0","0","0","0"
+"130","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","288","0","0","0","0"
+"131","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","290","0","0","0","0"
+"132","NZTA\\SDLT\\Model\\AnswerInputField","Process","textarea","1","0","","291","0","0","0","0"
+"133","NZTA\\SDLT\\Model\\AnswerInputField","Method","textarea","0","0","","304","0","0","0","0"
+"134","NZTA\\SDLT\\Model\\AnswerInputField","Frequency","text","0","0","","306","0","0","0","0"
+"135","NZTA\\SDLT\\Model\\AnswerInputField","City","text","1","0","","103","0","0","0","0"
+"136","NZTA\\SDLT\\Model\\AnswerInputField","Country","text","1","0","","103","0","0","0","0"
+"137","NZTA\\SDLT\\Model\\AnswerInputField","Link","url","1","6","","325","0","0","0","0"
+"138","NZTA\\SDLT\\Model\\AnswerInputField","Name","text","1","0","","333","0","0","0","0"
+"139","NZTA\\SDLT\\Model\\AnswerInputField","Role","text","1","0","","333","0","0","0","0"
+"140","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","334","0","0","0","0"
+"141","NZTA\\SDLT\\Model\\AnswerInputField","Classification","text","1","0","","335","0","0","0","0"
+"142","NZTA\\SDLT\\Model\\AnswerInputField","Users","textarea","1","0","","338","0","0","0","0"
+"143","NZTA\\SDLT\\Model\\AnswerInputField","Permissions","textarea","1","0","","339","0","0","0","0"
+"144","NZTA\\SDLT\\Model\\AnswerInputField","Legislations","textarea","1","0","","340","0","0","0","0"
+"145","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","341","0","0","0","0"
+"146","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","342","0","0","0","0"
+"147","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","343","0","0","0","0"
+"148","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","345","0","0","0","0"
+"149","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","346","0","0","0","0"
+"150","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","347","0","0","0","0"
+"151","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","348","0","0","0","0"
+"152","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","355","0","0","0","0"
+"153","NZTA\\SDLT\\Model\\AnswerInputField","Description","textarea","1","0","","377","0","0","0","0"
+"154","NZTA\\SDLT\\Model\\AnswerInputField","URL","url","0","0","","396","0","0","0","0"
+"155","NZTA\\SDLT\\Model\\AnswerInputField","Link","url","1","0","","399","0","0","0","0"
+"156","NZTA\\SDLT\\Model\\AnswerInputField","Link","url","1","0","","407","0","0","0","0"
+"157","NZTA\\SDLT\\Model\\AnswerInputField","Link","url","1","0","","409","0","0","0","0"
+"158","NZTA\\SDLT\\Model\\AnswerInputField","Link","url","1","0","","415","0","0","0","0"
+"159","NZTA\\SDLT\\Model\\AnswerInputField","Link","url","1","0","","416","0","0","0","0"
+"160","NZTA\\SDLT\\Model\\AnswerInputField","Date","date","1","0","","417","0","0","0","0"
+"161","NZTA\\SDLT\\Model\\AnswerInputField","Date","date","1","0","","418","0","0","0","0"
+"162","NZTA\\SDLT\\Model\\AnswerInputField","Date","date","1","0","","419","0","0","0","0"
+"163","NZTA\\SDLT\\Model\\AnswerInputField","URL","url","1","0","","427","0","0","0","0"
+"164","NZTA\\SDLT\\Model\\AnswerInputField","Project Name","text","1","0","","439","0","0","0","1"
+"165","NZTA\\SDLT\\Model\\AnswerInputField","Business Owner","text","1","0","","439","0","0","0","0"
+"166","NZTA\\SDLT\\Model\\AnswerInputField","Business Owner Email","email","0","0","","439","0","0","1","0"
+"167","NZTA\\SDLT\\Model\\AnswerInputField","Risk","multiple-choice: single selection","1","0","","440","0","0","0","0"
+"168","NZTA\\SDLT\\Model\\AnswerInputField","System","multiple-choice: multiple selection","1","0","","442","0","0","0","0"
+"169","NZTA\\SDLT\\Model\\AnswerInputField","Data Type","multiple-choice: multiple selection","1","0","","444","0","0","0","0"
+"170","NZTA\\SDLT\\Model\\AnswerInputField","Data Type","multiple-choice: multiple selection","1","0","","446","0","0","0","0"
+"171","NZTA\\SDLT\\Model\\AnswerInputField","Data Type","multiple-choice: multiple selection","1","0","","445","0","0","0","0"
+"172","NZTA\\SDLT\\Model\\AnswerInputField","System","multiple-choice: multiple selection","1","0","","447","0","0","0","0"

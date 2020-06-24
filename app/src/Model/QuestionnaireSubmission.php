@@ -109,8 +109,11 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SecurityArchitectApproverIPAddress' => 'Varchar(255)',
         'SecurityArchitectApproverMachineName' => 'Varchar(255)',
         'SecurityArchitectStatusUpdateDate' => 'Varchar(255)',
+        'SubmittedDate' => 'Varchar(255)',
+        'SubmittedForApprovalDate'=> 'Varchar(255)',
         'ApprovalLinkToken' => 'Varchar(64)',
         'ProductName' => 'Varchar(255)',
+        'ReleaseDate' => 'Date',
         'ApprovalOverrideBySecurityArchitect' => 'Boolean',
         'QuestionnaireLevelTaskIDs' => 'Varchar(255)',
         'RiskResultData' => 'Text',
@@ -150,7 +153,14 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         'SecurityArchitectApprovalStatus',
         'UUID',
         'IsStartLinkEmailSent',
-        'Created' => 'Created date'
+        'Created' => 'Created date',
+        'SubmittedDate',
+        'SubmittedForApprovalDate',
+        // If the approver groups are configurable in the future, i.e. change their group name,
+        // then these columns require to be changed accordingly.
+        'getSaApprovalDateToDisplay' => 'Date approved/denied by Security Architect',
+        'CisoApprovalStatusUpdateDate' => 'Date approved/denied by Chief Information Security Officer',
+        'BusinessOwnerStatusUpdateDate' => 'Date approved/denied by Business Owner'
     ];
 
     /**
@@ -205,10 +215,35 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'filter' => 'PartialMatchFilter',
                 'title' => 'UUID'
             ],
-            'Created'=> [
+            'Created' => [
                 'filter' => 'PartialMatchFilter',
                 'title' => 'Created Date',
                 'field' => DateField::create('Created')
+            ],
+            'SubmittedDate' => [
+                'filter' => 'PartialMatchFilter',
+                'title' => 'Submitted Date',
+                'field' => DateField::create('SubmittedDate')
+            ],
+            'SubmittedForApprovalDate' => [
+                'filter' => 'PartialMatchFilter',
+                'title' => 'Submitted For Approval Date',
+                'field' => DateField::create('SubmittedForApprovalDate')
+            ],
+            'SecurityArchitectStatusUpdateDate' => [
+                'filter' => 'PartialMatchFilter',
+                'title' => 'Date approved/denied by Security Architect',
+                'field' => DateField::create('SecurityArchitectStatusUpdateDate')
+            ],
+            'BusinessOwnerStatusUpdateDate' => [
+                'filter' => 'PartialMatchFilter',
+                'title' => 'Date approved/denied by Business Owner',
+                'field' => DateField::create('BusinessOwnerStatusUpdateDate')
+            ],
+            'CisoApprovalStatusUpdateDate' => [
+                'filter' => 'PartialMatchFilter',
+                'title' => 'Date approved/denied by Chief Information Security Officer',
+                'field' => DateField::create('CisoApprovalStatusUpdateDate')
             ]
         ];
     }
@@ -575,7 +610,9 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 $fields->dataFieldByName('SecurityArchitectApprovalStatus'),
                 $fields->dataFieldByName('SecurityArchitectApproverIPAddress'),
                 $fields->dataFieldByName('SecurityArchitectApproverMachineName'),
-                $fields->dataFieldByName('SecurityArchitectStatusUpdateDate'),
+                $fields->dataFieldByName('SecurityArchitectStatusUpdateDate')
+                        ->setDescription('Collect the date when SA is assigned and update it when SA
+                            approved/denied the submission.'),
                 $fields->dataFieldByName('IsEmailSentToSecurityArchitect')
             ]
         );
@@ -600,6 +637,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 $fields->dataFieldByName('CisoApproverIPAddress'),
                 $fields->dataFieldByName('CisoApproverMachineName'),
                 $fields->dataFieldByName('CisoApprovalStatusUpdateDate')
+                        ->setDescription('Collect the date when CISO approved/denied the submission.')
             ]
         );
 
@@ -617,6 +655,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 $fields->dataFieldByName('BusinessOwnerIPAddress'),
                 $fields->dataFieldByName('BusinessOwnerMachineName'),
                 $fields->dataFieldByName('BusinessOwnerStatusUpdateDate')
+                        ->setDescription('Collect date when Business Owner approved/denied the submission.')
             ]
         );
 
@@ -714,6 +753,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 'BusinessOwnerApproverName',
                 'ApprovalOverrideBySecurityArchitect',
                 'RiskResultData',
+                'ReleaseDate'
             ]);
 
         $submissionScaffolder
@@ -1084,6 +1124,20 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                         if (is_string($isProductName)) {
                             $questionnaireSubmission->ProductName = $isProductName;
                         }
+
+                        // check for relese date
+                        $isReleaseDate = QuestionnaireSubmission::is_field_type_exist(
+                            $jsonAnswerDataArr,
+                            $questionnaireSubmission->QuestionnaireData,
+                            $args['QuestionID'],
+                            'release date',
+                            ''
+                        );
+
+                        // if field is release date type, then add Release date
+                        if (is_string($isReleaseDate)) {
+                            $questionnaireSubmission->ReleaseDate = $isReleaseDate;
+                        }
                     }
 
                     $answerDataArr = [];
@@ -1144,6 +1198,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $questionnaireSubmission->doesQuestionnairBelongToCurrentUser();
 
                     $questionnaireSubmission->QuestionnaireStatus = QuestionnaireSubmission::STATUS_SUBMITTED;
+
+                    $questionnaireSubmission->SubmittedDate = date('Y-m-d H:i:s');
 
                     $questionnaireSubmission->write();
 
@@ -1273,6 +1329,8 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $questionnaireSubmission->doesQuestionnairBelongToCurrentUser();
 
                     $questionnaireSubmission->QuestionnaireStatus = QuestionnaireSubmission::STATUS_AWAITING_SA_REVIEW;
+
+                    $questionnaireSubmission->SubmittedForApprovalDate = date('Y-m-d H:i:s');
 
                     if ($questionnaireSubmission->SecurityArchitectApprovalStatus == 'denied') {
                         $questionnaireSubmission->QuestionnaireStatus =
@@ -1809,6 +1867,11 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         // update business owner details
         $this->updateBusinessOwnerDetail($member, $status);
 
+        // if business owner is in ciso group then approve as ciso as well
+        if ($member->getIsCISO()) {
+            $this->updateCisoDetail($member, $status);
+        }
+
         // if approve by business owner then change questionnaire status to approved
         // else denied and send email notification to the questionnaire submitter
         if ($status == self::STATUS_APPROVED) {
@@ -1863,16 +1926,32 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 if (!$skipBoAndCisoApproval) {
                     $this->QuestionnaireStatus = self::STATUS_WAITING_FOR_APPROVAL;
 
-                    // get CISO group member list
-                    $members = $this->getApprovalMembersListByGroup(UserGroupConstant::GROUP_CODE_CISO);
+                    // if member is ciso then approved a questioonaire as ciso as well
+                    $cisoMembers = [];
+
+                    if ($member->getIsCISO()) {
+                        $this->updateCisoDetail($member, $status);
+                    } else {
+                        $cisoMembers = $this->getApprovalMembersListByGroup(UserGroupConstant::GROUP_CODE_CISO);
+                    }
+
+                    // if member is business owner then approved a questioonaire as BO as well
+                    $businessOwnerEmail = $this->BusinessOwnerEmailAddress;
+
+                    if ($this->isBusinessOwnerEmailAddress()) {
+                        $this->updateBusinessOwnerDetail($member, $status);
+                        $this->QuestionnaireStatus = $status;
+                        $businessOwnerEmail = '';
+                    }
 
                     // send email to CISO group and Business owner
-                    $qs = QueuedJobService::create();
-
-                    $qs->queueJob(
-                        new SendApprovalLinkEmailJob($this, $members, $this->BusinessOwnerEmailAddress),
-                        date('Y-m-d H:i:s', time() + 90)
-                    );
+                    if (!empty($cisoMembers) || !empty($businessOwnerEmail)) {
+                        $qs = QueuedJobService::create();
+                        $qs->queueJob(
+                            new SendApprovalLinkEmailJob($this, $cisoMembers, $businessOwnerEmail),
+                            date('Y-m-d H:i:s', time() + 90)
+                        );
+                    }
                 } else {
                     $this->QuestionnaireStatus = $status;
 
@@ -1902,6 +1981,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                     $taskSubmission->write();
                 });
             }
+
             $this->write();
         } elseif ($accessDetail['group'] == UserGroupConstant::GROUP_CODE_CISO) {
             // update CISO member details
@@ -1994,6 +2074,10 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
                 $questionId,
                 $inputAnswerField->id
             );
+
+            if ($fieldType == "release date" && $inputfieldDetails->InputType == $fieldType) {
+                return $inputAnswerField->data;
+            }
 
             // check if $fieldname exists before accessing it
             if (!isset($inputfieldDetails->$fieldName)) {
@@ -2519,6 +2603,20 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
         $productAspects = $this->getProductAspectList($productAspectAnswerData);
 
         return json_encode($productAspects);
+    }
+
+    /**
+     * customise SA approved/denied date to display in Questionnaire Submission screen
+     *
+     * @return string
+     */
+    public function getSaApprovalDateToDisplay()
+    {
+        if ($this->isApprovedBySA() || $this->isDeniedBySA()) {
+            return $this->SecurityArchitectStatusUpdateDate;
+        }
+
+        return '';
     }
 
     /**

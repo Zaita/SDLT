@@ -6,6 +6,7 @@ import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import type {User} from "../../types/User";
 import type {QuestionnaireSubmissionListItem} from "../../types/Questionnaire";
+import PrettifyStatusUtil from "../../utils/PrettifyStatusUtil";
 import {loadCurrentUser} from "../../actions/user";
 import {loadMySubmissionList} from "../../actions/questionnaire";
 import moment from "moment";
@@ -39,16 +40,7 @@ type Props = {
   loadingState: object<*>
 };
 
-const prettifyStatus = (status: string) => {
-  return status
-    .split("_")
-    .map((str) => {
-      return str.charAt(0).toUpperCase() + str.slice(1);
-    })
-    .join(" ");
-};
-
-const list = (mySubmissionList: QuestionnaireSubmissionListItem) => {
+const list = (mySubmissionList: QuestionnaireSubmissionListItem, currentUser: User) => {
   if(!mySubmissionList.length)
   {
     return (
@@ -92,7 +84,13 @@ const list = (mySubmissionList: QuestionnaireSubmissionListItem) => {
                     {mySubmission.productName}
                   </td>
                   <td>
-                    {prettifyStatus(mySubmission.status)}
+                    {PrettifyStatusUtil.prettifyStatus(
+                      mySubmission.status,
+                      mySubmission.SecurityArchitectApproverID,
+                      currentUser,
+                      mySubmission.SecurityArchitectApprover,
+                      mySubmission.CisoApprovalStatus,
+                      mySubmission.BusinessOwnerApprovalStatus)}
                   </td>
                   <td>
                       <a href={url}>View</a>
@@ -132,7 +130,7 @@ class MySubmissionList extends Component<Props> {
     return (
       <div className="AnswersPreview">
         <Header title="My Submission" subtitle={siteConfig.siteTitle} username={currentUser.name} logopath={siteConfig.logoPath} />
-        {list(mySubmissionList)}
+        {list(mySubmissionList, currentUser)}
         <Footer footerCopyrightText={siteConfig.footerCopyrightText}/>
       </div>
     );

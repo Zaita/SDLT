@@ -11,6 +11,7 @@
             background-image: linear-gradient(rgba(.3,.3,.3,.7), rgba(.9,.9,.9,0)), url('$SiteConfig.LoginHeroImage.ScaleWidth(1920).getURL');
         }
     </style>
+    <% include FavIcon %>
   </head>
   <body class="$ClassName.ShortName security hero-image">
     <div class="h-100 container">

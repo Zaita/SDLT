@@ -2,8 +2,6 @@
 $white-background: rgba(255, 255, 255, 0.7);
 
 .ControlValidationAuditContainer {
-
-
   .ControlValidationAuditResult {
     max-width: map_get($container-max-widths, xl);
     margin-left: auto;
@@ -16,9 +14,9 @@ $white-background: rgba(255, 255, 255, 0.7);
     padding: 25px;
     background-color: $white-background;
   }
-  .control-description {
-      font-size: 14px;
-      margin-left: -5px;
+
+  textarea {
+    font-size: 14px !important;
   }
 
   label {

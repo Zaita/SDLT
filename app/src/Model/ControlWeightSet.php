@@ -178,4 +178,73 @@ class ControlWeightSet extends DataObject
 
         return $result;
     }
+
+    /**
+     * create/update control weight set from json import
+     *
+     * @param object $weights   control weights details
+     * @param object $control   control details
+     * @param object $component component details
+     * @return void
+     */
+    public static function create_record_from_json($weights, $control, $component)
+    {
+        foreach ($weights as $weight) {
+            $risk = Risk::find_or_make_by_name($weight->risk);
+            $weightsDBObj = self::get_control_weight_set($risk->ID, $control->ID, $component->ID);
+
+            if (empty($weightsDBObj)) {
+                $weightsDBObj = self::create();
+                $weightsDBObj->RiskID = $risk->ID;
+                $weightsDBObj->SecurityControlID = $control->ID;
+                $weightsDBObj->SecurityComponentID = $component->ID;
+            }
+
+            $weightsDBObj->Likelihood = $weight->likelihood ?? 0;
+            $weightsDBObj->Impact = $weight->impact ?? 0;
+            $weightsDBObj->LikelihoodPenalty = $weight->likelihoodPenalty ?? 0;
+            $weightsDBObj->ImpactPenalty = $weight->impactPenalty ?? 0;
+
+            $weightsDBObj->write();
+        }
+    }
+
+    /**
+     * get control weights set from db by risk, control, component id
+     *
+     * @param object $riskID      risk id
+     * @param object $controlID   control id
+     * @param object $componentID component id
+     *
+     * @return void
+     */
+    public static function get_control_weight_set($riskID, $controlID, $componentID)
+    {
+        $weightInDB = ControlWeightSet::get()
+            ->filter([
+                'RiskID' => $riskID,
+                'SecurityControlID' => $controlID,
+                'SecurityComponentID' => $componentID,
+            ])
+            ->first();
+
+        return $weightInDB;
+    }
+
+    /**
+     * export weight
+     *
+     * @param integer $weight weight
+     * @return string
+     */
+    public static function export_record($weight)
+    {
+        $obj['risk'] = $weight->Risk()->Name ?? '';
+        $obj['likelihood'] = $weight->Likelihood ?? 0;
+        $obj['Impact'] = $weight->Impact ?? 0;
+        $obj['likelihoodPenalty'] = $weight->LikelihoodPenalty ?? 0;
+        $obj['impactPenalty'] = $weight->ImpactPenalty ?? 0;
+
+        return $obj;
+    }
 }

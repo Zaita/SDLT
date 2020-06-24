@@ -31,6 +31,8 @@ use NZTA\SDLT\Helper\Utils;
 use NZTA\SDLT\Traits\SDLTRiskCalc;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\OptionsetField;
+use SilverStripe\Security\PermissionProvider;
+use SilverStripe\Security\Member;
 
 /**
  * Class Questionnaire
@@ -51,7 +53,7 @@ use SilverStripe\Forms\OptionsetField;
  * - Once assigned a risk, an admin can then add a "Weighting" (Range 0-100) to
  *   each answer+risk combination.
  */
-class Questionnaire extends DataObject implements ScaffoldingProvider
+class Questionnaire extends DataObject implements ScaffoldingProvider, PermissionProvider
 {
     use SDLTModelPermissions;
     use SDLTRiskCalc;
@@ -70,6 +72,11 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
      * @var integer
      */
     private static $min_expiry_days = 5;
+
+    /**
+     * @var boolean
+     */
+    private static $show_overwrite_for_json_import = true;
 
     /**
      * @var array
@@ -488,8 +495,7 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     {
         $result = parent::validate();
 
-        $changedFields = $this->getChangedFields();
-
+        // validation for require field
         if (!$this->Name) {
             $result->addError('Please add a questionnnaire name.');
         } elseif (!$this->Type) {
@@ -497,6 +503,24 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
         } elseif ($this->Type === 'RiskQuestionnaire' && !$this->RiskCalculation) {
             $result->addError('Please select a risk-calculation type.');
         }
+
+        // validation for unique questionnaire name
+        $questionnaire = self::get()
+           ->filter([
+               'Name' => $this->Name
+           ])->exclude('ID', $this->ID);
+
+        if ($questionnaire->count()) {
+            $result->addError(
+                sprintf(
+                    'Questionnaire name "%s" already exists. Please enter a unique Questionnaire name.',
+                    $this->Name
+                )
+            );
+        }
+
+        // validation for expiry date
+        $changedFields = $this->getChangedFields();
 
         if (isset($changedFields['ExpireAfterDays']['after'])) {
             $newExpireAfterDays = $changedFields['ExpireAfterDays']['after'];
@@ -523,5 +547,198 @@ class Questionnaire extends DataObject implements ScaffoldingProvider
     public function isBypassApproval() : bool
     {
         return $this->ApprovalIsNotRequired;
+    }
+
+    /**
+     * create questionnaire from json import
+     * @param object  $incomingJson questionnaire json object
+     * @param boolean $overwrite    overwrite the existing questionnaire
+     * @return void
+     */
+    public static function create_record_from_json($incomingJson, $overwrite = false)
+    {
+        $questionnaireJson = $incomingJson->questionnaire;
+        $obj = '';
+
+        if ($overwrite) {
+            $obj = self::get_by_name($questionnaireJson->name);
+            if (!empty($obj)) {
+                $obj->Questions()->removeAll();
+                $obj->Tasks()->removeAll();
+            }
+        }
+
+        // if overwrite is false or obj doesn't exist with the same name then create a new object
+        if (empty($obj)) {
+            $obj = self::create();
+        }
+
+        $obj->Name = $questionnaireJson->name ?? '';
+        $obj->Type =  $questionnaireJson->type ?? 'Questionnaire';
+        $obj->KeyInformation = $questionnaireJson->keyInformation ?? '';
+        $obj->RiskCalculation = $questionnaireJson->riskCalculation ?? 'NztaApproxRepresentation';
+        $obj->ApprovalIsNotRequired = $questionnaireJson->bypassApproval ?? false;
+        $obj->DoesSubmissionExpire = $questionnaireJson->doesSubmissionExpire ?? "Yes";
+        $obj->ExpireAfterDays = $questionnaireJson->expireAfterDays ?? self::$expiry_days;
+
+        // add questions
+        if (property_exists($questionnaireJson, "questions") && !empty($questions = $questionnaireJson->questions)) {
+            foreach ($questions as $question) {
+                $newQuestion = Question::create_record_from_json($question);
+                $obj->Questions()->add($newQuestion);
+            }
+
+            // update action field if ActionType is goto, once all questions are added in db
+            foreach ($questions as $question) {
+                // find the current question by question title
+                $questionInDB = $obj
+                    ->Questions()
+                    ->filter([
+                        "Title" => $question->title
+                    ])->first();
+
+                if (property_exists($question, "answerActionFields") &&
+                    !empty($answerActionFields = $question->answerActionFields)) {
+                    foreach ($answerActionFields as $actionField) {
+                        if ($actionField->actionType == "goto") {
+                            // find the goto question by question title for action
+                            $questionGotoInDB = $obj
+                                ->Questions()
+                                ->filter([
+                                    "Title" => $actionField->gotoQuestionTitle,
+                                    "AnswerFieldType" => $question->answerFieldType // type = action
+                                ])->first();
+
+                            // find the current action field
+                            $actionFieldInDB = $questionInDB
+                                ->AnswerActionFields()
+                                ->filter([
+                                    "Label" => $actionField->label,
+                                    "ActionType" => $actionField->actionType // type = goto
+                                ])->first();
+
+                            // update action field relationship in db record
+                            if ($questionGotoInDB && $actionFieldInDB) {
+                                $actionFieldInDB->GotoID = $questionGotoInDB->ID;
+                                $actionFieldInDB->write();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // add questionnaire level task
+        if (property_exists($questionnaireJson, "tasks") && !empty($tasks = $questionnaireJson->tasks)) {
+            foreach ($tasks as $task) {
+                $dbTask = Task::find_or_make_by_name($task->name);
+                $obj->Tasks()->add($dbTask);
+            }
+        }
+
+        $obj->write();
+    }
+
+    /**
+     * get questionnaire by name
+     *
+     * @param string $questionnaireName questionnaire name
+     * @return object|null
+     */
+    public static function get_by_name($questionnaireName)
+    {
+        $questionnaire = Questionnaire::get()
+            ->filter(['Name' => $questionnaireName])
+            ->first();
+
+        return $questionnaire;
+    }
+
+    /**
+     * permission-provider to import Questionnaire
+     *
+     * @return array
+     */
+    public function providePermissions()
+    {
+        return [
+            'IMPORT_QUESTIONNAIRE' => 'Allow user to import Questionnaire',
+            'EXPORT_QUESTIONNAIRE' => 'Allow user to export Questionnaire'
+        ];
+    }
+
+    /**
+     * Only ADMIN users and user with import permission should be able to import Questionnaire.
+     *
+     * @param Member $member to check the permission of
+     * @return boolean
+     */
+    public function canImport($member = null)
+    {
+        if (!$member) {
+            $member = Member::currentUser();
+        }
+
+        // checkMember(<Member>, [<at-least-one-match>])
+        $canImport = Permission::checkMember($member, [
+            'ADMIN',
+            'IMPORT_QUESTIONNAIRE'
+        ]);
+
+        return $canImport;
+    }
+
+    /**
+     * Only ADMIN users and user with export permission should be able to export Questionnaire.
+     *
+     * @param Member $member to check the permission of
+     * @return boolean
+     */
+    public function canExport($member = null)
+    {
+        if (!$member) {
+            $member = Member::currentUser();
+        }
+
+        // checkMember(<Member>, [<at-least-one-match>])
+        $canImport = Permission::checkMember($member, [
+            'ADMIN',
+            'EXPORT_QUESTIONNAIRE'
+        ]);
+
+        return $canImport;
+    }
+
+    /**
+     * export questionnaire
+     *
+     * @param integer $questionnaire questionnaire
+     * @return string
+     */
+    public static function export_record($questionnaire)
+    {
+        $obj['name'] = $questionnaire->Name;
+        $obj['type'] =  $questionnaire->Type;
+        $obj['keyInformation'] = $questionnaire->KeyInformation ?? '';
+        $obj['riskCalculation'] = $questionnaire->RiskCalculation;
+        $obj['bypassApproval'] = (boolean) $questionnaire->ApprovalIsNotRequired;
+        $obj['doesSubmissionExpire'] = $questionnaire->DoesSubmissionExpire;
+        $obj['expireAfterDays '] = $questionnaire->ExpireAfterDays;
+
+        foreach ($questionnaire->Questions() as $question) {
+            $obj['questions'][] = QUESTION::export_record($question);
+        }
+
+        $tasks = $questionnaire->Tasks();
+
+        if ($tasks->count()) {
+            foreach ($tasks as $task) {
+                $obj['tasks'][] = ['name' => $task->Name];
+            }
+        }
+
+        $returnobj['questionnaire'] = $obj;
+
+        return json_encode($returnobj, JSON_PRETTY_PRINT);
     }
 }

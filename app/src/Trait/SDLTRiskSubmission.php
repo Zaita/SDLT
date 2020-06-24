@@ -15,6 +15,7 @@ namespace NZTA\SDLT\Traits;
 
 use NZTA\SDLT\Model\ImpactThreshold;
 use NZTA\SDLT\Model\AnswerInputField;
+use NZTA\SDLT\Model\AnswerActionField;
 use NZTA\SDLT\Model\QuestionnaireSubmission;
 
 trait SDLTRiskSubmission
@@ -77,6 +78,7 @@ trait SDLTRiskSubmission
         foreach ($questionnaireData as $question) {
             $questionID = $question['ID'];
             $answers = [];
+            $risks = [];
 
             // get answers for all the input fields of the questions
             if (!$answers = $answerData[$questionID]) {
@@ -84,15 +86,22 @@ trait SDLTRiskSubmission
             }
 
             // if question type is input
-            $questionRisks = [];
             if ($question['AnswerFieldType'] === 'input' && !empty($question['AnswerInputFields'])) {
-                $questionRisks = AnswerInputField::get_risk_for_input_fields(
+                $risks = AnswerInputField::get_risk_for_input_fields(
                     $question['AnswerInputFields'],
                     $answers
                 );
             }
 
-            $selectedRiskData = array_merge($selectedRiskData, $questionRisks);
+            // if question type is action
+            if ($question['AnswerFieldType'] === 'action' && !empty($question['AnswerActionFields'])) {
+                $risks = AnswerActionField::get_risk_for_action_fields(
+                    $question['AnswerActionFields'],
+                    $answers
+                );
+            }
+
+            $selectedRiskData = array_merge($selectedRiskData, $risks);
         }
 
         // create array for unique $risk['ID']
@@ -110,7 +119,7 @@ trait SDLTRiskSubmission
             $score = $formula->setWeightings($data['weights'])->calculate();
             $impact = ImpactThreshold::match($score);
             $riskData[$riskId]['score'] = $score;
-            $riskData[$riskId]['rating'] = $impact ? $impact->Name : $default->Name;;
+            $riskData[$riskId]['rating'] = $impact ? $impact->Name : $default->Name;
             $riskData[$riskId]['weights'] = implode(', ', $data['weights']);
             $riskData[$riskId]['colour'] = $impact ? $impact->Colour : $default->Colour;
             $riskData[$riskId]['riskID'] = $riskId;
@@ -126,7 +135,7 @@ trait SDLTRiskSubmission
      */
     public function getRiskResultTable()
     {
-        if(!$this->RiskResultData) {
+        if (!$this->RiskResultData) {
             return '';
         }
 
@@ -134,15 +143,25 @@ trait SDLTRiskSubmission
             ? 'q'
             : 't';
         $json = $this->getRiskResult($type);
-        if(!count($json)) {
+
+        if (!count($json)) {
             return '';
         }
+
         $riskResultTableHTML = '<table class="table">';
-        $riskResultTableHTML .= '<tr><thead><th>Risk Name</th><th>Weight</th><th>Score</th><th>Rating</th></thead></tr>';
+        $riskResultTableHTML .= '<tr>
+            <thead>
+                <th>Risk Name</th>
+                <th>Weight</th>
+                <th>Score</th>
+                <th>Rating</th>
+            </thead>
+        </tr>';
         $riskResultTableHTML .= '<tbody>';
+
         foreach ($json as $row) {
             $riskResultTableHTML .= sprintf(
-                "<tr><td>%s</td><td>%d</td><td>%2.2f</td><td style=\"color:#%s\">%s</td></tr>",
+                "<tr><td>%s</td><td>%s</td><td>%2.2f</td><td style=\"color:#%s\">%s</td></tr>",
                 $row['riskName'],
                 $row['weights'],
                 $row['score'],
@@ -150,6 +169,7 @@ trait SDLTRiskSubmission
                 $row['rating']
             );
         }
+
         $riskResultTableHTML .= '</tbody>';
         $riskResultTableHTML .= '</table>';
 

@@ -66,7 +66,13 @@ export function saveControlValidationAuditData(uuid: string, controlData?: objec
   };
 }
 
-export function updateControlValidationAuditData(args: {selectedOption: string, controlID: string, componentID: string, productAspect: string}): ThunkAction {
+export function updateControlValidationAuditData(args: {
+  selectedOption: string,
+  controlID: string,
+  componentID: string,
+  productAspect: string,
+  implementationEvidenceUserInput:string
+}): ThunkAction {
   return async (dispatch) => {
     const action = {
       type: ActionType.CVA.UPDATE_CONTROL_VALIDATION_AUDIT_DATA,

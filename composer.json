@@ -14,7 +14,9 @@
         "catalyst/silverstripe-active-directory": "^1.0.1",
         "symbiote/silverstripe-multivaluefield": "^5.0",
         "phptek/sentry": "^2.0",
-        "tractorcow/silverstripe-colorpicker": "^4.0"
+        "tractorcow/silverstripe-colorpicker": "^4.0",
+        "swaggest/json-schema": "^0.12.24",
+        "ergebnis/json-printer": "^3.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^5.7",
@@ -25,12 +27,12 @@
         "silverstripe/graphql-devtools": "^1.0@dev",
         "dnadesign/silverstripe-populate": "^2.0"
     },
-    "repositories": [
-        {
+    "repositories": {
+        "catalyst/silverstripe-active-directory": {
             "type": "vcs",
             "url": "git@gitlab.catalyst.net.nz:SilverStripe/silverstripe-active-directory.git"
         }
-    ],
+    },
     "extra": {
         "project-files-installed": [
             "app/.htaccess",

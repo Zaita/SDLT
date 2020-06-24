@@ -1,0 +1,99 @@
+{
+  "questionnaire": {
+    "name": "My Test Questionnaire",
+    "type": "Questionnaire",
+    "keyInformation": "<ol><li>Item 1</li><li>Item 2</li></ol>",
+    "riskCalculation": "Maximum",
+    "bypassApproval": false,
+    "doesSubmissionExpire": "Yes",
+    "expireAfterDays": 6,
+    "questions": [
+      {
+        "title": "Test input",
+        "question": "test question 1",
+        "description": "<p>test description</p><ol><li>Item 1</li><li>Item 2</li></ol>",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Test textbox",
+            "inputType": "text",
+            "required": true,
+            "minLength": 25,
+            "maxLength": 50,
+            "placeHolder": "Test textbox placeholder",
+            "isBusinessOwner": false,
+            "isProductName": true
+          },
+          {
+            "label": "Test textarea",
+            "inputType": "textarea",
+            "required": false,
+            "minLength": 0,
+            "maxLength": 100,
+            "placeHolder": "Test textarea placeholder"
+          }
+        ]
+      },
+      {
+        "title": "Test Action",
+        "question": "test question 2 for action",
+        "description": "test description 2",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Test goto question 4",
+            "actionType": "goto",
+            "gotoQuestionTitle": "q4 test goto",
+            "tasks": [
+              {
+                "name": "Information Classification"
+              },
+              {
+                "name": "Penetration Test"
+              }
+            ]
+          },
+          {
+            "label": "Test goto question 3",
+            "actionType": "goto",
+            "gotoQuestionTitle": "q3 test"
+          }
+        ]
+      },
+      {
+        "title": "q3 test",
+        "question": "test question 2 for action",
+        "description": "test description 2",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Test message",
+            "actionType": "message",
+            "message": "test message  1"
+          }
+        ]
+      },
+      {
+        "title": "q4 test goto",
+        "question": "test question 2 for action",
+        "description": "test description 2",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Test continue 2",
+            "actionType": "continue",
+            "message": "test message continue 2"
+          }
+        ]
+      }
+    ],
+    "tasks": [
+      {
+        "name": "questionnaire level task test"
+      },
+      {
+        "name": "Penetration Test"
+      }
+    ]
+  }
+}

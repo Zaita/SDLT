@@ -1,0 +1,72 @@
+{
+  "securityComponents": [
+    {
+      "name": "NZTA User Login",
+      "description": "The product will authenticate NZTA Staff tests.",
+      "controls": [
+        {
+          "name": "Azure Active Directory Integration",
+          "description": "test This product integrateswith Azure Active Directory for NZTA UserAuthentication This product integrates with Azure",
+          "implementationGuidance": "test implementation guidance",
+          "implementationEvidence": "test implementation evidence 1",
+          "controlWeightSets": [
+            {
+              "risk": "Information Modification",
+              "likelihood": 0,
+              "impact": 10,
+              "likelihoodPenalty": 100,
+              "impactPenalty": 0
+            },
+            {
+              "risk": "Test new risk 123",
+              "likelihood": 5,
+              "impact": 9,
+              "likelihoodPenalty": 50,
+              "impactPenalty": 99
+            }
+          ]
+        },
+        {
+          "name": "New test control 1",
+          "description": "new test control 1",
+          "implementationEvidence": "test implementation evidence 2",
+          "controlWeightSets": [
+            {
+              "risk": "Information Modification",
+              "likelihood": 6,
+              "impact": 7,
+              "likelihoodPenalty": 10,
+              "impactPenalty": 85
+            },
+            {
+              "risk": "Test new risk 123",
+              "likelihood": 8,
+              "impact": 9,
+              "likelihoodPenalty": 90,
+              "impactPenalty": 99
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ts2",
+      "description": "ts2 info",
+      "controls": [
+        {
+          "name": "Azure Active Directory Integration",
+          "description": "test This product integrateswith Azure Active Directory for NZTA UserAuthentication This product integrates with Azure",
+          "controlWeightSets": [
+            {
+              "risk": "Information Modification",
+              "likelihood": 5,
+              "impact": 9,
+              "likelihoodPenalty": 41,
+              "impactPenalty": 99
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

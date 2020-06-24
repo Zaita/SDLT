@@ -26,6 +26,8 @@ use SilverStripe\Forms\Form;
 use SilverStripe\Forms\GridField\GridFieldImportButton;
 use SilverStripe\Forms\GridField\GridFieldExportButton;
 use SilverStripe\Forms\GridField\GridFieldPrintButton;
+use NZTA\SDLT\Form\GridField\GridFieldImportJsonButton;
+use NZTA\SDLT\Form\GridField\GridFieldExportJsonButton;
 
 /**
  * Class QuestionnaireAdmin
@@ -80,6 +82,26 @@ class QuestionnaireAdmin extends ModelAdmin
 
         if (!$this->modelClass::config()->get('show_export_button')) {
             $config->removeComponent($config->getComponentByType(GridFieldExportButton::class));
+        }
+
+        // show json import button only for the model has "canImport" method
+        // and user has permission to import (set in CMS with user group permission)
+        if (singleton($this->modelClass)->hasMethod('canImport') &&
+            singleton($this->modelClass)->canImport()) {
+            $config->addComponent(
+                GridFieldImportJsonButton::create('buttons-before-left')
+                    ->setImportJsonForm($this->ImportJsonForm())
+                    ->setModalTitle('Import from Json')
+            );
+        }
+
+        // show json export button only for the model has "canExport" method
+        // and user has permission to export (set in CMS with user group permission)
+        if (singleton($this->modelClass)->hasMethod('canExport') &&
+            singleton($this->modelClass)->canExport()) {
+            $config->addComponent(
+                new GridFieldExportJsonButton()
+            );
         }
 
         $gridField->setConfig($config);

@@ -1,9 +1,9 @@
 // @flow
 import React, {Component} from "react";
-import type {ImapctThreshold} from "../../types/ImapctThreshold";
+import type {ImpactThreshold} from "../../types/ImpactThreshold";
 
 type Props = {
-  impactThresholds: Array<ImapctThreshold> | null,
+  impactThresholds: Array<ImpactThreshold> | null,
 };
 
 class ImpactThresholdContainer extends Component<Props> {
@@ -27,7 +27,7 @@ class ImpactThresholdContainer extends Component<Props> {
               </tr>
             </thead>
             <tbody>
-              {impactThresholds.map((impactThreshold, index): Array<ImapctThreshold> => {
+              {impactThresholds.map((impactThreshold, index): Array<ImpactThreshold> => {
                 return (
                   <tr key={index+1}>
                     <td>

@@ -76,11 +76,10 @@ class TaskSubmission extends Component<Props> {
       />
     ) : null;
 
-    const pdfButton = (taskSubmission.status === 'expired') ? null : (
-      <LightButton title={"DOWNLOAD PDF"} iconImage={pdfIcon} onClick={() => this.downloadPdf()}/>
-    );
-
     const resultStatus = ["complete", "waiting_for_approval", "approved", "denied"];
+    const pdfButton = (resultStatus.indexOf(taskSubmission.status) > -1) ? (
+      <LightButton title={"DOWNLOAD PDF"} iconImage={pdfIcon} onClick={() => this.downloadPdf()}/>
+    ) : null;
 
     const result = taskSubmission.result && (resultStatus.indexOf(taskSubmission.status) > -1) ? (
       <div className="result">

@@ -177,4 +177,53 @@ class MultiChoiceAnswerSelection extends DataObject
 
         return $result;
     }
+
+    /**
+     * create selection field from json import
+     *
+     * @param object $selection selection json object
+     * @return DataObject
+     */
+    public static function create_record_from_json($selection)
+    {
+        $obj = self::create();
+
+        $obj->Label = $selection->label;
+        $obj->Value = $selection->value;
+
+        // if risk exist then add many_many relationship with extra field
+        if (property_exists($selection, "risks") && !empty($risks = $selection->risks)) {
+            foreach ($risks as $risk) {
+                $dbRisk = Risk::find_or_make_by_name($risk->name);
+                $obj->Risks()->add($dbRisk, ['Weight' => $risk->weight]);
+            }
+        }
+
+        $obj->write();
+
+        return $obj;
+    }
+
+    /**
+     * export MultiChoiceAnswerSelection and associate risk
+     *
+     * @param object $selection selection
+     * @return array
+     */
+    public static function export_record($selection)
+    {
+        $obj['label'] = $selection->Label ?? '';
+        $obj['value'] =  $selection->Value ?? '';
+        $risks = $selection->Risks();
+
+        if ($risks->count()) {
+            foreach ($risks as $risk) {
+                $tmp['name'] = $risk->Name;
+                $tmp['weight'] = $risk->Weight;
+                $obj['risks'][] = $tmp;
+            }
+        }
+
+        return $obj;
+    }
 }

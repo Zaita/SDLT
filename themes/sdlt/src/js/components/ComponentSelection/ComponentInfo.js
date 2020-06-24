@@ -22,13 +22,15 @@ export default class ComponentInfo extends React.Component<Props> {
     return (
       <div className="ComponentInfo" key={id+name}>
         <h3>
-          {!isDisable && (<button onClick={(event) => {
-            event.preventDefault();
-            removeComponent();
-          }}>
+          {!isDisable && (
+            <button onClick={(event) => {
+              event.preventDefault();
+              removeComponent();
+            }
+          }>
           <i className="fas fa-minus-circle text-danger"/>
+          <span> {name}</span>
           </button>)}
-          <span>{name}</span>
         </h3>
         <p>{description}</p>
 
@@ -42,6 +44,8 @@ export default class ComponentInfo extends React.Component<Props> {
                   id={control.id}
                   name={control.name}
                   description={control.description}
+                  implementationGuidance={control.implementationGuidance}
+                  className= "control-cs"
                 />
               );
             })

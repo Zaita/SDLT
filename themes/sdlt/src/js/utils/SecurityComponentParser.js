@@ -24,7 +24,8 @@ export default class SecurityComponentParser {
         return {
           id: toString(get(control, "ID", "")),
           name: toString(get(control, "Name", "")),
-          description: toString(get(control, "Description", ""))
+          description: toString(get(control, "Description", "")),
+          implementationGuidance: toString(get(control, "ImplementationGuidance", ""))
         }
       })
     }
@@ -42,7 +43,10 @@ export default class SecurityComponentParser {
             id: toString(get(control, "id", "")),
             name: toString(get(control, "name", "")),
             selectedOption: toString(get(control, "selectedOption", "")),
-            description: toString(get(control, "description", ""))
+            description: toString(get(control, "description", "")),
+            implementationGuidance: toString(get(control, "implementationGuidance", "")),
+            implementationEvidence: toString(get(control, "implementationEvidence", "")),
+            implementationEvidenceUserInput: toString(get(control, "implementationEvidenceUserInput", "")),
           }
         }),
         jiraTicketLink: toString(get(jsonObject, "jiraTicketLink", "")),

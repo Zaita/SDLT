@@ -8,6 +8,7 @@ import {
 } from "../../constants/values";
 import Comparators from "../../utils/Comparators";
 import TaskParser from "../../utils/TaskParser";
+import _toInteger from "lodash/toInteger";
 
 type Props = {
   calculatedSRAData: object,
@@ -109,23 +110,35 @@ class RiskAssessmentMatrixTableContainer extends Component<Props> {
       return (
         <div key={componentIndex+1}>
           <strong key={component.id}>{controls.length> 0 ? component.name : null}</strong>
-          {controls.length> 0 && this.renderControls(controls)}
+          {controls.length> 0 && this.renderControls(controls, type)}
         </div>
       )
     });
   }
 
-  renderControls(controls) {
+  renderControls(controls, type) {
     return controls.map((control, controlIndex) => {
+      let displayInBold = false;
+
+      if ( type == "Recommened" &&
+        (_toInteger(control.likelihoodPenalty) > 0 || _toInteger(control.impactPenalty) > 0)) {
+        displayInBold = true;
+      }
+
       return(
         <div key={controlIndex+1}>
-          <span key={control.id}>{control.name}</span>
+          <span
+            key={control.id}
+            className={`${displayInBold ? "font-weight-bold control-title" : "font-weight-normal control-title"}`}
+          >
+            {control.name} &nbsp;
+          </span>
           <small className="text-muted">
             (
-              I: {control.impactWeight},
               L: {control.likelihoodWeight},
-              IP: {control.impactPenalty},
-              LP: {control.likelihoodPenalty}
+              I: {control.impactWeight},
+              LP: {control.likelihoodPenalty},
+              IP: {control.impactPenalty}
             )
           </small>
         </div>

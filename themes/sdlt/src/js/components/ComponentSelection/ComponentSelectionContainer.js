@@ -33,6 +33,7 @@ import LightButton from "../Button/LightButton";
 import SecurityRiskAssessmentUtil from "../../utils/SecurityRiskAssessmentUtil";
 import {loadSiteConfig} from "../../actions/siteConfig";
 import {SubmissionExpired} from "../Common/SubmissionExpired";
+import {SubmissionNotCompleted} from "../Common/SubmissionNotCompleted";
 
 type OwnProps = {
   uuid: string,
@@ -121,45 +122,75 @@ class ComponentSelectionContainer extends Component<Props> {
     if (!currentUser || !taskSubmission || !siteConfig) {
       return null;
     }
+    const isCurrentUserSubmitter = parseInt(currentUser.id) === parseInt(taskSubmission.submitter.id);
     const isSRATaskFinalised = SecurityRiskAssessmentUtil.isSRATaskFinalised(taskSubmission.siblingSubmissions);
+    const showEditControlButton =
+      (taskSubmission.status === "complete" || taskSubmission.status === "waiting_for_approval" ||taskSubmission.status === "denied") &&
+      (taskSubmission.questionnaireSubmissionStatus === "submitted") &&
+      (currentUser.isSA || isCurrentUserSubmitter) && !taskSubmission.lockWhenComplete;
+    const backButton = (
+      <DarkButton key="back"
+        title={"BACK TO QUESTIONNAIRE SUMMARY"}
+        onClick={() => {
+        URLUtil.redirectToQuestionnaireSummary(taskSubmission.questionnaireSubmissionUUID, secureToken);
+        }}
+      />
+    );
+    const editControlButton = showEditControlButton && !isSRATaskFinalised ? (
+      <LightButton
+        title="EDIT CONTROLS"
+        onClick={ dispatchEditAnswersAction}
+        classes={["button"]}
+        iconImage={editIcon}
+      />
+    ) : null;
 
     let body = null;
     switch (taskSubmission.status) {
       case "start":
       case "in_progress":
-        body = (
-          <ComponentSelection
-            availableComponents={availableComponents}
-            selectedComponents={selectedComponents}
-            componentTarget={taskSubmission.componentTarget}
-            productAspects={taskSubmission.productAspects}
-            extraButtons={[(
-              <DarkButton
-                key="back"
-                title={"BACK TO QUESTIONNAIRE SUMMARY"}
-                onClick={() => {
-                  URLUtil.redirectToQuestionnaireSummary(taskSubmission.questionnaireSubmissionUUID, secureToken);
-                }}
-              />
-            )]}
-            createJIRATickets={(jiraKey) => {
-              dispatchCreateJIRATicketsAction(jiraKey);
-            }}
-            saveControls={() => {
-              dispatchSaveLocalControlsAction();
-            }}
-            removeComponent={(id, productAspect) => {
-              dispatchRemoveComponentAction(id, productAspect);
-            }}
-            addComponent={(id, productAspect) => {
-              dispatchAddComponentAction(id, productAspect);
-            }}
-            finishWithSelection={() => {
-              dispatchFinishAction();
-            }}
-          />
-        );
+         if (!isCurrentUserSubmitter){
+           body = (
+            <div className="ComponentSelectionReview">
+              <div className="section">
+                <h4>Selected Components</h4>
+                <br />
+                <SubmissionNotCompleted/>
+              </div>
+              <div className="buttons">
+                {backButton}
+              </div>
+            </div>
+             );
+           break;
+         }
+         else {
+          body = (
+            <ComponentSelection
+              availableComponents={availableComponents}
+              selectedComponents={selectedComponents}
+              componentTarget={taskSubmission.componentTarget}
+              productAspects={taskSubmission.productAspects}
+              extraButtons={backButton}
+              createJIRATickets={(jiraKey) => {
+                dispatchCreateJIRATicketsAction(jiraKey);
+              }}
+              saveControls={() => {
+                dispatchSaveLocalControlsAction();
+              }}
+              removeComponent={(id, productAspect) => {
+                dispatchRemoveComponentAction(id, productAspect);
+              }}
+              addComponent={(id, productAspect) => {
+                dispatchAddComponentAction(id, productAspect);
+              }}
+              finishWithSelection={() => {
+                dispatchFinishAction();
+              }}
+            />
+          );
         break;
+       }
       case "complete":
         body = (
           <div>
@@ -174,19 +205,8 @@ class ComponentSelectionContainer extends Component<Props> {
             productAspects={taskSubmission.productAspects}
             buttons={[(
               <div key="component-selection-review-button-container">
-                {!isSRATaskFinalised && (<LightButton
-                  title="EDIT CONTROLS"
-                  onClick={ dispatchEditAnswersAction}
-                  classes={["button"]}
-                  iconImage={editIcon}
-                />)}
-                <DarkButton
-                  title={"BACK TO QUESTIONNAIRE SUMMARY"}
-                  onClick={() => {
-                    URLUtil.redirectToQuestionnaireSummary(taskSubmission.questionnaireSubmissionUUID, secureToken);
-                  }}
-                  classes={["button"]}
-                />
+                {editControlButton}
+                {backButton}
               </div>
             )]}
           />

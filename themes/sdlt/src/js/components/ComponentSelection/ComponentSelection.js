@@ -118,37 +118,51 @@ export default class ComponentSelection extends Component<Props, State> {
                 );
               })}
             </div>
-
-            <div className="buttons">
-              {selectedComponents.length > 0 && componentTarget === "JIRA Cloud" && (
-                <React.Fragment>
-                  <input type="text" placeholder="JIRA Project Key" onChange={(event) => {
-                    const value = toString(event.target.value).trim();
-                    this.setState({jiraKey: value});
-                  }}/>
-                  <DarkButton title="CREATE JIRA TICKETS" classes={["mr-3"]} onClick={() => {
-                    createJIRATickets(jiraKey);
-                  }}/>
-                </React.Fragment>
-              )}
-              {componentTarget === "Local" && !isStandaloneTask && (
-                <LightButton title="SAVE CONTROLS" classes={["mr-3"]} onClick={() => {
-                  saveControls();
-                }}/>
-              )}
-              <LightButton title="COMPLETE WITHOUT SELECTION" classes={["mr-3"]} onClick={() => {
-                finishWithSelection();
-              }}/>
-
-            </div>
           </div>
         </div>
 
-        <div className="extra-wrapper">
-          {extraButtons}
-        </div>
-
-      </div>
-    );
-  }
-}
+        <div className="buttons-wrapper">
+           <div className="extra-buttons">{extraButtons}</div>
+           <div>
+             {selectedComponents.length > 0 && componentTarget === "JIRA Cloud" && (
+               <React.Fragment>
+                 <input
+                   type="text"
+                   style={{height: "100%", marginRight: "10px"}}
+                   placeholder="JIRA Project Key"
+                   onChange={event => {
+                     const value = toString(event.target.value).trim();
+                     this.setState({jiraKey: value});
+                   }}
+                 />
+                 <DarkButton
+                   title="CREATE JIRA TICKETS"
+                   classes={["mr-3"]}
+                   onClick={() => {
+                     createJIRATickets(jiraKey);
+                   }}
+                 />
+               </React.Fragment>
+             )}
+             {componentTarget === "Local" && !isStandaloneTask && (
+               <LightButton
+                 title="SAVE CONTROLS"
+                 classes={["mr-3"]}
+                 onClick={() => {
+                   saveControls();
+                 }}
+               />
+             )}
+             <LightButton
+               title="COMPLETE WITHOUT SELECTION"
+               classes={["mr-3"]}
+               onClick={() => {
+                 finishWithSelection();
+               }}
+             />
+           </div>
+         </div>
+       </div>
+     );
+   }
+ }

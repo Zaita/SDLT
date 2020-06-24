@@ -4,7 +4,7 @@ import type {QuestionnaireStartState, QuestionnaireSubmissionState} from "../sto
 import GraphQLRequestHelper from "../utils/GraphQLRequestHelper";
 import _ from "lodash";
 import {DEFAULT_NETWORK_ERROR} from "../constants/errors";
-import type {SubmissionQuestionData, MyQuestionnaireItem} from "../types/Questionnaire";
+import type {SubmissionQuestionData, QuestionnaireSubmissionListItem} from "../types/Questionnaire";
 import type {TaskSubmissionDisplay} from "../types/Task";
 import QuestionParser from "../utils/QuestionParser";
 import UserParser from "../utils/UserParser";
@@ -145,7 +145,7 @@ query {
     const memberData = _.get(json, "data.readCurrentMember.0", {});
     const submissionJSON = _.get(json, "data.readQuestionnaireSubmission.0", {});
     const siteData = _.get(json, "data.readSiteConfig.0", null);
-    
+
     if (!memberData || !submissionJSON || !siteData) {
       throw DEFAULT_NETWORK_ERROR;
     }
@@ -216,7 +216,7 @@ query {
     csrfToken: string
   }): Promise<void> {
     const {submissionID, questionID, answerData, csrfToken} = {...argument};
-    const answerDataStr = window.btoa(JSON.stringify(answerData));
+    const answerDataStr = window.btoa(unescape(encodeURIComponent(JSON.stringify(answerData))));
 
     const query = `
 mutation {
@@ -249,7 +249,7 @@ mutation {
     for (let index = 0; index < questionIDList.length; index++) {
       const questionID = questionIDList[index];
       const answerData = answerDataList[index];
-      const answerDataStr = window.btoa(JSON.stringify(answerData));
+      const answerDataStr = window.btoa(unescape(encodeURIComponent(JSON.stringify(answerData))));
       const singleQuery = `
 updateQuestion${questionID}: updateQuestionnaireSubmission(ID: "${submissionID}", QuestionID: "${questionID}", AnswerData: "${answerDataStr}") {
   ID
@@ -385,7 +385,7 @@ mutation {
   }
 
   // load data for Awaiting Approvals
-  static async fetchQuestionnaireSubmissionList(userID: string, pageType: string): Promise<Array<MyQuestionnaireItem>> {
+  static async fetchQuestionnaireSubmissionList(userID: string, pageType: string): Promise<Array<QuestionnaireSubmissionListItem>> {
     const query = `query {
       readQuestionnaireSubmission(UserID: "${userID}", PageType: "${pageType}") {
         ID
@@ -394,11 +394,16 @@ mutation {
         QuestionnaireName
         Created
         ProductName
+        ReleaseDate
         BusinessOwnerApproverName
         SubmitterName
         SecurityArchitectApprover {
+          FirstName
+          Surname
           ID
         }
+        CisoApprovalStatus
+        BusinessOwnerApprovalStatus
       }
     }`;
 
@@ -410,7 +415,7 @@ mutation {
       throw 'error';
     }
 
-    return data.map((item: any) : MyQuestionnaire => {
+    return data.map((item: any) : QuestionnaireSubmissionListItem => {
       let obj = {};
       obj['id'] = _.get(item, 'ID', '');
       obj['uuid'] = _.get(item, 'UUID', '');
@@ -418,9 +423,14 @@ mutation {
       obj['productName'] = _.get(item, 'ProductName', '');
       obj['questionnaireName'] = _.get(item, 'QuestionnaireName', '');
       obj['created'] = _.get(item, 'Created', '');
+      obj['releaseDate'] = _.get(item, 'ReleaseDate', '');
       obj['businessOwner'] = _.get(item, 'BusinessOwnerApproverName', '');
       obj['submitterName'] = _.get(item, 'SubmitterName', '');
+      obj['SecurityArchitectApprover'] = _.toString(_.get(item, 'SecurityArchitectApprover.FirstName', '') + " " + _.get(item, 'SecurityArchitectApprover.Surname', ''));
       obj['SecurityArchitectApproverID'] = _.get(item, 'SecurityArchitectApprover.ID', '');
+      obj['CisoApprovalStatus'] = _.get(item, 'CisoApprovalStatus', '');
+      obj['BusinessOwnerApprovalStatus'] =  _.get(item, 'BusinessOwnerApprovalStatus', '');
+      obj['']
       return obj;
     });
   }
