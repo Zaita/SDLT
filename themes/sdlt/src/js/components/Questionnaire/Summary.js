@@ -127,7 +127,10 @@ class Summary extends Component<Props> {
         {this.renderSubmitterInfo(submission)}
         {this.renderTasks(submission)}
         {this.renderApprovals(submission)}
-        <RiskResultContainer riskResults={submission.riskResults}/>
+        <RiskResultContainer
+          riskResults={submission.riskResults}
+          hideWeightsAndScore={submission.hideWeightsAndScore}
+        />
         {this.renderSkipCheckbox(submission, viewAs, user)}
         {this.renderButtons(submission)}
       </div>

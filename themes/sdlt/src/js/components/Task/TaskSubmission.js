@@ -89,7 +89,10 @@ class TaskSubmission extends Component<Props> {
     ) : null;
 
     const riskResult = taskSubmission.riskResults && (resultStatus.indexOf(taskSubmission.status) > -1) ? (
-      <RiskResultContainer riskResults={taskSubmission.riskResults}/>
+      <RiskResultContainer
+        riskResults={taskSubmission.riskResults}
+        hideWeightsAndScore={taskSubmission.hideWeightsAndScore}
+      />
     ) : null;
 
     const approveButton = (viewAs === "approver" && taskSubmission.status === "waiting_for_approval") ? (

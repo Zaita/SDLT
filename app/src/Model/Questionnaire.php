@@ -89,6 +89,7 @@ class Questionnaire extends DataObject implements ScaffoldingProvider, Permissio
         'ApprovalIsNotRequired' => 'Boolean',
         'DoesSubmissionExpire' => "Enum('No,Yes', 'Yes')",
         'ExpireAfterDays' => 'Int',
+        'HideRiskWeightsAndScore' => 'Boolean'
     ];
 
     /**
@@ -213,18 +214,22 @@ class Questionnaire extends DataObject implements ScaffoldingProvider, Permissio
         );
 
         if ($this->isRiskType()) {
-            $fields->addFieldToTab(
+            $fields->addFieldsToTab(
                 'Root.Main',
-                CheckboxField::create(
+                [
+                    CheckboxField::create(
                     'ApprovalIsNotRequired',
                     'Bypass all approvals'
-                )->setDescription('If this option is set, then no approvals are'
-                .' required, and no emails will be sent. This bypasses approvals'
-                .' only if the questionnaire submission has no tasks to complete.'
-                .' If there are tasks, then normal approval flow will be applied.')
+                    )
+                        ->setDescription('If this option is set, then no approvals are'
+                        .' required, and no emails will be sent. This bypasses approvals'
+                        .' only if the questionnaire submission has no tasks to complete.'
+                        .' If there are tasks, then normal approval flow will be applied.'),
+                    CheckboxField::create('HideRiskWeightsAndScore')
+                ]
             );
         } else {
-            $fields->removeByName('ApprovalIsNotRequired');
+            $fields->removeByName(['ApprovalIsNotRequired', 'HideRiskWeightsAndScore']);
         }
 
         $fields->removeByName(['DoesSubmissionExpire']);
