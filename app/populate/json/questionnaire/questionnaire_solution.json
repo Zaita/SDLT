@@ -1,0 +1,499 @@
+{
+  "questionnaire": {
+    "name": "Solution Delivery Assessment",
+    "type": "Questionnaire",
+    "keyInformation": "<ol class=\"information-list\"><li>This form will ask you a series of questions about the product you wish to implement. Please ensure you have key information about the product and people using it available before you start.<\/li>\n<li>Completion of this form should take 15-30 minutes depending on the complexity of the product. This tool will create and manage supplementary forms to fill out covering Privacy Impact Assessments, The DIA GCIO 105 etc.<\/li>\n<li>Approvals will be handled automatically through this tool and you will be contacted when they have been completed.<\/li>\n<li>By entering your email address below, you will be emailed a link to this questionnaire with a unique ID. This can be used to review your answers, or finish the questionnaire at a later date if you cannot complete it in one sitting.<\/li>\n<\/ol>",
+    "riskCalculation": "NztaApproxRepresentation",
+    "bypassApproval": false,
+    "doesSubmissionExpire": "Yes",
+    "expireAfterDays ": 14,
+    "questions": [
+      {
+        "title": "Product Information",
+        "question": "Please enter the name of the project and product and project\/manager name",
+        "description": "Please enter the name of the project and product and project\/manager name",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Product Name",
+            "inputType": "text",
+            "required": true,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": true
+          },
+          {
+            "label": "Project\/Product Manager",
+            "inputType": "text",
+            "required": true,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
+          }
+        ]
+      },
+      {
+        "title": "Business Owner",
+        "question": "Please enter details of the business owner for this product",
+        "description": "The business owner is the person who can formally accept risk to the data used in this product. This is a business line manager, not security.",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Full Name",
+            "inputType": "text",
+            "required": true,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
+          },
+          {
+            "label": "Role at NZTA",
+            "inputType": "text",
+            "required": true,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
+          },
+          {
+            "label": "Email",
+            "inputType": "email",
+            "required": true,
+            "minLength": 12,
+            "maxLength": 0,
+            "placeHolder": "person@nzta.govt.nz",
+            "isBusinessOwner": true,
+            "isProductName": false
+          }
+        ]
+      },
+      {
+        "title": "Design Documentation",
+        "question": "Please provide a link to the High-Level Design",
+        "description": "Please provide a link to the Solution Architecture Document or equivalent high level design that has been approved by the Architecture Review Board (ARB). If you do not have a high level design, the security team will be unable to perform a security assessment and risk analysis of your product.",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Link",
+            "inputType": "url",
+            "required": true,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
+          }
+        ]
+      },
+      {
+        "title": "ARB Endorsement",
+        "question": "Has the design for this product going through ARB and received endorsement?",
+        "description": "",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue"
+          },
+          {
+            "label": "No",
+            "actionType": "continue"
+          }
+        ]
+      },
+      {
+        "title": "Release Date",
+        "question": "What is your target release date for this solution?",
+        "description": "",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Date",
+            "inputType": "date",
+            "required": true,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
+          }
+        ]
+      },
+      {
+        "title": "Information Storage",
+        "question": "Will this product store data or information that belongs to the Transport Agency?",
+        "description": "",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "Information and Data Management Assessment"
+              }
+            ]
+          },
+          {
+            "label": "No",
+            "actionType": "goto",
+            "gotoQuestionTitle": "Cloud Migration"
+          }
+        ]
+      },
+      {
+        "title": "Information Classification",
+        "question": "Do you know the Information Classification already?",
+        "description": "The information classification must be assigned in line with the Government guidelines. If you are unsure, click \"No\" and the SDLT will generate your information classification for you as a task at the end of this questionnaire.",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue"
+          },
+          {
+            "label": "No",
+            "actionType": "goto",
+            "gotoQuestionTitle": "Personal Information",
+            "tasks": [
+              {
+                "name": "Information Classification"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Information Classification Result",
+        "question": "What is your information classification?",
+        "description": "Please enter your information classification",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Classification",
+            "inputType": "text",
+            "required": true,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
+          }
+        ]
+      },
+      {
+        "title": "Personal Information",
+        "question": "Does this product store personal information (PI)?",
+        "description": "<p>Personal Information is defined as any information about an identifiable individual (i.e. a living, natural person; not companies\/charities\/trusts etc). The information doesn\u2019t need to identify a person by their name to be personal information, and it also doesn\u2019t need to be private or sensitive. As long as there\u2019s a reasonable chance that someone could be identified from the information - even if it\u2019s only one person that makes the link between the information and the individual, and even if it\u2019s only by linking it with other information - then it\u2019s personal information. This includes information about other staff members and our customers.<\/p><p>All systems created, managed and used by the Agency that contain or use any form of Personal Information must go through a Privacy Threshold Assessment process. At the end of this questionnaire, a Privacy Threshold Assessment task will be completed. When completed, this task will be submitted to the Privacy Officers for review and approval.<\/p><p>For more information, and specific examples, please see the Privacy Page on OnRamp: https:\/\/onramp.nzta.govt.nz\/what-we-do\/legal-services\/privacy\/<\/p>",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "Privacy Threshold Assessment Link"
+              }
+            ]
+          },
+          {
+            "label": "No",
+            "actionType": "continue"
+          }
+        ]
+      },
+      {
+        "title": "External Data",
+        "question": "Will Transport Agency data being transferred to an external party, cloud provider or mobile app for storage or processing (e.g. Google\/Azure\/Amazon\/Catalyst)",
+        "description": "If Transport Agency data is being transferred outside of the Corporate, ITS or Unisys networks; the answer is likely 'Yes'.",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue"
+          },
+          {
+            "label": "No",
+            "actionType": "goto",
+            "gotoQuestionTitle": "Public Facing Interfaces"
+          }
+        ]
+      },
+      {
+        "title": " Transferring Data",
+        "question": "How is Transport Agency data being transferred to\/from the product?",
+        "description": "Please document the technologies being used to transfer data (e.g. Web Forms, FTP, SCP, Email etc)",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Description",
+            "inputType": "text",
+            "required": false,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
+          }
+        ]
+      },
+      {
+        "title": "Data Storage Location",
+        "question": "Where will Transport Agency data be physically located\/stored?",
+        "description": "<p>What countries and cities will Transport Agency data be held in by this product?<\/p><p>The Transport Agency must adhere to guidance from the Department of Internal Affairs (DIA). This determines what countries are acceptable for storing information the Transport Agency is accountable. In general, the Transport Agency is allowed to story information in:<\/p><ul><li>New Zealand<\/li>\n<li>Australia<\/li>\n<li>United States of America<\/li>\n<li>Canada<\/li>\n<li>Germany<\/li>\n<li>Netherlands<\/li>\n<li>United Kingdom<\/li>\n<\/ul><p>Other countries\/jurisdictions can be considered, but these will need to go through a separate data risk assessment to ensure the target jurisdiction's Information and Privacy laws are compatible with New Zealand's.<\/p>",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Locations",
+            "inputType": "textarea",
+            "required": true,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
+          }
+        ]
+      },
+      {
+        "title": "Existing Provider",
+        "question": "Has the Transport Agency used this service provider in this way before?",
+        "description": "<p>When engaging new providers of SaaS or Cloud Services, all NZ Government Agencies are required to complete a Government Digital Communication Office Cloud Risk Assessment (GCDO\/GCIO). Once complete and assessed, a copy of this assessment will be provided to the NZ Department of Internal Affairs (DIA) and made available to all NZ Government Agencies. Each external organisation should only have to ever complete this process once.<\/p><p>This assessment is designed to solicit information about potential risks to NZ Government Data and Agencies. If the vendor in question has not completed an assessment before, a new GCIO105 task will be created on completion of this questionnaire.<\/p>",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue"
+          },
+          {
+            "label": "No",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "GCIO 105"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Public Facing Interfaces",
+        "question": "Does this product expose new public facing interfaces?",
+        "description": "<p>Will this solution be exposing new web-facing services? Including APIs through an existing API management platform (e.g. Mulesoft, CDI, CloudFlare, RedShield). The Transport Agency has an obligation to ensure that all information that it is accountable for is kept safe, especially when that information is being provided to external parties through web-facing services. <\/p><p>At the end of this questionnaire, a Penetration Test task will be completed. You'll be asked to either conduct a penetration test on the services or provide a recently completed penetration test report and summary of remediation work that has been undertaken. More information about this is explained in the Penetration Test task.<\/p><p>&nbsp;<\/p>",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "Penetration Test"
+              }
+            ]
+          },
+          {
+            "label": "No",
+            "actionType": "continue"
+          }
+        ]
+      },
+      {
+        "title": "Cloud Migration",
+        "question": "Is this an on-premises to cloud migration?",
+        "description": "If we're migrating existing functionality from an on-premises solution to a cloud-based one, click 'Yes'. If it's staying with the same organisation providing the product, please still select 'Yes'",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue"
+          },
+          {
+            "label": "No",
+            "actionType": "goto",
+            "gotoQuestionTitle": "Credit Card Payments"
+          }
+        ]
+      },
+      {
+        "title": "Previous Cloud Usage",
+        "question": "Has the Agency used this cloud product previously?",
+        "description": "",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue"
+          },
+          {
+            "label": "No",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "GCIO 105"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Credit Card Payments",
+        "question": "Will this product accept Transport Agency customer credit cards?",
+        "description": "<p>Will this product accept credit card payments from the NZ Public on behalf of the Transport Agency?<\/p><p>The Transport Agency is required by VISA and our Bank to maintain compliance with the Payment Card Industry - Data Security Standards (PCI-DSS). Vendors that accept credit cards on behalf of the Transport Agency will need to provide evidence of PCI-DSS compliance that can be forwarded to our bank. If this product is going to accept credit card payments, at the end of this questionnaire a PCI-DSS assessment task will be created. This task will ask you to go through each of the PCI-DSS requirements and ensure they're being met within this solution. <\/p>",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "PCI-DSS Assessment"
+              }
+            ]
+          },
+          {
+            "label": "No",
+            "actionType": "continue"
+          }
+        ]
+      },
+      {
+        "title": "Credit Card Connection",
+        "question": "Will this product directly talk to the Transport Agency Payment Micro-site or Common Payment Services (CPS) system?",
+        "description": "<p>To use this product, will there need to be some integration with Transport Agency systems that handle payments? This includes the Payment Micro-site and Common Payment Services (CPS).<\/p><p>The Transport Agency is required by VISA and our Bank to maintain compliance with the Payment Card Industry - Data Security Standards (PCI-DSS). These products sit within the Transport Agencies PCI-DSS environment. Any changes to this environment will require validation against the current PCI-DSS requirements to ensure no compliance obligations are being compromised. At the end of this questionnaire a PCI-DSS assessment task will be created. This task will ask you to go through each of the PCI-DSS requirements and ensure they're being met within this solution.<\/p>",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "PCI-DSS Assessment"
+              }
+            ]
+          },
+          {
+            "label": "No",
+            "actionType": "continue"
+          }
+        ]
+      },
+      {
+        "title": "JIRA",
+        "question": "Are you using JIRA to manage this project\/product deployment?",
+        "description": "If you click yes, you will be given given the option of creating security control issues in JIRA. Each JIRA ticket created has a list of security controls that must be implemented to meet Transport Agency and NZISM security guidelines.",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "Control Validation Audit"
+              }
+            ]
+          },
+          {
+            "label": "No",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "Control Validation Audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Firewall Changes",
+        "question": "Will you require firewall changes to be made to use this product?",
+        "description": "If this product requires connections to\/from Transport Agency systems that are not Web (e.g. Chrome\/Edge\/Firefox) the answer is probably Yes",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue"
+          },
+          {
+            "label": "No",
+            "actionType": "continue"
+          }
+        ]
+      },
+      {
+        "title": "Authentication",
+        "question": "Does this product integrate with the Transport Agency identity and access management platforms?",
+        "description": "Will this product integrate with Azure Active Directory or OKTA to manage Transport Agency user accounts?",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue"
+          },
+          {
+            "label": "No",
+            "actionType": "continue"
+          }
+        ]
+      },
+      {
+        "title": "Security Risk Assessment",
+        "question": "This product will require a Risk Assessment",
+        "description": "",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Ok",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "Security Risk Assessment Link"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Certification and Accreditation",
+        "question": "This product will require a Certification and Accreditation (C&A) report.",
+        "description": "",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Ok",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "Certification and Accreditation Report"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Other",
+        "question": "Is there any other information you'd like to submit with your application?",
+        "description": "Please include information that might be relevant to the Security Architects, Chief Information Security Officer or Business Owner.",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Information",
+            "inputType": "textarea",
+            "required": false,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
+          }
+        ]
+      }
+    ]
+  }
+}
