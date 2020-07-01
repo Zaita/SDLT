@@ -31,12 +31,15 @@ use SilverStripe\Dev\BuildTask;
 use SilverStripe\ORM\DB;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ValidationException;
+use NZTA\SDLT\Traits\SDLTAdminCommon;
 
 /**
  * SetupSDLTDataTask
  */
 class SetupSDLTDataTask extends BuildTask
 {
+    use SDLTAdminCommon;
+
     /**
      * Segment of this task
      * @var string
@@ -133,6 +136,23 @@ class SetupSDLTDataTask extends BuildTask
         'NZTA\SDLT\Model\SecurityComponent' => [],
         'NZTA\SDLT\Model\SecurityControl' => [],
         'NZTA\SDLT\Model\Task' => [],
+    ];
+
+    /**
+     * @var array
+     */
+    private $json_questionnaire_paths = [
+        'Questionnaire: Proof of Concept' => 'app/populate/json/questionnaire/questionnaire_poc.json',
+        'Questionnaire: Solution' => 'app/populate/json/questionnaire/questionnaire_solution.json',
+        'Questionnaire: SaaS' => 'app/populate/json/questionnaire/questionnaire_saas.json',
+        'Questionnaire: Feature Release' => 'app/populate/json/questionnaire/questionnaire_feature.json'
+    ];
+
+    /**
+     * @var array
+     */
+    private $json_task_paths = [
+        'Task: Web Security Configuration' => 'app/populate/json/task/task_web_security_configuration.json'
     ];
 
     /**
@@ -256,6 +276,30 @@ class SetupSDLTDataTask extends BuildTask
                     $model
                 )
             );
+        }
+
+        /**
+         * Now that the CSV Import has been done, we'll import
+         * the JSON files that will handle the relationship betweens
+         * between Questionnaires and tasks
+         */
+        foreach ($this->json_questionnaire_paths as $key => $value) {
+            printf("Importing JSON Questionnaire '$key' from $value\n");
+
+            $string = file_get_contents($value);
+            $incomingJson = $incomingJson = (json_decode($string));
+            Questionnaire::create_record_from_json($incomingJson, true);
+        }
+
+        /**
+         * Import Tasks
+         */
+        foreach ($this->json_task_paths as $key => $value) {
+            printf("Importing JSON Task '$key' from $value\n");
+
+            $string = file_get_contents($value);
+            $incomingJson = $incomingJson = (json_decode($string));
+            Task::create_record_from_json($incomingJson, true);
         }
     }
 

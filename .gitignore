@@ -106,3 +106,7 @@ silverstripe-admin
 silverstripe-assets
 graphql
 
+#docker
+data
+logs
+composer.phar

@@ -605,8 +605,7 @@ class Questionnaire extends DataObject implements ScaffoldingProvider, Permissio
                             $questionGotoInDB = $obj
                                 ->Questions()
                                 ->filter([
-                                    "Title" => $actionField->gotoQuestionTitle,
-                                    "AnswerFieldType" => $question->answerFieldType // type = action
+                                    "Title" => $actionField->gotoQuestionTitle
                                 ])->first();
 
                             // find the current action field
