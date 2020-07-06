@@ -103,6 +103,9 @@ class SetupSDLTDataTask extends BuildTask
         'AnswerInputBlock_Risks' => [
             'path' => 'app/populate/csv/AnswerInputBlock_Risks.csv',
         ],
+        'AnswerActionField_Risks' => [
+            'path' => 'app/populate/csv/AnswerActionField_Risks.csv',
+        ],
         'Dashboard_Tasks' => [
             'path' => 'app/populate/csv/Dashboard_Tasks.csv',
         ],
@@ -169,6 +172,7 @@ class SetupSDLTDataTask extends BuildTask
         DB::query("TRUNCATE AnswerActionField_Tasks");
         DB::query("TRUNCATE AnswerInputBlock");
         DB::query("TRUNCATE AnswerInputBlock_Risks");
+        DB::query("TRUNCATE AnswerActionField_Risks");
         DB::query("TRUNCATE AnswerInputField");
         DB::query("TRUNCATE ControlWeightSet");
         DB::query("TRUNCATE Dashboard");
@@ -357,7 +361,7 @@ class SetupSDLTDataTask extends BuildTask
         return $record;
     }
 
-     /**
+    /**
      * Magic method for linking AnswerInputBlock and Risk records
      *
      * @param DataObject $record parsed CSV row
@@ -381,7 +385,33 @@ class SetupSDLTDataTask extends BuildTask
         return $record;
     }
 
-     /**
+    /**
+     * Magic method for linking AnswerActionField and Risk records
+     *
+     * @param DataObject $record parsed CSV row
+     * @return DataObject
+     */
+    private function joinAnswerActionField_Risks($record)
+    {
+        $actionField = $this->findOrMake(
+            'NZTA\SDLT\Model\AnswerActionField',
+            $record['AnswerActionFieldID']
+        );
+
+        $risk = $this->findOrMake(
+            'NZTA\SDLT\Model\Risk',
+            $record['RiskID']
+        );
+
+        if ($actionField && $risk) {
+            $risk->Weight = (int) ($record['Weight'] ?? 0);
+            $actionField->Risks()->add($risk);
+        }
+
+        return $record;
+    }
+
+    /**
      * Magic method for linking Dashboard and Task records
      *
      * @param DataObject $record parsed CSV row
@@ -412,7 +442,7 @@ class SetupSDLTDataTask extends BuildTask
         return $record;
     }
 
-     /**
+    /**
      * Magic method for linking Questionnaire and Task records
      *
      * @param DataObject $record parsed CSV row
@@ -444,7 +474,7 @@ class SetupSDLTDataTask extends BuildTask
         return $record;
     }
 
-     /**
+    /**
      * Magic method for linking Task and (default) SecurityComponent records
      *
      * @param DataObject $record parsed CSV row
