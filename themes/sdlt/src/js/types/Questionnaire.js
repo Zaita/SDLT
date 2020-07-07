@@ -67,6 +67,7 @@ export type Submission = {
   },
   taskSubmissions: Array<TaskSubmissionDisplay>,
   isApprovalOverrideBySecurityArchitect: boolean,
+  hideWeightsAndScore: boolean,
   productName: string,
   riskResults: Array<RiskResult>,
 };
