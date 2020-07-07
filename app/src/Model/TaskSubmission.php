@@ -482,7 +482,8 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
                 'CVATaskData',
                 'CVATaskDataSource',
                 'SecurityRiskAssessmentData',
-                'Created'
+                'Created',
+                'HideWeightsAndScore'
             ]);
 
         $dataObjectScaffolder
@@ -2260,5 +2261,18 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
             )
         );
         return $fields;
+    }
+
+    /**
+     * hide weights and score for risk questionnaire if check box is ticked
+     * @return bool
+     */
+    public function getHideWeightsAndScore() : bool
+    {
+        if ($this->Task()->isRiskType() && $this->Task()->HideRiskWeightsAndScore) {
+            return true;
+        }
+
+        return false;
     }
 }
