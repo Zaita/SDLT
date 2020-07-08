@@ -1893,6 +1893,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         $taskName = $this->Task()->Name;
         $SubmitterName = $this->Submitter()->Name;
         $SubmitterEmail = $this->Submitter()->Email;
+        $productName = $this->QuestionnaireSubmission()->ProductName;
 
         if ($linkPrefix) {
             $link = $this->AnonymousAccessLink($linkPrefix);
@@ -1904,6 +1905,7 @@ class TaskSubmission extends DataObject implements ScaffoldingProvider
         $string = str_replace('{$taskLink}', $link, $string);
         $string = str_replace('{$submitterName}', $SubmitterName, $string);
         $string = str_replace('{$submitterEmail}', $SubmitterEmail, $string);
+        $string = str_replace('{$productName}', $productName, $string);
 
         return $string;
     }

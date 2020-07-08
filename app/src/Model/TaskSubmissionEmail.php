@@ -74,21 +74,36 @@ class TaskSubmissionEmail extends DataObject
 
         $fields->removeByName(['OwnerID']);
 
-        $fields->addFieldsToTab('Root.Main', [
-            EmailField::create('FromEmailAddress'),
-            TextField::create('EmailSubject'),
-            HtmlEditorField::create('EmailBody')
-                ->setDescription("You may use any of the following variables in"
-                ." the body of your email: {\$taskName}, {\$taskLink}, "
-                ." {\$submitterName}, and {\$submitterEmail}. They will be "
-                ." replaced with the actual value."),
-            HtmlEditorField::create('EmailSignature'),
-            HtmlEditorField::create('ApprovalLinkEmailBody')
-                ->setDescription("You may use any of the following variables in"
-                ." the body of your email: {\$taskName}, {\$taskLink}, "
-                ." {\$submitterName}, and {\$submitterEmail}. They will be "
-                ." replaced with the actual value."),
-        ]);
+        $fields->addFieldsToTab(
+            'Root.Main',
+            [
+                EmailField::create('FromEmailAddress'),
+                TextField::create('EmailSubject', "Submitter Email Subject")
+                    ->setDescription("You may use any of the following variables in"
+                    ." the subject of your email: {\$taskName}, {\$taskLink}, {\$productName}, "
+                    ." {\$submitterName}, and {\$submitterEmail}. They will be "
+                    ." replaced with the actual value."),
+                HtmlEditorField::create('EmailBody', "Submitter Email Body")
+                    ->setRows('3')
+                    ->setDescription("You may use any of the following variables in"
+                    ." the body of your email: {\$taskName}, {\$taskLink}, {\$productName}, "
+                    ." {\$submitterName}, and {\$submitterEmail}. They will be "
+                    ." replaced with the actual value."),
+                HtmlEditorField::create('EmailSignature')
+                    ->setRows('3'),
+                TextField::create('ApprovalLinkEmailSubject', "Approver Email Subject")
+                    ->setDescription("You may use any of the following variables in"
+                    ." the subject of your email: {\$taskName}, {\$taskLink}, {\$productName}, "
+                    ." {\$submitterName}, and {\$submitterEmail}. They will be "
+                    ." replaced with the actual value."),
+                HtmlEditorField::create('ApprovalLinkEmailBody', "Approver Email Body")
+                    ->setRows('3')
+                    ->setDescription("You may use any of the following variables in"
+                    ." the body of your email: {\$taskName}, {\$taskLink}, {\$productName}, "
+                    ." {\$submitterName}, and {\$submitterEmail}. They will be "
+                    ." replaced with the actual value."),
+            ]
+        );
 
         return $fields;
     }
