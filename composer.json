@@ -17,10 +17,6 @@
         "swaggest/json-schema": "^0.12.24",
         "ergebnis/json-printer": "^3.0"
     },
-    "require-dev": {
-    },
-    "repositories": {
-    },
     "extra": {
         "project-files-installed": [
             "app/.htaccess",
