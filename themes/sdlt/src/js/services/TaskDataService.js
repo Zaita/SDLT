@@ -292,6 +292,9 @@ mutation {
         UUID
         Created
         TaskName
+        QuestionnaireSubmission {
+          ProductName
+        }
         Submitter {
           FirstName
           Surname
@@ -314,6 +317,7 @@ mutation {
       obj['uuid'] = get(item, 'UUID', '');
       obj['created'] = get(item, 'Created', '');
       obj['taskName'] = get(item, 'TaskName', '');
+      obj['productName'] = get(item, 'QuestionnaireSubmission.ProductName', '');
       obj['submitterName'] = toString(get(item, "Submitter.FirstName", ""))+ ' ' + toString(get(item, "Submitter.Surname", ""));
       obj['status'] = get(item, 'Status', '');
       return obj;

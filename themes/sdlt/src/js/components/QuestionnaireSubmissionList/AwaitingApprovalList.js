@@ -194,6 +194,7 @@ const taskList = (awaitingApprovalTaskList:Array<TaskSubmissionListItem>, curren
             <tr key="submission_table_header">
               <th className="text-center">Date Created</th>
               <th className="text-center">Task Name</th>
+              <th className="text-center">Product Name</th>
               <th className="text-center">Submitter</th>
               <th className="text-center">Status</th>
               <th className="text-center">Actions</th>
@@ -209,6 +210,9 @@ const taskList = (awaitingApprovalTaskList:Array<TaskSubmissionListItem>, curren
                   </td>
                   <td>
                     {awaitingTaskApproval.taskName}
+                  </td>
+                  <td>
+                    {awaitingTaskApproval.productName}
                   </td>
                   <td>
                     {awaitingTaskApproval.submitterName}
