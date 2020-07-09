@@ -1,5 +1,5 @@
 {
-    "name": "silverstripe/installer",
+    "name": "nzta/sdlt",
     "type": "silverstripe-recipe",
     "description": "The SilverStripe Framework Installer",
     "require": {
