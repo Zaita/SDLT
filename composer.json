@@ -2,7 +2,7 @@
     "name": "nzta/sdlt",
     "type": "silverstripe-recipe",
     "description": "NZTA Software Development Lifecycle Tool",
-    "license": "BSD-3",
+    "license": "BSD-3-Clause",
     "require": {
         "php": ">=7.2",
         "silverstripe/recipe-plugin": "^1.2",
