@@ -1,7 +1,7 @@
 {
     "name": "nzta/sdlt",
     "type": "silverstripe-recipe",
-    "description": "The SilverStripe Framework Installer",
+    "description": "NZTA Software Development Lifecycle Tool",
     "license": "BSD-3",
     "require": {
         "php": ">=7.2",
