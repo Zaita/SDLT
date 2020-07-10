@@ -23,7 +23,6 @@ import ReactModal from "react-modal";
 import DarkButton from "../Button/DarkButton";
 import LightButton from "../Button/LightButton";
 import CSRFTokenService from "../../services/CSRFTokenService";
-import RiskResultContainer from "../Common/RiskResultContainer";
 
 const mapStateToProps = (state: RootState) => {
   return {

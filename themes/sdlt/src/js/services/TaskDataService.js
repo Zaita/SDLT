@@ -80,6 +80,7 @@ query {
     RiskResultData
     ComponentTarget
     ProductAspects
+    HideWeightsAndScore
   }
 }`;
 
@@ -113,6 +114,7 @@ query {
       riskResults: _.has(submissionJSONObject, 'RiskResultData') ? JSON.parse(get(submissionJSONObject, "RiskResultData", "[]")) : "[]",
       productAspects:  _.has(submissionJSONObject, 'ProductAspects') ? JSON.parse(get(submissionJSONObject, "ProductAspects", [])) : [],
       componentTarget: toString(get(submissionJSONObject, "ComponentTarget", "")),
+      hideWeightsAndScore: _.get(submissionJSONObject, "HideWeightsAndScore", "false") === "true",
       siblingSubmissions: TaskParser.parseAlltaskSubmissionforQuestionnaire(submissionJSONObject)
     };
     return data;

@@ -9,7 +9,7 @@ type Props = {
 
 class RiskResultContainer extends Component<Props> {
   render() {
-    const {riskResults} = {...this.props};
+    const {riskResults, hideWeightsAndScore} = {...this.props};
 
     if (!riskResults || riskResults.length === 0) {
       return null;
@@ -24,8 +24,16 @@ class RiskResultContainer extends Component<Props> {
             <thead className="thead-light">
               <tr key="risk_table_header">
                 <th>Risk Name</th>
-                <th>Weights</th>
-                <th>Score</th>
+                {
+                  (!hideWeightsAndScore) && (
+                    <th>Weights</th>
+                  )
+                }
+                {
+                  (!hideWeightsAndScore) && (
+                    <th>Score</th>
+                  )
+                }
                 <th>Rating</th>
               </tr>
             </thead>
@@ -36,12 +44,20 @@ class RiskResultContainer extends Component<Props> {
                     <td>
                       {riskResult.riskName}
                     </td>
-                    <td>
-                      {riskResult.weights}
-                    </td>
-                    <td>
-                      {riskResult.score}
-                    </td>
+                    {
+                      !hideWeightsAndScore && (
+                        <td>
+                          {riskResult.weights}
+                        </td>
+                      )
+                    }
+                    {
+                      !hideWeightsAndScore && (
+                        <td>
+                          {riskResult.score}
+                        </td>
+                      )
+                    }
                     <td style={{color:'#' + riskResult.colour}}>
                       {riskResult.rating}
                     </td>

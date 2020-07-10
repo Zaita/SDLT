@@ -1,0 +1,455 @@
+{
+  "questionnaire": {
+    "name": "Feature or Bug Fix Implementation Request Form",
+    "type": "Questionnaire",
+    "keyInformation": "<ol><li>This form will ask you a series of questions about the feature or bug fix you wish to implement. Please ensure you have key information about the feature and people using it available before you start.<\/li>\n<li>Completion of this form should take 15-30 minutes depending on the complexity of the product. This form will email you supplementary forms to fill out covering Privacy Impact Assessments etc.<\/li>\n<li>This form will be emailed to the relevant Transport Agency staff for approval. Approvals will be handled automatically through this process and you will be contacted when they have been completed.<\/li>\n<li>By clicking 'Start', you will be emailed a link to this questionnaire with a unique ID. This can be used to review your answers, or finish the questionnaire at a later date if you cannot complete it in one sitting.<\/li>\n<\/ol>",
+    "riskCalculation": "NztaApproxRepresentation",
+    "bypassApproval": false,
+    "doesSubmissionExpire": "Yes",
+    "expireAfterDays ": 14,
+    "questions": [
+      {
+        "title": "Product Information",
+        "question": "Please enter the name of the project and product and project\/manager name",
+        "description": "Please enter the name of the project and product and project\/manager name",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Product Name",
+            "inputType": "text",
+            "required": true,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": true
+          },
+          {
+            "label": "Project\/Product Manager",
+            "inputType": "text",
+            "required": true,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
+          }
+        ]
+      },
+      {
+        "title": "Business Owner",
+        "question": "Please enter details of the business owner for this product",
+        "description": "The business owner is the person who can formally accept risk to the data used in this product. This is a business line manager, not security.",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Full Name",
+            "inputType": "text",
+            "required": true,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
+          },
+          {
+            "label": "Role at the NZTA",
+            "inputType": "text",
+            "required": true,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
+          },
+          {
+            "label": "Email",
+            "inputType": "email",
+            "required": true,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "person@nzta.govt.nz",
+            "isBusinessOwner": true,
+            "isProductName": false
+          }
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "question": "Please provide links to the release notes for this change",
+        "description": "<p>Please provide links to the release notes for this change. The release notes should contain a list of changes that are going to be implemented as part of this release.<\/p><p>If you do not have any release notes available, please enter \"no release notes\".<\/p>",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Links",
+            "inputType": "textarea",
+            "required": true,
+            "minLength": 0,
+            "maxLength": 4096,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
+          }
+        ]
+      },
+      {
+        "title": "Change Description",
+        "question": "Please provide a description of the change",
+        "description": "<p>Please provide a description of the change in plain English. If you have a high level design document that covers the scope of this change, you can enter the link to this document.<\/p><p>Ensure your description covers enough information for<\/p><ul><li>The Security Team to review the potential impacts of this change<\/li>\n<li>The Business Owner to review and accept any changes to the risk profile<\/li>\n<\/ul>",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Description",
+            "inputType": "textarea",
+            "required": true,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
+          }
+        ]
+      },
+      {
+        "title": "Release Date",
+        "question": "What is the release date for this deliverable?",
+        "description": "",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Date",
+            "inputType": "date",
+            "required": true,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
+          }
+        ]
+      },
+      {
+        "title": "New Transfers of Data",
+        "question": "Does this delivery add new data or information that belongs to the Transport Agency?",
+        "description": "<p>Is this change going to be adding any new data sources or targets of data\/information?<\/p><p>This would include:<\/p><ul><li>Data\/Information being received by the product<\/li>\n<li>Data\/Information being sent by the product<\/li>\n<li>Data\/Information being loaded\/imported into the product<\/li>\n<li>Data\/Information being exported from the product<\/li>\n<\/ul><p>Alert information is used for Logging\/Operations\/SIEM platforms. An alert is a notification of an issue with operations that is reported for support. If you're adding Alert\/Logging Information <strong>AND<\/strong> other information, please click 'Yes'.<\/p>",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "Information and Data Management Assessment"
+              }
+            ]
+          },
+          {
+            "label": "No",
+            "actionType": "goto",
+            "gotoQuestionTitle": "Public Facing Interfaces"
+          },
+          {
+            "label": "Yes - New Alert or Logging Information Only",
+            "actionType": "goto",
+            "gotoQuestionTitle": "External Data"
+          }
+        ]
+      },
+      {
+        "title": "Information Classification",
+        "question": "Does this new data have an information classification yet?",
+        "description": "<p>Do you know the Information Classification for this new data?<\/p><p>AND;<\/p><p>Is this information classification different to what the product already handles?<\/p>",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Same classification as existing",
+            "actionType": "continue"
+          },
+          {
+            "label": "Different classification",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "Information Classification"
+              }
+            ]
+          },
+          {
+            "label": "I Don't Know",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "Information Classification"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Personal Information",
+        "question": "Does this new information contain Personal Information (PI)?",
+        "description": "<p>Personal Information is defined as any information about an identifiable individual (i.e. a living, natural person; not companies\/charities\/trusts etc). The information doesn\u2019t need to identify a person by their name to be personal information, and it also doesn\u2019t need to be private or sensitive. As long as there\u2019s a reasonable chance that someone could be identified from the information - even if it\u2019s only one person that makes the link between the information and the individual, and even if it\u2019s only by linking it with other information - then it\u2019s personal information. This includes information about other staff members and our customers.<\/p><p>All systems created, managed and used by the Agency that contain or use any form of Personal Information must go through a Privacy Threshold Assessment process. At the end of this questionnaire, a Privacy Threshold Assessment task will be completed. When completed, this task will be submitted to the Privacy Officers for review and approval.<\/p><p>For more information, and specific examples, please see the Privacy Page on OnRamp: https:\/\/onramp.nzta.govt.nz\/what-we-do\/legal-services\/privacy\/<\/p>",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "Privacy Threshold Assessment Link"
+              }
+            ]
+          },
+          {
+            "label": "No",
+            "actionType": "goto",
+            "gotoQuestionTitle": "External Data"
+          }
+        ]
+      },
+      {
+        "title": "Existing Personal Information",
+        "question": "Did the product previously transmit, receive or store Personal Information (PI)?",
+        "description": "<p>Personal Information is defined as any information about an identifiable individual (i.e. a living, natural person; not companies\/charities\/trusts etc). The information doesn\u2019t need to identify a person by their name to be personal information, and it also doesn\u2019t need to be private or sensitive. As long as there\u2019s a reasonable chance that someone could be identified from the information - even if it\u2019s only one person that makes the link between the information and the individual, and even if it\u2019s only by linking it with other information - then it\u2019s personal information. This includes information about other staff members and our customers.<\/p><p>For more information, and specific examples, please see the Privacy Page on OnRamp: https:\/\/onramp.nzta.govt.nz\/what-we-do\/legal-services\/privacy\/<\/p>",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue"
+          },
+          {
+            "label": "No",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "Privacy Threshold Assessment Link"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "External Data",
+        "question": "Will this new data being transferred to a new external location?",
+        "description": "<p>Will the product be transferring data to a <strong>new<\/strong> external location?<\/p><p>An external location is defined as somewhere that is physically different to where the product is hosted. If you're exporting data for a backup to a difference cloud location\/region\/zone or a different data centre then please click 'Yes'. If this external location has been previously used by this product for data storage, please click 'No'.<\/p><p>&nbsp;<\/p><p>&nbsp;<\/p>",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue"
+          },
+          {
+            "label": "No",
+            "actionType": "continue"
+          }
+        ]
+      },
+      {
+        "title": "Data Storage Location",
+        "question": "Where will Transport Agency data be physically located\/stored?",
+        "description": "<p>What countries and cities will Transport Agency data be held in by this product?<\/p><p>The Transport Agency must adhere to guidance from the Department of Internal Affairs (DIA). This determines what countries are acceptable for storing information the Transport Agency is accountable. In general, the Transport Agency is allowed to story information in:<\/p><ul><li>New Zealand<\/li>\n<li>Australia<\/li>\n<li>United States of America<\/li>\n<li>Canada<\/li>\n<li>Germany<\/li>\n<li>Netherlands<\/li>\n<li>United Kingdom<\/li>\n<\/ul><p>Other countries\/jurisdictions can be considered, but these will need to go through a separate data risk assessment to ensure the target jurisdiction's Information and Privacy laws are compatible with New Zealand's.<\/p>",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Locations",
+            "inputType": "textarea",
+            "required": true,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
+          }
+        ]
+      },
+      {
+        "title": "Existing Provider",
+        "question": "Has the Transport Agency used this service provider previously?",
+        "description": "<p>When engaging new providers of SaaS or Cloud Services, all NZ Government Agencies are required to complete a Government Digital Communication Office Cloud Risk Assessment (GCDO\/GCIO). Once complete and assessed, a copy of this assessment will be provided to the NZ Department of Internal Affairs (DIA) and made available to all NZ Government Agencies. Each external organisation should only have to ever complete this process once.<\/p><p>This assessment is designed to solicit information about potential risks to NZ Government Data and Agencies. If the vendor in question has not completed an assessment before, a new GCIO105 task will be created on completion of this questionnaire.<\/p>",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue"
+          },
+          {
+            "label": "No",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "GCIO 105"
+              }
+            ]
+          },
+          {
+            "label": "I Don't Know",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "GCIO 105"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Public Facing Interfaces",
+        "question": "Does this deliverable expose new public facing interfaces?",
+        "description": "<p>Will this solution be exposing new web-facing services? Including APIs through an existing API management platform (e.g. Mulesoft, CDI, CloudFlare, RedShield). The Transport Agency has an obligation to ensure that all information under it's jurisdiction is kept safe, especially when that information is being provided to external parties through web-facing services.<\/p><p>If you answer 'Yes', two tasks will be created at the end of this questionnaire.<\/p><p>A Penetration Test task will be created. You'll be asked to either conduct a penetration test on the services or provide a recently completed penetration test report and summary of remediation work that has been undertaken. More information about this is explained in the Penetration Test task.<\/p><p>A Web Security Configuration task will be created. You'll be asked to test your web facing services against some industry best practices to ensure it's secure. This task will take approximately 10 minutes complete.<\/p><p>&nbsp;<\/p>",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "Penetration Test"
+              },
+              {
+                "name": "Web Security Configuration"
+              }
+            ]
+          },
+          {
+            "label": "No",
+            "actionType": "continue"
+          }
+        ]
+      },
+      {
+        "title": "Credit Card Payments",
+        "question": "Does this deliverable add or modify credit card processing?",
+        "description": "<p>Select yes if this deliverable modifies any component that handles credit card processing.<\/p><p>The Transport Agency is required by VISA and our Bank to maintain compliance with the Payment Card Industry - Data Security Standards (PCI-DSS). Vendors that accept credit cards on behalf of the Transport Agency will need to provide evidence of PCI-DSS compliance that can be forwarded to our bank. If this product is going to accept credit card payments, at the end of this questionnaire a PCI-DSS assessment task will be created. This task will ask you to go through each of the PCI-DSS requirements and ensure they're being met within this solution.<\/p>",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "PCI-DSS Assessment"
+              }
+            ]
+          },
+          {
+            "label": "No",
+            "actionType": "continue"
+          }
+        ]
+      },
+      {
+        "title": "Credit Card Connection",
+        "question": "Will this deliverable talk to the NZTA Common Payment Services (CPS) system or impact it's security?",
+        "description": "<p>Does this product deal with credit card payments in any way? or talk to Transport Agency systems that do? This includes the Payment Micro-site and Common Payment Services (CPS).<\/p><p>The Transport Agency is required by VISA and our Bank to maintain compliance with the Payment Card Industry - Data Security Standards (PCI-DSS). These products sit within the Transport Agencies PCI-DSS environment. Any changes to this environment will require validation against the current PCI-DSS requirements to ensure no compliance obligations are being compromised. At the end of this questionnaire a PCI-DSS assessment task will be created. This task will ask you to go through each of the PCI-DSS requirements and ensure they're being met within this product integration.<\/p>",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "PCI-DSS Assessment"
+              }
+            ]
+          },
+          {
+            "label": "No",
+            "actionType": "continue"
+          }
+        ]
+      },
+      {
+        "title": "Significant Change",
+        "question": "Is this a significant change to the product?",
+        "description": "<p>A significant change would be something defined as:<\/p><ul><li>Moving the product from one location to another (e.g. data centre migration)<\/li>\n<li>Moving the product from <span class=\"ILfuVd\"><span class=\"e24Kjd\">On-premises<\/span><\/span> to cloud (e.g. Revera to Azure)<\/li>\n<li>An upgrade of the Operating System that is hosting the product<\/li>\n<li>An major version upgrade of the hosting platform (e.g. Silverstripe upgrade v3 to v4)<\/li>\n<li>Changing how Authentication is handled<\/li>\n<li>The inclusion of new Personal Information (PI)<\/li>\n<\/ul>",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "Security Risk Assessment Link"
+              }
+            ]
+          },
+          {
+            "label": "No",
+            "actionType": "continue"
+          }
+        ]
+      },
+      {
+        "title": "Firewall Changes",
+        "question": "Will this deliverable require firewall changes?",
+        "description": "If this deliverable requires connections from Transport Agency systems that are not Web (e.g. chrome\/firefox) the answer is probably Yes",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue"
+          },
+          {
+            "label": "No",
+            "actionType": "goto",
+            "gotoQuestionTitle": "New Users"
+          }
+        ]
+      },
+      {
+        "title": "Firewall Information",
+        "question": "Please describe what firewall changes you might need",
+        "description": "This doesn't have to be technically accurate, but an indication of what systems need to talk and how would be a good start for Infrastructure",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Description",
+            "inputType": "textarea",
+            "required": true,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
+          }
+        ]
+      },
+      {
+        "title": "New Users",
+        "question": "Please list the names and roles of new users of this product",
+        "description": "Users are the people who will be using the product. Please document the names, roles and permissions each user will get. If there are named groups within the product, please document the group that each user will belong to.",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Users",
+            "inputType": "textarea",
+            "required": true,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
+          }
+        ]
+      },
+      {
+        "title": "Other Risks",
+        "question": "Is there any other information that should be provided that modifies the risk of the product because of this deliverable?",
+        "description": "Provide any further information that may impact the security\/risk of this product with this deliverable.",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Description",
+            "inputType": "textarea",
+            "required": false,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
+          }
+        ]
+      }
+    ]
+  }
+}
