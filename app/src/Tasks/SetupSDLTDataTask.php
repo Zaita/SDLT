@@ -373,13 +373,18 @@ class SetupSDLTDataTask extends BuildTask
             'NZTA\SDLT\Model\MultiChoiceAnswerSelection',
             $record['AnswerInputBlockID']
         );
+
         $risk = $this->findOrMake(
             'NZTA\SDLT\Model\Risk',
             $record['RiskID']
         );
+
         if ($aib && $risk) {
-            $risk->Weight = (int) ($record['Weight'] ?? 0);
-            $aib->Risks()->add($risk);
+            $weight = (int) ($record['Weight'] ?? 0);
+            $aib->Risks()->add(
+                $risk,
+                ['Weight' => $weight]
+            );
         }
 
         return $record;
