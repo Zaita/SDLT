@@ -1,6 +1,6 @@
-# NZTA Software Development Lifecycle Tool
+# NZTA Security Development Lifecycle Tool
 
-The SDLT is software that supports, and expedites I.T. security professionals as part of the change approval process within their organisation.
+The SDLT is Web Application that supports, and expedites I.T. security professionals as part of the change approval process within their organisation.
 
 ## Requirements
 
