@@ -2349,7 +2349,7 @@ class QuestionnaireSubmission extends DataObject implements ScaffoldingProvider
             return false;
         }
 
-        if ($member->Email === $this->BusinessOwnerEmailAddress) {
+        if (strtolower($member->Email) === strtolower($this->BusinessOwnerEmailAddress)) {
             return true;
         }
 
