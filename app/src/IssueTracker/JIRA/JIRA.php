@@ -5,8 +5,8 @@
  * @category SilverStripe_Project
  * @package SDLT
  * @author  Catalyst I.T. SilverStripe Team 2019 <silverstripedev@catalyst.net.nz>
- * @copyright 2019 Catalyst.Net Ltd
- * @license https://www.catalyst.net.nz (Commercial)
+ * @copyright NZ Transport Agency
+ * @license BSD-3
  * @link https://www.catalyst.net.nz
  */
 
