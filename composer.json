@@ -1,7 +1,8 @@
 {
-    "name": "silverstripe/installer",
-    "type": "silverstripe-recipe",
-    "description": "The SilverStripe Framework Installer",
+  "name": "nzta/sdlt",
+  "type": "silverstripe-recipe",
+  "description": "NZTA Security Development Lifecycle Tool",
+  "license": "BSD-3-Clause",
     "require": {
         "php": ">=7.2",
         "silverstripe/recipe-plugin": "^1.2",
@@ -26,12 +27,7 @@
         "silverstripe/graphql-devtools": "^1.0@dev",
         "dnadesign/silverstripe-populate": "^2.0"
     },
-    "repositories": {
-        "catalyst/silverstripe-active-directory": {
-            "type": "vcs",
-            "url": "git@gitlab.catalyst.net.nz:SilverStripe/silverstripe-active-directory.git"
-        }
-    },
+
     "extra": {
         "project-files-installed": [
             "app/.htaccess",
