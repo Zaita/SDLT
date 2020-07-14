@@ -5,7 +5,7 @@
     "require": {
         "php": ">=7.2",
         "silverstripe/recipe-plugin": "^1.2",
-        "silverstripe/recipe-cms": "^4@stable",
+        "silverstripe/recipe-cms": "~4.4.7",
         "silverstripe/postgresql": "^2.1.0",
         "unclecheese/display-logic": "^2.0",
         "symbiote/silverstripe-gridfieldextensions": "^3.2",
