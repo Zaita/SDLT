@@ -16,7 +16,7 @@ DNADesign\Populate\Populate:
     - 'app/populate/populate-security-components.yml'
 
 SilverStripe\Control\Session:
-  timeout: 7200
+  timeout: 14400
   cookie_secure: 1
 
 SilverStripe\Core\Injector\Injector:
