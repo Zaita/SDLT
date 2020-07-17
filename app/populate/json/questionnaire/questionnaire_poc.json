@@ -63,7 +63,7 @@
             "isProductName": false
           },
           {
-            "label": "Role at NZTA",
+            "label": "Role at Agency",
             "inputType": "text",
             "required": true,
             "minLength": 0,
@@ -78,7 +78,7 @@
             "required": true,
             "minLength": 12,
             "maxLength": 0,
-            "placeHolder": "person@nzta.govt.nz",
+            "placeHolder": "person@example.co.nz",
             "isBusinessOwner": true,
             "isProductName": false
           }
@@ -87,12 +87,13 @@
       {
         "title": " Existing POC\/Trial",
         "question": "Is this an existing Proof of Concept or Trial?",
-        "description": "Has this product already gone through a proof of concept or trial? \r\nOR:\r\nIs this product currently in a proof of concept or trial and you want an extension?",
+        "description": "Has this product already gone through a proof of concept or trial?\nOR:\nIs this product currently in a proof of concept or trial and you want an extension?",
         "answerFieldType": "action",
         "answerActionFields": [
           {
             "label": "Yes",
-            "actionType": "message"
+            "actionType": "message",
+            "message": "<p>If this product has already gone through a proof of concept or trial, please contact the security architects (security.architects@example.co.nz) for next steps. They will be able to provide information on why this product was never adopted after the previous POC\/Trial.<\/p><p>&nbsp;<\/p><p>If this product is currently in a POC\/Trial and you wish to get an extension. Please email the security architects (security.architects@example.co.nz) to discuss this. Please ensure there is clear justification for the extension to this POC\/Trial. If there is not, it is recommended that you start through the SaaS questionnaire to get the product officially certified.<\/p>"
           },
           {
             "label": "No",
@@ -109,7 +110,8 @@
         "answerActionFields": [
           {
             "label": "Yes",
-            "actionType": "message"
+            "actionType": "message",
+            "message": "<p>This product may have already gone through the required security assurance processes. Please contact the security architects (security.architects@example.co.nz) to check.<\/p><p>&nbsp;<\/p><p>If you know for certain that this product has been previously cleared, or used within the transport agency. Then, this product would have been previously certified for use by the security team. No further security assurance processes are required. Please engage the Change Advisory Board (CAB) to use this product.<\/p>"
           },
           {
             "label": "No",
@@ -120,12 +122,13 @@
       {
         "title": "Funded By Transport Agency",
         "question": "Has the Transport Agency paid for the development of this product?",
-        "description": "Has this product been developed by the Transport Agency? \r\nOR:\r\nHas it been developed by a partner at the expense of the Transport Agency?",
+        "description": "<p>Has this product been developed by the Transport Agency? OR: Has it been developed by a partner at the expense of the Transport Agency?<\/p><p>If the Transport Agency is paying for customisations to a platform, this is not considered development of the product so please select 'No'.<\/p>",
         "answerFieldType": "action",
         "answerActionFields": [
           {
             "label": "Yes",
-            "actionType": "message"
+            "actionType": "message",
+            "message": "<p>Products developed by\/for the Transport Agency are not candidates for a proof of concept or trial.&nbsp;<\/p><p>&nbsp;<\/p><p>If the Transport Agency will consume this product as a hosted service by one of our vendors (e.g. Unisys), then please complete the Software as a Service questionnaire.<\/p><p>&nbsp;<\/p><p>If the Transport Agency is going to deploy this product within our own on-prem or cloud infrastructure, then please complete the Solution Delivery questionnaire.<\/p>"
           },
           {
             "label": "No",
@@ -186,9 +189,9 @@
         ]
       },
       {
-        "title": "SaaS or NZTA Controlled",
-        "question": "Is this Software as a Service or a NZTA Controlled Deployment",
-        "description": "SaaS means that we do not have any control over the installation or configuration of the installation. \r\nNZTA Controlled means that we have control over how and where the product is deployed.",
+        "title": "SaaS or Agency Controlled",
+        "question": "Is this Software as a Service or a Agency Controlled Deployment",
+        "description": "SaaS means that we do not have any control over the installation or configuration of the installation.\nAgency Controlled means that we have control over how and where the product is deployed.",
         "answerFieldType": "action",
         "answerActionFields": [
           {
@@ -196,7 +199,7 @@
             "actionType": "continue"
           },
           {
-            "label": "NZTA Controlled",
+            "label": "Agency Controlled",
             "actionType": "continue"
           }
         ]
@@ -204,7 +207,7 @@
       {
         "title": "Key Stakeholders",
         "question": "Please list names and roles of key stakeholders",
-        "description": "Key stakeholders are people who \r\n- Will use the product \r\n- Will pay for the product\r\n- Will have data\/information stored by the product\r\n- Will have deliverables tied to the use of this product",
+        "description": "Key stakeholders are people who\n- Will use the product\n- Will pay for the product\n- Will have data\/information stored by the product\n- Will have deliverables tied to the use of this product",
         "answerFieldType": "input",
         "answerInputFields": [
           {
@@ -289,7 +292,7 @@
       {
         "title": "Description of Information",
         "question": "Describe what Transport Agency information will be received, transmitted and stored by this product",
-        "description": "Transport Agency Information is any and all data or information that the Transport Agency receives, stores or transmits. \r\n\r\nPlease ensure as much information as possible about information stored, transmitted or received by this product is documented.",
+        "description": "Transport Agency Information is any and all data or information that the Transport Agency receives, stores or transmits.\n\nPlease ensure as much information as possible about information stored, transmitted or received by this product is documented.",
         "answerFieldType": "input",
         "answerInputFields": [
           {

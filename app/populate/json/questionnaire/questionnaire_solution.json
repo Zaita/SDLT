@@ -2,11 +2,11 @@
   "questionnaire": {
     "name": "Solution Delivery Assessment",
     "type": "Questionnaire",
-    "keyInformation": "<ol class=\"information-list\"><li>This form will ask you a series of questions about the product you wish to implement. Please ensure you have key information about the product and people using it available before you start.<\/li>\n<li>Completion of this form should take 15-30 minutes depending on the complexity of the product. This tool will create and manage supplementary forms to fill out covering Privacy Impact Assessments, The DIA GCIO 105 etc.<\/li>\n<li>Approvals will be handled automatically through this tool and you will be contacted when they have been completed.<\/li>\n<li>By entering your email address below, you will be emailed a link to this questionnaire with a unique ID. This can be used to review your answers, or finish the questionnaire at a later date if you cannot complete it in one sitting.<\/li>\n<\/ol>",
+    "keyInformation": "<ol class=\"information-list\"><li>This form will ask you a series of questions about the product you wish to implement. Please ensure you have key information about the product and people using it available before you start.<\/li>\n<li>Completion of this form should take 15-30 minutes depending on the complexity of the product. This tool will create and manage supplementary forms to fill out covering Privacy Impact Assessments, The DIA GCIO 105 etc.<\/li>\n<li>Approvals will be handled automatically through this tool and you will be contacted when they have been completed.<\/li>\n<li>By entering your email address below, you will be emailed a link to this questionnaire with a unique ID. This can be used to review your answers, or finish the questionnaire at a later date if you cannot complete it in one sitting.<\/li>\n<li>The submission will expire after 7 days if you do not complete the initial set of questions. Once you have \"submitted\" your questionnaire and have the list of tasks, it will no longer expire.<\/li>\n<\/ol>",
     "riskCalculation": "NztaApproxRepresentation",
     "bypassApproval": false,
     "doesSubmissionExpire": "Yes",
-    "expireAfterDays ": 14,
+    "expireAfterDays ": 10,
     "questions": [
       {
         "title": "Product Information",
@@ -53,7 +53,7 @@
             "isProductName": false
           },
           {
-            "label": "Role at NZTA",
+            "label": "Role at Agency",
             "inputType": "text",
             "required": true,
             "minLength": 0,
@@ -68,7 +68,7 @@
             "required": true,
             "minLength": 12,
             "maxLength": 0,
-            "placeHolder": "person@nzta.govt.nz",
+            "placeHolder": "person@example.co.nz",
             "isBusinessOwner": true,
             "isProductName": false
           }
@@ -93,9 +93,9 @@
         ]
       },
       {
-        "title": "ARB Endorsement",
-        "question": "Has the design for this product going through ARB and received endorsement?",
-        "description": "",
+        "title": "DQR\/ADC Endorsement",
+        "question": "Has the design for this product going through DQR\/ADC and received endorsement?",
+        "description": "<p>Note: If you're still going through the DQR\/ADC process, please click \"Yes\". You will need to ensure approval has been completed prior to completing the SDLT submission. The SDLT artifacts will need to reflect the final-design of the solution, so approval will need to be completed prior to having the SDLT submission approved.<\/p>",
         "answerFieldType": "action",
         "answerActionFields": [
           {
@@ -191,7 +191,7 @@
       {
         "title": "Personal Information",
         "question": "Does this product store personal information (PI)?",
-        "description": "<p>Personal Information is defined as any information about an identifiable individual (i.e. a living, natural person; not companies\/charities\/trusts etc). The information doesn\u2019t need to identify a person by their name to be personal information, and it also doesn\u2019t need to be private or sensitive. As long as there\u2019s a reasonable chance that someone could be identified from the information - even if it\u2019s only one person that makes the link between the information and the individual, and even if it\u2019s only by linking it with other information - then it\u2019s personal information. This includes information about other staff members and our customers.<\/p><p>All systems created, managed and used by the Agency that contain or use any form of Personal Information must go through a Privacy Threshold Assessment process. At the end of this questionnaire, a Privacy Threshold Assessment task will be completed. When completed, this task will be submitted to the Privacy Officers for review and approval.<\/p><p>For more information, and specific examples, please see the Privacy Page on OnRamp: https:\/\/onramp.nzta.govt.nz\/what-we-do\/legal-services\/privacy\/<\/p>",
+        "description": "<p>Personal Information is defined as any information about an identifiable individual (i.e. a living, natural person; not companies\/charities\/trusts etc). The information doesn\u2019t need to identify a person by their name to be personal information, and it also doesn\u2019t need to be private or sensitive. As long as there\u2019s a reasonable chance that someone could be identified from the information - even if it\u2019s only one person that makes the link between the information and the individual, and even if it\u2019s only by linking it with other information - then it\u2019s personal information. This includes information about other staff members and our customers.<\/p><p>All systems created, managed and used by the Agency that contain or use any form of Personal Information must go through a Privacy Threshold Assessment process. At the end of this questionnaire, a Privacy Threshold Assessment task will be completed. When completed, this task will be submitted to the Privacy Officers for review and approval.<\/p><p>For more information, and specific examples, please see the Privacy Page on OnRamp: https:\/\/onramp.example.co.nz\/what-we-do\/legal-services\/privacy\/<\/p>",
         "answerFieldType": "action",
         "answerActionFields": [
           {
@@ -392,21 +392,11 @@
         "answerActionFields": [
           {
             "label": "Yes",
-            "actionType": "continue",
-            "tasks": [
-              {
-                "name": "Control Validation Audit"
-              }
-            ]
+            "actionType": "continue"
           },
           {
             "label": "No",
-            "actionType": "continue",
-            "tasks": [
-              {
-                "name": "Control Validation Audit"
-              }
-            ]
+            "actionType": "continue"
           }
         ]
       },
@@ -427,25 +417,9 @@
         ]
       },
       {
-        "title": "Authentication",
-        "question": "Does this product integrate with the Transport Agency identity and access management platforms?",
-        "description": "Will this product integrate with Azure Active Directory or OKTA to manage Transport Agency user accounts?",
-        "answerFieldType": "action",
-        "answerActionFields": [
-          {
-            "label": "Yes",
-            "actionType": "continue"
-          },
-          {
-            "label": "No",
-            "actionType": "continue"
-          }
-        ]
-      },
-      {
         "title": "Security Risk Assessment",
-        "question": "This product will require a Risk Assessment",
-        "description": "",
+        "question": "A Security Risk Assessment is required for this delivery",
+        "description": "<p>As you're doing a delivery of a new solution, or a major change to an existing solution, a Security Risk Assessment is required.<\/p><p>The Transport Agency uses a new Digital Security Risk Assessment (DSRA) methodology. If you're familiar with this approach and do not need the Tutorial please click 'Ok'. If you would like the Tutorial to give you some background information on how to use the DSRA please click the 'With Tutorial' button.<\/p>",
         "answerFieldType": "action",
         "answerActionFields": [
           {
@@ -453,7 +427,22 @@
             "actionType": "continue",
             "tasks": [
               {
-                "name": "Security Risk Assessment Link"
+                "name": "Initial Risk Impact Assessment"
+              },
+              {
+                "name": "Control Validation Audit"
+              },
+              {
+                "name": "Security Risk Assessment"
+              }
+            ]
+          },
+          {
+            "label": "With Tutorial",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "Digital Security Risk Assessment Tutorial"
               }
             ]
           }
@@ -473,6 +462,24 @@
                 "name": "Certification and Accreditation Report"
               }
             ]
+          }
+        ]
+      },
+      {
+        "title": "Security Architect",
+        "question": "What security architect have you been working with for this delivery?",
+        "description": "<p>If you have been working with a security architect who has knowledge of this delivery, please put their name in the box. First name only is fine.<\/p>",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Name",
+            "inputType": "text",
+            "required": false,
+            "minLength": 0,
+            "maxLength": 4096,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
           }
         ]
       },

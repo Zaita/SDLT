@@ -2,12 +2,46 @@
   "questionnaire": {
     "name": "Software as a Service Request Form",
     "type": "Questionnaire",
-    "keyInformation": "<ol><li>This form will ask you a series of questions about the product you wish to implement. Please ensure you have key information about the product and people using it available before you start.<\/li>\n<li>Completion of this form should take 15-30 minutes depending on the complexity of the product. This form will email you supplementary forms to fill out covering Privacy Impact Assessments, The DIA GCIO 105 etc.<\/li>\n<li>This form will be emailed to the relevant Transport Agency staff for approval. Approvals will be handled automatically through this process and you will be contacted when they have been completed.<\/li>\n<li>By clicking 'Start', you will be emailed a link to this questionnaire. This can be used to review your answers, or finish the questionnaire at a later date if you cannot complete it in one sitting.<\/li>\n<\/ol>",
+    "keyInformation": "<ol><li>Please ensure you have checked the <a rel=\"noopener\" href=\"#\" target=\"_blank\" class=\"ss-broken\">Transport Agencies Product List<\/a> to see if the product has already been endorsed for use at the Agency. Endorsed products do not need to go through the SDLT for any security assurance activities.<\/li>\n<li>You will need information about the product you wish to implement in order to complete this questionnaire.<\/li>\n<li>It will take approximately 15 minutes to complete the initial questionnaire if you have all information availabile. You do not have to complete the form in one sitting. You will be emailed a link and have access through the \"My Submissions\" button on the homepage to complete it at a later date.<\/li>\n<li>If you do not complete the initial questionnaire and get your submission through to the summary screen, it will expire after 7 days. You will need to start again if this occurs. The questionnaire will not expire once you get to the summary screen and are working through the necessary tasks.<\/li>\n<li>Once you complete all tasks, or have no tasks, you will be able to send your submission through for approval. This form will be emailed to the relevant Transport Agency staff for approval. Approvals will be handled automatically through this process and you will be contacted when they have been completed.<\/li>\n<\/ol>",
     "riskCalculation": "NztaApproxRepresentation",
     "bypassApproval": false,
     "doesSubmissionExpire": "Yes",
     "expireAfterDays ": 14,
     "questions": [
+      {
+        "title": "Existing Product",
+        "question": "Is this product currently, or previously in use at the Transport Agency?",
+        "description": "<p>Has this product already been cleared for use at the Transport Agency by the internal product team?<\/p><p>Please check the <a rel=\"noopener\" href=\"https:\/\/infohub.example.co.nz\/otcs\/cs.dll?func=ll&amp;objaction=overview&amp;objid=43085466\" target=\"_blank\">Transport Agency Product List<\/a> spreadsheet to see if the product is listed. If the product can be found in the spreadsheet, please answer \"yes\".<\/p><p>If you're unsure, please contact <a href=\"mailto:lauren.flohr@example.co.nz\">Lauren Flohr<\/a>, <span class=\"_21sno _3v9gP _27y7i\" title=\"Head of Product\" data-log-name=\"JobTitle\">Head of Product.<\/span><\/p>",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "message",
+            "message": "<p>This product has already been approved for use by the Transport Agency product team. At this point, no security assurance activities are required. Please reach out to the product team (product@example.co.nz) to get information about getting access to this product.<\/p><p>&nbsp;<\/p><p><strong>Note:<\/strong> You do not need to complete the rest of this submission. This will appear in your \"My Submissions\" tab with a status of \"In Progress\" for 7 days before expiring. You do not need to make any follow ups about this submission with the security team.<\/p>"
+          },
+          {
+            "label": "No",
+            "actionType": "continue"
+          }
+        ]
+      },
+      {
+        "title": "Funded By Transport Agency",
+        "question": "Has the Transport Agency paid for the development of this product?",
+        "description": "<p>Has this product been developed by the Transport Agency?<\/p><p>OR:<\/p><p>Has it been developed by a partner\/vendor at the expense of the Transport Agency?<\/p>",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "message",
+            "message": "<p>\"Software as a Service\" or \"Cloud Products\" developed by the Transport Agency cannot be assessed through this pillar. Please return to the landing page (by clicking Agency logo at the top of the page) and select the \"Solution Delivery\" pillar.<\/p>"
+          },
+          {
+            "label": "No",
+            "actionType": "continue"
+          }
+        ]
+      },
       {
         "title": "Product Information",
         "question": "Please enter details of the product",
@@ -49,7 +83,7 @@
       {
         "title": "Business Owner",
         "question": "Please enter details of the business owner for the use of this SaaS product",
-        "description": "The business owner is the person who can formally accept risks on behalf of the Agency to the data used in this product. This is a business line manager, not security. This person will know they're the business owner, as their role explicitly states that they can accept risk. This is not a developer, engineer or technical lead position.",
+        "description": "<p>The business owner is the person who can formally accept risks on behalf of the Agency to the data used in this product. This is a business line manager, not security. This person will know they're the business owner, as their role explicitly states that they can accept risk. This is not a developer, engineer or technical lead position.<\/p>",
         "answerFieldType": "input",
         "answerInputFields": [
           {
@@ -63,7 +97,7 @@
             "isProductName": false
           },
           {
-            "label": "Role at NZTA",
+            "label": "Role at Agency",
             "inputType": "text",
             "required": true,
             "minLength": 0,
@@ -78,48 +112,16 @@
             "required": true,
             "minLength": 12,
             "maxLength": 0,
-            "placeHolder": "person@nzta.govt.nz",
+            "placeHolder": "person@example.co.nz",
             "isBusinessOwner": true,
             "isProductName": false
           }
         ]
       },
       {
-        "title": "Product Used Before",
-        "question": "Is this product currently, or previously in use at the Transport Agency?",
-        "description": "<p>Is another part of the Transport Agency already using this product?<\/p><p>OR;<\/p><p>Was it used previously?<\/p><p>&nbsp;<\/p><p>If the product is currently going through a Proof of Concept or Software Trial, please click \"No\".<\/p>",
-        "answerFieldType": "action",
-        "answerActionFields": [
-          {
-            "label": "Yes",
-            "actionType": "message"
-          },
-          {
-            "label": "No",
-            "actionType": "continue"
-          }
-        ]
-      },
-      {
-        "title": "Funded By Transport Agency",
-        "question": "Has the Transport Agency paid for the development of this product?",
-        "description": "Has this product been developed by the Transport Agency? \r\nOR:\r\nHas it been developed by a partner\/vendor at the expense of the Transport Agency?",
-        "answerFieldType": "action",
-        "answerActionFields": [
-          {
-            "label": "Yes",
-            "actionType": "continue"
-          },
-          {
-            "label": "No",
-            "actionType": "continue"
-          }
-        ]
-      },
-      {
         "title": "Product Description",
         "question": "Please describe what the product does in plain English",
-        "description": "Include description of the product's features, the ones the Transport Agency wants to use and how we intend to use them.",
+        "description": "<p>Include description of the product's features, the ones the Transport Agency wants to use and how we intend to use them.<\/p>",
         "answerFieldType": "input",
         "answerInputFields": [
           {
@@ -171,9 +173,9 @@
         ]
       },
       {
-        "title": "GCIO105",
-        "question": "Has this vendor completed a GCIO105?",
-        "description": "<p>All NZ Government Agencies are required to complete a Government Digital Communication Office Cloud Risk Assessment (GCDO\/GCIO). Once complete and assessed, a copy of this assessment will be provided to the NZ Department of Internal Affairs (DIA) and made available to all NZ Government Agencies. Each external organisation should only have to ever complete this process once.<\/p><p>This assessment is designed to solicit information about potential risks to NZ Government Data and Agencies. If the vendor in question has not completed an assessment before, a new GCIO105 task will be created on completion of this questionnaire.<\/p>",
+        "title": "Personal Information",
+        "question": "Will this SaaS product store customer personal information (PI)?",
+        "description": "<p>Personal Information is defined as any information about an identifiable individual (i.e. a living, natural person; not companies\/charities\/trusts etc). The information doesn\u2019t need to identify a person by their name to be personal information, and it also doesn\u2019t need to be private or sensitive. As long as there\u2019s a reasonable chance that someone could be identified from the information - even if it\u2019s only one person that makes the link between the information and the individual, and even if it\u2019s only by linking it with other information - then it\u2019s personal information. This includes information about other staff members and our customers.<\/p><p>All SaaS products used by the Agency that contain or use any form of Personal Information must go through a Privacy Threshold Assessment process. At the end of this questionnaire, a Privacy Threshold Assessment task will be completed. When completed, this task will be submitted to the Privacy Officers for review and approval.<\/p><p>For more information, and specific examples, please see the Privacy Page on OnRamp: https:\/\/onramp.example.co.nz\/what-we-do\/legal-services\/privacy\/<\/p><p><strong>Note: <\/strong>If the product will only store the names and email addresses of Transport Agency staff as users of this system, please click the \"Agency Staff Login Only\" button.<\/p>",
         "answerFieldType": "action",
         "answerActionFields": [
           {
@@ -181,39 +183,64 @@
             "actionType": "continue",
             "tasks": [
               {
+                "name": "Privacy Threshold Assessment Link"
+              },
+              {
                 "name": "GCIO 105"
+              },
+              {
+                "name": "Security Risk Assessment Link"
               }
             ]
           },
           {
             "label": "No",
-            "actionType": "continue",
-            "tasks": [
-              {
-                "name": "GCIO 105"
-              }
-            ]
+            "actionType": "continue"
           },
           {
-            "label": "I Don't Know",
-            "actionType": "continue",
-            "tasks": [
-              {
-                "name": "GCIO 105"
-              }
-            ]
+            "label": "Agency Staff Login Only",
+            "actionType": "continue"
           }
         ]
       },
       {
-        "title": "Use of Data",
-        "question": "Will Transport Agency Data be used by this product?",
-        "description": "Will this product use\/store data that the Transport Agency is responsible for? \r\n(i.e. do we have a legal requirement to ensure the safety of this data)\r\n\r\nTransport Agency data is any and all data or information that the Transport Agency receives, stores or transmits. ",
+        "title": "Types of Data",
+        "question": "Please list the types of data being used in this product",
+        "description": "<p>Please list out the different types of data you'll be inputting or using into this software. (e.g. flow charts, names, emails, phone numbers)<\/p>",
+        "answerFieldType": "input",
+        "answerInputFields": [
+          {
+            "label": "Data",
+            "inputType": "textarea",
+            "required": true,
+            "minLength": 0,
+            "maxLength": 4096,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
+          }
+        ]
+      },
+      {
+        "title": "Agency Integration",
+        "question": "Will this SaaS product be integrating with any Transport Agency systems?",
+        "description": "<p>Will this product r<strong>eceive information from<\/strong> or <strong>transfer data to<\/strong> any other Transport Agency systems?<\/p>",
         "answerFieldType": "action",
         "answerActionFields": [
           {
             "label": "Yes",
-            "actionType": "continue"
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "Information and Data Management Assessment"
+              },
+              {
+                "name": "GCIO 105"
+              },
+              {
+                "name": "Security Risk Assessment Link"
+              }
+            ]
           },
           {
             "label": "No",
@@ -223,114 +250,27 @@
         ]
       },
       {
-        "title": "New Collection",
-        "question": "Is this a new collection of data or information; or a change to the way it is collected or sourced?",
-        "description": "",
-        "answerFieldType": "action",
-        "answerActionFields": [
+        "title": "Data Transfer",
+        "question": "How is Transport Agency data being transferred to\/from the SaaS Product?",
+        "description": "<p>Please document the technologies being used to transfer data (e.g. Web Forms, FTP, SCP, Email etc)<\/p>",
+        "answerFieldType": "input",
+        "answerInputFields": [
           {
-            "label": "Yes",
-            "actionType": "continue",
-            "tasks": [
-              {
-                "name": "Information and Data Management Assessment"
-              }
-            ]
-          },
-          {
-            "label": "No",
-            "actionType": "continue"
-          }
-        ]
-      },
-      {
-        "title": "New Use of Data",
-        "question": "Is this a new use for data or information already held by the NZ Transport Agency?",
-        "description": "Transport Agency data is any and all data or information that the Transport Agency receives, stores or transmits. ",
-        "answerFieldType": "action",
-        "answerActionFields": [
-          {
-            "label": "Yes",
-            "actionType": "continue",
-            "tasks": [
-              {
-                "name": "Information and Data Management Assessment"
-              }
-            ]
-          },
-          {
-            "label": "No",
-            "actionType": "continue"
-          }
-        ]
-      },
-      {
-        "title": "Data Storage Change",
-        "question": "Is this a change to, or a new way of storing data or information?",
-        "description": "Transport Agency Information is any and all data or information that the Transport Agency receives, stores or transmits. ",
-        "answerFieldType": "action",
-        "answerActionFields": [
-          {
-            "label": "Yes",
-            "actionType": "continue",
-            "tasks": [
-              {
-                "name": "Information and Data Management Assessment"
-              }
-            ]
-          },
-          {
-            "label": "No",
-            "actionType": "continue"
-          }
-        ]
-      },
-      {
-        "title": "Sharing Data",
-        "question": "Does this involve the sharing or distributing of data or information with other agencies, organisations, or the public?",
-        "description": "",
-        "answerFieldType": "action",
-        "answerActionFields": [
-          {
-            "label": "Yes",
-            "actionType": "continue",
-            "tasks": [
-              {
-                "name": "Information and Data Management Assessment"
-              }
-            ]
-          },
-          {
-            "label": "No",
-            "actionType": "continue"
-          }
-        ]
-      },
-      {
-        "title": "Personal Information",
-        "question": "Will this SaaS product store personal information (PI)?",
-        "description": "<p>Personal Information is defined as any information about an identifiable individual (i.e. a living, natural person; not companies\/charities\/trusts etc). The information doesn\u2019t need to identify a person by their name to be personal information, and it also doesn\u2019t need to be private or sensitive. As long as there\u2019s a reasonable chance that someone could be identified from the information - even if it\u2019s only one person that makes the link between the information and the individual, and even if it\u2019s only by linking it with other information - then it\u2019s personal information. This includes information about other staff members and our customers.<\/p><p>All SaaS products used by the Agency that contain or use any form of Personal Information must go through a Privacy Threshold Assessment process. At the end of this questionnaire, a Privacy Threshold Assessment task will be completed. When completed, this task will be submitted to the Privacy Officers for review and approval.<\/p><p>For more information, and specific examples, please see the Privacy Page on OnRamp: https:\/\/onramp.nzta.govt.nz\/what-we-do\/legal-services\/privacy\/<\/p>",
-        "answerFieldType": "action",
-        "answerActionFields": [
-          {
-            "label": "Yes",
-            "actionType": "continue",
-            "tasks": [
-              {
-                "name": "Privacy Threshold Assessment Link"
-              }
-            ]
-          },
-          {
-            "label": "No",
-            "actionType": "continue"
+            "label": "Description",
+            "inputType": "textarea",
+            "required": true,
+            "minLength": 0,
+            "maxLength": 0,
+            "placeHolder": "",
+            "isBusinessOwner": false,
+            "isProductName": false
           }
         ]
       },
       {
         "title": "Description of Information",
         "question": "Describe what Transport Agency information will be received, transmitted and stored by this product",
-        "description": "Transport Agency Information is any and all data or information that the Transport Agency receives, stores or transmits. \r\n\r\nPlease ensure as much information as possible about information stored, transmitted or received by this product is documented.",
+        "description": "Please ensure as much information as possible about Transport Agency information that is utilised by this product. Any information that is stored by, transmitted to; or received from this product must be documented.",
         "answerFieldType": "input",
         "answerInputFields": [
           {
@@ -346,67 +286,9 @@
         ]
       },
       {
-        "title": "External Data",
-        "question": "Will Transport Agency data being transferred or loaded into the SaaS Product?",
-        "description": "<p>This determines if Transport Agency data is 'leaving the building'. SaaS products that hold information on behalf of the Transport Agency (i.e. information that the Transport Agency is responsible for) will need to provide evidence of a recent Penetration Test and Remediation Report. The Transport Agency has an obligation to ensure that all information that it is accountable for is kept safe, even when that information is being housed by an external vendor.<\/p><p>At the end of this questionnaire, a SaaS Penetration Test task will be created. You'll be asked to contact the vendor for a copy of their most recent penetration test report and summary of remediation work that has been undertaken. More information about this is explained in the SaaS Penetration Test task.<\/p>",
-        "answerFieldType": "action",
-        "answerActionFields": [
-          {
-            "label": "Yes",
-            "actionType": "continue",
-            "tasks": [
-              {
-                "name": "SaaS Penetration Test"
-              }
-            ]
-          },
-          {
-            "label": "No",
-            "actionType": "goto",
-            "gotoQuestionTitle": "Credit Card Payments"
-          }
-        ]
-      },
-      {
-        "title": " Transferring Data",
-        "question": "How is Transport Agency data transferred to\/from the SaaS Product?",
-        "description": "Please document the technologies being used to transfer data (e.g. Web Forms, FTP, SCP, Email etc)",
-        "answerFieldType": "input",
-        "answerInputFields": [
-          {
-            "label": "Description",
-            "inputType": "textarea",
-            "required": true,
-            "minLength": 0,
-            "maxLength": 0,
-            "placeHolder": "",
-            "isBusinessOwner": false,
-            "isProductName": false
-          }
-        ]
-      },
-      {
-        "title": " Data Storage Location",
-        "question": "Where will Transport Agency data be physically located\/stored?",
-        "description": "<p>What countries and cities will Transport Agency data be held in by this product?<\/p><p>The Transport Agency must adhere to guidance from the Department of Internal Affairs (DIA). This determines what countries are acceptable for storing information the Transport Agency is accountable. In general, the Transport Agency is allowed to story information in:<\/p><ul><li>New Zealand<\/li>\n<li>Australia<\/li>\n<li>United States of America<\/li>\n<li>Canada<\/li>\n<li>Germany<\/li>\n<li>Netherlands<\/li>\n<li>United Kingdom<\/li>\n<\/ul><p>Other countries\/jurisdictions can be considered, but these will need to go through a separate data risk assessment to ensure the target jurisdiction's Information and Privacy laws are compatible with New Zealand's.<\/p>",
-        "answerFieldType": "input",
-        "answerInputFields": [
-          {
-            "label": "Locations",
-            "inputType": "textarea",
-            "required": true,
-            "minLength": 0,
-            "maxLength": 0,
-            "placeHolder": "",
-            "isBusinessOwner": false,
-            "isProductName": false
-          }
-        ]
-      },
-      {
         "title": "Credit Card Payments",
-        "question": "Will this product accept credit cards from the public?",
-        "description": "<p>Will this product accept credit card payments from the Public on behalf of the Transport Agency? (i.e. Will this product sell products and services for the Agency and accept payment via Credit Card).<\/p><p>The Transport Agency is required by VISA and our Bank to maintain compliance with the Payment Card Industry - Data Security Standards (PCI-DSS). Vendors that accept credit cards on behalf of the Transport Agency will need to provide evidence of PCI-DSS compliance that can be forwarded to our bank. If this product is going to accept credit card payments, at the end of this questionnaire a Third-Party PCI-DSS task will be created. You will need to engage with the vendor to obtain evidence of current PCI-DSS compliance.<\/p><p>&nbsp;<\/p>",
+        "question": "Will this product accept Transport Agency customer credit cards?",
+        "description": "Will this product accept credit card payments from the NZ Public on behalf of the Transport Agency?",
         "answerFieldType": "action",
         "answerActionFields": [
           {
@@ -426,8 +308,8 @@
       },
       {
         "title": "Credit Card Connection",
-        "question": "Will this product directly talk to the Transport Agency Tolling Website, Payment Micro-site or Common Payment Services (CPS) system?",
-        "description": "<p>To use this product, will there need to be some integration with Transport Agency systems that handle payments? This includes the Tolling website, Payment Micro-site or Common Payment Services (CPS). <\/p><p>The Transport Agency is required by VISA and our Bank to maintain compliance with the Payment Card Industry - Data Security Standards (PCI-DSS). These products sit within the Transport Agencies PCI-DSS environment. Any changes to this environment will require validation against the current PCI-DSS requirements to ensure no compliance obligations are being compromised. At the end of this questionnaire a PCI-DSS assessment task will be created. This task will ask you to go through each of the PCI-DSS requirements and ensure they're being met within this product integration.<\/p>",
+        "question": "Will this product directly talk to the Transport Agency Payment Micro-site or Common Payment Services (CPS) system?",
+        "description": "To use this product, will there need to be some integration with Transport Agency systems that handle payments? This includes the Payment Micro-site and Common Payment Services (CPS). ",
         "answerFieldType": "action",
         "answerActionFields": [
           {
@@ -457,26 +339,7 @@
           },
           {
             "label": "No",
-            "actionType": "goto",
-            "gotoQuestionTitle": "SaaS Users"
-          }
-        ]
-      },
-      {
-        "title": "Firewall Information",
-        "question": "Please describe what firewall changes you might need",
-        "description": "Please name the systems that need to talk and how. This doesn't have to be technically accurate, but an indication of what systems need to talk and how would be a good start for Infrastructure.",
-        "answerFieldType": "input",
-        "answerInputFields": [
-          {
-            "label": "Description",
-            "inputType": "textarea",
-            "required": true,
-            "minLength": 0,
-            "maxLength": 0,
-            "placeHolder": "",
-            "isBusinessOwner": false,
-            "isProductName": false
+            "actionType": "continue"
           }
         ]
       },
@@ -501,61 +364,20 @@
       {
         "title": "Authentication",
         "question": "Does this product integrate with the Transport Agency identity and access management platforms?",
-        "description": "Will this product integrate with Azure Active Directory or OKTA to manage Transport Agency user accounts?",
+        "description": "<p>Will this product integrate with Azure Active Directory or OKTA to manage Transport Agency user accounts?<\/p>",
         "answerFieldType": "action",
         "answerActionFields": [
           {
             "label": "Yes",
-            "actionType": "goto",
-            "gotoQuestionTitle": "Security Risk Assessment"
+            "actionType": "continue"
           },
           {
             "label": "No",
             "actionType": "continue"
-          }
-        ]
-      },
-      {
-        "title": "Multi-Factor Authentication",
-        "question": "Please describe how Multi-factor authentication is used by this product",
-        "description": "Include the technologies and products being used (e.g. SMS, Google Authenticator)",
-        "answerFieldType": "input",
-        "answerInputFields": [
-          {
-            "label": "Description",
-            "inputType": "textarea",
-            "required": true,
-            "minLength": 0,
-            "maxLength": 0,
-            "placeHolder": "",
-            "isBusinessOwner": false,
-            "isProductName": false
-          }
-        ]
-      },
-      {
-        "title": "Security Risk Assessment",
-        "question": "Have you completed a security risk assessment?",
-        "description": "",
-        "answerFieldType": "action",
-        "answerActionFields": [
-          {
-            "label": "Yes",
-            "actionType": "continue",
-            "tasks": [
-              {
-                "name": "Security Risk Assessment Link"
-              }
-            ]
           },
           {
-            "label": "No",
-            "actionType": "continue",
-            "tasks": [
-              {
-                "name": "Security Risk Assessment Link"
-              }
-            ]
+            "label": "Not Applicable",
+            "actionType": "continue"
           }
         ]
       },
@@ -574,6 +396,18 @@
             "placeHolder": "",
             "isBusinessOwner": false,
             "isProductName": false
+          }
+        ]
+      },
+      {
+        "title": "Next Steps",
+        "question": "Next Steps",
+        "description": "<p>Next, you will need to review your answers to click \"Submit Questionnaire\".<\/p><p>If any tasks are required, these will be created and displayed for you to complete.<\/p><p>If no tasks are required, you will be able to click \"Submit for Approval\" to send your submission for approval.<\/p>",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Review my answers",
+            "actionType": "continue"
           }
         ]
       }

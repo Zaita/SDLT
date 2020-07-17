@@ -306,6 +306,10 @@ class AnswerActionField extends DataObject implements ScaffoldingProvider
         $obj['label'] = $actionField->Label ?? '';
         $obj['actionType'] =  $actionField->ActionType;
 
+        if ($actionField->ActionType == 'message') {
+            $obj['message'] = $actionField->Message ?? '';
+        }
+
         if ($actionField->ActionType == 'goto') {
             $obj['gotoQuestionTitle'] = $actionField->Goto() ? $actionField->Goto()->Title: '';
         }

@@ -1,6 +1,6 @@
 {
   "questionnaire": {
-    "name": "Feature or Bug Fix Implementation Request Form",
+    "name": "Product Release, Technical Change or Bug Fix Request Form",
     "type": "Questionnaire",
     "keyInformation": "<ol><li>This form will ask you a series of questions about the feature or bug fix you wish to implement. Please ensure you have key information about the feature and people using it available before you start.<\/li>\n<li>Completion of this form should take 15-30 minutes depending on the complexity of the product. This form will email you supplementary forms to fill out covering Privacy Impact Assessments etc.<\/li>\n<li>This form will be emailed to the relevant Transport Agency staff for approval. Approvals will be handled automatically through this process and you will be contacted when they have been completed.<\/li>\n<li>By clicking 'Start', you will be emailed a link to this questionnaire with a unique ID. This can be used to review your answers, or finish the questionnaire at a later date if you cannot complete it in one sitting.<\/li>\n<\/ol>",
     "riskCalculation": "NztaApproxRepresentation",
@@ -53,7 +53,7 @@
             "isProductName": false
           },
           {
-            "label": "Role at the NZTA",
+            "label": "Role at the Agency",
             "inputType": "text",
             "required": true,
             "minLength": 0,
@@ -68,9 +68,31 @@
             "required": true,
             "minLength": 0,
             "maxLength": 0,
-            "placeHolder": "person@nzta.govt.nz",
+            "placeHolder": "person@example.co.nz",
             "isBusinessOwner": true,
             "isProductName": false
+          }
+        ]
+      },
+      {
+        "title": "Release Notes Known",
+        "question": "Do you currently have release notes for this deliverable?",
+        "description": "<p>If you have the release notes, please click \"Yes\". You'll be asked in the next question to provide the release notes as part of this submission.<\/p><p>If you do not have the release notes, please click \"No\". A Release Notes will be created at the end of the submission for you to provide them prior to submitting for approval.<\/p>",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Yes",
+            "actionType": "continue"
+          },
+          {
+            "label": "No",
+            "actionType": "goto",
+            "gotoQuestionTitle": "Change Description",
+            "tasks": [
+              {
+                "name": "Release Notes"
+              }
+            ]
           }
         ]
       },
@@ -188,7 +210,7 @@
       {
         "title": "Personal Information",
         "question": "Does this new information contain Personal Information (PI)?",
-        "description": "<p>Personal Information is defined as any information about an identifiable individual (i.e. a living, natural person; not companies\/charities\/trusts etc). The information doesn\u2019t need to identify a person by their name to be personal information, and it also doesn\u2019t need to be private or sensitive. As long as there\u2019s a reasonable chance that someone could be identified from the information - even if it\u2019s only one person that makes the link between the information and the individual, and even if it\u2019s only by linking it with other information - then it\u2019s personal information. This includes information about other staff members and our customers.<\/p><p>All systems created, managed and used by the Agency that contain or use any form of Personal Information must go through a Privacy Threshold Assessment process. At the end of this questionnaire, a Privacy Threshold Assessment task will be completed. When completed, this task will be submitted to the Privacy Officers for review and approval.<\/p><p>For more information, and specific examples, please see the Privacy Page on OnRamp: https:\/\/onramp.nzta.govt.nz\/what-we-do\/legal-services\/privacy\/<\/p>",
+        "description": "<p>Personal Information is defined as any information about an identifiable individual (i.e. a living, natural person; not companies\/charities\/trusts etc). The information doesn\u2019t need to identify a person by their name to be personal information, and it also doesn\u2019t need to be private or sensitive. As long as there\u2019s a reasonable chance that someone could be identified from the information - even if it\u2019s only one person that makes the link between the information and the individual, and even if it\u2019s only by linking it with other information - then it\u2019s personal information. This includes information about other staff members and our customers.<\/p><p>All systems created, managed and used by the Agency that contain or use any form of Personal Information must go through a Privacy Threshold Assessment process. At the end of this questionnaire, a Privacy Threshold Assessment task will be completed. When completed, this task will be submitted to the Privacy Officers for review and approval.<\/p><p>For more information, and specific examples, please see the Privacy Page on OnRamp: https:\/\/onramp.example.co.nz\/what-we-do\/legal-services\/privacy\/<\/p>",
         "answerFieldType": "action",
         "answerActionFields": [
           {
@@ -210,7 +232,7 @@
       {
         "title": "Existing Personal Information",
         "question": "Did the product previously transmit, receive or store Personal Information (PI)?",
-        "description": "<p>Personal Information is defined as any information about an identifiable individual (i.e. a living, natural person; not companies\/charities\/trusts etc). The information doesn\u2019t need to identify a person by their name to be personal information, and it also doesn\u2019t need to be private or sensitive. As long as there\u2019s a reasonable chance that someone could be identified from the information - even if it\u2019s only one person that makes the link between the information and the individual, and even if it\u2019s only by linking it with other information - then it\u2019s personal information. This includes information about other staff members and our customers.<\/p><p>For more information, and specific examples, please see the Privacy Page on OnRamp: https:\/\/onramp.nzta.govt.nz\/what-we-do\/legal-services\/privacy\/<\/p>",
+        "description": "<p>Personal Information is defined as any information about an identifiable individual (i.e. a living, natural person; not companies\/charities\/trusts etc). The information doesn\u2019t need to identify a person by their name to be personal information, and it also doesn\u2019t need to be private or sensitive. As long as there\u2019s a reasonable chance that someone could be identified from the information - even if it\u2019s only one person that makes the link between the information and the individual, and even if it\u2019s only by linking it with other information - then it\u2019s personal information. This includes information about other staff members and our customers.<\/p><p>For more information, and specific examples, please see the Privacy Page on OnRamp: https:\/\/onramp.example.co.nz\/what-we-do\/legal-services\/privacy\/<\/p>",
         "answerFieldType": "action",
         "answerActionFields": [
           {
@@ -295,7 +317,7 @@
       {
         "title": "Public Facing Interfaces",
         "question": "Does this deliverable expose new public facing interfaces?",
-        "description": "<p>Will this solution be exposing new web-facing services? Including APIs through an existing API management platform (e.g. Mulesoft, CDI, CloudFlare, RedShield). The Transport Agency has an obligation to ensure that all information under it's jurisdiction is kept safe, especially when that information is being provided to external parties through web-facing services.<\/p><p>If you answer 'Yes', two tasks will be created at the end of this questionnaire.<\/p><p>A Penetration Test task will be created. You'll be asked to either conduct a penetration test on the services or provide a recently completed penetration test report and summary of remediation work that has been undertaken. More information about this is explained in the Penetration Test task.<\/p><p>A Web Security Configuration task will be created. You'll be asked to test your web facing services against some industry best practices to ensure it's secure. This task will take approximately 10 minutes complete.<\/p><p>&nbsp;<\/p>",
+        "description": "<p>Will this solution be exposing new web-facing services? Including APIs through an existing API management platform (e.g. Mulesoft, CDI, CloudFlare, RedShield). The Transport Agency has an obligation to ensure that all information under it's jurisdiction is kept safe, especially when that information is being provided to external parties through web-facing services.<\/p><p>If you are moving an existing service from one location to another and this does have public facing services (website or API) then the answer to this is 'Yes'.<\/p><p>&nbsp;<\/p><p>If you answer 'Yes', two tasks will be created at the end of this questionnaire.<\/p><p>A Penetration Test task will be created. You'll be asked to either conduct a penetration test on the services or provide a recently completed penetration test report and summary of remediation work that has been undertaken. More information about this is explained in the Penetration Test task.<\/p><p>A Web Security Configuration task will be created. You'll be asked to test your web facing services against some industry best practices to ensure it's secure. This task will take approximately 10 minutes complete.<\/p><p>&nbsp;<\/p>",
         "answerFieldType": "action",
         "answerActionFields": [
           {
@@ -339,7 +361,7 @@
       },
       {
         "title": "Credit Card Connection",
-        "question": "Will this deliverable talk to the NZTA Common Payment Services (CPS) system or impact it's security?",
+        "question": "Will this deliverable talk to the Agency Common Payment Services (CPS) system or impact it's security?",
         "description": "<p>Does this product deal with credit card payments in any way? or talk to Transport Agency systems that do? This includes the Payment Micro-site and Common Payment Services (CPS).<\/p><p>The Transport Agency is required by VISA and our Bank to maintain compliance with the Payment Card Industry - Data Security Standards (PCI-DSS). These products sit within the Transport Agencies PCI-DSS environment. Any changes to this environment will require validation against the current PCI-DSS requirements to ensure no compliance obligations are being compromised. At the end of this questionnaire a PCI-DSS assessment task will be created. This task will ask you to go through each of the PCI-DSS requirements and ensure they're being met within this product integration.<\/p>",
         "answerFieldType": "action",
         "answerActionFields": [
@@ -366,16 +388,44 @@
         "answerActionFields": [
           {
             "label": "Yes",
+            "actionType": "continue"
+          },
+          {
+            "label": "No",
+            "actionType": "goto",
+            "gotoQuestionTitle": "Firewall Changes"
+          }
+        ]
+      },
+      {
+        "title": "Security Risk Assessment",
+        "question": "Security Risk Assessment Required",
+        "description": "<p>As this change is a significant change, you will be required to complete a Digital Security Risk Assessment.<\/p><p>The Transport Agency uses a new Digital Security Risk Assessment (DSRA) methodology. If you're familiar with this approach and do not need the Tutorial please click 'Ok'. If you would like the Tutorial to give you some background information on how to use the DSRA please click the 'With Tutorial' button.<\/p>",
+        "answerFieldType": "action",
+        "answerActionFields": [
+          {
+            "label": "Ok",
             "actionType": "continue",
             "tasks": [
               {
-                "name": "Security Risk Assessment Link"
+                "name": "Initial Risk Impact Assessment"
+              },
+              {
+                "name": "Control Validation Audit"
+              },
+              {
+                "name": "Security Risk Assessment"
               }
             ]
           },
           {
-            "label": "No",
-            "actionType": "continue"
+            "label": "With Tutorial",
+            "actionType": "continue",
+            "tasks": [
+              {
+                "name": "Digital Security Risk Assessment Tutorial"
+              }
+            ]
           }
         ]
       },
