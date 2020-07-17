@@ -68,3 +68,17 @@ Displays log output from services.
 ```
 docker logs -f sdlt_php
 ```
+### Setting up project manually
+As of tag 2.1.0, the SDLT can be installed with the following command:
+```
+#install from source
+composer create-project nzta/sdlt /path/to/sdlt-app 2.1.0
+
+#build database
+cd sdlt-app
+vendor/bin/sake dev/build flush=
+
+#setup default data
+vendor/bin/sake dev/tasks/SetupSDLTDataTask
+
+```
