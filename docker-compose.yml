@@ -1,0 +1,51 @@
+version: '3'
+services:
+    web:
+        container_name: sdlt_web
+        image: nginx:alpine
+        volumes:
+            - "./docker/nginx.conf:/etc/nginx/conf.d/default.conf"
+            - "./:/var/www/html"
+        ports:
+            - "666:80"
+        environment:
+            - NGINX_HOST=${NGINX_HOST}
+        command: /bin/sh -c "nginx -g 'daemon off;'"
+        restart: always
+        depends_on:
+            - php
+            - mysqldb
+        networks:
+            - frontend
+            - backend
+    php:
+        container_name: sdlt_php
+        image: php:${PHP_VERSION}-fpm
+        restart: always
+        volumes:
+            - "./:/var/www/html"
+            - "./docker/setup_php.sh:/opt/setup.sh"
+            - ./logs/:/var/log
+        networks:
+            - backend
+        command: /bin/sh -c /opt/setup.sh
+    mysqldb:
+        image: mysql:${MYSQL_VERSION}
+        container_name: sdlt_mysql
+        restart: always
+        env_file:
+            - ".env"
+        environment:
+            - MYSQL_DATABASE=${SS_DATABASE_NAME}
+            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+            - MYSQL_USER=${SS_DATABASE_USERNAME}
+            - MYSQL_PASSWORD=${SS_DATABASE_PASSWORD}
+        volumes:
+            - "./data/db/mysql:/var/lib/mysql"
+        networks:
+            - backend
+networks:
+  frontend:
+  backend:
+volumes:
+    data:

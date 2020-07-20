@@ -1,0 +1,23 @@
+{
+    "name": "nzta/sdlt-installer",
+    "type": "silverstripe-recipe",
+    "description": "NZTA Security Development Lifecycle Tool Recipe",
+    "license": "BSD-3-Clause",
+    "require": {
+        "php": ">=7.2",
+        "nzta/sdlt-framework": "*",
+        "nzta/sdlt-theme": "*"
+    },
+    "repositories": {
+        "nzta/sdlt-framework": {
+            "type": "vcs",
+            "url": "git@github.com:catalyst/sdlt-framework.git"
+        },
+        "nzta/sdlt-theme": {
+            "type": "vcs",
+            "url": "git@github.com:catalyst/sdlt-theme.git"
+        }
+    },
+    "prefer-stable": true,
+    "minimum-stability": "dev"
+}
