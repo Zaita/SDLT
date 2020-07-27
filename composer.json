@@ -1,23 +1,40 @@
 {
-    "name": "nzta/sdlt-installer",
+    "name": "nzta/sdlt",
     "type": "silverstripe-recipe",
     "description": "NZTA Security Development Lifecycle Tool Recipe",
     "license": "BSD-3-Clause",
     "require": {
         "php": ">=7.2",
-        "nzta/sdlt-framework": "*",
-        "nzta/sdlt-theme": "*"
+        "silverstripe/recipe-plugin": "^1.2",
+        "nzta/sdlt-framework": "3.0.0-alpha1",
+        "nzta/sdlt-theme": "3.0.0-alpha1"
     },
-    "repositories": {
-        "nzta/sdlt-framework": {
-            "type": "vcs",
-            "url": "git@github.com:catalyst/sdlt-framework.git"
-        },
-        "nzta/sdlt-theme": {
-            "type": "vcs",
-            "url": "git@github.com:catalyst/sdlt-theme.git"
-        }
+    "extra": {
+        "project-files-installed": [
+            "app/.htaccess",
+            "app/_config.php",
+            "app/_config/mysite.yml",
+            "app/src/Page.php",
+            "app/src/PageController.php"
+        ],
+        "public-files-installed": [
+            ".htaccess",
+            "index.php",
+            "install-frameworkmissing.html",
+            "install.php",
+            "web.config"
+        ]
     },
     "prefer-stable": true,
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "scripts": {
+        "post-update-cmd": [
+            "composer vendor-expose"
+        ],
+        "post-install-cmd": [
+            "composer vendor-expose"
+        ],
+        "build": "sudo chown -R www-data ./public/assets && sudo -u www-data ./vendor/bin/sake /dev/build flush=all",
+        "bundle": "cd /vagrant/themes/sdlt/ && yarn run build"
+    }
 }
