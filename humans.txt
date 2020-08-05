@@ -25,6 +25,10 @@ Thor Chen
 Luke Percy
         - @agilecreep
 
+Lian Zhang
+        - github.com/zhanglian77
+
+
 /* PROJECT */
 
 IDEs:           Netbeans, Sublime, Atom, VSCode
