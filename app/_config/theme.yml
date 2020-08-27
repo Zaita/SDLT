@@ -1,5 +1,0 @@
-SilverStripe\View\SSViewer:
-  themes:
-    - '$public'
-    - 'sdlt'
-    - '$default'

@@ -1,33 +1,14 @@
 {
-  "name": "nzta/sdlt",
-  "type": "silverstripe-recipe",
-  "description": "NZTA Security Development Lifecycle Tool",
-  "license": "BSD-3-Clause",
+    "name": "nzta/sdlt",
+    "type": "silverstripe-recipe",
+    "description": "NZTA Security Development Lifecycle Tool Recipe",
+    "license": "BSD-3-Clause",
     "require": {
         "php": ">=7.2",
         "silverstripe/recipe-plugin": "^1.2",
-        "silverstripe/recipe-cms": "~4.4.7",
-        "silverstripe/postgresql": "^2.1.0",
-        "unclecheese/display-logic": "^2.0",
-        "symbiote/silverstripe-gridfieldextensions": "^3.2",
-        "symbiote/silverstripe-queuedjobs": "^4.3",
-        "ramsey/uuid": "^3.8",
-        "symbiote/silverstripe-multivaluefield": "^5.0",
-        "phptek/sentry": "^2.0",
-        "tractorcow/silverstripe-colorpicker": "^4.0",
-        "swaggest/json-schema": "^0.12.24",
-        "ergebnis/json-printer": "^3.0"
+        "nzta/sdlt-framework": "3.0.0",
+        "nzta/sdlt-theme": "3.0.0"
     },
-    "require-dev": {
-        "phpunit/phpunit": "^5.7",
-        "phpro/grumphp": "^v0.14.2",
-        "friendsofphp/php-cs-fixer": "^v2.13.1",
-        "sensiolabs/security-checker": "^5.0.1",
-        "squizlabs/php_codesniffer": "^3.3.2",
-        "silverstripe/graphql-devtools": "^1.0@dev",
-        "dnadesign/silverstripe-populate": "^2.0"
-    },
-
     "extra": {
         "project-files-installed": [
             "app/.htaccess",
@@ -42,17 +23,7 @@
             "install-frameworkmissing.html",
             "install.php",
             "web.config"
-        ],
-        "expose": [
-            "app/css",
-            "themes/sdlt/dist"
         ]
-    },
-    "suggest": {
-        "phptek/sentry": "Advanced logging of bugs and exceptions throughout your codebase"
-    },
-    "config": {
-        "process-timeout": 600
     },
     "prefer-stable": true,
     "minimum-stability": "dev",

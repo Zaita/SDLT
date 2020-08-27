@@ -1,6 +1,0 @@
-"ID","ClassName","Name","Value","Colour","Operator"
-1,"NZTA\SDLT\Model\ImpactThreshold","Insignificant",10,"00ab00","<"
-2,"NZTA\SDLT\Model\ImpactThreshold","Minor",30,"00ab00","<"
-3,"NZTA\SDLT\Model\ImpactThreshold","Moderate",70,"ff8400","<"
-4,"NZTA\SDLT\Model\ImpactThreshold","Severe",130,"fa0000","<"
-5,"NZTA\SDLT\Model\ImpactThreshold","Extreme",130,"ad1818",">="
