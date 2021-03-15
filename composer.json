@@ -6,13 +6,14 @@
     "require": {
         "php": ">=7.2",
         "silverstripe/recipe-plugin": "^1.2",
-        "nzta/sdlt-framework": "3.0.0",
-        "nzta/sdlt-theme": "3.0.0"
+        "nzta/sdlt-framework": "3.1.0",
+        "nzta/sdlt-theme": "3.1.0"
     },
     "extra": {
         "project-files-installed": [
             "app/.htaccess",
             "app/_config.php",
+            "app/_config/mimevalidator.yml",
             "app/_config/mysite.yml",
             "app/src/Page.php",
             "app/src/PageController.php"
