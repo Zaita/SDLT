@@ -11,6 +11,7 @@ if [ ! -f "$COMPOSER_FILE" ]; then
 echo "Step 03 - Installing Composer"
 chmod +x /var/www/html/docker/install_composer.sh
 /var/www/html/docker/install_composer.sh
+php composer.phar update
 php composer.phar install
 echo "Step 04 - Building Silverstripe Vendor Components"
 php /var/www/html/vendor/silverstripe/framework/cli-script.php dev/build
