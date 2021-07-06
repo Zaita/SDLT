@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "84cc0e573262122bc38ab0f9bd7030ee",
+    "content-hash": "6d4c096d58fbce20f24a9ec01ff5ed83",
     "packages": [
         {
             "name": "asyncphp/doorman",
@@ -1038,16 +1038,16 @@
         },
         {
             "name": "nzta/sdlt-framework",
-            "version": "3.1.1",
+            "version": "3.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NZTA/sdlt-framework.git",
-                "reference": "d5d4fd0b741fff5e3462a81c32bf33e01161cb5b"
+                "reference": "9e30b9033022221820b78e94505d18b5d2765cc3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NZTA/sdlt-framework/zipball/d5d4fd0b741fff5e3462a81c32bf33e01161cb5b",
-                "reference": "d5d4fd0b741fff5e3462a81c32bf33e01161cb5b",
+                "url": "https://api.github.com/repos/NZTA/sdlt-framework/zipball/9e30b9033022221820b78e94505d18b5d2765cc3",
+                "reference": "9e30b9033022221820b78e94505d18b5d2765cc3",
                 "shasum": ""
             },
             "require": {
@@ -1087,20 +1087,20 @@
                 "BSD-3-Clause"
             ],
             "description": "NZTA Security Development Lifecycle Tool Framework",
-            "time": "2021-04-13T01:13:51+00:00"
+            "time": "2021-07-06T03:34:53+00:00"
         },
         {
             "name": "nzta/sdlt-theme",
-            "version": "3.1.1",
+            "version": "3.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NZTA/sdlt-theme.git",
-                "reference": "c4d4645dba9045da24dd251c39a5ad7bfa0edaa6"
+                "reference": "26b8c275cebeffc8bf2a28fc2f40e21a05eaacce"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NZTA/sdlt-theme/zipball/c4d4645dba9045da24dd251c39a5ad7bfa0edaa6",
-                "reference": "c4d4645dba9045da24dd251c39a5ad7bfa0edaa6",
+                "url": "https://api.github.com/repos/NZTA/sdlt-theme/zipball/26b8c275cebeffc8bf2a28fc2f40e21a05eaacce",
+                "reference": "26b8c275cebeffc8bf2a28fc2f40e21a05eaacce",
                 "shasum": ""
             },
             "type": "silverstripe-theme",
@@ -1120,7 +1120,7 @@
                 "silverstripe",
                 "theme"
             ],
-            "time": "2021-04-13T01:19:06+00:00"
+            "time": "2021-07-06T05:06:37+00:00"
         },
         {
             "name": "paragonie/random_compat",
