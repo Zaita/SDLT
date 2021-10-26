@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "547a03c68fc739b19ac8fbce699e89eb",
+    "content-hash": "5e24315f929107e95beb3594c15d1cd4",
     "packages": [
         {
             "name": "asyncphp/doorman",
@@ -47,16 +47,16 @@
         },
         {
             "name": "bramus/ansi-php",
-            "version": "3.0.3",
+            "version": "3.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bramus/ansi-php.git",
-                "reference": "fb0be33f36053af7454d462e3ddc0a2ac0b2f311"
+                "reference": "9aefed0d9088d87fe230ff83885d3e5562a7fd8a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bramus/ansi-php/zipball/fb0be33f36053af7454d462e3ddc0a2ac0b2f311",
-                "reference": "fb0be33f36053af7454d462e3ddc0a2ac0b2f311",
+                "url": "https://api.github.com/repos/bramus/ansi-php/zipball/9aefed0d9088d87fe230ff83885d3e5562a7fd8a",
+                "reference": "9aefed0d9088d87fe230ff83885d3e5562a7fd8a",
                 "shasum": ""
             },
             "require": {
@@ -83,7 +83,7 @@
                 }
             ],
             "description": "ANSI Control Functions and ANSI Control Sequences (Colors, Erasing, etc.) for PHP CLI Apps",
-            "time": "2019-12-03T09:04:38+00:00"
+            "time": "2021-10-21T07:23:09+00:00"
         },
         {
             "name": "bramus/monolog-colored-line-formatter",
@@ -1127,16 +1127,16 @@
         },
         {
             "name": "nzta/sdlt-framework",
-            "version": "3.2.0",
+            "version": "3.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NZTA/sdlt-framework.git",
-                "reference": "c5657189a94481362ca700514e7c6f09e7a076bc"
+                "reference": "1124ca515a3227afb8c53e4008f05f80bad205d7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NZTA/sdlt-framework/zipball/c5657189a94481362ca700514e7c6f09e7a076bc",
-                "reference": "c5657189a94481362ca700514e7c6f09e7a076bc",
+                "url": "https://api.github.com/repos/NZTA/sdlt-framework/zipball/1124ca515a3227afb8c53e4008f05f80bad205d7",
+                "reference": "1124ca515a3227afb8c53e4008f05f80bad205d7",
                 "shasum": ""
             },
             "require": {
@@ -1176,7 +1176,7 @@
                 "BSD-3-Clause"
             ],
             "description": "NZTA Security Development Lifecycle Tool Framework",
-            "time": "2021-09-23T02:02:49+00:00"
+            "time": "2021-10-26T06:26:00+00:00"
         },
         {
             "name": "nzta/sdlt-theme",
@@ -3084,12 +3084,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/silverstripe/silverstripe-versioned-snapshots.git",
-                "reference": "2513bbe6c6040cbd4847eb8b68310e56572768f4"
+                "reference": "3ac177ed8382405f2117cbf91704b5d5b69681eb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/silverstripe/silverstripe-versioned-snapshots/zipball/2513bbe6c6040cbd4847eb8b68310e56572768f4",
-                "reference": "2513bbe6c6040cbd4847eb8b68310e56572768f4",
+                "url": "https://api.github.com/repos/silverstripe/silverstripe-versioned-snapshots/zipball/3ac177ed8382405f2117cbf91704b5d5b69681eb",
+                "reference": "3ac177ed8382405f2117cbf91704b5d5b69681eb",
                 "shasum": ""
             },
             "require": {
@@ -3140,7 +3140,7 @@
                 "snapshots",
                 "versioned"
             ],
-            "time": "2021-09-09T22:35:06+00:00"
+            "time": "2021-10-18T01:03:48+00:00"
         },
         {
             "name": "sminnee/callbacklist",
@@ -3227,27 +3227,30 @@
         },
         {
             "name": "swaggest/json-schema",
-            "version": "v0.12.38",
+            "version": "v0.12.39",
             "source": {
                 "type": "git",
                 "url": "https://github.com/swaggest/php-json-schema.git",
-                "reference": "ab7cca149a5822acc5be538dd6c008a348f6cb89"
+                "reference": "193ba39cce1ffa2d55ddd5445315e945a63298a2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/swaggest/php-json-schema/zipball/ab7cca149a5822acc5be538dd6c008a348f6cb89",
-                "reference": "ab7cca149a5822acc5be538dd6c008a348f6cb89",
+                "url": "https://api.github.com/repos/swaggest/php-json-schema/zipball/193ba39cce1ffa2d55ddd5445315e945a63298a2",
+                "reference": "193ba39cce1ffa2d55ddd5445315e945a63298a2",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "ext-mbstring": "*",
                 "php": ">=5.4",
                 "phplang/scope-exit": "^1.0",
-                "swaggest/json-diff": "^3.8.2"
+                "swaggest/json-diff": "^3.8.2",
+                "symfony/polyfill-mbstring": "^1.19"
             },
             "require-dev": {
                 "phpunit/phpunit": "^4.8.23"
+            },
+            "suggest": {
+                "ext-mbstring": "For better performance"
             },
             "type": "library",
             "autoload": {
@@ -3266,7 +3269,7 @@
                 }
             ],
             "description": "High definition PHP structures with JSON-schema based validation",
-            "time": "2021-09-17T13:54:01+00:00"
+            "time": "2021-10-15T18:12:27+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",
