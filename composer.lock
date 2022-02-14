@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5e24315f929107e95beb3594c15d1cd4",
+    "content-hash": "f1f20b4dc2cd344d6ee1594286c9a10b",
     "packages": [
         {
             "name": "asyncphp/doorman",
@@ -344,6 +344,63 @@
                 }
             ],
             "time": "2021-09-13T08:19:44+00:00"
+        },
+        {
+            "name": "dragonmantank/cron-expression",
+            "version": "v3.3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dragonmantank/cron-expression.git",
+                "reference": "be85b3f05b46c39bbc0d95f6c071ddff669510fa"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dragonmantank/cron-expression/zipball/be85b3f05b46c39bbc0d95f6c071ddff669510fa",
+                "reference": "be85b3f05b46c39bbc0d95f6c071ddff669510fa",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2|^8.0",
+                "webmozart/assert": "^1.0"
+            },
+            "replace": {
+                "mtdowling/cron-expression": "^1.0"
+            },
+            "require-dev": {
+                "phpstan/extension-installer": "^1.0",
+                "phpstan/phpstan": "^1.0",
+                "phpstan/phpstan-webmozart-assert": "^1.0",
+                "phpunit/phpunit": "^7.0|^8.0|^9.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Cron\\": "src/Cron/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Chris Tankersley",
+                    "email": "chris@ctankersley.com",
+                    "homepage": "https://github.com/dragonmantank"
+                }
+            ],
+            "description": "CRON for PHP: Calculate the next or previous run date and determine if a CRON expression is due",
+            "keywords": [
+                "cron",
+                "schedule"
+            ],
+            "funding": [
+                {
+                    "url": "https://github.com/dragonmantank",
+                    "type": "github"
+                }
+            ],
+            "time": "2022-01-18T15:43:28+00:00"
         },
         {
             "name": "embed/embed",
@@ -1127,22 +1184,23 @@
         },
         {
             "name": "nzta/sdlt-framework",
-            "version": "3.2.1",
+            "version": "4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NZTA/sdlt-framework.git",
-                "reference": "1124ca515a3227afb8c53e4008f05f80bad205d7"
+                "reference": "2f171af59d5a308199d4296409793430ba8c9ad4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NZTA/sdlt-framework/zipball/1124ca515a3227afb8c53e4008f05f80bad205d7",
-                "reference": "1124ca515a3227afb8c53e4008f05f80bad205d7",
+                "url": "https://api.github.com/repos/NZTA/sdlt-framework/zipball/2f171af59d5a308199d4296409793430ba8c9ad4",
+                "reference": "2f171af59d5a308199d4296409793430ba8c9ad4",
                 "shasum": ""
             },
             "require": {
                 "ergebnis/json-printer": "^3.0",
                 "php": ">=7.4",
                 "ramsey/uuid": "^3.8",
+                "silverstripe/crontask": "^2.0",
                 "silverstripe/postgresql": "^2.1.0",
                 "silverstripe/recipe-cms": "4.8.0",
                 "silverstripe/versioned-snapshot-admin": "^0.3",
@@ -1176,20 +1234,20 @@
                 "BSD-3-Clause"
             ],
             "description": "NZTA Security Development Lifecycle Tool Framework",
-            "time": "2021-10-26T06:26:00+00:00"
+            "time": "2022-02-08T04:08:18+00:00"
         },
         {
             "name": "nzta/sdlt-theme",
-            "version": "3.2.0",
+            "version": "4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NZTA/sdlt-theme.git",
-                "reference": "9331b8624cedd362b2b0af78c80a6d228e0c2a03"
+                "reference": "8852c80498674bd2ab82c1f6adec3214a9d8f559"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NZTA/sdlt-theme/zipball/9331b8624cedd362b2b0af78c80a6d228e0c2a03",
-                "reference": "9331b8624cedd362b2b0af78c80a6d228e0c2a03",
+                "url": "https://api.github.com/repos/NZTA/sdlt-theme/zipball/8852c80498674bd2ab82c1f6adec3214a9d8f559",
+                "reference": "8852c80498674bd2ab82c1f6adec3214a9d8f559",
                 "shasum": ""
             },
             "type": "silverstripe-theme",
@@ -1209,7 +1267,7 @@
                 "silverstripe",
                 "theme"
             ],
-            "time": "2021-09-07T03:14:03+00:00"
+            "time": "2022-02-08T05:26:50+00:00"
         },
         {
             "name": "opis/closure",
@@ -2235,6 +2293,62 @@
             ],
             "description": "SilverStripe configuration based on YAML and class statics",
             "time": "2020-12-11T01:10:31+00:00"
+        },
+        {
+            "name": "silverstripe/crontask",
+            "version": "2.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/silverstripe/silverstripe-crontask.git",
+                "reference": "4b02027f553b1ffb75ebce0175ec83c1564b9bf4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/silverstripe/silverstripe-crontask/zipball/4b02027f553b1ffb75ebce0175ec83c1564b9bf4",
+                "reference": "4b02027f553b1ffb75ebce0175ec83c1564b9bf4",
+                "shasum": ""
+            },
+            "require": {
+                "dragonmantank/cron-expression": "^3",
+                "php": "^7.1 || ^8",
+                "silverstripe/framework": "^4"
+            },
+            "require-dev": {
+                "sminnee/phpunit": "^5.7",
+                "squizlabs/php_codesniffer": "^3.0"
+            },
+            "type": "silverstripe-vendormodule",
+            "autoload": {
+                "psr-4": {
+                    "SilverStripe\\CronTask\\": "src/",
+                    "SilverStripe\\CronTask\\Tests\\": "tests/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "SilverStripe",
+                    "homepage": "http://silverstripe.com"
+                },
+                {
+                    "name": "The SilverStripe Community",
+                    "homepage": "http://silverstripe.org"
+                },
+                {
+                    "name": "Damian Mooyman",
+                    "email": "damian@silverstripe.com",
+                    "role": "Maintainer"
+                }
+            ],
+            "description": "Module for running tasks with a standard cron timeschedule",
+            "keywords": [
+                "cron",
+                "silverstripe"
+            ],
+            "time": "2021-08-27T00:06:33+00:00"
         },
         {
             "name": "silverstripe/errorpage",
@@ -3323,6 +3437,7 @@
                 "mail",
                 "mailer"
             ],
+            "abandoned": "symfony/mailer",
             "time": "2018-07-31T09:26:32+00:00"
         },
         {
@@ -4957,6 +5072,60 @@
                 "silverstripe"
             ],
             "time": "2019-10-15T23:31:03+00:00"
+        },
+        {
+            "name": "webmozart/assert",
+            "version": "1.10.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webmozarts/assert.git",
+                "reference": "6964c76c7804814a842473e0c8fd15bab0f18e25"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webmozarts/assert/zipball/6964c76c7804814a842473e0c8fd15bab0f18e25",
+                "reference": "6964c76c7804814a842473e0c8fd15bab0f18e25",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2 || ^8.0",
+                "symfony/polyfill-ctype": "^1.8"
+            },
+            "conflict": {
+                "phpstan/phpstan": "<0.12.20",
+                "vimeo/psalm": "<4.6.1 || 4.6.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^8.5.13"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.10-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Webmozart\\Assert\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Bernhard Schussek",
+                    "email": "bschussek@gmail.com"
+                }
+            ],
+            "description": "Assertions to validate method input/output with nice error messages.",
+            "keywords": [
+                "assert",
+                "check",
+                "validate"
+            ],
+            "time": "2021-03-09T10:59:23+00:00"
         },
         {
             "name": "webonyx/graphql-php",
