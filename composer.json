@@ -6,8 +6,8 @@
     "require": {
         "php": ">=7.2",
         "silverstripe/recipe-plugin": "^1.2",
-        "nzta/sdlt-framework": "4.0.0",
-        "nzta/sdlt-theme": "4.0.0",
+        "nzta/sdlt-framework": "4.1.0",
+        "nzta/sdlt-theme": "4.1.0",
         "silverstripe/graphql": "3.5.1 as 3.5.0"
     },
     "extra": {
