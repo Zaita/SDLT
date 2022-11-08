@@ -1,8 +1,10 @@
 #!/bin/bash
 echo "Step 01 - Updating Container"
 apt-get update
-apt-get -y install libicu-dev wget git zip unzip
+apt-get -y install libicu-dev wget git zip unzip zlib1g-dev libpng-dev libfreetype6-dev libjpeg62-turbo-dev
 echo "Step 02 - Installing PHP Modules"
+docker-php-ext-configure gd --with-freetype --with-jpeg
+docker-php-ext-install gd
 docker-php-ext-install intl
 docker-php-ext-install mysqli
 docker-php-ext-install pdo_mysql
