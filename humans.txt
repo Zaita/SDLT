@@ -1,5 +1,9 @@
 /* TEAM */
 
+The SDLT was designed by Scott Rasmussen.
+Forked and customized by Scott Rasmussen
+        - https://github.com/zaita
+
 Built by the Catalyst I.T. SilverStripe Team https://catalyst.net.nz
 
 Russell Michell

@@ -3,12 +3,22 @@
   "type": "silverstripe-recipe",
   "description": "NZTA Security Development Lifecycle Tool Recipe",
   "license": "BSD-3-Clause",
+  "repositories": [
+      {
+          "type": "path",
+          "url": "/opt/sdlt-theme"
+      },
+      {
+          "type": "path",
+          "url": "/opt/sdlt-framework"
+      }
+  ],
   "require": {
-      "php": ">=7.4",
+      "php": ">=7.2",
       "silverstripe/recipe-plugin": "^1.2",
-      "nzta/sdlt-framework": "4.1.1",
-      "nzta/sdlt-theme": "4.1.1",
-      "silverstripe/graphql": "^3.5.1"
+      "nzta/sdlt-framework": "*",
+      "nzta/sdlt-theme": "*",
+      "silverstripe/graphql": "3.5.1 as 3.5.0"    
   },
   "extra": {
       "project-files-installed": [

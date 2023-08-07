@@ -1,6 +1,33 @@
-# NZTA Security Development Lifecycle Tool
+# The SDLT
+The SDLT, previously named the Security Development Lifecycle Tool, is a web application workflow tool for the implementation of
+software delivery, security development, service delivery and many more processes.
 
-The SDLT is Web Application that supports, and expedites I.T. security professionals as part of the change approval process within their organisation.
+The SDLT is a no-code solution, allowing quick and easy deployment of workflows that support organisational delivery processes. You can have your organisation running submissions in a few minutes with the pre-configured workflows.
+
+The tool comes pre-configured with:
+- Pre-configured workflows to illustrate different common scenarios
+- Built in approval flows with delegation ability
+- Digital security risk assessment capability
+- Control validation audit capability
+- Certification and accreditation capability
+- Service inventory module built in to certification and accreditation
+- Reports
+
+The SDLT is Web Application that supports, and expedites I.T. security professionals as part of the change approval process within their organisation. 
+
+## This Fork
+This fork is now the primarily repository for the SDLT.
+
+The SDLT was previously owned and hosted by The New Zealand Transport Agency (Waka Kotahi), but they are no longer managing the project or code-base. This fork was done to continue development of new functionality, and ensure the product remained open source.
+
+## Getting Help or Hosting
+If you would like to run the SDLT, we first recommend downloading the code and following the deployment instructions yourself to have a go.
+
+If you would prefer to have a custom demo available to you, please log an issue against this project with contact details (email) and we'll reach out.
+
+If you would like professional hosting of the SDLT, please reach out to Catalyst (NZ) Limited.
+
+If you would like a fully managed instance, with us looking after the day to day setup, configuration and maintenance, please log an issue against this project with your email and we'll reach out.
 
 ## Requirements
 

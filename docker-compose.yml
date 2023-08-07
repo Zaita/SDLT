@@ -1,11 +1,14 @@
 version: '3'
+name: dev_sdlt
 services:
-    web:
-        container_name: sdlt_web
+    dev_web:
+        container_name: dev_sdlt_web
         image: nginx:alpine
         volumes:
             - "./docker/nginx.conf:/etc/nginx/conf.d/default.conf"
             - "./:/var/www/html"
+            - "../sdlt-theme:/var/www/html/themes/sdlt"            
+            - "../sdlt-framework:/var/www/html/vendor/nzta/sdlt-framework" 
         ports:
             - "666:80"
         environment:
@@ -13,39 +16,25 @@ services:
         command: /bin/sh -c "nginx -g 'daemon off;'"
         restart: always
         depends_on:
-            - php
-            - mysqldb
+            - dev_php
         networks:
-            - frontend
-            - backend
-    php:
-        container_name: sdlt_php
+            - dev_frontend
+            - dev_backend
+    dev_php:
+        container_name: dev_sdlt_php
         image: php:${PHP_VERSION}-fpm
         restart: always
         volumes:
             - "./:/var/www/html"
             - "./docker/setup_php.sh:/opt/setup.sh"
+            - "../sdlt-framework:/opt/sdlt-framework"
+            - "../sdlt-theme:/opt/sdlt-theme"
             - ./logs/:/var/log
         networks:
-            - backend
-        command: /bin/sh -c /opt/setup.sh
-    mysqldb:
-        image: mysql:${MYSQL_VERSION}
-        container_name: sdlt_mysql
-        restart: always
-        env_file:
-            - ".env"
-        environment:
-            - MYSQL_DATABASE=${SS_DATABASE_NAME}
-            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-            - MYSQL_USER=${SS_DATABASE_USERNAME}
-            - MYSQL_PASSWORD=${SS_DATABASE_PASSWORD}
-        volumes:
-            - "./data/db/mysql:/var/lib/mysql"
-        networks:
-            - backend
+            - dev_backend
+        command: /bin/sh -c /opt/setup.sh    
 networks:
-  frontend:
-  backend:
+  dev_frontend:
+  dev_backend:
 volumes:
     data:
