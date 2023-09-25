@@ -6,8 +6,8 @@
   "require": {
       "php": ">=7.4",
       "silverstripe/recipe-plugin": "^1.2",
-      "nzta/sdlt-framework": "4.1.1",
-      "nzta/sdlt-theme": "4.1.1",
+      "zaita/sdlt-framework": "5.0.1",
+      "zaita/sdlt-theme": "5.0.0",
       "silverstripe/graphql": "^3.5.1"
   },
   "extra": {
@@ -38,5 +38,12 @@
       ],
       "build": "sudo chown -R www-data ./public/assets && sudo -u www-data ./vendor/bin/sake /dev/build flush=all",
       "bundle": "cd /vagrant/themes/sdlt/ && yarn run build"
+  }
+  "config": {
+    "allow-plugins": {
+      "composer/installers": true,
+      "silverstripe/vendor-plugin": true,
+      "silverstripe/recipe-plugin": true
+    }
   }
 }
