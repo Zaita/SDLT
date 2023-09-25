@@ -1,7 +1,7 @@
 {
-  "name": "nzta/sdlt",
+  "name": "zaita/sdlt",
   "type": "silverstripe-recipe",
-  "description": "NZTA Security Development Lifecycle Tool Recipe",
+  "description": "Zaita SDLT",
   "license": "BSD-3-Clause",
   "repositories": [
       {
@@ -14,11 +14,11 @@
       }
   ],
   "require": {
-      "php": ">=7.2",
+      "php": ">=8.1",
       "silverstripe/recipe-plugin": "^1.2",
-      "nzta/sdlt-framework": "*",
-      "nzta/sdlt-theme": "*",
-      "silverstripe/graphql": "3.5.1 as 3.5.0"    
+      "zaita/sdlt-framework": "*",
+      "zaita/sdlt-theme": "*",
+      "silverstripe/graphql": "^3.5.1"    
   },
   "extra": {
       "project-files-installed": [
@@ -48,5 +48,12 @@
       ],
       "build": "sudo chown -R www-data ./public/assets && sudo -u www-data ./vendor/bin/sake /dev/build flush=all",
       "bundle": "cd /vagrant/themes/sdlt/ && yarn run build"
+  },
+  "config": {
+    "allow-plugins": {
+      "composer/installers": true,
+      "silverstripe/vendor-plugin": true,
+      "silverstripe/recipe-plugin": true
+    }
   }
 }
