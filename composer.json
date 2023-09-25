@@ -38,7 +38,7 @@
       ],
       "build": "sudo chown -R www-data ./public/assets && sudo -u www-data ./vendor/bin/sake /dev/build flush=all",
       "bundle": "cd /vagrant/themes/sdlt/ && yarn run build"
-  }
+  },
   "config": {
     "allow-plugins": {
       "composer/installers": true,
