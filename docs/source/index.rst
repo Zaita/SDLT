@@ -18,10 +18,13 @@ Contents
 
   introduction
   installation
+  sso_configuration
   basic_concepts
   basic_configuration
-  basic_admin_tasks
+  basic_admin_tasks  
   dsra_configuration
+  certification_and_accreditation
+  
 
 Indices and tables
 ==================

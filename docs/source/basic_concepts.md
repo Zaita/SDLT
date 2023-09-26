@@ -82,10 +82,34 @@ Once the business owner approves the submission, it is marked as approved.
 _Note: A pillar can be configured to allow the security architect members to auto-approve submissions if they feel they pose no risk to the organisation_
 
 ## Digital Security Risk Assessment (DSRA)
-adsa
+The DSRA is a component of the SDLT that focusses on simplifying risk assessments and control validation. It implements the following core concepts:
+1. The way you measure risk is consistent and quantifiable, no human involvement.
+2. The decision to implement controls should have a known impact on the risk position (gamification).
+3. The process should be entirely self-service for the project/delivery team.
+4. Approval/Endorsement of the delivery should be guaranteed based on acceptable risk outcomes.
+5. Controls should provide information aboud technology decisions and patterns to the delivery team (design by numbers).
+
+The DSRA has 3 steps.
+1. The user answers a small questionnaire about the data and systems their delivery interacts with. This is used to calculate the initial risk position.
+2. The user then selects from the control catalogue the controls that are applicable to their delivery. The applicable controls will all have a risk reduction score against the initial risk position.
+3. The delivery team plan and implement the controls to bring their risk position down to an agreed acceptable level.
+
+Every control has a description of the control, implementation guidance, validation requirements and the scores associated with the risk reduction. The idea being that the delivery team don't need to go hunting for information outside of the SDLT on how to satisfy the risk requirements.
+
+For example, if you have a control called "Password Complexity" then this control should include all information required to implement it. The requirements for the password complexity rules should be documented within the control. Similarly, if you had a more complex control like "Back Up", then the control should link to the relevant documentation on how the project can implement back-up procedures in line with the organisations existing processes, practices and tooling. A solution designer shouldn't ever need to chase down organisational patterns and existing technology implementating when designing a new solution. The DSRA should be the avenue to delivering technology decisions for designs to solution designers.
+
+Most importantly for the DSRA, it provides a consistent and reproducible method for assessing, measuring and monitoring risk in the organisation. If you put A in today and get C out, then that would be the same in 12 months or 24 months regardless of the person conducting the risk assessment. It removes human subjectivity from the equation.
 
 ## Certification and Accreditation
-dsad
+Certification and accreditation (C&A) is a two-step process that ensures security of information systems. Certification is the process of evaluating, testing, and examining security controls that have been pre-determined based on the data type in an information system. The evaluation compares the current systems’ security posture with specific standards. The certification process ensures that security weaknesses are identified and plans for mitigation strategies are in place. On the other hand, accreditation is the process of accepting the residual risks associated with the continued operation of a system and granting approval to operate for a specified period of time [1](https://en.wikipedia.org/wiki/Certification_and_Accreditation).
+
+By it's very nature, using the SDLT constitutes a certification process. 
+
+Accreditation is handled through a specific "certification and accreditation" task in the SDLT. The SDLT can be customised to have a C&A task that issues an accreditation in the `Service Inventory` module. The task is completed after all other tasks and an accreditation for a period of time can be issued. This ensures systems are recorded in the SDLT as either being accredited or not, and re-certification can be done on a schedule. You can also use the SDLT to catalogue and review all changes made on a system during it's accreditation pariod as part of the re-certification process.
+
+
+
+
 
 
 
