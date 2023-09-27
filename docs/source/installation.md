@@ -39,10 +39,10 @@ If you wish to run the project in a docker container, then you will only need:
 ## Installation with Composer
 This assumes you have a LAMP environment: Linux (Ubuntu), Apache (v2), MySQL (5.7) and PHP (8.1). Another assumption is that you're using a virtualhost on Apache. We assume your project is installed at /var/www/example.com/sdlt with a DocumentRoot set to something like /var/www/example.com/sdlt/public.
 
-```sh
+```none
 cd /var/www/example.com/
 #clone most stable version directly from Github. This also runs composer automatically
-composer create-project zaita/sdlt sdlt ^3
+composer create-project zaita/sdlt sdlt ^5
 
 #change directory
 cd sdlt
