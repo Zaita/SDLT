@@ -6,7 +6,7 @@
   "require": {
       "php": ">=8.1",
       "silverstripe/recipe-plugin": "^1.2",
-      "zaita/sdlt-framework": "5.0.2",
+      "zaita/sdlt-framework": "5.0.3",
       "zaita/sdlt-theme": "5.0.0",
       "silverstripe/graphql": "^3.5.1"
   },
