@@ -24,6 +24,9 @@ Contents
   basic_admin_tasks  
   dsra_configuration
   certification_and_accreditation
+  advanced_admin_tasks
+  advanced_approval_flows
+  advanced_creating_control_sets
   
 
 Indices and tables

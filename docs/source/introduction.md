@@ -1,5 +1,22 @@
 # Introduction
 
+## What is the SDLT?
+Let's start with what the SDLT accomplishes. It simplifies your change management by funnelling change management processes through a single platform that has security, privacy and information management as core tenants. While many change management systems come from the perspective of rigid process, the SDLT customises the processes and requirements based on the complexity of the change. A small change with a very low risk profile will take <5 minutes to complete, while a very complex and large change may have their submission open for many months spending a few minutes every few weeks updating it.
+
+So what is the SDLT? It's a web application that provides change management workflows for your delivery teams. It has been designed by security and software professionals to make the delivery lifecycle as low-touch and quick as possible.
+
+A change leader (e.g., technical lead) can submit the change information through the SDLT and it will automatically create the tasks required before going live. Many of the tasks can be completed within the SDLT, without the need for another product. The tasks that need external information will store the outcomes, or links to outcomes, in the SDLT for future reference.
+
+Out of the box, the SDLT comes with some basic configurations covering standard business domains (e.g., Privacy, Information Management, Security, Risk). But, it's an exceptionally easy system to configure with no requirement for the admins to have any development or coding knowledge. 
+
+In the real world, the SDLT has been used to achieve ISO27001 compliance with minimal changes to the change and software development experience. The SDLT is ideal for environments and organisations that want a fast, low touch, and easy to follow change management process.
+
+Some of the things that SDLT can do for you:
+- Greatly speed up your change management
+- Remove the need for change approval meetings 
+- Ensure multiple stakeholders (e.g., security, privacy, information management) are represented and informed
+- Provide a single source of truth
+
 ## Goals
 The goals of the SDLT are:
 1. Self-Service : Provide self service tool for Project Lead to get a checklist of requirements related to their project.

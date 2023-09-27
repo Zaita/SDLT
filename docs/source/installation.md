@@ -5,13 +5,13 @@ Below is a quick and dirty way to get the SDLT running locally with docker. You 
 
 The following commands can be used to download the source code from GitHub and run the SDLT in a default local docker configuration:
 1. Download the source code from GitHub and start the docker containers
-```bash
+```none
 git clone https://github.com/zaita/sdlt
 cd sdlt && cp .env.example .env
 docker-compose up -d
 ```
 2. Wait for the sdlt_php container to be ready for connections, can be monitored with:
-```bash
+```none
 docker logs -f sdlt_php
 ```
 3. Navigate to `http://127.0.0.1:8123` and login with admin credentials in `.env`
@@ -79,7 +79,7 @@ Rename the `.env.example` file included with the project to `.env` and ensure it
 
 In order to protect the entire project behind an authentication screen, run the following task:
 
-```
+```none
 ./vendor/bin/sake dev/tasks/HydrateCustomConfig
 ```
 
@@ -87,7 +87,7 @@ In order to protect the entire project behind an authentication screen, run the 
 
 To run the suite ("dev" environments only - see the .env file example below):
 
-```
+```none
 ./vendor/bin/phpunit
 ```
 
