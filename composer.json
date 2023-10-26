@@ -8,7 +8,7 @@
       "silverstripe/recipe-plugin": "^1.2",
       "zaita/sdlt-framework": "5.0.3",
       "zaita/sdlt-theme": "5.0.0",
-      "silverstripe/graphql": "^3.5.1"
+      "silverstripe/graphql": "^3.8.2"
   },
   "extra": {
       "project-files-installed": [

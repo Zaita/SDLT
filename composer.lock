@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a2435918d77643eedac852a7899d3bf4",
+    "content-hash": "ba7423ce8e03a15be59623aedfff0741",
     "packages": [
         {
             "name": "asyncphp/doorman",
@@ -449,16 +449,16 @@
         },
         {
             "name": "doctrine/deprecations",
-            "version": "v1.1.1",
+            "version": "1.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/deprecations.git",
-                "reference": "612a3ee5ab0d5dd97b7cf3874a6efe24325efac3"
+                "reference": "4f2d4f2836e7ec4e7a8625e75c6aa916004db931"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/deprecations/zipball/612a3ee5ab0d5dd97b7cf3874a6efe24325efac3",
-                "reference": "612a3ee5ab0d5dd97b7cf3874a6efe24325efac3",
+                "url": "https://api.github.com/repos/doctrine/deprecations/zipball/4f2d4f2836e7ec4e7a8625e75c6aa916004db931",
+                "reference": "4f2d4f2836e7ec4e7a8625e75c6aa916004db931",
                 "shasum": ""
             },
             "require": {
@@ -490,9 +490,9 @@
             "homepage": "https://www.doctrine-project.org/",
             "support": {
                 "issues": "https://github.com/doctrine/deprecations/issues",
-                "source": "https://github.com/doctrine/deprecations/tree/v1.1.1"
+                "source": "https://github.com/doctrine/deprecations/tree/1.1.2"
             },
-            "time": "2023-06-03T09:27:29+00:00"
+            "time": "2023-09-27T20:04:15+00:00"
         },
         {
             "name": "doctrine/lexer",
@@ -791,31 +791,33 @@
         },
         {
             "name": "ergebnis/json-printer",
-            "version": "3.3.0",
+            "version": "3.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ergebnis/json-printer.git",
-                "reference": "18920367473b099633f644f0ca6dc8794345148f"
+                "reference": "05841593d72499de4f7ce4034a237c77e470558f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ergebnis/json-printer/zipball/18920367473b099633f644f0ca6dc8794345148f",
-                "reference": "18920367473b099633f644f0ca6dc8794345148f",
+                "url": "https://api.github.com/repos/ergebnis/json-printer/zipball/05841593d72499de4f7ce4034a237c77e470558f",
+                "reference": "05841593d72499de4f7ce4034a237c77e470558f",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
                 "ext-mbstring": "*",
-                "php": "^8.0"
+                "php": "~8.1.0 || ~8.2.0 || ~8.3.0"
             },
             "require-dev": {
-                "ergebnis/license": "^2.0.0",
-                "ergebnis/php-cs-fixer-config": "^4.11.0",
-                "fakerphp/faker": "^1.20.0",
-                "infection/infection": "~0.26.6",
-                "phpunit/phpunit": "^9.5.26",
-                "psalm/plugin-phpunit": "~0.18.3",
-                "vimeo/psalm": "^4.30.0"
+                "ergebnis/license": "^2.2.0",
+                "ergebnis/php-cs-fixer-config": "^6.6.0",
+                "ergebnis/phpunit-slow-test-detector": "^2.3.0",
+                "fakerphp/faker": "^1.23.0",
+                "infection/infection": "~0.27.3",
+                "phpunit/phpunit": "^10.4.1",
+                "psalm/plugin-phpunit": "~0.18.4",
+                "rector/rector": "~0.18.5",
+                "vimeo/psalm": "^5.15.0"
             },
             "type": "library",
             "autoload": {
@@ -830,7 +832,8 @@
             "authors": [
                 {
                     "name": "Andreas Möller",
-                    "email": "am@localheinz.com"
+                    "email": "am@localheinz.com",
+                    "homepage": "https://localheinz.com"
                 }
             ],
             "description": "Provides a JSON printer, allowing for flexible indentation.",
@@ -842,9 +845,10 @@
             ],
             "support": {
                 "issues": "https://github.com/ergebnis/json-printer/issues",
+                "security": "https://github.com/ergebnis/json-printer/blob/main/.github/SECURITY.md",
                 "source": "https://github.com/ergebnis/json-printer"
             },
-            "time": "2022-11-28T10:27:43+00:00"
+            "time": "2023-10-10T07:42:48+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -1439,16 +1443,16 @@
         },
         {
             "name": "league/mime-type-detection",
-            "version": "1.13.0",
+            "version": "1.14.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/mime-type-detection.git",
-                "reference": "a6dfb1194a2946fcdc1f38219445234f65b35c96"
+                "reference": "b6a5854368533df0295c5761a0253656a2e52d9e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/mime-type-detection/zipball/a6dfb1194a2946fcdc1f38219445234f65b35c96",
-                "reference": "a6dfb1194a2946fcdc1f38219445234f65b35c96",
+                "url": "https://api.github.com/repos/thephpleague/mime-type-detection/zipball/b6a5854368533df0295c5761a0253656a2e52d9e",
+                "reference": "b6a5854368533df0295c5761a0253656a2e52d9e",
                 "shasum": ""
             },
             "require": {
@@ -1479,7 +1483,7 @@
             "description": "Mime-type detection for Flysystem",
             "support": {
                 "issues": "https://github.com/thephpleague/mime-type-detection/issues",
-                "source": "https://github.com/thephpleague/mime-type-detection/tree/1.13.0"
+                "source": "https://github.com/thephpleague/mime-type-detection/tree/1.14.0"
             },
             "funding": [
                 {
@@ -1491,7 +1495,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-08-05T12:09:49+00:00"
+            "time": "2023-10-17T14:13:20+00:00"
         },
         {
             "name": "m1/env",
@@ -2633,16 +2637,16 @@
         },
         {
             "name": "silverstripe/admin",
-            "version": "1.13.13",
+            "version": "1.13.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/silverstripe/silverstripe-admin.git",
-                "reference": "2fea4a61e969eaafba84cf280b6c33fd8b1d8255"
+                "reference": "eaca9e797cb187502b4f3035f5bab9b0aec14957"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/silverstripe/silverstripe-admin/zipball/2fea4a61e969eaafba84cf280b6c33fd8b1d8255",
-                "reference": "2fea4a61e969eaafba84cf280b6c33fd8b1d8255",
+                "url": "https://api.github.com/repos/silverstripe/silverstripe-admin/zipball/eaca9e797cb187502b4f3035f5bab9b0aec14957",
+                "reference": "eaca9e797cb187502b4f3035f5bab9b0aec14957",
                 "shasum": ""
             },
             "require": {
@@ -2698,9 +2702,9 @@
             ],
             "support": {
                 "issues": "https://github.com/silverstripe/silverstripe-admin/issues",
-                "source": "https://github.com/silverstripe/silverstripe-admin/tree/1.13.13"
+                "source": "https://github.com/silverstripe/silverstripe-admin/tree/1.13.14"
             },
-            "time": "2023-09-19T20:56:16+00:00"
+            "time": "2023-09-27T22:23:18+00:00"
         },
         {
             "name": "silverstripe/asset-admin",
@@ -3362,16 +3366,16 @@
         },
         {
             "name": "silverstripe/graphql",
-            "version": "3.8.1",
+            "version": "3.8.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/silverstripe/silverstripe-graphql.git",
-                "reference": "727085095854ba721f62e925cdcb929ec823e8ba"
+                "reference": "7638a3faf892742e8fa5a2baeb5252133d0e97a5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/silverstripe/silverstripe-graphql/zipball/727085095854ba721f62e925cdcb929ec823e8ba",
-                "reference": "727085095854ba721f62e925cdcb929ec823e8ba",
+                "url": "https://api.github.com/repos/silverstripe/silverstripe-graphql/zipball/7638a3faf892742e8fa5a2baeb5252133d0e97a5",
+                "reference": "7638a3faf892742e8fa5a2baeb5252133d0e97a5",
                 "shasum": ""
             },
             "require": {
@@ -3389,6 +3393,8 @@
             },
             "require-dev": {
                 "phpunit/phpunit": "^9.5",
+                "silverstripe/asset-admin": "^1.10",
+                "silverstripe/frameworktest": "^0.4.3",
                 "squizlabs/php_codesniffer": "^3.0"
             },
             "suggest": {
@@ -3409,9 +3415,9 @@
             "description": "GraphQL server for SilverStripe models and other data",
             "support": {
                 "issues": "https://github.com/silverstripe/silverstripe-graphql/issues",
-                "source": "https://github.com/silverstripe/silverstripe-graphql/tree/3.8.1"
+                "source": "https://github.com/silverstripe/silverstripe-graphql/tree/3.8.2"
             },
-            "time": "2022-07-06T23:18:22+00:00"
+            "time": "2023-10-16T00:44:54+00:00"
         },
         {
             "name": "silverstripe/mimevalidator",
@@ -4476,16 +4482,16 @@
         },
         {
             "name": "symbiote/silverstripe-multivaluefield",
-            "version": "5.4.1",
+            "version": "5.4.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symbiote/silverstripe-multivaluefield.git",
-                "reference": "d1032f317f493593a7684f3761117342d371ce2d"
+                "reference": "55a10fd4960c4a2d7e0b928d21a0251f82dd5786"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symbiote/silverstripe-multivaluefield/zipball/d1032f317f493593a7684f3761117342d371ce2d",
-                "reference": "d1032f317f493593a7684f3761117342d371ce2d",
+                "url": "https://api.github.com/repos/symbiote/silverstripe-multivaluefield/zipball/55a10fd4960c4a2d7e0b928d21a0251f82dd5786",
+                "reference": "55a10fd4960c4a2d7e0b928d21a0251f82dd5786",
                 "shasum": ""
             },
             "require": {
@@ -4530,9 +4536,9 @@
             ],
             "support": {
                 "issues": "https://github.com/symbiote/silverstripe-multivaluefield/issues",
-                "source": "https://github.com/symbiote/silverstripe-multivaluefield/tree/5.4.1"
+                "source": "https://github.com/symbiote/silverstripe-multivaluefield/tree/5.4.2"
             },
-            "time": "2023-05-21T23:08:14+00:00"
+            "time": "2023-10-06T01:19:37+00:00"
         },
         {
             "name": "symbiote/silverstripe-queuedjobs",
@@ -6638,17 +6644,11 @@
         },
         {
             "name": "zaita/sdlt-framework",
-            "version": "5.0.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Zaita/sdlt-framework.git",
-                "reference": "4c50b37ea549d71d0e762b073d2c87d6a8e714d2"
-            },
+            "version": "dev-master",
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Zaita/sdlt-framework/zipball/4c50b37ea549d71d0e762b073d2c87d6a8e714d2",
-                "reference": "4c50b37ea549d71d0e762b073d2c87d6a8e714d2",
-                "shasum": ""
+                "type": "path",
+                "url": "/opt/sdlt-framework",
+                "reference": "4c50b37ea549d71d0e762b073d2c87d6a8e714d2"
             },
             "require": {
                 "ergebnis/json-printer": "^3.0",
@@ -6683,30 +6683,35 @@
                     "css"
                 ]
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "scripts": {
+                "post-update-cmd": [
+                    "composer vendor-expose"
+                ],
+                "post-install-cmd": [
+                    "composer vendor-expose"
+                ],
+                "build": [
+                    "sudo chown -R www-data ./public/assets && sudo -u www-data ./vendor/bin/sake /dev/build flush=all"
+                ],
+                "bundle": [
+                    "cd /vagrant/themes/sdlt/ && yarn run build"
+                ]
+            },
             "license": [
                 "BSD-3-Clause"
             ],
             "description": "Zaita SDLT Framework",
-            "support": {
-                "issues": "https://github.com/Zaita/sdlt-framework/issues",
-                "source": "https://github.com/Zaita/sdlt-framework/tree/5.0.3"
-            },
-            "time": "2023-09-27T02:29:59+00:00"
+            "transport-options": {
+                "relative": false
+            }
         },
         {
             "name": "zaita/sdlt-theme",
-            "version": "5.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Zaita/sdlt-theme.git",
-                "reference": "cd2bc87cf16daa9cc8e2172f8abe6b9762467363"
-            },
+            "version": "dev-master",
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Zaita/sdlt-theme/zipball/cd2bc87cf16daa9cc8e2172f8abe6b9762467363",
-                "reference": "cd2bc87cf16daa9cc8e2172f8abe6b9762467363",
-                "shasum": ""
+                "type": "path",
+                "url": "/opt/sdlt-theme",
+                "reference": "cd2bc87cf16daa9cc8e2172f8abe6b9762467363"
             },
             "type": "silverstripe-theme",
             "extra": {
@@ -6715,7 +6720,6 @@
                     "dist"
                 ]
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -6725,11 +6729,9 @@
                 "silverstripe",
                 "theme"
             ],
-            "support": {
-                "issues": "https://github.com/Zaita/sdlt-theme/issues",
-                "source": "https://github.com/Zaita/sdlt-theme/tree/5.0.0"
-            },
-            "time": "2023-09-25T21:58:07+00:00"
+            "transport-options": {
+                "relative": false
+            }
         }
     ],
     "packages-dev": [],
@@ -6742,5 +6744,5 @@
         "php": ">=8.1"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }
