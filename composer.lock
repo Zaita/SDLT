@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ba7423ce8e03a15be59623aedfff0741",
+    "content-hash": "1c39a1ab6d08d0e460171b1f97ec494d",
     "packages": [
         {
             "name": "asyncphp/doorman",
@@ -6644,11 +6644,17 @@
         },
         {
             "name": "zaita/sdlt-framework",
-            "version": "dev-master",
-            "dist": {
-                "type": "path",
-                "url": "/opt/sdlt-framework",
+            "version": "5.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Zaita/sdlt-framework.git",
                 "reference": "4c50b37ea549d71d0e762b073d2c87d6a8e714d2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Zaita/sdlt-framework/zipball/4c50b37ea549d71d0e762b073d2c87d6a8e714d2",
+                "reference": "4c50b37ea549d71d0e762b073d2c87d6a8e714d2",
+                "shasum": ""
             },
             "require": {
                 "ergebnis/json-printer": "^3.0",
@@ -6683,35 +6689,30 @@
                     "css"
                 ]
             },
-            "scripts": {
-                "post-update-cmd": [
-                    "composer vendor-expose"
-                ],
-                "post-install-cmd": [
-                    "composer vendor-expose"
-                ],
-                "build": [
-                    "sudo chown -R www-data ./public/assets && sudo -u www-data ./vendor/bin/sake /dev/build flush=all"
-                ],
-                "bundle": [
-                    "cd /vagrant/themes/sdlt/ && yarn run build"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
             "description": "Zaita SDLT Framework",
-            "transport-options": {
-                "relative": false
-            }
+            "support": {
+                "issues": "https://github.com/Zaita/sdlt-framework/issues",
+                "source": "https://github.com/Zaita/sdlt-framework/tree/5.0.3"
+            },
+            "time": "2023-09-27T02:29:59+00:00"
         },
         {
             "name": "zaita/sdlt-theme",
-            "version": "dev-master",
-            "dist": {
-                "type": "path",
-                "url": "/opt/sdlt-theme",
+            "version": "5.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Zaita/sdlt-theme.git",
                 "reference": "cd2bc87cf16daa9cc8e2172f8abe6b9762467363"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Zaita/sdlt-theme/zipball/cd2bc87cf16daa9cc8e2172f8abe6b9762467363",
+                "reference": "cd2bc87cf16daa9cc8e2172f8abe6b9762467363",
+                "shasum": ""
             },
             "type": "silverstripe-theme",
             "extra": {
@@ -6720,6 +6721,7 @@
                     "dist"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -6729,9 +6731,11 @@
                 "silverstripe",
                 "theme"
             ],
-            "transport-options": {
-                "relative": false
-            }
+            "support": {
+                "issues": "https://github.com/Zaita/sdlt-theme/issues",
+                "source": "https://github.com/Zaita/sdlt-theme/tree/5.0.0"
+            },
+            "time": "2023-09-25T21:58:07+00:00"
         }
     ],
     "packages-dev": [],
@@ -6744,5 +6748,5 @@
         "php": ">=8.1"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.3.0"
 }

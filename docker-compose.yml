@@ -6,8 +6,6 @@ services:
         volumes:
             - "./docker/nginx.conf:/etc/nginx/conf.d/default.conf"
             - "./:/var/www/html"
-            - "../sdlt-framework:/opt/sdlt-framework"
-            - "../sdlt-theme:/opt/sdlt-theme"            
         ports:
             - "8123:80"
         environment:
@@ -27,9 +25,7 @@ services:
         volumes:
             - "./:/var/www/html"
             - "./docker/setup_php.sh:/opt/setup.sh"
-            - ./logs/:/var/log
-            - "../sdlt-framework:/opt/sdlt-framework"
-            - "../sdlt-theme:/opt/sdlt-theme"            
+            - ./logs/:/var/log    
         networks:
             - backend
         command: /bin/sh -c /opt/setup.sh
