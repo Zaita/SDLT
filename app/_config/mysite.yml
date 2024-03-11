@@ -3,3 +3,25 @@ Name: myproject
 ---
 SilverStripe\Core\Manifest\ModuleManifest:
   project: app
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Security\MemberAuthenticator\CookieAuthenticationHandler:
+    calls:
+      - [ setTokenCookieSecure, [ true ] ]
+  Bigfork\SilverStripeOAuth\Client\Factory\ProviderFactory:
+    properties:
+      providers:
+        'Okta': '%$OktaProvider'
+  OktaProvider:
+    class: 'Foxworth42\OAuth2\Client\Provider\Okta'
+    constructor:
+      Options:
+        redirectUri: '`OKTA_REDIRECT_URI`'
+        clientId: '`OKTA_CLIENT_ID`'
+        clientSecret: '`OKTA_CLIENT_SECRET`'
+        issuer: '`OKTA_ISSUER`'
+        graphApiVersion: 'v2.6'          
+Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator:
+  providers:
+    'Okta': # Matches the key for '$%OktaProvider' above
+      name: 'Okta'
+      scopes: ['openid', 'profile', 'email'] 

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0f55d0a340d61539328fcc32ad99c923",
+    "content-hash": "3ba7167472264bb0b66a9e9dd80e13f3",
     "packages": [
         {
             "name": "asyncphp/doorman",
@@ -48,6 +48,119 @@
                 "source": "https://github.com/silverstripe/doorman/tree/3.2.0"
             },
             "time": "2021-04-29T22:16:54+00:00"
+        },
+        {
+            "name": "bigfork/silverstripe-oauth",
+            "version": "2.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bigfork/silverstripe-oauth.git",
+                "reference": "942d504a7ef12f5f59f662eefbef70f77c2d2182"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bigfork/silverstripe-oauth/zipball/942d504a7ef12f5f59f662eefbef70f77c2d2182",
+                "reference": "942d504a7ef12f5f59f662eefbef70f77c2d2182",
+                "shasum": ""
+            },
+            "require": {
+                "league/oauth2-client": "^2",
+                "silverstripe/framework": "^4 | ^5"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^5.7"
+            },
+            "type": "silverstripe-vendormodule",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Bigfork\\SilverStripeOAuth\\Client\\": "src/",
+                    "Bigfork\\SilverStripeOAuth\\Client\\Test\\": "tests/src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Loz Calver",
+                    "email": "lozcalver@bigfork.co.uk"
+                }
+            ],
+            "description": "SilverStripe OAuth2 authentication, based on the PHP League's OAuth2 client",
+            "keywords": [
+                "Authentication",
+                "oauth",
+                "oauth2",
+                "silverstripe"
+            ],
+            "support": {
+                "issues": "https://github.com/bigfork/silverstripe-oauth/issues",
+                "source": "https://github.com/bigfork/silverstripe-oauth/tree/2.2.1"
+            },
+            "time": "2023-12-06T09:11:43+00:00"
+        },
+        {
+            "name": "bigfork/silverstripe-oauth-login",
+            "version": "2.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bigfork/silverstripe-oauth-login.git",
+                "reference": "5457831b8d649a044ecf1c6690cd12c6b38dbf2b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bigfork/silverstripe-oauth-login/zipball/5457831b8d649a044ecf1c6690cd12c6b38dbf2b",
+                "reference": "5457831b8d649a044ecf1c6690cd12c6b38dbf2b",
+                "shasum": ""
+            },
+            "require": {
+                "bigfork/silverstripe-oauth": "^2",
+                "silverstripe/framework": "^4.4 | ^5"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^5.7",
+                "sminnee/phpunit-mock-objects": "^3.4.5"
+            },
+            "type": "silverstripe-vendormodule",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Bigfork\\SilverStripeOAuth\\Client\\": "src/",
+                    "Bigfork\\SilverStripeOAuth\\Client\\Test\\": "tests/src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Loz Calver",
+                    "email": "lozcalver@bigfork.co.uk"
+                }
+            ],
+            "description": "SilverStripe logins via OAuth2, using the PHP League's OAuth2 client",
+            "keywords": [
+                "login",
+                "oauth",
+                "oauth2",
+                "silverstripe"
+            ],
+            "support": {
+                "issues": "https://github.com/bigfork/silverstripe-oauth-login/issues",
+                "source": "https://github.com/bigfork/silverstripe-oauth-login/tree/2.3.0"
+            },
+            "time": "2023-08-24T15:51:34+00:00"
         },
         {
             "name": "bramus/ansi-php",
@@ -852,6 +965,60 @@
             "time": "2024-01-29T15:33:37+00:00"
         },
         {
+            "name": "foxworth42/oauth2-okta",
+            "version": "v1.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/foxworth42/oauth2-okta.git",
+                "reference": "de108ed318a0a33f553f965a368e36d73f9cc76f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/foxworth42/oauth2-okta/zipball/de108ed318a0a33f553f965a368e36d73f9cc76f",
+                "reference": "de108ed318a0a33f553f965a368e36d73f9cc76f",
+                "shasum": ""
+            },
+            "require": {
+                "league/oauth2-client": "^2.0",
+                "php": ">=7.1.0"
+            },
+            "require-dev": {
+                "php-coveralls/php-coveralls": "^2.1",
+                "phpunit/phpunit": "^7.0",
+                "squizlabs/php_codesniffer": "^3.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Foxworth42\\OAuth2\\Client\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ed Walker",
+                    "email": "github@foxwire.org"
+                }
+            ],
+            "description": "Okta OAuth 2.0 Client Provider for The PHP League OAuth2-Client",
+            "keywords": [
+                "Authentication",
+                "authorization",
+                "client",
+                "oauth",
+                "oauth2",
+                "okta"
+            ],
+            "support": {
+                "issues": "https://github.com/foxworth42/oauth2-okta/issues",
+                "source": "https://github.com/foxworth42/oauth2-okta/tree/v1.0.3"
+            },
+            "time": "2024-03-01T01:58:21+00:00"
+        },
+        {
             "name": "guzzlehttp/guzzle",
             "version": "7.8.1",
             "source": {
@@ -1498,6 +1665,76 @@
                 }
             ],
             "time": "2024-01-28T23:22:08+00:00"
+        },
+        {
+            "name": "league/oauth2-client",
+            "version": "2.7.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/thephpleague/oauth2-client.git",
+                "reference": "160d6274b03562ebeb55ed18399281d8118b76c8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/thephpleague/oauth2-client/zipball/160d6274b03562ebeb55ed18399281d8118b76c8",
+                "reference": "160d6274b03562ebeb55ed18399281d8118b76c8",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^6.0 || ^7.0",
+                "paragonie/random_compat": "^1 || ^2 || ^9.99",
+                "php": "^5.6 || ^7.0 || ^8.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.3.5",
+                "php-parallel-lint/php-parallel-lint": "^1.3.1",
+                "phpunit/phpunit": "^5.7 || ^6.0 || ^9.5",
+                "squizlabs/php_codesniffer": "^2.3 || ^3.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-2.x": "2.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "League\\OAuth2\\Client\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Alex Bilbie",
+                    "email": "hello@alexbilbie.com",
+                    "homepage": "http://www.alexbilbie.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Woody Gilk",
+                    "homepage": "https://github.com/shadowhand",
+                    "role": "Contributor"
+                }
+            ],
+            "description": "OAuth 2.0 Client Library",
+            "keywords": [
+                "Authentication",
+                "SSO",
+                "authorization",
+                "identity",
+                "idp",
+                "oauth",
+                "oauth2",
+                "single sign on"
+            ],
+            "support": {
+                "issues": "https://github.com/thephpleague/oauth2-client/issues",
+                "source": "https://github.com/thephpleague/oauth2-client/tree/2.7.0"
+            },
+            "time": "2023-04-16T18:19:15+00:00"
         },
         {
             "name": "m1/env",
