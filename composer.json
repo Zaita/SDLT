@@ -6,8 +6,8 @@
   "require": {
       "php": ">=8.1",
       "silverstripe/recipe-plugin": "^1.2",
-      "zaita/sdlt-framework": "5.0.5",
-      "zaita/sdlt-theme": "5.0.0",
+      "zaita/sdlt-framework": "5.0.6",
+      "zaita/sdlt-theme": "5.0.1",
       "silverstripe/graphql": "^3.8.2",
     "bigfork/silverstripe-oauth-login": "*",
     "foxworth42/oauth2-okta": "^1.0"

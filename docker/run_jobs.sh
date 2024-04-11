@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "Running queued job at `date`"
-source /etc/cron_env
+source /var/www/html/cron_env
 echo "Updating Path to include PHP binary"
 export PATH=/usr/local/bin:$PATH
 echo "Running SDLT Queued Jobs"
