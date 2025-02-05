@@ -1,3 +1,8 @@
+# Project Status
+This project has been deprecated and is no longer receiving updates, patches or security fixes. Due to significant breaking changes when migrating from SilverStripe 4.X to 5.X the project has been replaced with a new product developed on Laravel. 
+
+The new SDLT, named Odin, can be found at: https://github.com/zaita/odin
+
 # The SDLT
 The SDLT, previously the Security Development Lifecycle Tool, is a web application tool that serves as a self-service entry point for following a quality assurance lifecycle process. This tool collects relevant information about a delivery, determines the risk rating and generates the appropriate requirements. The tool tailors the list of requirements to the projects specific needs, without providing unnecessary unrelated requirements. The process is derived from a security centric perspective, allowing the security teams and other stakeholders (e.g., privacy, data, finance) to establish custom guidance and requirements as checklist items for all deliveries.
 
